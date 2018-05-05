@@ -25,13 +25,13 @@ local game_scale = 1
 
 
 -- Used when zooming in out due to in game reasons or window resize
--- Don't set total_scale. Calculate through this
-function M.calculate_total_scale(table)
+-- Never set total_scale. Calculate through this
+function M.calculate_total_scale(params)
 
-  if table.resized then
+  if params.resized then
     window_scale = window_scale * (current_w / previous_w)
   end
-  game_scale = table.game_scale or game_scale
+  game_scale = params.game_scale or game_scale
   return window_scale * game_scale
 
 end
@@ -39,16 +39,23 @@ end
 -- Finds appropriate gamera window dimensions after resize.
 -- Returned values are to be used in gamera:setWindow
 function M.resize_calculate_dimensions( w, h )
+  -- w = window width after resize, h = same with height
 
-  -- Calculate new dimensions
+  -- Calculate new dimensions:
+  -- set screen width to window width
   local new_w = w
+  -- Preserve aspect ratio
   local new_h = new_w * (current_h / current_w)
+  -- If the new dimentions are bigger than the window recalculate
   if new_h > h then
+    -- Since height went out of bounds, make sure it doesn't this time
     new_h = h
+    -- Preserve aspect ratio
     new_w = new_h * (current_w / current_h)
   end
 
-  -- Determine unused screen area (to find display window offset)
+  -- Determine unused screen area to find display window offset,
+  -- so that what's displayed is always in the middle of the window
   local dead_space_w = w - new_w
   local dead_space_h = h - new_h
 

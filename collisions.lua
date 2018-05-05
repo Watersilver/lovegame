@@ -1,0 +1,1 @@
+-- class definitions for colliders, maybe global variables

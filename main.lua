@@ -1,10 +1,24 @@
-local scaling_handler = require("scaling_handler")
-local gamera = require "gamera.gamera"
+-- Load global stuff that might be used anywhere
+require("global")
 
-local cam = gamera.new(0, 0, 800, 450)
+-- Camera library found at https://github.com/kikito/gamera
+gamera = require "gamera.gamera"
+-- Collision detection library found at https://github.com/vrld/HC
+HC = require "HC"
+
+
+local scaling_handler = require("scaling_handler")
+input = require("input")
+
+playa = require("PlayaTest")
+
+
+local cam = gamera.new(0, 0, 2800, 2450)
+camx = 0
+camy = 0
 
 -- For gamera:setScale. Don't change directly
-local total_scale = scaling_handler.calculate_total_scale{}
+local total_scale = scaling_handler.calculate_total_scale{game_scale=1}
 
 function love.load()
 
@@ -18,10 +32,18 @@ end
 
 function love.update(dt)
 
-  playax = playax + 2
   -- get input
+  pl1in_previous = pl1in
+  pl1in = input.check_input(input.controllers.player1)
+
+  -- determine what effect input has
 
   -- move stuff to new positions
+  if updaters[1] then
+    for i = 1, #updaters do
+      updaters[i]:update()
+    end
+  end
 
   -- resolve collisions until no collisions
 
