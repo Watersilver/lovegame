@@ -1,8 +1,9 @@
+-- removes scaled sprite blurriness
+love.graphics.setDefaultFilter("nearest")
+
 -- tables that contain existing objects depending on their function
 -- table of objects with AIs that can "sense" environments
 sentients = {}
--- table of objects that can move
-mobiles = {}
 -- table of objects that can collide
 colliders = {}
 -- table of objects that check for collisions
@@ -22,7 +23,6 @@ layers = 3
 -- *visibles is a table of tables so it's not here
 hypertable = {
   sentient = sentients,
-  mobile = mobiles,
   collider = colliders,
   collision_check = collision_checkers,
   update = updaters,

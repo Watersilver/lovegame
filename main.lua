@@ -10,7 +10,7 @@ HC = require "HC"
 local scaling_handler = require("scaling_handler")
 input = require("input")
 
-playa = require("PlayaTest")
+require("PlayaTest")
 
 
 local cam = gamera.new(0, 0, 2800, 2450)
@@ -18,16 +18,10 @@ camx = 0
 camy = 0
 
 -- For gamera:setScale. Don't change directly
-local total_scale = scaling_handler.calculate_total_scale{game_scale=1}
+local total_scale = scaling_handler.calculate_total_scale{game_scale=2}
 
 function love.load()
 
-  -- removes scaled sprite blurriness
-  love.graphics.setDefaultFilter("nearest")
-
-  playa = love.graphics.newImage("Sprites/Test.png")
-  playax = 11
-  playay = 11
 end
 
 function love.update(dt)
@@ -40,7 +34,8 @@ function love.update(dt)
 
   -- move stuff to new positions
   if updaters[1] then
-    for i = 1, #updaters do
+    local upnum = #updaters
+    for i = 1, upnum do
       updaters[i]:update()
     end
   end
@@ -76,14 +71,14 @@ function love.draw()
     love.graphics.setColor(COLORCOST, 0, 0, COLORCOST)
     love.graphics.rectangle("fill", 22, 22, 800-44, 450-44)
     love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
-    love.graphics.print("Hi, I'm gamera."..camx..","..camy)
+    love.graphics.print("Hi, I'm gamera."..camx..","..camy.." Plx "..erty.position.x)
     love.graphics.rectangle("fill", 11, 11, 33, 33)
     love.graphics.setColor(COLORCOST, COLORCOST, 0, COLORCOST)
     love.graphics.rectangle("fill", 33, 33, 33, 33)
     -- draw stuff..
     --love.graphics.scale(5)
     love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
-    love.graphics.draw(playa, playax, playay)
+    love.graphics.draw(erty.draw.sprite, erty.position.x, erty.position.y)
   end)
 end
 

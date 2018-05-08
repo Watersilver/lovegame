@@ -2,8 +2,6 @@ local GameObject = {}
 
 -- We'll see... Probably for AI to make decisions before update
 GameObject.sentient = nil
--- Can it move?
-GameObject.mobile = nil
 -- Can it collide?
 GameObject.collider = nil
 -- Will it check for collisions?
@@ -17,14 +15,16 @@ GameObject.update = nil
 -- Will it late update?
 GameObject.late_update = nil
 
+-- Position
+GameObject.position = {x = 0, y = 0}
 
-function GameObject:new()
+function GameObject:new(initial_values)
 
   -- Object to be returned
-  local NewObject = {}
+  local NewObject = type(initial_values) == "table" and initial_values or {}
 
   self.__newindex = function(table, key, value)
-    -- Make sue the object can be accessed through its collision mask
+    -- Make sure the object can be accessed through its collision mask
     if key == "Mask" then
       if type(value) == "table" then
         value.gameObject = table
@@ -43,13 +43,14 @@ function GameObject:new()
 
 end
 
-function GameObject:instance()
+-- Add a gameObject to the world
+function GameObject:instantiate()
 
   -- Make sure drawing layer exists, if not, create
   if not visibles[self.layer] then visibles[self.layer] = {} end
 
   -- Insert self in the correct layer of the table of visibles if appropriate
-  if self.draw then table.insert(visibles[self.layer] ,self) end
+  if self.draw then table.insert(visibles[self.layer], self) end
 
   -- Insert self to appropriate tables
   for name, key in pairs(hypertable) do
