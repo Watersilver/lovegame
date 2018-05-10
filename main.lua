@@ -10,15 +10,15 @@ HC = require "HC"
 local scaling_handler = require("scaling_handler")
 input = require("input")
 
-require("PlayaTest")
-
+--dofile("Rooms/room1.lua")
+assert(love.filesystem.load("Rooms/room1.lua"))()
 
 local cam = gamera.new(0, 0, 2800, 2450)
-camx = 0
-camy = 0
+cam.x = 0
+cam.y = 0
 
 -- For gamera:setScale. Don't change directly
-local total_scale = scaling_handler.calculate_total_scale{game_scale=2}
+local total_scale = scaling_handler.calculate_total_scale{game_scale=1}
 
 function love.load()
 
@@ -63,7 +63,7 @@ function love.draw()
 
   -- Set camera
   cam:setScale(total_scale)
-  cam:setPosition(0, 0)
+  cam:setPosition(cam.x, cam.y)
 
   -- draw camera
   cam:draw(function(l,t,w,h)
@@ -71,14 +71,33 @@ function love.draw()
     love.graphics.setColor(COLORCOST, 0, 0, COLORCOST)
     love.graphics.rectangle("fill", 22, 22, 800-44, 450-44)
     love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
-    love.graphics.print("Hi, I'm gamera."..camx..","..camy.." Plx "..erty.position.x)
+    love.graphics.print("Hi, I'm gamera."..camx..","..camy)
     love.graphics.rectangle("fill", 11, 11, 33, 33)
     love.graphics.setColor(COLORCOST, COLORCOST, 0, COLORCOST)
     love.graphics.rectangle("fill", 33, 33, 33, 33)
     -- draw stuff..
     --love.graphics.scale(5)
     love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
-    love.graphics.draw(erty.draw.sprite, erty.position.x, erty.position.y)
+
+    if fuck then
+      love.graphics.print(fuck, 66, 66)
+    end
+
+    fuck = #visibles[1]
+
+    for layer = 1, layers do
+      vila = visibles[layer]
+      if vila then
+        local vinum = #vila
+        for i = 1, vinum do
+          love.graphics.draw(
+          vila[i].draw.sprite,
+          vila[i].position.x,
+          vila[i].position.y)
+        end
+      end
+    end
+
   end)
 end
 
