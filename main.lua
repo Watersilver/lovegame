@@ -14,8 +14,9 @@ input = require("input")
 assert(love.filesystem.load("Rooms/room1.lua"))()
 
 local cam = gamera.new(0, 0, 2800, 2450)
-cam.x = 0
-cam.y = 0
+-- Do NOT name cam.x or cam.y. Reserved by gamera.
+cam.xt = 0
+cam.yt = 0
 
 -- For gamera:setScale. Don't change directly
 local total_scale = scaling_handler.calculate_total_scale{game_scale=1}
@@ -63,11 +64,13 @@ function love.draw()
 
   -- Set camera
   cam:setScale(total_scale)
-  cam:setPosition(cam.x, cam.y)
+  cam:setPosition(cam.xt, cam.yt)
 
   -- draw camera
   cam:draw(function(l,t,w,h)
     local camx, camy = cam:getPosition()
+    love.graphics.setColor(0, COLORCOST*0.2, 0, COLORCOST)
+    love.graphics.rectangle("fill", 22, 22, 2800-44, 2450-44)
     love.graphics.setColor(COLORCOST, 0, 0, COLORCOST)
     love.graphics.rectangle("fill", 22, 22, 800-44, 450-44)
     love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
