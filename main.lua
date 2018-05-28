@@ -10,19 +10,19 @@ HC = require "HC"
 local scaling_handler = require("scaling_handler")
 input = require("input")
 
---dofile("Rooms/room1.lua")
-assert(love.filesystem.load("Rooms/room1.lua"))()
-
 local cam = gamera.new(0, 0, 2800, 2450)
 -- Do NOT name cam.x or cam.y. Reserved by gamera.
 cam.xt = 0
 cam.yt = 0
 
--- For gamera:setScale. Don't change directly
-local total_scale = scaling_handler.calculate_total_scale{game_scale=1}
+-- For gamera:setScale.
+scaling_handler.calculate_total_scale{game_scale=1}
 
 function love.load()
+  hc = HC.new(64)
 
+  --dofile("Rooms/room1.lua")
+  assert(love.filesystem.load("Rooms/room1.lua"))()
 end
 
 function love.update(dt)
@@ -50,11 +50,17 @@ end
 function love.resize( w, h )
 
   -- Set camera display window size and offset
-  cam:setWindow(scaling_handler.resize_calculate_dimensions( w, h ))
+  cam:setWindow(scaling_handler.calculate_resized_window( w, h ))
 
   -- Determine camera scale due to window size
-  total_scale = scaling_handler.calculate_total_scale{resized=true}
+  scaling_handler.calculate_total_scale{resized=true}
 
+end
+
+function love.wheelmoved( x, y )
+  scaling_handler.calculate_total_scale{
+    game_scale = scaling_handler.get_game_scale() + y * 0.01
+  }
 end
 
 -- draw to screen
@@ -63,7 +69,7 @@ function love.draw()
   -- love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
 
   -- Set camera
-  cam:setScale(total_scale)
+  cam:setScale(scaling_handler.get_total_scale())
   cam:setPosition(cam.xt, cam.yt)
 
   -- draw camera
@@ -86,21 +92,26 @@ function love.draw()
       love.graphics.print(fuck, 66, 66)
     end
 
-    fuck = #visibles[1]
-
     for layer = 1, layers do
       vila = visibles[layer]
       if vila then
         local vinum = #vila
         for i = 1, vinum do
           love.graphics.draw(
-          vila[i].draw.sprite,
+          vila[i].sprite,
           vila[i].position.x,
           vila[i].position.y)
         end
       end
     end
 
+
+    colnum = #collidables
+    if colnum then
+      for i = 1, colnum do
+       collidables[i].mask:draw("line")
+     end
+   end
   end)
 end
 

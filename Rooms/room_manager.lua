@@ -29,7 +29,8 @@ function rm.build_room(room)
         x = subroom.x_that_I_start + (i-1) * subroom.tile_width,
         y = subroom.y_that_I_start + (j-1) * subroom.tile_width
       }
-      element:instantiate()
+      element.mask:moveTo(element.position.x, element.position.y)
+      addToWorld(element)
       i = i + 1
       if subroom.carriage_return and subroom.carriage_return < i then
         i = 1
@@ -38,7 +39,6 @@ function rm.build_room(room)
     end
 
   end
-
 
 
 end

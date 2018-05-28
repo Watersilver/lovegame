@@ -1,4 +1,3 @@
-local GO = require("gameobject")
 local rm = require("Rooms.room_manager")
 
 room = {}
@@ -6,6 +5,12 @@ room = {}
 room.width = 800
 room.height = 450
 room.subrooms = {}
+layers = 3
+
+sprites = {
+  player1 = love.graphics.newImage("Sprites/Test.png"),
+  brick = love.graphics.newImage("Sprites/Brick.png")
+}
 
 
 local subroom = {

@@ -22,7 +22,14 @@ local window_scale = initial_w / 800
 
 -- Camera scaling due to in-game reasons
 local game_scale = 1
+function M.get_game_scale()
+  return game_scale
+end
 
+local total_scale
+function M.get_total_scale()
+  return total_scale
+end
 
 -- Used when zooming in out due to in game reasons or window resize
 -- Never set total_scale. Calculate through this
@@ -32,13 +39,13 @@ function M.calculate_total_scale(params)
     window_scale = window_scale * (current_w / previous_w)
   end
   game_scale = params.game_scale or game_scale
-  return window_scale * game_scale
+  total_scale = window_scale * game_scale
 
 end
 
 -- Finds appropriate gamera window dimensions after resize.
 -- Returned values are to be used in gamera:setWindow
-function M.resize_calculate_dimensions( w, h )
+function M.calculate_resized_window( w, h )
   -- w = window width after resize, h = same with height
 
   -- Calculate new dimensions:

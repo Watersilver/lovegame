@@ -1,1 +1,0 @@
---class definition for drawables
