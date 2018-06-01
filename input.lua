@@ -13,7 +13,7 @@ end
 function input.check_input(controller)
   local player = {}
   for name, key in pairs(controller) do
-    player[name] = love.keyboard.isDown(key)
+    player[name] = love.keyboard.isDown(key) == true and 1 or 0
   end
   return player
 end

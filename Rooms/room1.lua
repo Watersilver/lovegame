@@ -1,10 +1,10 @@
 local rm = require("Rooms.room_manager")
 
-room = {}
+local room = {}
 
 room.width = 800
 room.height = 450
-room.subrooms = {}
+room.room_parts = {}
 layers = 3
 
 sprites = {
@@ -12,25 +12,26 @@ sprites = {
   brick = love.graphics.newImage("Sprites/Brick.png")
 }
 
+----------Start of arrays of geography of parts of room----------
+local room_part = {'P1'}
+room_part.x_that_I_start = 300
+room_part.y_that_I_start = 200
 
-local subroom = {
+table.insert(room.room_parts, room_part)
+
+local room_part = {
   'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x',
   'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x',
   'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x',
-  'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x',
+  'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'P1',
 }
-subroom.x_that_I_start = 200
-subroom.y_that_I_start = 300
-subroom.carriage_return = 15
-subroom.tile_width = 16
+room_part.x_that_I_start = 200
+room_part.y_that_I_start = 300
+room_part.row_length = 15
+room_part.tile_width = 16
 
-table.insert(room.subrooms, subroom)
-
-local subroom = {'P1'}
-subroom.x_that_I_start = 300
-subroom.y_that_I_start = 200
-
-table.insert(room.subrooms, subroom)
+table.insert(room.room_parts, room_part)
+----------End of arrays of geography of parts of room----------
 
 
 rm.build_room(room)

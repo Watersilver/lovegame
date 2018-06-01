@@ -8,7 +8,7 @@ HC = require "HC"
 
 
 local scaling_handler = require("scaling_handler")
-input = require("input")
+local input = require("input")
 
 local cam = gamera.new(0, 0, 2800, 2450)
 -- Do NOT name cam.x or cam.y. Reserved by gamera.
@@ -37,7 +37,7 @@ function love.update(dt)
   if updaters[1] then
     local upnum = #updaters
     for i = 1, upnum do
-      updaters[i]:update()
+      updaters[i]:update(dt)
     end
   end
 
@@ -54,13 +54,15 @@ function love.resize( w, h )
 
   -- Determine camera scale due to window size
   scaling_handler.calculate_total_scale{resized=true}
-
 end
 
 function love.wheelmoved( x, y )
   scaling_handler.calculate_total_scale{
     game_scale = scaling_handler.get_game_scale() + y * 0.01
   }
+
+  removeFromWorld(visibles[1][60])
+  fuck = #visibles[1]
 end
 
 -- draw to screen
@@ -97,10 +99,7 @@ function love.draw()
       if vila then
         local vinum = #vila
         for i = 1, vinum do
-          love.graphics.draw(
-          vila[i].sprite,
-          vila[i].position.x,
-          vila[i].position.y)
+          vila[i]:draw()
         end
       end
     end
