@@ -41,7 +41,7 @@ function rm.build_room(room)
         x = x_that_I_start + (i-1) * tile_width,
         y = y_that_I_start + (j-1) * tile_height
       }
-      element.mask:moveTo(element.position.x, element.position.y)
+      if element.mask then --[[move mask]] end
       addToWorld(element)
 
       i = i + 1

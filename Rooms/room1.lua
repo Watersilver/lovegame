@@ -7,11 +7,6 @@ room.height = 450
 room.room_parts = {}
 layers = 3
 
-sprites = {
-  player1 = love.graphics.newImage("Sprites/Test.png"),
-  brick = love.graphics.newImage("Sprites/Brick.png")
-}
-
 ----------Start of arrays of geography of parts of room----------
 local room_part = {'P1'}
 room_part.x_that_I_start = 300

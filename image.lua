@@ -1,0 +1,70 @@
+-- removes scaled sprite blurriness
+love.graphics.setDefaultFilter("nearest")
+
+sprites = {}
+
+function load_sprite(args)
+
+  local img_name = args.img_name or args[1]
+
+  -- if it already exists, don't add it again
+  if not sprites[img_name] then
+
+    -- store optional arguments in local memory
+    local rows = args.rows or args[2] or 1
+    local columns = args.columns or args[3] or 1
+    local padding = args.padding or args[4] or 1
+
+    -- Prepare sprite
+    local sprite = {}
+    -- Load image
+    sprite.img = love.graphics.newImage("Sprites/" .. img_name .. ".png")
+    local img = sprite.img
+
+    -- Determine the width and height of each quad
+    local imgw = img:getWidth()
+    local imgh = img:getHeight()
+    local width = --[[math.ceil(]](imgw / rows)--[[)]] - 2 * padding
+    local height = --[[math.ceil(]](imgh / columns)--[[)]] - 2 * padding
+
+    -- Determine x and y scale because of the image resolution
+    if args.width then
+      sprite.res_x_scale = args.width / width
+      sprite.res_y_scale = args.height / height
+    else
+      sprite.res_x_scale = 1
+      sprite.res_y_scale = 1
+    end
+
+    -- Determine offsets
+    sprite.ox = width * 0.5
+    sprite.oy = height * 0.5
+
+    -- Initialize essential stuff
+    local init = not args.dontinit
+    if init then
+      -- if init exists but isn't a table, make it one to force default values
+      if type(init) ~= table then
+        init = {}
+      end
+      sprite.rot = init.rot or 0 -- rotation
+      sprite.sx = init.sx or 1 -- x scale
+      sprite.sy = init.sy or 1 -- y scale
+    end
+
+    -- Slice image
+    local frames = 0
+    for j = 0, columns-1 do
+      for i = 0, rows-1 do
+        sprite[frames] = love.graphics.newQuad(padding+i*(width + 2 * padding ),
+        padding+j*(height + 2 * padding ),
+        width, height, img:getDimensions())
+        frames = frames + 1
+      end
+    end
+    sprite.frames = frames
+    sprites[img_name] = sprite
+  end
+
+  return sprites[img_name]
+end

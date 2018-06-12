@@ -1,10 +1,12 @@
 -- Load global stuff that might be used anywhere
 require("global")
 
+require("image")
+
+require("utilities")
+
 -- Camera library found at https://github.com/kikito/gamera
 gamera = require "gamera.gamera"
--- Collision detection library found at https://github.com/vrld/HC
-HC = require "HC"
 
 
 local scaling_handler = require("scaling_handler")
@@ -18,14 +20,18 @@ cam.yt = 0
 -- For gamera:setScale.
 scaling_handler.calculate_total_scale{game_scale=1}
 
-function love.load()
-  hc = HC.new(64)
+-- To limit frames per second
+local fps_min = 1/60
 
+function love.load()
   --dofile("Rooms/room1.lua")
   assert(love.filesystem.load("Rooms/room1.lua"))()
 end
 
 function love.update(dt)
+   if dt < fps_min then
+      love.timer.sleep(fps_min - dt)
+   end
 
   -- get input
   pl1in_previous = pl1in
@@ -42,6 +48,12 @@ function love.update(dt)
   end
 
   -- resolve collisions until no collisions
+  if colliders[1] then
+    local colnum = #colliders
+    for i = 1, colnum do
+      colliders[i]:collide(dt)
+    end
+  end
 
   -- determine what's drawn and in what order
 
@@ -104,13 +116,6 @@ function love.draw()
       end
     end
 
-
-    colnum = #collidables
-    if colnum then
-      for i = 1, colnum do
-       collidables[i].mask:draw("line")
-     end
-   end
   end)
 end
 

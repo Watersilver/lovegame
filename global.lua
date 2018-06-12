@@ -1,6 +1,3 @@
--- removes scaled sprite blurriness
-love.graphics.setDefaultFilter("nearest")
-
 -- tables that contain existing objects depending on their function
 -- table of objects with AIs that can "sense" environments
 sentients = {}
@@ -67,7 +64,12 @@ end
 function addToWorld(instance)
   -- if it has a sprite, add to visibles
   if instance.draw and not instance.visibles_index then
-    layer = instance.layer or 1
+    local layer = instance.layer or 1
+    -- ensure important drawing stuff won't be nil if instance is visible
+    instance.layer = layer
+    if not instance.image_index then instance.image_index = 0 end
+    if not instance.image_speed then instance.image_speed = 1 end
+
     if not visibles[layer] then visibles[layer] = {} end
     instance.visibles_index = push(visibles[layer], instance)
   end
@@ -78,6 +80,10 @@ function addToWorld(instance)
   -- if it has an update function, add to updaters
   if instance.update and not instance.updaters_index then
     instance.updaters_index = push(updaters, instance)
+  end
+  -- if it has a collide function, add to updaters
+  if instance.collide and not instance.colliders_index then
+    instance.colliders_index = push(colliders, instance)
   end
 end
 
