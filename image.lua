@@ -1,6 +1,13 @@
 -- removes scaled sprite blurriness
 love.graphics.setDefaultFilter("nearest")
 
+-- Constants
+if love.getVersion() < 11 then
+  COLORCOST = 255
+else
+  COLORCOST = 1
+end
+
 sprites = {}
 
 function load_sprite(args)

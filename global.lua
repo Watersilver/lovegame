@@ -2,8 +2,6 @@
 -- table of objects with AIs that can "sense" environments
 sentients = {}
 -- table of objects that can collide
-collidables = {}
--- table of objects that check for collisions
 colliders = {}
 -- table of tables of objects to be drawn. Each of the tables signifies layer
 visibles = {}
@@ -12,7 +10,7 @@ updaters = {}
 -- table of objects that update after collisions have been resolved
 late_updaters = {}
 
--- number of layers
+-- number of drawing layers
 layers = 1
 
 -- table that assigns properties of individual objects (e.g. late_update)
@@ -28,11 +26,12 @@ hypertable = {
 
 -- Pushes thing on table as if table is stack
 -- only use on tables that are sequences
-local function push(table, thing)
+function push(table, thing)
   local new_index = #table + 1
   table[new_index] = thing
   return new_index
 end
+local push = push
 
 -- Removes from table at index == thing[keyname]
 -- and gives its place to the last table element
@@ -62,6 +61,10 @@ end
 
 -- Add an instance to the appropriate tables
 function addToWorld(instance)
+  -- if it has an on_load function, run it
+  if instance.on_load then
+    instance:on_load()
+  end
   -- if it has a sprite, add to visibles
   if instance.draw and not instance.visibles_index then
     local layer = instance.layer or 1
@@ -73,16 +76,12 @@ function addToWorld(instance)
     if not visibles[layer] then visibles[layer] = {} end
     instance.visibles_index = push(visibles[layer], instance)
   end
-  -- if it has a mask, add to collidables
-  if instance.mask and not instance.collidables_index then
-    instance.collidables_index = push(collidables, instance)
-  end
   -- if it has an update function, add to updaters
   if instance.update and not instance.updaters_index then
     instance.updaters_index = push(updaters, instance)
   end
-  -- if it has a collide function, add to updaters
-  if instance.collide and not instance.colliders_index then
+  -- if it has a body, add to colliders
+  if instance.body and not instance.colliders_index then
     instance.colliders_index = push(colliders, instance)
   end
 end
@@ -90,8 +89,28 @@ end
 -- Remove an instance from the appropriate tables
 function removeFromWorld(instance)
   if type(instance) == 'table' then
+    if instance.body then instance.body:setActive(false) end
     remove(visibles[instance.layer or 1], instance, 'visibles_index')
     remove(updaters, instance, 'updaters_index')
-    remove(collidables, instance, 'collidables_index')
+    remove(colliders, instance, 'colliders_index')
   end
 end
+
+function almostRectangle(width, height, slope)
+  local wdiv2 = width*0.5
+  local hdiv2 = height*0.5
+  if not slope then slope = 0.1 end
+  return {
+    -wdiv2, -hdiv2, -- panw aristera
+    0, -hdiv2 - slope, -- panw mesh
+    wdiv2, -hdiv2, -- panw deksia
+    -wdiv2 -slope, 0, -- mesh aristera
+    wdiv2 +slope, 0, -- mesh deksia
+    -wdiv2, hdiv2, -- katw aristera
+    0, hdiv2 + slope, -- katw mesh
+    wdiv2, hdiv2 -- katw deksia
+  }
+end
+
+debugtxt = 0
+persisting = 0

@@ -1,12 +1,5 @@
 local M = {}
 
--- Constants
-if love.getVersion() < 11 then
-  COLORCOST = 255
-else
-  COLORCOST = 1
-end
-
 -- Private fields
 
 -- Set dimensions

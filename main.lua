@@ -3,6 +3,8 @@ require("global")
 
 require("image")
 
+require("shapes")
+
 require("utilities")
 
 -- Camera library found at https://github.com/kikito/gamera
@@ -24,14 +26,52 @@ scaling_handler.calculate_total_scale{game_scale=1}
 local fps_min = 1/60
 
 function love.load()
+  -- set physical world for collisions
+  physWorld = love.physics.newWorld(0, 600)
+  physWorld:setCallbacks(beginContact, endContact, preSolve, postSolve)
+
   --dofile("Rooms/room1.lua")
   assert(love.filesystem.load("Rooms/room1.lua"))()
 end
 
+function love.mousepressed(x, y, button, isTouch)
+  local pl = require("PlayaTest")
+  local element = pl:new()
+  element.position = {x = 333, y = 111}
+  if element.body then
+    element.body:setPosition(element.position.x, element.position.y)
+  end
+  addToWorld(element)
+end
+
+fuck = 0
+function beginContact(a, b, coll)
+
+end
+
+function endContact(a, b, coll)
+end
+
+function preSolve(a, b, coll)
+end
+
+function postSolve(a, b, coll, normalimpulse, tangentimpulse)
+    if a:getUserData().postSolve then
+      a:getUserData():postSolve(a, b, coll, normalimpulse, tangentimpulse)
+    end
+    if b:getUserData().postSolve then
+      b:getUserData():postSolve(a, b, coll, normalimpulse, tangentimpulse)
+    end
+end
+
+
 function love.update(dt)
-   if dt < fps_min then
-      love.timer.sleep(fps_min - dt)
-   end
+  if dt < fps_min then
+    love.timer.sleep(fps_min - dt)
+  end
+  if string.len(debugtxt) > 768 then debugtxt = "" end
+
+  physWorld:update(dt)
 
   -- get input
   pl1in_previous = pl1in
@@ -46,17 +86,16 @@ function love.update(dt)
       updaters[i]:update(dt)
     end
   end
-
+  -- ***Handled by physics***
   -- resolve collisions until no collisions
-  if colliders[1] then
-    local colnum = #colliders
-    for i = 1, colnum do
-      colliders[i]:collide(dt)
-    end
-  end
+  -- if colliders[1] then
+  --   local colnum = #colliders
+  --   for i = 1, colnum do
+  --     colliders[i]:collide(dt)
+  --   end
+  -- end
 
   -- determine what's drawn and in what order
-
 end
 
 function love.resize( w, h )
@@ -73,8 +112,8 @@ function love.wheelmoved( x, y )
     game_scale = scaling_handler.get_game_scale() + y * 0.01
   }
 
-  removeFromWorld(visibles[1][60])
-  fuck = #visibles[1]
+  removeFromWorld(visibles[1][2])
+  -- fuck = #visibles[1]
 end
 
 -- draw to screen
@@ -104,6 +143,7 @@ function love.draw()
 
     if fuck then
       love.graphics.print(fuck, 66, 66)
+      love.graphics.print(debugtxt, 66, 99)
     end
 
     for layer = 1, layers do
@@ -118,7 +158,6 @@ function love.draw()
 
   end)
 end
-
 -- --Testing if version 11 works
 -- function love.draw()
 --   love.graphics.rectangle("fill", 10, 10, 10, 10)

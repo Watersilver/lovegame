@@ -26,6 +26,7 @@ function rm.build_room(room)
     local tile_width = room_part.tile_width or 0
     local tile_height = room_part.tile_height or tile_width or 0
     local row_length = room_part.row_length or 0
+    local col_length = room_part.col_length or 0
 
     -- initialize indexes
     local i = 1
@@ -41,7 +42,34 @@ function rm.build_room(room)
         x = x_that_I_start + (i-1) * tile_width,
         y = y_that_I_start + (j-1) * tile_height
       }
-      if element.mask then --[[move mask]] end
+      -- Make sure to use as few edge shapes as necessary
+      if element.tile then
+        if j == 1 then
+          if i == 1 then
+            element.tile = {"u", "l"} -- upper left
+          elseif i == row_length then
+            element.tile = {"u", "r"} -- upper right and so forth
+          else
+            element.tile = {"u"}
+          end
+        elseif j == col_length then
+          if i == 1 then
+            element.tile = {"d", "l"}
+          elseif i == row_length then
+            element.tile = {"d", "r"}
+          else
+            element.tile = {"d"}
+          end
+        else
+          if i == 1 then
+            element.tile = {"l"}
+          elseif i == row_length then
+            element.tile = {"r"}
+          else
+            element.tile = {"none"}
+          end
+        end
+      end
       addToWorld(element)
 
       i = i + 1
