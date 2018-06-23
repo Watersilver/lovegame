@@ -1,10 +1,10 @@
-local M = {}
+local sh = {}
 
 -- Private fields
 
 -- Set dimensions
-local initial_w = 800
-local initial_h = 450
+local initial_w = love.graphics.getWidth()
+local initial_h = love.graphics.getHeight()
 local current_w = initial_w
 local current_h = initial_h
 local previous_w = current_w
@@ -15,18 +15,18 @@ local window_scale = initial_w / 800
 
 -- Camera scaling due to in-game reasons
 local game_scale = 1
-function M.get_game_scale()
+function sh.get_game_scale()
   return game_scale
 end
 
 local total_scale
-function M.get_total_scale()
+function sh.get_total_scale()
   return total_scale
 end
 
 -- Used when zooming in out due to in game reasons or window resize
 -- Never set total_scale. Calculate through this
-function M.calculate_total_scale(params)
+function sh.calculate_total_scale(params)
 
   if params.resized then
     window_scale = window_scale * (current_w / previous_w)
@@ -38,7 +38,7 @@ end
 
 -- Finds appropriate gamera window dimensions after resize.
 -- Returned values are to be used in gamera:setWindow
-function M.calculate_resized_window( w, h )
+function sh.calculate_resized_window( w, h )
   -- w = window width after resize, h = same with height
 
   -- Calculate new dimensions:
@@ -71,17 +71,11 @@ function M.calculate_resized_window( w, h )
 
 end
 
-function M.ToMainCanvas(canvas)
-  canvas:renderTo(function()
-    love.graphics.clear()
-    love.graphics.rectangle("fill", 11, 11, 33, 33)
-    love.graphics.setColor(COLORCOST, COLORCOST, 0, COLORCOST)
-    love.graphics.rectangle("fill", 33, 33, 33, 33)
-    -- draw stuff..
-    love.graphics.scale(5)
-    love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
-    love.graphics.draw(playa, playax, playay)
-  end)
+function sh.calculate_initial_window(cam)
+  local _,_,ww,wh = cam:getWorld()
+  initial_w = math.max(initial_w, ww)
+  initial_h = math.max(initial_h, wh)
+  return sh.calculate_resized_window(initial_w, initial_h)
 end
 
-return M
+return sh

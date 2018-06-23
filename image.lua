@@ -7,15 +7,16 @@ if love.getVersion() < 11 then
 else
   COLORCOST = 1
 end
+i = {}
 
-sprites = {}
+i.sprites = {}
 
-function load_sprite(args)
+function i.load_sprite(args)
 
   local img_name = args.img_name or args[1]
 
   -- if it already exists, don't add it again
-  if not sprites[img_name] then
+  if not i.sprites[img_name] then
 
     -- store optional arguments in local memory
     local rows = args.rows or args[2] or 1
@@ -25,7 +26,7 @@ function load_sprite(args)
     -- Prepare sprite
     local sprite = {}
     -- Load image
-    sprite.img = love.graphics.newImage("Sprites/" .. img_name .. ".png")
+    sprite.img = love.graphics.newImage("sprites/" .. img_name .. ".png")
     local img = sprite.img
 
     -- Determine the width and height of each quad
@@ -70,8 +71,10 @@ function load_sprite(args)
       end
     end
     sprite.frames = frames
-    sprites[img_name] = sprite
+    i.sprites[img_name] = sprite
   end
 
-  return sprites[img_name]
+  return i.sprites[img_name]
 end
+
+return i

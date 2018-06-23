@@ -1,14 +1,11 @@
-local Brick = require("BrickTest")
-local Player = require("PlayaTest")
+local u = require "utilities"
+local o = require "GameObjects.objects"
 
 local rm = {}
 
-local symbols_to_objects = {
-  x = Brick,
-  P1 = Player
-}
+rm.sto = require "Rooms.symbols_to_objects"
 
--- Takes that takes a room table and builds it in the world
+-- Table that takes a room table and builds it in the world
 function rm.build_room(room)
 
   -- Probably for the camera world
@@ -28,7 +25,7 @@ function rm.build_room(room)
     local row_length = room_part.row_length or 0
     local col_length = room_part.col_length or 0
 
-    -- initialize indexes
+    -- initialize indices
     local i = 1
     local j = 1
 
@@ -37,40 +34,38 @@ function rm.build_room(room)
 
     -- iterate over all elements of a room_part
     for _ = 1, number_of_elements do
-      local element = symbols_to_objects[room_part[i+(j-1)*row_length]]:new()
-      element.position = {
-        x = x_that_I_start + (i-1) * tile_width,
-        y = y_that_I_start + (j-1) * tile_height
-      }
+      local element = rm.sto[room_part[i+(j-1)*row_length]]:new()
+      element.xstart = x_that_I_start + (i-1) * tile_width
+      element.ystart = y_that_I_start + (j-1) * tile_height
       -- Make sure to use as few edge shapes as necessary
-      if element.tile then
+      if element.physical_properties.tile then
         if j == 1 then
           if i == 1 then
-            element.tile = {"u", "l"} -- upper left
+            element.physical_properties.tile = {"u", "l"} -- upper left
           elseif i == row_length then
-            element.tile = {"u", "r"} -- upper right and so forth
+            element.physical_properties.tile = {"u", "r"} -- upper right and so forth
           else
-            element.tile = {"u"}
+            element.physical_properties.tile = {"u"}
           end
         elseif j == col_length then
           if i == 1 then
-            element.tile = {"d", "l"}
+            element.physical_properties.tile = {"d", "l"}
           elseif i == row_length then
-            element.tile = {"d", "r"}
+            element.physical_properties.tile = {"d", "r"}
           else
-            element.tile = {"d"}
+            element.physical_properties.tile = {"d"}
           end
         else
           if i == 1 then
-            element.tile = {"l"}
+            element.physical_properties.tile = {"l"}
           elseif i == row_length then
-            element.tile = {"r"}
+            element.physical_properties.tile = {"r"}
           else
-            element.tile = {"none"}
+            element.physical_properties.tile = {"none"}
           end
         end
       end
-      addToWorld(element)
+      o.addToWorld(element)
 
       i = i + 1
       if row_length > 0 and row_length < i then
@@ -80,7 +75,6 @@ function rm.build_room(room)
     end
 
   end
-
 
 end
 

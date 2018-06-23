@@ -1,166 +1,158 @@
--- Load global stuff that might be used anywhere
-require("global")
+local ps = require "physics_settings"
+local o = require "GameObjects.objects"
+local p = require "GameObjects.BoxTest"
+local u = require "utilities"
+local sh = require "scaling_handler"
+local inp = require "input"
+local im = require "image"
 
-require("image")
-
-require("shapes")
-
-require("utilities")
-
--- Camera library found at https://github.com/kikito/gamera
-gamera = require "gamera.gamera"
+local gamera = require "gamera.gamera"
 
 
-local scaling_handler = require("scaling_handler")
-local input = require("input")
-
-local cam = gamera.new(0, 0, 2800, 2450)
--- Do NOT name cam.x or cam.y. Reserved by gamera.
+local cam = gamera.new(0,0,800,450)
+sh.calculate_total_scale{game_scale=1}
 cam.xt = 0
 cam.yt = 0
 
--- For gamera:setScale.
-scaling_handler.calculate_total_scale{game_scale=1}
 
--- To limit frames per second
-local fps_min = 1/60
+fuck = 0
+
 
 function love.load()
-  -- set physical world for collisions
-  physWorld = love.physics.newWorld(0, 600)
-  physWorld:setCallbacks(beginContact, endContact, preSolve, postSolve)
+  ps.pw:setCallbacks(beginContact, endContact, preSolve, postSolve)
 
   --dofile("Rooms/room1.lua")
   assert(love.filesystem.load("Rooms/room1.lua"))()
 end
 
-function love.mousepressed(x, y, button, isTouch)
-  local pl = require("PlayaTest")
-  local element = pl:new()
-  element.position = {x = 333, y = 111}
-  if element.body then
-    element.body:setPosition(element.position.x, element.position.y)
-  end
-  addToWorld(element)
-end
-
-fuck = 0
-function beginContact(a, b, coll)
-
-end
-
-function endContact(a, b, coll)
-end
 
 function preSolve(a, b, coll)
-end
-
-function postSolve(a, b, coll, normalimpulse, tangentimpulse)
-    if a:getUserData().postSolve then
-      a:getUserData():postSolve(a, b, coll, normalimpulse, tangentimpulse)
+    local apreSolve = a:getBody():getUserData().preSolve
+    if apreSolve then
+      apreSolve(a, b, coll)
     end
-    if b:getUserData().postSolve then
-      b:getUserData():postSolve(a, b, coll, normalimpulse, tangentimpulse)
+    local bpreSolve = b:getBody():getUserData().preSolve
+    if bpreSolve then
+      bpreSolve(a, b, coll)
     end
 end
 
 
 function love.update(dt)
-  if dt < fps_min then
-    love.timer.sleep(fps_min - dt)
+fuck = #o.colliders
+  if o.to_be_added[1] then
+    o.to_be_added:add_all()
   end
-  if string.len(debugtxt) > 768 then debugtxt = "" end
 
-  physWorld:update(dt)
+  inp.check_input()
 
-  -- get input
-  pl1in_previous = pl1in
-  pl1in = input.check_input(input.controllers.player1)
-
-  -- determine what effect input has
-
-  -- move stuff to new positions
-  if updaters[1] then
-    local upnum = #updaters
+  local upnum = #o.updaters
+  if upnum > 0 then
     for i = 1, upnum do
-      updaters[i]:update(dt)
+      o.updaters[i]:update(dt)
     end
   end
-  -- ***Handled by physics***
-  -- resolve collisions until no collisions
-  -- if colliders[1] then
-  --   local colnum = #colliders
-  --   for i = 1, colnum do
-  --     colliders[i]:collide(dt)
-  --   end
-  -- end
 
-  -- determine what's drawn and in what order
+  ps.pw:update(dt)
+
+  if o.to_be_deleted[1] then
+    o.to_be_deleted:remove_all()
+  end
+
 end
 
-function love.resize( w, h )
 
-  -- Set camera display window size and offset
-  cam:setWindow(scaling_handler.calculate_resized_window( w, h ))
-
-  -- Determine camera scale due to window size
-  scaling_handler.calculate_total_scale{resized=true}
-end
-
-function love.wheelmoved( x, y )
-  scaling_handler.calculate_total_scale{
-    game_scale = scaling_handler.get_game_scale() + y * 0.01
-  }
-
-  removeFromWorld(visibles[1][2])
-  -- fuck = #visibles[1]
-end
-
--- draw to screen
 function love.draw()
-  -- Mandatory line before drawing canvas: Reset colour
-  -- love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
 
-  -- Set camera
-  cam:setScale(scaling_handler.get_total_scale())
+  cam:setScale(sh.get_total_scale())
   cam:setPosition(cam.xt, cam.yt)
 
-  -- draw camera
   cam:draw(function(l,t,w,h)
-    local camx, camy = cam:getPosition()
-    love.graphics.setColor(0, COLORCOST*0.2, 0, COLORCOST)
-    love.graphics.rectangle("fill", 22, 22, 2800-44, 2450-44)
-    love.graphics.setColor(COLORCOST, 0, 0, COLORCOST)
-    love.graphics.rectangle("fill", 22, 22, 800-44, 450-44)
-    love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
-    love.graphics.print("Hi, I'm gamera."..camx..","..camy)
-    love.graphics.rectangle("fill", 11, 11, 33, 33)
-    love.graphics.setColor(COLORCOST, COLORCOST, 0, COLORCOST)
-    love.graphics.rectangle("fill", 33, 33, 33, 33)
-    -- draw stuff..
-    --love.graphics.scale(5)
-    love.graphics.setColor(COLORCOST, COLORCOST, COLORCOST, COLORCOST)
 
-    if fuck then
-      love.graphics.print(fuck, 66, 66)
-      love.graphics.print(debugtxt, 66, 99)
-    end
+    local curcol = love.graphics.getColor()
+    love.graphics.setColor(155, 155, 155, 255)
+    love.graphics.rectangle("fill", 0, 0, 800, 450)
+    love.graphics.setColor(255, 255, 255, 255)
 
-    for layer = 1, layers do
-      vila = visibles[layer]
-      if vila then
-        local vinum = #vila
-        for i = 1, vinum do
-          vila[i]:draw()
+    local layers = #o.draw_layers
+    if layers > 0 then
+      for layer = 1, layers do
+        local drawnum = #o.draw_layers[layer]
+        for i = 1, drawnum do
+          o.draw_layers[layer][i]:draw()
         end
       end
     end
 
+    love.graphics.print(love.timer.getFPS())
+    love.graphics.print(fuck, 0, 13)
   end)
+
 end
--- --Testing if version 11 works
--- function love.draw()
---   love.graphics.rectangle("fill", 10, 10, 10, 10)
---   love.graphics.print("Current FPS: "..tostring(love.timer.getFPS( )), 20, 10)
---   love.graphics.print("Hello World!", 400, 300)
+
+
+function love.mousepressed(x, y, button, isTouch)
+  x, y = cam:toWorld(x, y)
+  u.push(o.to_be_added, p:new{xstart=x, ystart=y})
+end
+
+
+function love.resize( w, h )
+
+  -- Set camera display window size and offset
+  cam:setWindow(sh.calculate_resized_window( w, h ))
+
+  -- Determine camera scale due to window size
+  sh.calculate_total_scale{resized=true}
+end
+
+
+-- main function with main loop
+-- function love.run()
+--
+-- 	if love.math then
+-- 		love.math.setRandomSeed(os.time())
+-- 	end
+--
+-- 	if love.load then love.load(arg) end
+--
+-- 	-- We don't want the first frame's dt to include time taken by love.load.
+-- 	if love.timer then love.timer.step() end
+--
+-- 	local dt = 0
+--
+-- 	-- Main loop time.
+-- 	while true do
+-- 		-- Process events.
+-- 		if love.event then
+-- 			love.event.pump()
+-- 			for name, a,b,c,d,e,f in love.event.poll() do
+-- 				if name == "quit" then
+-- 					if not love.quit or not love.quit() then
+-- 						return a
+-- 					end
+-- 				end
+-- 				love.handlers[name](a,b,c,d,e,f)
+-- 			end
+-- 		end
+--
+-- 		-- Update dt, as we'll be passing it to update
+-- 		if love.timer then
+-- 			love.timer.step()
+-- 			dt = love.timer.getDelta()
+-- 		end
+--
+-- 		-- Call update and draw
+-- 		if love.update then love.update(dt) end -- will pass 0 if love.timer is disabled
+--
+-- 		if love.graphics and love.graphics.isActive() then
+-- 			love.graphics.clear(love.graphics.getBackgroundColor())
+-- 			love.graphics.origin()
+-- 			if love.draw then love.draw() end
+-- 			love.graphics.present()
+-- 		end
+--
+-- 		if love.timer then love.timer.sleep(0.001) end
+-- 	end
+--
 -- end
