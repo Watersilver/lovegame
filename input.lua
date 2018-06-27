@@ -1,4 +1,4 @@
-id = require "input_defaults"
+local id = require "input_defaults"
 
 local input = {}
 input.controllers = {}

@@ -3,20 +3,21 @@ love.graphics.setDefaultFilter("nearest")
 
 -- Constants
 if love.getVersion() < 11 then
-  COLORCOST = 255
+  COLORCONST = 255
 else
-  COLORCOST = 1
+  COLORCONST = 1
 end
-i = {}
 
-i.sprites = {}
+local im = {}
 
-function i.load_sprite(args)
+im.sprites = {}
+
+function im.load_sprite(args)
 
   local img_name = args.img_name or args[1]
 
   -- if it already exists, don't add it again
-  if not i.sprites[img_name] then
+  if not im.sprites[img_name] then
 
     -- store optional arguments in local memory
     local rows = args.rows or args[2] or 1
@@ -71,10 +72,10 @@ function i.load_sprite(args)
       end
     end
     sprite.frames = frames
-    i.sprites[img_name] = sprite
+    im.sprites[img_name] = sprite
   end
 
-  return i.sprites[img_name]
+  return im.sprites[img_name]
 end
 
-return i
+return im

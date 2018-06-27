@@ -25,13 +25,28 @@ function love.load()
   assert(love.filesystem.load("Rooms/room1.lua"))()
 end
 
-
 function preSolve(a, b, coll)
+    -- If it's a sprite depth dispute solve
+    if a:getCategory() == SPRITECAT then
+      coll:setEnabled(false)
+      local abod, bbod = a:getBody(), b:getBody()
+      local _, apos = abod:getPosition()
+      local _, bpos = bbod:getPosition()
+      local aob, bob = abod:getUserData(), bbod:getUserData()
+      if aob.layer == bob.layer and (apos > bpos and aob.drawable < bob.drawable) or
+      (apos < bpos and aob.drawable > bob.drawable) then
+        u.swap(o.draw_layers[aob.layer], aob.drawable, bob.drawable)
+      end
+      return
+    end
+
+    -- Store the objects that collided
     local apreSolve = a:getBody():getUserData().preSolve
+    local bpreSolve = b:getBody():getUserData().preSolve
+
     if apreSolve then
       apreSolve(a, b, coll)
     end
-    local bpreSolve = b:getBody():getUserData().preSolve
     if bpreSolve then
       bpreSolve(a, b, coll)
     end
@@ -39,12 +54,13 @@ end
 
 
 function love.update(dt)
-fuck = #o.colliders
   if o.to_be_added[1] then
     o.to_be_added:add_all()
   end
 
   inp.check_input()
+
+  ps.pw:update(dt)
 
   local upnum = #o.updaters
   if upnum > 0 then
@@ -53,7 +69,7 @@ fuck = #o.colliders
     end
   end
 
-  ps.pw:update(dt)
+  fuck = o.updaters[2].drawable
 
   if o.to_be_deleted[1] then
     o.to_be_deleted:remove_all()

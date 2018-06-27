@@ -2,6 +2,7 @@ local ps = require "physics_settings"
 local im = require "image"
 local inp = require "input"
 local p = require "GameObjects.prototype"
+local mo = require "movement"
 
 local Playa = {}
 
@@ -23,34 +24,38 @@ function Playa.initialize(instance)
   instance.physical_properties = {
     bodyType = "dynamic",
     fixedRotation = true,
-    mass = 50,
-    shape = ps.shapes.rect1x1,
-    restitution = 0
+    density = 80,
+    shape = ps.shapes.lowr1x1,
+    gravityScaleFactor = 0,
+    restitution = 0,
+    friction = 0
   }
+  instance.spritefixture_properties = {
+    shape = ps.shapes.rect1x1
+  }
+  instance.player = "player1"
+  instance.layer = 3
 end
 
 Playa.functions = {
 update = function(self, dt)
-  local _, gravity = ps.pw:getGravity()
-  local pl1in = inp.current.player1
-  self.body:applyForce((pl1in.right-pl1in.left)*500,pl1in.down-pl1in.up*gravity*2)
-  if not self.jumplimit then self.jumplimit = 0 end
-  if self.jumplimit == 0 then
-    -- self.body:applyLinearImpulse(0, -pl1in.up*200)
-    if pl1in.up == 1 then self.jumplimit = 100 end
-  end
-  self.jumplimit = self.jumplimit - 1
-  if self.jumplimit < 1 then self.jumplimit = 0 end
 
+  -- Return movement table based on the long term action you want to take (Npcs)
+  -- Return movement table based on the given input (Players)
+  self.input = inp.current[self.player]
+
+  -- Apply movement table
+  mo.top_down(self, dt)
+
+  -- Figure out what to draw
   self.sprite.rot = self.sprite.rot --+ 0.01
   self.image_index = (self.image_index + dt*60*self.image_speed) % self.sprite.frames
 end,
 
 draw = function(self)
-  x, y = self.body:getPosition()
+  local x, y = self.body:getPosition()
+  self.x, self.y = x, y
   local sprite = self.sprite
-  -- -- make independent of framerate
-  -- self.image_index = (self.image_index + self.image_speed) % sprite.frames
   local frame = sprite[math.floor(self.image_index)]
   love.graphics.draw(
   sprite.img, frame, x, y, sprite.rot,

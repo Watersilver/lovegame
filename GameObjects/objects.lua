@@ -51,6 +51,10 @@ function o.to_be_added:add_all()
       object:build_body()
       if object.body then object[o.colliders.role] = u.push(o.colliders, object) end
     end
+    -- Build spritemask if applicable
+    if object.spritefixture_properties then
+      object:build_spritefixture()
+    end
     -- Add to updaters if updater and if not already there
     if object.update and not object.updater then
       object[o.updaters.role] = u.push(o.updaters, object)

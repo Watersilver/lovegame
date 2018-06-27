@@ -17,17 +17,43 @@ p.functions = {
       if not self.body then self.body = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0) end
       local body = self.body
       if pp.bodyType then body:setType(pp.bodyType) end
+      if pp.gravityScaleFactor then body:setGravityScale(pp.gravityScaleFactor) end
       if pp.fixedRotation then body:setFixedRotation(pp.fixedRotation) end
-      if pp.mass then body:setMass(pp.mass) end
+      if pp.linearDamping then body:setLinearDamping(pp.linearDamping) end
       body:setUserData(self)
       if pp.shape then
         self.shape = pp.shape
-        if self.fixture then self.fixture:destroy() end
+
+        -- Fixture info
+        local fi = nil
+
+        -- If fixture exists, save its info and destroy it
+        if self.fixture then
+          fi = ps.getFixtureInfo(self.fixture)
+          self.fixture:destroy()
+        end
+
+        -- Make new fixture to attach new shape to body
         self.fixture = love.physics.newFixture(self.body, self.shape)
+
+        -- Make sure to retain deleted fixture properties if
+        -- it existed and if not explicitly overriten by new properties
+        ps.setFixtureInfo(self.fixture, fi, pp)
+        self.body:resetMassData()
       end
-      if pp.restitution then self.fixture:setRestitution(pp.restitution) end
+      if pp.mass then body:setMass(pp.mass) end
     end
     self.physical_properties = nil
+  end,
+
+  build_spritefixture = function(self)
+    local sp = self.spritefixture_properties
+    if not self.body then self.body = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0) end
+    local body = self.body
+    body:setUserData(self)
+    self.spritefixture = love.physics.newFixture(body, sp.shape)
+    self.spritefixture:setCategory(SPRITECAT)
+    self.spritefixture_properties = nil
   end
 }
 

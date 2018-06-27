@@ -1,8 +1,18 @@
 local ps = require "physics_settings"
+local p = require "GameObjects.prototype"
 
 local lp = love.physics
 
 local bt = {}
+
+function bt.initialize(instance)
+  instance.physical_properties = {
+    bodyType = "dynamic",
+    density = 40,
+    shape = ps.shapes.rect1x1,
+    restitution = 0
+  }
+end
 
 bt.functions = {
   update = function(self)
@@ -14,31 +24,12 @@ bt.functions = {
   ,
   load = function(self)
     -- set up physical properties
-    self.body = lp.newBody(ps.pw, self.xstart, self.ystart, "dynamic")
-    self.body:setUserData(self)
-    self.shape = ps.shapes.rect1x1
-    self.fixtures = {
-      lp.newFixture(self.body, self.shape),
-    }
   end
-}
-
-bt.fields = {
 }
 
 function bt:new(init)
-  local instance = {}
-  for funcname, func in pairs(self.functions) do
-    instance[funcname] = func
-  end
-  for fieldname, field in pairs(self.fields) do
-    instance[fieldname] = field
-  end
-  if init then
-    for name, value in pairs(init) do
-      instance[name] = value
-    end
-  end
+  local instance = p:new() -- add parent functions and fields
+  p.new(bt, instance, init) -- add own functions and fields
   return instance
 end
 
