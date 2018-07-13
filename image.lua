@@ -57,6 +57,7 @@ function im.load_sprite(args)
         init = {}
       end
       sprite.rot = init.rot or 0 -- rotation
+      sprite.rotspeed = init.rotspeed or 0 -- rotation speed
       sprite.sx = init.sx or 1 -- x scale
       sprite.sy = init.sy or 1 -- y scale
     end
@@ -72,10 +73,21 @@ function im.load_sprite(args)
       end
     end
     sprite.frames = frames
+    -- Initialize counter that stores how many times this image was loaded
+    sprite.times_loaded = 0
     im.sprites[img_name] = sprite
   end
 
-  return im.sprites[img_name]
+  local sprite = im.sprites[img_name]
+  -- The sprite must only be able to be removed from memory if this is zero
+  sprite.times_loaded = sprite.times_loaded + 1
+
+  return sprite
+end
+
+function im.unload_sprite(img_name)
+  im.sprites[img_name].times_loaded = im.sprites[img_name].times_loaded - 1
+  if im.sprites[img_name].times_loaded == 0 then im.sprites[img_name] = nil end
 end
 
 return im

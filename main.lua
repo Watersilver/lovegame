@@ -10,7 +10,7 @@ local gamera = require "gamera.gamera"
 
 
 local cam = gamera.new(0,0,800,450)
-sh.calculate_total_scale{game_scale=1}
+sh.calculate_total_scale{game_scale=2}
 cam.xt = 0
 cam.yt = 0
 
@@ -69,8 +69,6 @@ function love.update(dt)
     end
   end
 
-  fuck = o.updaters[2].drawable
-
   if o.to_be_deleted[1] then
     o.to_be_deleted:remove_all()
   end
@@ -109,6 +107,10 @@ end
 
 function love.mousepressed(x, y, button, isTouch)
   x, y = cam:toWorld(x, y)
+  if button == 2 then
+    o.removeFromWorld(o.updaters[2])
+    return
+  end
   u.push(o.to_be_added, p:new{xstart=x, ystart=y})
 end
 

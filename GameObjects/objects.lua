@@ -2,10 +2,11 @@ local u = require "utilities"
 
 local o = {}
 
-o.updaters = {role = "updater"}
-o.colliders = {role = "collider"}
-o.persistents = {role = "persistent"}
-o.draw_layers = {}
+o.identified = {} -- These can be referred to by name
+o.updaters = {role = "updater"} -- List of object with update functions
+o.colliders = {role = "collider"} -- List of objects that can collide
+o.persistents = {role = "persistent"} -- List of objects that survive room trans
+o.draw_layers = {} -- List of layers(Lists of objects to be drawn)
 
 -- Table to hold objects pending to be deleted from the world
 o.to_be_deleted = {}
@@ -26,6 +27,20 @@ function o.to_be_deleted:remove_all()
       u.free(o.draw_layers[object.layer], object.drawable)
       object.drawable = nil
     end
+    if object.identifiable then
+      -- Free for ALL ids
+      for id, index_in_identified_table in pairs(object.identifiable) do
+        -- Can't use free function, because "identifiable" is more than a number
+        local array, index = o.identified[id], index_in_identified_table
+        array[index], array[#array] = array[#array], array[index]
+        -- Teach the array's element its new index
+        array[index].identifiable[id] = index
+        table.remove(array)
+        if #array == 0 then o.identified[id] = nil end
+      end
+      object.identifiable = nil
+    end
+    if object.sprite_info then object:unload_sprites() end
     if object.delete and not object.persistent then object:delete() end
     if object.imdying then object.imdying = nil end
   end
@@ -46,14 +61,27 @@ function o.to_be_added:add_all()
     if object.persistent and not type(object.persistent) == "number" then
       object[o.persistents.role] = u.push(o.persistents, object)
     end
+    -- Add to identified if has id and if not already there
+    if object.ids[1] and not object.identifiable then
+      -- Prepare table, it will be indexed
+      object.identifiable = {}
+      -- Put in identified for every id
+      for _, id in ipairs(object.ids) do
+        if not o.identified[id] then o.identified[id] = {role = "identifiable"} end
+        object.identifiable[id] = u.push(o.identified[id], object)
+      end
+    end
     -- Add to colliders if has physical_properties and if not already there
     if object.physical_properties and not object.collider then
       object:build_body()
       if object.body then object[o.colliders.role] = u.push(o.colliders, object) end
     end
-    -- Build spritemask if applicable
-    if object.spritefixture_properties then
-      object:build_spritefixture()
+    -- Load sprites and build spritefixture if applicable
+    if object.sprite_info then
+      object:load_sprites()
+      if object.sprite_info.spritefixture_properties then
+        object:build_spritefixture()
+      end
     end
     -- Add to updaters if updater and if not already there
     if object.update and not object.updater then

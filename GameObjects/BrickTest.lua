@@ -9,6 +9,9 @@ function Brick.initialize(instance)
     tile = true,
     edgetable = ps.shapes.edgeRect1x1
   }
+  instance.sprite_info = {
+    {'Brick', 2, 2, dontinit = true}
+  }
 end
 
 Brick.functions = {
@@ -30,7 +33,6 @@ end,
 load = function(self)
   self.image_speed = 0
   self.image_index = math.random() > 0.5 and 0 or 3
-  self.sprite = im.load_sprite{'Brick', 2, 2, dontinit = true}
 end
 }
 

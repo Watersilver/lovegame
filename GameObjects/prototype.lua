@@ -1,4 +1,5 @@
 local ps = require "physics_settings"
+local im = require "image"
 
 local lp = love.physics
 
@@ -47,17 +48,37 @@ p.functions = {
   end,
 
   build_spritefixture = function(self)
-    local sp = self.spritefixture_properties
+    local sp = self.sprite_info.spritefixture_properties
     if not self.body then self.body = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0) end
     local body = self.body
     body:setUserData(self)
     self.spritefixture = love.physics.newFixture(body, sp.shape)
     self.spritefixture:setCategory(SPRITECAT)
-    self.spritefixture_properties = nil
+    self.sprite_info.spritefixture_properties = nil
+  end,
+
+  load_sprites = function(self)
+    local si = self.sprite_info
+    if not si then return end
+    local sinum = #si
+    for i = 1, sinum do
+      im.load_sprite(si[i])
+    end
+    self.sprite = im.sprites[si[1][1] or si[1][img_name]]
+  end,
+
+  unload_sprites = function(self)
+    local si = self.sprite_info
+    if not si then return end
+    local sinum = #si
+    for i = 1, sinum do
+      im.unload_sprite(si[i][1] or si[i][img_name])
+    end
   end
 }
 
 function p.initialize(instance)
+  instance.ids = {}
 end
 
 function p:new(instance, init)
