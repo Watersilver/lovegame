@@ -13,54 +13,6 @@ room_part.y_that_I_start = 200
 
 table.insert(room.room_parts, room_part)
 ---
-local room_part = {'P1'}
-room_part.x_that_I_start = 330
-room_part.y_that_I_start = 200
-
-table.insert(room.room_parts, room_part)
----
-local room_part = {'P1'}
-room_part.x_that_I_start = 330
-room_part.y_that_I_start = 200
-
-table.insert(room.room_parts, room_part)
----
-local room_part = {'P1'}
-room_part.x_that_I_start = 330
-room_part.y_that_I_start = 200
-
-table.insert(room.room_parts, room_part)
----
-local room_part = {'P1'}
-room_part.x_that_I_start = 330
-room_part.y_that_I_start = 200
-
-table.insert(room.room_parts, room_part)
----
-local room_part = {'P1'}
-room_part.x_that_I_start = 330
-room_part.y_that_I_start = 200
-
-table.insert(room.room_parts, room_part)
----
-local room_part = {'P1'}
-room_part.x_that_I_start = 330
-room_part.y_that_I_start = 200
-
-table.insert(room.room_parts, room_part)
----
-local room_part = {'P1'}
-room_part.x_that_I_start = 330
-room_part.y_that_I_start = 200
-
-table.insert(room.room_parts, room_part)
----
-local room_part = {'P1'}
-room_part.x_that_I_start = 330
-room_part.y_that_I_start = 200
-
-table.insert(room.room_parts, room_part)
----
 local room_part = {
   'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x',
   'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x',

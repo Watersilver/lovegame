@@ -23,7 +23,6 @@ p.functions = {
       if pp.linearDamping then body:setLinearDamping(pp.linearDamping) end
       body:setUserData(self)
       if pp.shape then
-        self.shape = pp.shape
 
         -- Fixture info
         local fi = nil
@@ -35,15 +34,37 @@ p.functions = {
         end
 
         -- Make new fixture to attach new shape to body
-        self.fixture = love.physics.newFixture(self.body, self.shape)
+        self.fixture = love.physics.newFixture(self.body, pp.shape)
 
         -- Make sure to retain deleted fixture properties if
         -- it existed and if not explicitly overriten by new properties
         ps.setFixtureInfo(self.fixture, fi, pp)
+        if pp.downSensor then
+          self.downfixture = love.physics.newFixture(body, pp.downSensor, 0)
+          self.downfixture:setSensor(true)
+          self.downfixture:setUserData("downTouch")
+        end
+        if pp.upSensor then
+          self.upfixture = love.physics.newFixture(body, pp.upSensor, 0)
+          self.upfixture:setSensor(true)
+          self.upfixture:setUserData("upTouch")
+        end
+        if pp.leftSensor then
+          self.leftfixture = love.physics.newFixture(body, pp.leftSensor, 0)
+          self.leftfixture:setSensor(true)
+          self.leftfixture:setUserData("leftTouch")
+        end
+        if pp.rightSensor then
+          self.rightfixture = love.physics.newFixture(body, pp.rightSensor, 0)
+          self.rightfixture:setSensor(true)
+          self.rightfixture:setUserData("rightTouch")
+        end
         self.body:resetMassData()
       end
       if pp.mass then body:setMass(pp.mass) end
+
     end
+
     self.physical_properties = nil
   end,
 
@@ -52,7 +73,7 @@ p.functions = {
     if not self.body then self.body = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0) end
     local body = self.body
     body:setUserData(self)
-    self.spritefixture = love.physics.newFixture(body, sp.shape)
+    self.spritefixture = love.physics.newFixture(body, sp.shape, 0)
     self.spritefixture:setCategory(SPRITECAT)
     self.sprite_info.spritefixture_properties = nil
   end,

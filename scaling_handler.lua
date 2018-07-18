@@ -12,6 +12,9 @@ local previous_h = current_h
 
 -- Camera scaling due to window size
 local window_scale = initial_w / 800
+function sh.get_window_scale()
+  return window_scale
+end
 
 -- Camera scaling due to in-game reasons
 local game_scale = 1

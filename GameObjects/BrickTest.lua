@@ -10,7 +10,7 @@ function Brick.initialize(instance)
     edgetable = ps.shapes.edgeRect1x1
   }
   instance.sprite_info = {
-    {'Brick', 2, 2, dontinit = true}
+    {'Brick', 2, 2}
   }
 end
 
@@ -25,7 +25,8 @@ draw = function (self)
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.ox, sprite.oy)
   if self.body then
-    for i, shape in ipairs(self.shapes) do
+    for i, fixture in ipairs(self.fixtures) do
+      local shape = fixture:getShape()
       love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
     end
   end

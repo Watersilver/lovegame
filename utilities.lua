@@ -1,5 +1,9 @@
 local u = {}
 
+local random = math.random
+local remove = table.remove
+local sqrt = math.sqrt
+
 -- A push operation that returns the new_index
 function u.push(array, thing)
   local new_index = #array + 1
@@ -13,7 +17,7 @@ function u.free(array, index)
   -- Teach the array's element its new index
   array[index][array.role] = index
 
-  return table.remove(array)
+  return remove(array)
 end
 
 -- Swap elements in one of the objects tables while teaching them their new indices
@@ -27,13 +31,18 @@ function u.swap(otable, index1, index2)
 end
 
 function u.normalize2d(x, y)
-  local invmagn = math.sqrt(x*x + y*y)
+  local invmagn = sqrt(x*x + y*y)
   invmagn = invmagn>0 and 1/invmagn or 1
   return x*invmagn, y*invmagn
 end
 
 function u.sign(x)
   return x>0 and 1 or x<0 and -1 or 0
+end
+
+function u.choose(x, y)
+  choice = random()
+  return choice>0.5 and x or y
 end
 
 return u

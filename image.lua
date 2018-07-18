@@ -49,19 +49,6 @@ function im.load_sprite(args)
     sprite.ox = width * 0.5
     sprite.oy = height * 0.5
 
-    -- Initialize essential stuff
-    local init = not args.dontinit
-    if init then
-      -- if init exists but isn't a table, make it one to force default values
-      if type(init) ~= table then
-        init = {}
-      end
-      sprite.rot = init.rot or 0 -- rotation
-      sprite.rotspeed = init.rotspeed or 0 -- rotation speed
-      sprite.sx = init.sx or 1 -- x scale
-      sprite.sy = init.sy or 1 -- y scale
-    end
-
     -- Slice image
     local frames = 0
     for j = 0, columns-1 do

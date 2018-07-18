@@ -10,9 +10,9 @@ love.physics.setMeter(16)
 
 ps.pw = love.physics.newWorld(0, 280)--280)
 
+-- Make shapes
 ps.shapes = {
   rect1x1 = love.physics.newRectangleShape(16, 16),
-  lowr1x1 = love.physics.newPolygonShape(-8,0, 8,0, -8,8, 8,8),
   circle1 = love.physics.newCircleShape(8),
   edgeRect1x1 = {
     u = love.physics.newEdgeShape(-8, -8, 8, -8), -- upper side
@@ -23,6 +23,31 @@ ps.shapes = {
   -- EdgeBrick16.u:setPreviousVertex(-24, -8)
   -- EdgeBrick16.u:setNextVertex(24, -8)
 }
+-- Make player shapes
+local width, height = 10, 8
+-- Main collision shape
+ps.shapes.plshape = love.physics.newRectangleShape(
+0, height * 0.5,
+width, height
+)
+-- Directional sensors
+local proportion, thickness = 0.95, 0.16
+ps.shapes.pldsens = love.physics.newRectangleShape(
+0, height,
+width * proportion, thickness
+)
+ps.shapes.plusens = love.physics.newRectangleShape(
+0, 0,
+width * proportion, thickness
+)
+ps.shapes.pllsens = love.physics.newRectangleShape(
+-width * 0.5, height * 0.5,
+thickness, height * proportion
+)
+ps.shapes.plrsens = love.physics.newRectangleShape(
+width * 0.5, height * 0.5,
+thickness, height * proportion
+)
 
 function ps.shapes.edgeToTiles(instance, edgetable)
   local i = 1
@@ -31,14 +56,12 @@ function ps.shapes.edgeToTiles(instance, edgetable)
   instance.body = love.physics.newBody(ps.pw, instance.xstart, instance.ystart)
   instance.body:setUserData(instance)
   instance.fixtures = {}
-  instance.shapes = {}
   for _, side in ipairs(instance.physical_properties.tile) do
     local shape = edgetable[side]
     local newf = love.physics.newFixture(instance.body, shape)
     u.push(instance.fixtures, newf)
     newf:setMask(SPRITECAT)
     -- instance.fixtures[i]:setUserData(instance)
-    u.push(instance.shapes, shape)
     i = i + 1
   end
 end

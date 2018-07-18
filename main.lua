@@ -5,14 +5,21 @@ local u = require "utilities"
 local sh = require "scaling_handler"
 local inp = require "input"
 local im = require "image"
+local game = require "game"
+local inv = require "inventory"
 
 local gamera = require "gamera.gamera"
 
 
 local cam = gamera.new(0,0,800,450)
-sh.calculate_total_scale{game_scale=2}
 cam.xt = 0
 cam.yt = 0
+
+local hud = gamera.new(0,0,400,225)
+hud.xt = 0
+hud.yt = 0
+
+sh.calculate_total_scale{game_scale=2}
 
 
 fuck = 0
@@ -23,6 +30,42 @@ function love.load()
 
   --dofile("Rooms/room1.lua")
   assert(love.filesystem.load("Rooms/room1.lua"))()
+end
+
+function beginContact(a, b, coll)
+    -- If it's a sprite depth dispute solve
+    if a:getCategory() == SPRITECAT then
+      return
+    end
+
+    -- Store the objects that collided
+    local aob = a:getBody():getUserData()
+    local bob = b:getBody():getUserData()
+
+    if aob.beginContact then
+      aob:beginContact(a, b, coll, aob)
+    end
+    if bob.beginContact then
+      bob:beginContact(a, b, coll, aob)
+    end
+end
+
+function endContact(a, b, coll)
+    -- If it's a sprite depth dispute solve
+    if a:getCategory() == SPRITECAT then
+      return
+    end
+
+    -- Store the objects that collided
+    local aob = a:getBody():getUserData()
+    local bob = b:getBody():getUserData()
+
+    if aob.endContact then
+      aob:endContact(a, b, coll, aob)
+    end
+    if bob.endContact then
+      bob:endContact(a, b, coll, aob)
+    end
 end
 
 function preSolve(a, b, coll)
@@ -41,14 +84,14 @@ function preSolve(a, b, coll)
     end
 
     -- Store the objects that collided
-    local apreSolve = a:getBody():getUserData().preSolve
-    local bpreSolve = b:getBody():getUserData().preSolve
+    local aob = a:getBody():getUserData()
+    local bob = b:getBody():getUserData()
 
-    if apreSolve then
-      apreSolve(a, b, coll)
+    if aob.preSolve then
+      aob:preSolve(a, b, coll)
     end
-    if bpreSolve then
-      bpreSolve(a, b, coll)
+    if bob.preSolve then
+      bob:preSolve(a, b, coll)
     end
 end
 
@@ -60,17 +103,37 @@ function love.update(dt)
 
   inp.check_input()
 
-  ps.pw:update(dt)
 
-  local upnum = #o.updaters
-  if upnum > 0 then
-    for i = 1, upnum do
-      o.updaters[i]:update(dt)
+  if not game.paused then
+
+    ps.pw:update(dt)
+
+    local upnum = #o.updaters
+    if upnum > 0 then
+      for i = 1, upnum do
+        o.updaters[i]:update(dt)
+      end
     end
+
+  else
+
+    inv.manage(game.paused)
+    if inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0 then
+      game.pause(false)
+    end
+
   end
+
 
   if o.to_be_deleted[1] then
     o.to_be_deleted:remove_all()
+  end
+
+
+  local playaTest = o.identified.PlayaTest
+  if playaTest and playaTest[1].x then
+    cam.xt = playaTest[1].x or 0
+    cam.yt = playaTest[1].y or 0
   end
 
 end
@@ -84,9 +147,9 @@ function love.draw()
   cam:draw(function(l,t,w,h)
 
     local curcol = love.graphics.getColor()
-    love.graphics.setColor(155, 155, 155, 255)
+    love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.6, COLORCONST*0.6, COLORCONST)
     love.graphics.rectangle("fill", 0, 0, 800, 450)
-    love.graphics.setColor(255, 255, 255, 255)
+    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
 
     local layers = #o.draw_layers
     if layers > 0 then
@@ -98,9 +161,33 @@ function love.draw()
       end
     end
 
-    love.graphics.print(love.timer.getFPS())
-    love.graphics.print(fuck, 0, 13)
   end)
+
+  hud:setScale(sh.get_window_scale()*2)
+  hud:setPosition(hud.xt, hud.yt)
+
+  hud:draw(function(l,t,w,h)
+    if im.sprites["GuyWalk"] then
+      love.graphics.draw(im.sprites["GuyWalk"].img, 0, 0)
+      if game.paused then
+        local pr, pg, pb, pa = love.graphics.getColor()
+        love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
+        love.graphics.rectangle("fill", l, t, w, h)
+        love.graphics.setColor(pr, pg, pb, pa)
+        inv.draw()
+      end
+    end
+  end)
+
+  love.graphics.print(love.timer.getFPS())
+  if fuck then love.graphics.print(fuck, 0, 13) end
+  local debiter = 0
+  if triggersdebug then
+    for trigger, _ in pairs(triggersdebug) do
+      debiter = debiter + 10
+      love.graphics.print(trigger, 0, 20+debiter)
+    end
+  end
 
 end
 

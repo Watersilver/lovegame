@@ -6,6 +6,8 @@ local lp = love.physics
 local bt = {}
 
 function bt.initialize(instance)
+  instance.mycolour = 255
+  instance.contacts = 0
   instance.physical_properties = {
     bodyType = "dynamic",
     density = 40,
@@ -16,15 +18,31 @@ end
 
 bt.functions = {
   update = function(self)
+    self.mycolour = self.contacts>0 and 0 or COLORCONST
+    -- self.mycolour = self.mycolour>254 and 255 or self.mycolour+1
   end
   ,
   draw = function(self)
-    love.graphics.polygon("line", self.body:getWorldPoints(self.shape:getPoints()))
+    love.graphics.setColor(COLORCONST, self.mycolour, self.mycolour, COLORCONST)
+    love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
   end
   ,
   load = function(self)
     -- set up physical properties
-  end
+  end,
+
+  beginContact = function(self, a, b, coll)
+    self.contacts = self.contacts + 1
+  end,
+
+  endContact = function(self, a, b, coll)
+    self.contacts = self.contacts - 1
+  end,
+
+  preSolve = function(self, a, b, coll)
+    -- if coll:isTouching() then self.mycolour = 0 end
+  end,
 }
 
 function bt:new(init)

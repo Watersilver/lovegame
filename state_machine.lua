@@ -1,6 +1,6 @@
-local fsm = {}
+local sm = {}
 
-function fsm.new_state_machine(states)
+function sm.new_state_machine(states)
   machine = states
   function machine.change_state(self, instance, dt, new_state)
     self[self.state].end_state(instance, dt)
@@ -10,4 +10,4 @@ function fsm.new_state_machine(states)
   return machine
 end
 
-return fsm
+return sm
