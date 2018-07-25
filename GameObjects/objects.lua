@@ -3,10 +3,28 @@ local u = require "utilities"
 local o = {}
 
 o.identified = {} -- These can be referred to by name
-o.updaters = {role = "updater"} -- List of object with update functions
+o.earlyUpdaters = {role = "earlyUpdater"} -- List of objects with early_update functions
+o.updaters = {role = "updater"} -- List of objects with update functions
 o.colliders = {role = "collider"} -- List of objects that can collide
 o.persistents = {role = "persistent"} -- List of objects that survive room trans
 o.draw_layers = {} -- List of layers(Lists of objects to be drawn)
+
+-- Function to change layer
+function o.change_layer(object, newLayer)
+  -- if not object or not newLayer then return end
+  local oldLayer = object.layer
+  if newLayer == oldLayer then return end
+  if o.draw_layers[oldLayer] then
+    u.free(o.draw_layers[oldLayer], object.drawable)
+  end
+  object.layer = newLayer
+  -- Check if all layers up to this one exist, if not, make them
+  for i=1, newLayer do
+    if not o.draw_layers[i] then o.draw_layers[i] = {role = "drawable"} end
+  end
+  -- Add it to the appropriate layer in the draw_layers table
+  object[o.draw_layers[newLayer].role] = u.push(o.draw_layers[newLayer], object)
+end
 
 -- Table to hold objects pending to be deleted from the world
 o.to_be_deleted = {}
@@ -14,10 +32,15 @@ o.to_be_deleted = {}
 function o.to_be_deleted:remove_all()
   if not self[1] then return end
   for _, object in ipairs(self) do
+    if object.sprite_info then object:unload_sprites() end
     if object.body then object.body:destroy() end
     if object.updater then
       u.free(o.updaters, object.updater)
       object.updater = nil
+    end
+    if object.earlyUpdater then
+      u.free(o.earlyUpdaters, object.earlyUpdater)
+      object.earlyUpdater = nil
     end
     if object.collider then
       u.free(o.colliders, object.collider)
@@ -40,9 +63,9 @@ function o.to_be_deleted:remove_all()
       end
       object.identifiable = nil
     end
-    if object.sprite_info then object:unload_sprites() end
     if object.delete and not object.persistent then object:delete() end
-    if object.imdying then object.imdying = nil end
+    -- Mark as not existing
+    object.exists = false
   end
   o.to_be_deleted = {remove_all = o.to_be_deleted.remove_all}
 end
@@ -87,6 +110,10 @@ function o.to_be_added:add_all()
     if object.update and not object.updater then
       object[o.updaters.role] = u.push(o.updaters, object)
     end
+    -- Add to earlyUpdaters if earlyUpdater and if not already there
+    if object.early_update and not object.earlyUpdater then
+      object[o.earlyUpdaters.role] = u.push(o.earlyUpdaters, object)
+    end
     -- Add to objects that will be drawn if not already there
     if object.draw and not object.drawable then
       -- Make sure it has a layer
@@ -104,7 +131,8 @@ function o.to_be_added:add_all()
     end
     -- Run its load function if existent
     if object.load then object:load(); object.load = nil end
-    if object.gettingAdded then object.gettingAdded = nil end
+    -- Mark as existing
+    object.exists = true
   end
   -- Clear the table; everything has been added
   o.to_be_added = {add_all = o.to_be_added.add_all}

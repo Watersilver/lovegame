@@ -12,6 +12,7 @@ function Brick.initialize(instance)
   instance.sprite_info = {
     {'Brick', 2, 2}
   }
+  instance.pushback = true
 end
 
 Brick.functions = {
@@ -23,7 +24,7 @@ draw = function (self)
   love.graphics.draw(
   sprite.img, frame, x, y, 0,
   sprite.res_x_scale, sprite.res_y_scale,
-  sprite.ox, sprite.oy)
+  sprite.cx, sprite.cy)
   if self.body then
     for i, fixture in ipairs(self.fixtures) do
       local shape = fixture:getShape()

@@ -3,6 +3,8 @@ local u = require "utilities"
 -- Constants
 -- Collision Categories
 SPRITECAT = 16
+PLAYERATTACKCAT = 15
+ENEMYATTACKCAT = 14
 
 local ps = {}
 
@@ -19,7 +21,11 @@ ps.shapes = {
     l = love.physics.newEdgeShape(-8, -8, -8, 8), -- left side
     r = love.physics.newEdgeShape(8, -8, 8, 8), -- right side
     d = love.physics.newEdgeShape(-8, 8, 8, 8) -- down side
-  }
+  },
+  swordSprite = love.physics.newRectangleShape(16, 15),
+  swordIgniting = love.physics.newRectangleShape(0, 7, 2, 7+7),
+  swordSwing = love.physics.newCircleShape(6), -- or rect(12, 13),
+  swordStill = love.physics.newRectangleShape(0, 4, 2, 15+7),
   -- EdgeBrick16.u:setPreviousVertex(-24, -8)
   -- EdgeBrick16.u:setNextVertex(24, -8)
 }
@@ -90,6 +96,12 @@ function ps.setFixtureInfo(fixture, fixtureInfo, physical_properties)
   fixture:setFriction(pp.friction or fi.friction or 0.5)
   fixture:setSensor(pp.sensor or fi.sensor or false)
   fixture:setMask(SPRITECAT, fixture:getMask())
+
+  if pp.masks then
+    for _, mask in ipairs(pp.masks) do
+      fixture:setMask(mask, fixture:getMask())
+    end
+  end
 end
 
 return ps

@@ -3,7 +3,7 @@ local inp = require "input"
 local inv = {}
 
 inv.sword = {
-  image = love.graphics.newImage("Sprites/Inventory/sword.png"),
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgSwordL1.png"),
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
       return "swing_sword"
@@ -14,18 +14,20 @@ inv.sword = {
   image_offset = function(object, dt, side)
     local offset = object.image_index * 3 * 0.5
     if side == "down" then
-      object.ioy = - offset
-    elseif side == "right" or side == "left"  then
-      object.iox = offset
-    elseif side == "up" then
       object.ioy = offset
+    elseif side == "right" then
+      object.iox = offset
+    elseif side == "left"  then
+      object.iox = - offset
+    elseif side == "up" then
+      object.ioy = - offset
     end
   end
 }
 
 inv.slots = {}
 
-inv.slots[6] = {item = inv.sword, key = "c"}
+inv.slots[6] = {key = "c", item = inv.sword}
 inv.slots[5] = {key = "x"}
 inv.slots[4] = {key = "z"}
 inv.slots[3] = {key = "d"}
@@ -80,7 +82,7 @@ function inv.determine_equipment_triggers(object, dt)
 end
 
 
-local cursor = {x=1, y=1}
+local cursor = {x=1, y=0}
 function inv.manage(pauser)
 
   local myinput = inp.current[pauser.player]
@@ -127,7 +129,7 @@ function inv.draw()
     else
       love.graphics.rectangle("line", x, y, 18, 18)
     end
-    if contents.item then love.graphics.draw(contents.item.image, x+1, y+1) end
+    if contents.item then love.graphics.draw(contents.item.invImage, x+1, y+1) end
     love.graphics.print(contents.key, x+1, y)
     x = x + 19
     if index % 3 == 0 then

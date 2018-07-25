@@ -45,9 +45,9 @@ function im.load_sprite(args)
       sprite.res_y_scale = 1
     end
 
-    -- Determine offsets
-    sprite.ox = width * 0.5
-    sprite.oy = height * 0.5
+    -- Determine center
+    sprite.cx = width * 0.5
+    sprite.cy = height * 0.5
 
     -- Slice image
     local frames = 0

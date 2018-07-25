@@ -1,6 +1,38 @@
 local ps = require "physics_settings"
 local u = require "utilities"
 
+-- To be used in check_walk_while_walking function
+local walktable = {
+  down =
+  {
+    first_check = {check1 = "walk_right", check2 = "walk_down", result = "rightwalk" },
+    second_check = {check1 = "walk_left", check2 = "walk_down", result = "leftwalk" },
+    third_check = {check1 = "walk_up", result = "upwalk" },
+    fourth_check = {check1 = "walk_down" }
+  },
+  right =
+  {
+    first_check = {check1 = "walk_down", check2 = "walk_right", result = "downwalk" },
+    second_check = {check1 = "walk_up", check2 = "walk_right", result = "upwalk" },
+    third_check = {check1 = "walk_left", result = "leftwalk" },
+    fourth_check = {check1 = "walk_right" }
+  },
+  left =
+  {
+    first_check = {check1 = "walk_down", check2 = "walk_left", result = "downwalk" },
+    second_check = {check1 = "walk_up", check2 = "walk_left", result = "upwalk" },
+    third_check = {check1 = "walk_right", result = "rightwalk" },
+    fourth_check = {check1 = "walk_left" }
+  },
+  up =
+  {
+    first_check = {check1 = "walk_right", check2 = "walk_up", result = "rightwalk" },
+    second_check = {check1 = "walk_left", check2 = "walk_up", result = "leftwalk" },
+    third_check = {check1 = "walk_down", result = "downwalk" },
+    fourth_check = {check1 = "walk_up" }
+  }
+}
+
 local mo = {}
 
   local sqrt = math.sqrt
@@ -197,7 +229,7 @@ local mo = {}
 
 
     -- Animation state checking functions
-    check_push_a = function(instance, trig)
+    check_push_a = function(instance, trig, myside)
       if myside and trig["push_" .. myside] then
         instance.animation_state:change_state(instance, dt, myside .. "push")
         return true
@@ -239,7 +271,25 @@ local mo = {}
       return false
     end,
 
-    check_halt_a = function(instance, trig)
+    check_walk_while_walking = function(instance, trig, myside)
+      if trig[walktable[myside].first_check.check1]
+        and not trig[walktable[myside].first_check.check2] then
+          instance.animation_state:change_state(instance, dt, walktable[myside].first_check.result)
+          return true
+      elseif trig[walktable[myside].second_check.check1]
+        and not trig[walktable[myside].second_check.check2] then
+          instance.animation_state:change_state(instance, dt, walktable[myside].second_check.result)
+          return true
+      elseif trig[walktable[myside].third_check.check1] then
+        instance.animation_state:change_state(instance, dt, walktable[myside].third_check.result)
+        return true
+      elseif trig[walktable[myside].fourth_check.check1] then
+        return true
+      end
+      return false
+    end,
+
+    check_halt_a = function(instance, trig, myside)
       if myside and trig["halt_" .. myside] then
         instance.animation_state:change_state(instance, dt, myside .. "halt")
         return true
@@ -254,6 +304,23 @@ local mo = {}
         instance.animation_state:change_state(instance, dt, "lefthalt")
         return true
       elseif trig.halt_up then
+        instance.animation_state:change_state(instance, dt, "uphalt")
+        return true
+      end
+      return false
+    end,
+
+    check_halt_notme = function(instance, trig, myside)
+      if trig.halt_down and myside ~= "down" then
+        instance.animation_state:change_state(instance, dt, "downhalt")
+        return true
+      elseif trig.halt_right and myside ~= "right" then
+        instance.animation_state:change_state(instance, dt, "righthalt")
+        return true
+      elseif trig.halt_left and myside ~= "left" then
+        instance.animation_state:change_state(instance, dt, "lefthalt")
+        return true
+      elseif trig.halt_up and myside ~= "up" then
         instance.animation_state:change_state(instance, dt, "uphalt")
         return true
       end

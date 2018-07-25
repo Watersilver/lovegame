@@ -43,10 +43,10 @@ function beginContact(a, b, coll)
     local bob = b:getBody():getUserData()
 
     if aob.beginContact then
-      aob:beginContact(a, b, coll, aob)
+      aob:beginContact(a, b, coll, aob, bob)
     end
     if bob.beginContact then
-      bob:beginContact(a, b, coll, aob)
+      bob:beginContact(a, b, coll, aob, bob)
     end
 end
 
@@ -105,6 +105,13 @@ function love.update(dt)
 
 
   if not game.paused then
+
+    local eUpnum = #o.earlyUpdaters
+    if eUpnum > 0 then
+      for i = 1, eUpnum do
+        o.earlyUpdaters[i]:early_update(dt)
+      end
+    end
 
     ps.pw:update(dt)
 

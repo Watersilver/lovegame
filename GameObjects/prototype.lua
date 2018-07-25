@@ -41,23 +41,27 @@ p.functions = {
         ps.setFixtureInfo(self.fixture, fi, pp)
         if pp.downSensor then
           self.downfixture = love.physics.newFixture(body, pp.downSensor, 0)
+          self.downfixture:setMask(self.fixture:getMask())
           self.downfixture:setSensor(true)
           self.downfixture:setUserData("downTouch")
         end
-        if pp.upSensor then
-          self.upfixture = love.physics.newFixture(body, pp.upSensor, 0)
-          self.upfixture:setSensor(true)
-          self.upfixture:setUserData("upTouch")
+        if pp.rightSensor then
+          self.rightfixture = love.physics.newFixture(body, pp.rightSensor, 0)
+          self.rightfixture:setMask(self.fixture:getMask())
+          self.rightfixture:setSensor(true)
+          self.rightfixture:setUserData("rightTouch")
         end
         if pp.leftSensor then
           self.leftfixture = love.physics.newFixture(body, pp.leftSensor, 0)
+          self.leftfixture:setMask(self.fixture:getMask())
           self.leftfixture:setSensor(true)
           self.leftfixture:setUserData("leftTouch")
         end
-        if pp.rightSensor then
-          self.rightfixture = love.physics.newFixture(body, pp.rightSensor, 0)
-          self.rightfixture:setSensor(true)
-          self.rightfixture:setUserData("rightTouch")
+        if pp.upSensor then
+          self.upfixture = love.physics.newFixture(body, pp.upSensor, 0)
+          self.upfixture:setMask(self.fixture:getMask())
+          self.upfixture:setSensor(true)
+          self.upfixture:setUserData("upTouch")
         end
         self.body:resetMassData()
       end
@@ -90,7 +94,7 @@ p.functions = {
 
   unload_sprites = function(self)
     local si = self.sprite_info
-    if not si then return end
+    if not si or not self.drawable then return end
     local sinum = #si
     for i = 1, sinum do
       im.unload_sprite(si[i][1] or si[i][img_name])

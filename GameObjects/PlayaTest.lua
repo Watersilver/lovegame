@@ -3,10 +3,12 @@ local im = require "image"
 local inp = require "input"
 local inv = require "inventory"
 local p = require "GameObjects.prototype"
+local sw = require "GameObjects.Items.sword"
 local td = require "movement"; td = td.top_down
 local sm = require "state_machine"
 local u = require "utilities"
 local game = require "game"
+local o = require "GameObjects.objects"
 
 local sqrt = math.sqrt
 local floor = math.floor
@@ -48,7 +50,8 @@ function Playa.initialize(instance)
     downSensor = ps.shapes.pldsens,
     upSensor = ps.shapes.plusens,
     leftSensor = ps.shapes.pllsens,
-    rightSensor = ps.shapes.plrsens
+    rightSensor = ps.shapes.plrsens,
+    masks = {PLAYERATTACKCAT}
   }
   instance.sprite_info = {
     {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
@@ -152,14 +155,7 @@ function Playa.initialize(instance)
       local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
       if inv.check_use(instance, trig, "down") then
       elseif td.check_push_a(instance, trig, "down") then
-      elseif trig.walk_right and not trig.walk_down then
-        instance.animation_state:change_state(instance, dt, "rightwalk")
-      elseif trig.walk_left and not trig.walk_down then
-        instance.animation_state:change_state(instance, dt, "leftwalk")
-      elseif trig.walk_up then
-        instance.animation_state:change_state(instance, dt, "upwalk")
-      elseif trig.walk_down then
-        return
+      elseif td.check_walk_while_walking(instance, trig, "down") then
       elseif td.check_halt_a(instance, trig, "down") then
       elseif trig.restish then
         instance.animation_state:change_state(instance, dt, "downstill")
@@ -184,14 +180,7 @@ function Playa.initialize(instance)
       local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
       if inv.check_use(instance, trig, "right") then
       elseif td.check_push_a(instance, trig, "right") then
-      elseif trig.walk_down and not trig.walk_right then
-        instance.animation_state:change_state(instance, dt, "downwalk")
-      elseif trig.walk_up and not trig.walk_right then
-        instance.animation_state:change_state(instance, dt, "upwalk")
-      elseif trig.walk_left then
-        instance.animation_state:change_state(instance, dt, "leftwalk")
-      elseif trig.walk_right then
-        return
+      elseif td.check_walk_while_walking(instance, trig, "right") then
       elseif td.check_halt_a(instance, trig, "right") then
       elseif trig.restish then
         instance.animation_state:change_state(instance, dt, "rightstill")
@@ -218,14 +207,7 @@ function Playa.initialize(instance)
       local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
       if inv.check_use(instance, trig, "left") then
       elseif td.check_push_a(instance, trig, "left") then
-      elseif trig.walk_down and not trig.walk_left then
-        instance.animation_state:change_state(instance, dt, "downwalk")
-      elseif trig.walk_up and not trig.walk_left then
-        instance.animation_state:change_state(instance, dt, "upwalk")
-      elseif trig.walk_right then
-        instance.animation_state:change_state(instance, dt, "rightwalk")
-      elseif trig.walk_left then
-        return
+      elseif td.check_walk_while_walking(instance, trig, "left") then
       elseif td.check_halt_a(instance, trig, "left") then
       elseif trig.restish then
         instance.animation_state:change_state(instance, dt, "leftstill")
@@ -250,14 +232,7 @@ function Playa.initialize(instance)
       local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
       if inv.check_use(instance, trig, "up") then
       elseif td.check_push_a(instance, trig, "up") then
-      elseif trig.walk_right and not trig.walk_up then
-        instance.animation_state:change_state(instance, dt, "rightwalk")
-      elseif trig.walk_left and not trig.walk_up then
-        instance.animation_state:change_state(instance, dt, "leftwalk")
-      elseif trig.walk_down then
-        instance.animation_state:change_state(instance, dt, "downwalk")
-      elseif trig.walk_up then
-        return
+      elseif td.check_walk_while_walking(instance, trig, "up") then
       elseif td.check_halt_a(instance, trig, "up") then
       elseif trig.restish then
         instance.animation_state:change_state(instance, dt, "upstill")
@@ -287,12 +262,7 @@ function Playa.initialize(instance)
       elseif td.check_walk_a(instance, trig, "down") then
       elseif trig.restish then
         instance.animation_state:change_state(instance, dt, "downstill")
-      elseif trig.halt_right then
-        instance.animation_state:change_state(instance, dt, "righthalt")
-      elseif trig.halt_left then
-        instance.animation_state:change_state(instance, dt, "lefthalt")
-      elseif trig.halt_up then
-        instance.animation_state:change_state(instance, dt, "uphalt")
+      elseif td.check_halt_notme(instance, trig, "down") then
       end
     end,
 
@@ -317,12 +287,7 @@ function Playa.initialize(instance)
       elseif td.check_walk_a(instance, trig, "right") then
       elseif trig.restish then
         instance.animation_state:change_state(instance, dt, "rightstill")
-      elseif trig.halt_down then
-        instance.animation_state:change_state(instance, dt, "downhalt")
-      elseif trig.halt_left then
-        instance.animation_state:change_state(instance, dt, "lefthalt")
-      elseif trig.halt_up then
-        instance.animation_state:change_state(instance, dt, "uphalt")
+      elseif td.check_halt_notme(instance, trig, "right") then
       end
     end,
 
@@ -349,12 +314,7 @@ function Playa.initialize(instance)
       elseif td.check_walk_a(instance, trig, "left") then
       elseif trig.restish then
         instance.animation_state:change_state(instance, dt, "leftstill")
-      elseif trig.halt_down then
-        instance.animation_state:change_state(instance, dt, "downhalt")
-      elseif trig.halt_right then
-        instance.animation_state:change_state(instance, dt, "righthalt")
-      elseif trig.halt_up then
-        instance.animation_state:change_state(instance, dt, "uphalt")
+      elseif td.check_halt_notme(instance, trig, "left") then
       end
     end,
 
@@ -379,12 +339,7 @@ function Playa.initialize(instance)
       elseif td.check_walk_a(instance, trig, "up") then
       elseif trig.restish then
         instance.animation_state:change_state(instance, dt, "upstill")
-      elseif trig.halt_down then
-        instance.animation_state:change_state(instance, dt, "downhalt")
-      elseif trig.halt_right then
-        instance.animation_state:change_state(instance, dt, "righthalt")
-      elseif trig.halt_left then
-        instance.animation_state:change_state(instance, dt, "lefthalt")
+      elseif td.check_halt_notme(instance, trig, "up") then
       end
     end,
 
@@ -588,6 +543,8 @@ function Playa.initialize(instance)
     downswing = {
     run_state = function(instance, dt)
       local trig = instance.triggers
+
+      -- Manage position offset and image speed
       if trig.animation_end then
         instance.image_speed = 0
         instance.image_index = 1.99
@@ -607,15 +564,21 @@ function Playa.initialize(instance)
 
     start_state = function(instance, dt)
       instance.image_index = 0
-      instance.image_speed = 0.15
+      instance.image_speed = 0.20
       instance.triggers.animation_end = false
       instance.sprite = im.sprites["Witch/swing_down"]
+      -- Create sword
+      instance.sword = sw:new{creator = instance, side = "down", layer = instance.layer}
+      o.addToWorld(instance.sword)
     end,
 
     end_state = function(instance, dt)
       instance.ioy, instance.iox = 0, 0
       instance.image_index = 0
       instance.image_speed = 0
+      -- Delete sword
+      o.removeFromWorld(instance.sword)
+      instance.sword = nil
     end
     },
 
@@ -623,6 +586,8 @@ function Playa.initialize(instance)
     rightswing = {
     run_state = function(instance, dt)
       local trig = instance.triggers
+
+      -- Manage position offset and image speed
       if trig.animation_end then
         instance.image_speed = 0
         instance.image_index = 1.99
@@ -642,9 +607,13 @@ function Playa.initialize(instance)
 
     start_state = function(instance, dt)
       instance.image_index = 0
-      instance.image_speed = 0.15
+      instance.image_speed = 0.20
       instance.triggers.animation_end = false
       instance.sprite = im.sprites["Witch/swing_left"]
+      -- Create sword
+      instance.sword = sw:new{creator = instance, side = "right", layer = instance.layer}
+      o.addToWorld(instance.sword)
+
       instance.x_scale = -1
     end,
 
@@ -652,6 +621,10 @@ function Playa.initialize(instance)
       instance.ioy, instance.iox = 0, 0
       instance.image_index = 0
       instance.image_speed = 0
+      -- Delete sword
+      o.removeFromWorld(instance.sword)
+      instance.sword = nil
+
       instance.x_scale = 1
     end
     },
@@ -660,6 +633,8 @@ function Playa.initialize(instance)
     leftswing = {
     run_state = function(instance, dt)
       local trig = instance.triggers
+
+      -- Manage position offset and image speed
       if trig.animation_end then
         instance.image_speed = 0
         instance.image_index = 1.99
@@ -679,15 +654,21 @@ function Playa.initialize(instance)
 
     start_state = function(instance, dt)
       instance.image_index = 0
-      instance.image_speed = 0.15
+      instance.image_speed = 0.20
       instance.triggers.animation_end = false
       instance.sprite = im.sprites["Witch/swing_left"]
+      -- Create sword
+      instance.sword = sw:new{creator = instance, side = "left", layer = instance.layer}
+      o.addToWorld(instance.sword)
     end,
 
     end_state = function(instance, dt)
       instance.ioy, instance.iox = 0, 0
       instance.image_index = 0
       instance.image_speed = 0
+      -- Delete sword
+      o.removeFromWorld(instance.sword)
+      instance.sword = nil
     end
     },
 
@@ -695,6 +676,8 @@ function Playa.initialize(instance)
     upswing = {
     run_state = function(instance, dt)
       local trig = instance.triggers
+
+      -- Manage position offset and image speed
       if trig.animation_end then
         instance.image_speed = 0
         instance.image_index = 1.99
@@ -714,15 +697,21 @@ function Playa.initialize(instance)
 
     start_state = function(instance, dt)
       instance.image_index = 0
-      instance.image_speed = 0.15
+      instance.image_speed = 0.20
       instance.triggers.animation_end = false
       instance.sprite = im.sprites["Witch/swing_up"]
+      -- Create sword
+      instance.sword = sw:new{creator = instance, side = "up", layer = instance.layer}
+      o.addToWorld(instance.sword)
     end,
 
     end_state = function(instance, dt)
       instance.ioy, instance.iox = 0, 0
       instance.image_index = 0
       instance.image_speed = 0
+      -- Delete sword
+      o.removeFromWorld(instance.sword)
+      instance.sword = nil
     end
     }
   }
@@ -806,9 +795,9 @@ Playa.functions = {
     end
     local frame = sprite[floor(self.image_index)]
     love.graphics.draw(
-    sprite.img, frame, x, y, self.angle,
+    sprite.img, frame, x + self.iox, y + self.ioy, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
-    sprite.ox + self.iox, sprite.oy + self.ioy)
+    sprite.cx, sprite.cy)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --
@@ -884,8 +873,6 @@ Playa.functions = {
   end,
 
   postSolve = function(self, a, b, coll, normalimpulse, tangentimpulse)
-    -- fuck = normalimpulse
-    -- debugtxt = tangentimpulse
   end
 }
 
