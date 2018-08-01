@@ -105,37 +105,38 @@ Sword.functions = {
     if not cr then
       o.removeFromWorld(self)
     end
+    if self.weld then self.weld:destroy() end
 
     -- Calculate sprite_index
-    local frames = self.sprite.frames
-    local phase = floor(cr.image_index * frames / cr.sprite.frames)
+    local phase
+    if not self.stab then
+      phase = floor(cr.image_index * self.sprite.frames / cr.sprite.frames)
+      self.image_index = phase
+    else
+      self.image_index = 2
+      phase = self.image_index
+    end
     local prevphase = self.previous_image_index
-    self.image_index = phase
 
     -- Calculate offset due to sword swinging
     local sox, soy, angle = calculate_offset(self.side, phase)
     local creatorx, creatory = cr.body:getPosition()
 
     if phase ~= prevphase then
-      if phase == 0 then
-        if self.fixture then
-          self.fixture:destroy()
-        end
-        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordIgniting)
-        self.fixture:setSensor(true)
-      elseif phase == 1 then
-        if self.fixture then
-          self.fixture:destroy()
-        end
-        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwing)
-        self.fixture:setSensor(true)
-      elseif phase == 2 then
-        if self.fixture then
-          self.fixture:destroy()
-        end
-        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordStill)
-        self.fixture:setSensor(true)
+
+      if self.fixture then
+        self.fixture:destroy()
       end
+      if phase == 0 then
+        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordIgniting, 0)
+      elseif phase == 1 then
+        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwing, 0)
+      elseif phase == 2 then
+        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordStill, 0)
+      end
+      self.fixture:setSensor(true)
+      self.fixture:setCategory(PLAYERATTACKCAT)
+
     end
 
     -- Determine offset due to wielder's offset
@@ -144,7 +145,14 @@ Sword.functions = {
     -- Set position and angle
     self.body:setPosition(creatorx + sox + wox, creatory + soy + woy)
     self.body:setAngle(angle)
+
+    -- Drawing angle
     self.angle = angle
+
+    -- Weld
+    self.weld = love.physics.newWeldJoint(cr.body, self.body, creatorx + sox + wox, creatory + soy + woy, true)
+
+
 
     o.change_layer(self, cr.layer)
     self.previous_image_index = phase
@@ -165,15 +173,8 @@ Sword.functions = {
     sprite.cx, sprite.cy)
     -- love.graphics.polygon("line",
     -- self.body:getWorldPoints(self.spritefixture:getShape():getPoints()))
-    if self.image_index ~= 1 then
-      love.graphics.polygon("line",
-      self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-    else
-      local cshx, cshy = self.body:getPosition()
-      love.graphics.circle("line",
-        cshx, cshy,
-        self.fixture:getShape():getRadius())
-    end
+    -- love.graphics.polygon("line",
+    -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,
 
   beginContact = function(self, a, b, coll, aob, bob)
@@ -198,7 +199,19 @@ Sword.functions = {
     end
 
     if other.pushback and not self.hitWall then
-      cr.body:applyLinearImpulse(0, -200)
+      local lvx, lvy = cr.body:getLinearVelocity()
+      local crmass = cr.body:getMass()
+      cr.body:applyLinearImpulse(-lvx * crmass, -lvy * crmass)
+      if self.side == "down" then
+        px, py = 0, -30 * crmass
+      elseif self.side == "right" then
+        px, py = -30 * crmass, 0
+      elseif self.side == "left" then
+        px, py = 30 * crmass, 0
+      elseif self.side == "up" then
+        px, py = 0, 30 * crmass
+      end
+      cr.body:applyLinearImpulse(px, py)
       self.hitWall = true
     end
   end

@@ -24,6 +24,8 @@ function rm.build_room(room)
     local tile_height = room_part.tile_height or tile_width or 0
     local row_length = room_part.row_length or 0
     local col_length = room_part.col_length or 0
+    local tileset = room_part.tileset
+    local tileset_index_table = room_part.tileset_index_table
 
     -- initialize indices
     local i = 1
@@ -34,39 +36,56 @@ function rm.build_room(room)
 
     -- iterate over all elements of a room_part
     for _ = 1, number_of_elements do
-      local element = rm.sto[room_part[i+(j-1)*row_length]]:new()
-      element.xstart = x_that_I_start + (i-1) * tile_width
-      element.ystart = y_that_I_start + (j-1) * tile_height
-      -- Make sure to use as few edge shapes as necessary
-      if element.physical_properties.tile then
-        if j == 1 then
-          if i == 1 then
-            element.physical_properties.tile = {"u", "l"} -- upper left
-          elseif i == row_length then
-            element.physical_properties.tile = {"u", "r"} -- upper right and so forth
+
+      -- Store place on room part table
+      local symbol_index = i+(j-1)*row_length
+      -- Store symbol of room part
+      local symbol = room_part[symbol_index]
+      -- If symbol exists, create corresponding object
+      if symbol then
+        local element = rm.sto[symbol]:new()
+        element.xstart = x_that_I_start + (i-1) * tile_width
+        element.ystart = y_that_I_start + (j-1) * tile_height
+        -- Make sure to use as few edge shapes as necessary
+        local epp = element.physical_properties
+        if epp and epp.tile then
+          if j == 1 then
+            if i == 1 then
+              epp.tile = {"u", "l"} -- upper left
+            elseif i == row_length then
+              epp.tile = {"u", "r"} -- upper right and so forth
+            else
+              epp.tile = {"u"}
+            end
+          elseif j == col_length then
+            if i == 1 then
+              epp.tile = {"d", "l"}
+            elseif i == row_length then
+              epp.tile = {"d", "r"}
+            else
+              epp.tile = {"d"}
+            end
           else
-            element.physical_properties.tile = {"u"}
-          end
-        elseif j == col_length then
-          if i == 1 then
-            element.physical_properties.tile = {"d", "l"}
-          elseif i == row_length then
-            element.physical_properties.tile = {"d", "r"}
-          else
-            element.physical_properties.tile = {"d"}
-          end
-        else
-          if i == 1 then
-            element.physical_properties.tile = {"l"}
-          elseif i == row_length then
-            element.physical_properties.tile = {"r"}
-          else
-            element.physical_properties.tile = {"none"}
+            if i == 1 then
+              epp.tile = {"l"}
+            elseif i == row_length then
+              epp.tile = {"r"}
+            else
+              epp.tile = {"none"}
+            end
           end
         end
-      end
-      o.addToWorld(element)
 
+        -- Determine sprite
+        if tileset then
+          element.sprite_info = {tileset}
+          element.image_index = tileset_index_table[symbol_index]
+        end
+
+        o.addToWorld(element)
+      end
+
+      -- Progress iterators
       i = i + 1
       if row_length > 0 and row_length < i then
         i = 1

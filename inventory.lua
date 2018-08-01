@@ -25,10 +25,21 @@ inv.sword = {
   end
 }
 
+inv.jump = {
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgJumpL1.png"),
+  check_trigger = function(object, keyheld)
+    if keyheld == 0 then
+      return "jump"
+    else
+      return "none"
+    end
+  end
+}
+
 inv.slots = {}
 
 inv.slots[6] = {key = "c", item = inv.sword}
-inv.slots[5] = {key = "x"}
+inv.slots[5] = {key = "x", item = inv.jump}
 inv.slots[4] = {key = "z"}
 inv.slots[3] = {key = "d"}
 inv.slots[2] = {key = "s"}

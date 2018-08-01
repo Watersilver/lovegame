@@ -3,17 +3,35 @@ local im = require "image"
 local inp = require "input"
 local inv = require "inventory"
 local p = require "GameObjects.prototype"
-local sw = require "GameObjects.Items.sword"
 local td = require "movement"; td = td.top_down
 local sm = require "state_machine"
 local u = require "utilities"
 local game = require "game"
 local o = require "GameObjects.objects"
+local hps = require "GameObjects.Helpers.player_states"
+
+local sw = require "GameObjects.Items.sword"
+local hsw = require "GameObjects.Items.held_sword"
 
 local sqrt = math.sqrt
 local floor = math.floor
 local choose = u.choose
 local max = math.max
+
+local check_walk = hps.check_walk
+local check_halt = hps.check_halt
+local check_still = hps.check_still
+local check_push = hps.check_push
+local run_swing = hps.run_swing
+local check_swing = hps.check_swing
+local start_swing = hps.start_swing
+local end_swing = hps.end_swing
+local run_stab = hps.run_stab
+local check_stab = hps.check_stab
+local start_stab = hps.start_stab
+local end_stab = hps.end_stab
+local check_hold = hps.check_hold
+local start_hold = hps.start_hold
 
 local Playa = {}
 
@@ -69,6 +87,9 @@ function Playa.initialize(instance)
     {'Witch/swing_up', 2, padding = 2, width = 16, height = 16},
     {'Witch/swing_left', 2, padding = 2, width = 16, height = 16},
     {'Witch/swing_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/hold_up', 4, padding = 2, width = 16, height = 16},
+    {'Witch/hold_left', 4, padding = 2, width = 16, height = 16},
+    {'Witch/hold_down', 4, padding = 2, width = 16, height = 16},
     {'GuyWalk', 4, width = 16, height = 16},
     {'Test', 1, padding = 0},
     {'Plrun_strip12', 12, padding = 0, width = 16, height = 16},
@@ -89,6 +110,8 @@ function Playa.initialize(instance)
     end_state = function(instance, dt)
     end
     },
+
+
     normal = {
     run_state = function(instance, dt)
       -- Apply movement table
@@ -97,8 +120,10 @@ function Playa.initialize(instance)
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
-      if trig.swing_sword then
-        instance.movement_state:change_state(instance, dt, "using_item")
+      if trig.stab then
+        instance.movement_state:change_state(instance, dt, "using_sword")
+      elseif trig.swing_sword then
+        instance.movement_state:change_state(instance, dt, "using_sword")
       end
     end,
 
@@ -108,6 +133,19 @@ function Playa.initialize(instance)
     end_state = function(instance, dt)
     end
     },
+
+
+    using_sword = {
+    start_state = function(instance, dt)
+      instance.movement_state:change_state(instance, dt, "using_item")
+    end,
+
+    end_state = function(instance, dt)
+      instance.item_use_duration = 0.5
+    end
+    },
+
+
     using_item = {
     run_state = function(instance, dt)
       -- Apply movement table
@@ -118,8 +156,8 @@ function Playa.initialize(instance)
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
       if trig.swing_sword then
-        instance.movement_state:change_state(instance, dt, "using_item")
-      elseif instance.item_use_counter > 0.5 then
+        instance.movement_state:change_state(instance, dt, "using_sword")
+      elseif instance.item_use_counter > instance.item_use_duration then
         instance.movement_state:change_state(instance, dt, "normal")
       end
     end,
@@ -152,14 +190,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "down") then
-      elseif td.check_push_a(instance, trig, "down") then
-      elseif td.check_walk_while_walking(instance, trig, "down") then
-      elseif td.check_halt_a(instance, trig, "down") then
-      elseif trig.restish then
-        instance.animation_state:change_state(instance, dt, "downstill")
-      end
+      check_walk(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
@@ -177,14 +208,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "right") then
-      elseif td.check_push_a(instance, trig, "right") then
-      elseif td.check_walk_while_walking(instance, trig, "right") then
-      elseif td.check_halt_a(instance, trig, "right") then
-      elseif trig.restish then
-        instance.animation_state:change_state(instance, dt, "rightstill")
-      end
+      check_walk(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
@@ -204,14 +228,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "left") then
-      elseif td.check_push_a(instance, trig, "left") then
-      elseif td.check_walk_while_walking(instance, trig, "left") then
-      elseif td.check_halt_a(instance, trig, "left") then
-      elseif trig.restish then
-        instance.animation_state:change_state(instance, dt, "leftstill")
-      end
+      check_walk(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
@@ -229,14 +246,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "up") then
-      elseif td.check_push_a(instance, trig, "up") then
-      elseif td.check_walk_while_walking(instance, trig, "up") then
-      elseif td.check_halt_a(instance, trig, "up") then
-      elseif trig.restish then
-        instance.animation_state:change_state(instance, dt, "upstill")
-      end
+      check_walk(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
@@ -256,14 +266,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "down") then
-      elseif td.check_push_a(instance, trig, "down") then
-      elseif td.check_walk_a(instance, trig, "down") then
-      elseif trig.restish then
-        instance.animation_state:change_state(instance, dt, "downstill")
-      elseif td.check_halt_notme(instance, trig, "down") then
-      end
+      check_halt(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
@@ -281,14 +284,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "right") then
-      elseif td.check_push_a(instance, trig, "right") then
-      elseif td.check_walk_a(instance, trig, "right") then
-      elseif trig.restish then
-        instance.animation_state:change_state(instance, dt, "rightstill")
-      elseif td.check_halt_notme(instance, trig, "right") then
-      end
+      check_halt(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
@@ -308,14 +304,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "left") then
-      elseif td.check_push_a(instance, trig, "left") then
-      elseif td.check_walk_a(instance, trig, "left") then
-      elseif trig.restish then
-        instance.animation_state:change_state(instance, dt, "leftstill")
-      elseif td.check_halt_notme(instance, trig, "left") then
-      end
+      check_halt(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
@@ -333,14 +322,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "up") then
-      elseif td.check_push_a(instance, trig, "up") then
-      elseif td.check_walk_a(instance, trig, "up") then
-      elseif trig.restish then
-        instance.animation_state:change_state(instance, dt, "upstill")
-      elseif td.check_halt_notme(instance, trig, "up") then
-      end
+      check_halt(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
@@ -358,12 +340,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "down") then
-      elseif td.check_push_a(instance, trig, "down") then
-      elseif td.check_walk_a(instance, trig, "down") then
-      elseif td.check_halt_a(instance, trig, "down") then
-      end
+      check_still(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
@@ -381,12 +358,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "right") then
-      elseif td.check_push_a(instance, trig, "right") then
-      elseif td.check_walk_a(instance, trig, "right") then
-      elseif td.check_halt_a(instance, trig, "right") then
-      end
+      check_still(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
@@ -406,12 +378,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "left") then
-      elseif td.check_push_a(instance, trig, "left") then
-      elseif td.check_walk_a(instance, trig, "left") then
-      elseif td.check_halt_a(instance, trig, "left") then
-      end
+      check_still(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
@@ -429,12 +396,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "up") then
-      elseif td.check_push_a(instance, trig, "up") then
-      elseif td.check_walk_a(instance, trig, "up") then
-      elseif td.check_halt_a(instance, trig, "up") then
-      end
+      check_still(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
@@ -453,11 +415,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "down") then
-      elseif not trig.push_down then
-        instance.animation_state:change_state(instance, dt, "downstill")
-      end
+      check_push(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
@@ -476,11 +434,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "right") then
-      elseif not trig.push_right then
-        instance.animation_state:change_state(instance, dt, "rightstill")
-      end
+      check_push(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
@@ -501,11 +455,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "left") then
-      elseif not trig.push_left then
-        instance.animation_state:change_state(instance, dt, "leftstill")
-      end
+      check_push(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
@@ -524,11 +474,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if inv.check_use(instance, trig, "up") then
-      elseif not trig.push_up then
-        instance.animation_state:change_state(instance, dt, "upstill")
-      end
+      check_push(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
@@ -542,130 +488,171 @@ function Playa.initialize(instance)
 
     downswing = {
     run_state = function(instance, dt)
-      local trig = instance.triggers
-
-      -- Manage position offset and image speed
-      if trig.animation_end then
-        instance.image_speed = 0
-        instance.image_index = 1.99
-      else
-        inv.sword.image_offset(instance, dt, "down")
-      end
+      run_swing(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.swing_sword then
-        instance.animation_state:change_state(instance, dt, "downswing")
-      elseif otherstate == "normal" then
-        instance.animation_state:change_state(instance, dt, "downstill")
-      end
+      check_swing(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      instance.image_index = 0
-      instance.image_speed = 0.20
-      instance.triggers.animation_end = false
-      instance.sprite = im.sprites["Witch/swing_down"]
-      -- Create sword
-      instance.sword = sw:new{creator = instance, side = "down", layer = instance.layer}
-      o.addToWorld(instance.sword)
+      start_swing(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
-      instance.ioy, instance.iox = 0, 0
-      instance.image_index = 0
-      instance.image_speed = 0
-      -- Delete sword
-      o.removeFromWorld(instance.sword)
-      instance.sword = nil
+      end_swing(instance, dt, "down")
     end
     },
 
 
     rightswing = {
     run_state = function(instance, dt)
-      local trig = instance.triggers
-
-      -- Manage position offset and image speed
-      if trig.animation_end then
-        instance.image_speed = 0
-        instance.image_index = 1.99
-      else
-        inv.sword.image_offset(instance, dt, "right")
-      end
+      run_swing(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.swing_sword then
-        instance.animation_state:change_state(instance, dt, "rightswing")
-      elseif otherstate == "normal" then
-        instance.animation_state:change_state(instance, dt, "rightstill")
-      end
+      check_swing(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      instance.image_index = 0
-      instance.image_speed = 0.20
-      instance.triggers.animation_end = false
-      instance.sprite = im.sprites["Witch/swing_left"]
-      -- Create sword
-      instance.sword = sw:new{creator = instance, side = "right", layer = instance.layer}
-      o.addToWorld(instance.sword)
-
-      instance.x_scale = -1
+      start_swing(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      instance.ioy, instance.iox = 0, 0
-      instance.image_index = 0
-      instance.image_speed = 0
-      -- Delete sword
-      o.removeFromWorld(instance.sword)
-      instance.sword = nil
-
-      instance.x_scale = 1
+      end_swing(instance, dt, "right")
     end
     },
 
 
     leftswing = {
     run_state = function(instance, dt)
-      local trig = instance.triggers
-
-      -- Manage position offset and image speed
-      if trig.animation_end then
-        instance.image_speed = 0
-        instance.image_index = 1.99
-      else
-        inv.sword.image_offset(instance, dt, "left")
-      end
+      run_swing(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.swing_sword then
-        instance.animation_state:change_state(instance, dt, "leftswing")
-      elseif otherstate == "normal" then
-        instance.animation_state:change_state(instance, dt, "leftstill")
-      end
+      check_swing(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      instance.image_index = 0
-      instance.image_speed = 0.20
-      instance.triggers.animation_end = false
-      instance.sprite = im.sprites["Witch/swing_left"]
-      -- Create sword
-      instance.sword = sw:new{creator = instance, side = "left", layer = instance.layer}
-      o.addToWorld(instance.sword)
+      start_swing(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
-      instance.ioy, instance.iox = 0, 0
-      instance.image_index = 0
-      instance.image_speed = 0
+      end_swing(instance, dt, "left")
+    end
+    },
+
+
+    upswing = {
+    run_state = function(instance, dt)
+      run_swing(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      check_swing(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_swing(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      end_swing(instance, dt, "up")
+    end
+    },
+
+
+    downstab = {
+    run_state = function(instance, dt)
+      run_stab(instance, dt, "down")
+    end,
+
+    check_state = function(instance, dt)
+      check_stab(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      start_stab(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+      end_stab(instance, dt, "down")
+    end
+    },
+
+
+    rightstab = {
+    run_state = function(instance, dt)
+      run_stab(instance, dt, "right")
+    end,
+
+    check_state = function(instance, dt)
+      check_stab(instance, dt, "right")
+    end,
+
+    start_state = function(instance, dt)
+      start_stab(instance, dt, "right")
+    end,
+
+    end_state = function(instance, dt)
+      end_stab(instance, dt, "right")
+    end
+    },
+
+
+    leftstab = {
+    run_state = function(instance, dt)
+      run_stab(instance, dt, "left")
+    end,
+
+    check_state = function(instance, dt)
+      check_stab(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      start_stab(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      end_stab(instance, dt, "left")
+    end
+    },
+
+
+    upstab = {
+    run_state = function(instance, dt)
+      run_stab(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      check_stab(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_stab(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      end_stab(instance, dt, "up")
+    end
+    },
+
+
+    downhold = {
+    run_state = function(instance, dt)
+      td.image_speed(instance, dt)
+      if instance.speed < 5 then instance.image_index = 0 end
+    end,
+
+    check_state = function(instance, dt)
+      check_hold(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      start_hold(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
       -- Delete sword
       o.removeFromWorld(instance.sword)
       instance.sword = nil
@@ -673,42 +660,66 @@ function Playa.initialize(instance)
     },
 
 
-    upswing = {
+    righthold = {
     run_state = function(instance, dt)
-      local trig = instance.triggers
-
-      -- Manage position offset and image speed
-      if trig.animation_end then
-        instance.image_speed = 0
-        instance.image_index = 1.99
-      else
-        inv.sword.image_offset(instance, dt, "up")
-      end
+      td.image_speed(instance, dt)
+      if instance.speed < 5 then instance.image_index = 0 end
     end,
 
     check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.swing_sword then
-        instance.animation_state:change_state(instance, dt, "upswing")
-      elseif otherstate == "normal" then
-        instance.animation_state:change_state(instance, dt, "upstill")
-      end
+      check_hold(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      instance.image_index = 0
-      instance.image_speed = 0.20
-      instance.triggers.animation_end = false
-      instance.sprite = im.sprites["Witch/swing_up"]
-      -- Create sword
-      instance.sword = sw:new{creator = instance, side = "up", layer = instance.layer}
-      o.addToWorld(instance.sword)
+      start_hold(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      instance.ioy, instance.iox = 0, 0
-      instance.image_index = 0
-      instance.image_speed = 0
+      -- Delete sword
+      o.removeFromWorld(instance.sword)
+      instance.sword = nil
+      instance.x_scale = 1
+    end
+    },
+
+
+    lefthold = {
+    run_state = function(instance, dt)
+      td.image_speed(instance, dt)
+      if instance.speed < 5 then instance.image_index = 0 end
+    end,
+
+    check_state = function(instance, dt)
+      check_hold(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      start_hold(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      -- Delete sword
+      o.removeFromWorld(instance.sword)
+      instance.sword = nil
+    end
+    },
+
+
+    uphold = {
+    run_state = function(instance, dt)
+      td.image_speed(instance, dt)
+      if instance.speed < 5 then instance.image_index = 0 end
+    end,
+
+    check_state = function(instance, dt)
+      check_hold(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_hold(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
       -- Delete sword
       o.removeFromWorld(instance.sword)
       instance.sword = nil
