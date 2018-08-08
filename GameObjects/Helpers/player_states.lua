@@ -1,6 +1,7 @@
 local inv = require "inventory"
 local td = require "movement"; td = td.top_down
 local im = require "image"
+local ps = require "physics_settings"
 
 local o = require "GameObjects.objects"
 local sw = require "GameObjects.Items.sword"
@@ -83,7 +84,11 @@ player_states.start_swing = function(instance, dt, side)
     instance.x_scale = -1
   end
   -- Create sword
-  instance.sword = sw:new{creator = instance, side = side, layer = instance.layer}
+  instance.sword = sw:new{
+    creator = instance,
+    side = side,
+    layer = instance.layer
+  }
   o.addToWorld(instance.sword)
 end
 
@@ -171,6 +176,37 @@ player_states.start_hold = function(instance, dt, side)
   -- Create sword
   instance.sword = hsw:new{creator = instance, side = side, layer = instance.layer}
   o.addToWorld(instance.sword)
+end
+
+player_states.start_jump = function(instance, dt, side)
+  instance.zvel = 110
+  instance.animation_state:change_state(instance, dt, side .. "fall")
+end
+
+player_states.run_fall = function(instance, dt, side)
+end
+
+player_states.check_fall = function(instance, dt, side)
+  if instance.zo == 0 then
+    instance.animation_state:change_state(instance, dt, side .. "still")
+  end
+end
+
+player_states.start_fall = function(instance, dt, side)
+  instance.image_index = 0
+  instance.image_speed = 0
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/hold_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/hold_left"]
+    instance.x_scale = -1
+  end
+end
+
+player_states.end_fall = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = 1
+  end
 end
 
 return player_states

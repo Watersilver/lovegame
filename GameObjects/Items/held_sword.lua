@@ -93,6 +93,11 @@ HeldSword.functions = {
 
   draw = function(self)
     local x, y = self.body:getPosition()
+    -- self.spritebody:setPosition(x, y)
+    -- if self.spritejoint then self.spritejoint:destroy() end
+    self.spritebody:setPosition(x, y)
+    -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+
     self.x, self.y = x, y
     local sprite = self.sprite
     -- Check in case animation changed to something with fewer frames
@@ -106,6 +111,8 @@ HeldSword.functions = {
     sprite.cx, sprite.cy)
 
     -- Debug
+    love.graphics.polygon("line",
+    self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     -- love.graphics.polygon("line",
     -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,

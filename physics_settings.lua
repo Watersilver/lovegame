@@ -7,7 +7,7 @@ PLAYERATTACKCAT = 15
 ENEMYATTACKCAT = 14
 FLOORCAT = 13
 JUMPABLECAT = 12
-JUMPCAT = 11
+DEFAULTCAT = 1
 
 local ps = {}
 
@@ -100,7 +100,6 @@ function ps.setFixtureInfo(fixture, fixtureInfo, physical_properties)
   fixture:setFriction(pp.friction or fi.friction or 0.5)
   fixture:setSensor(pp.sensor or fi.sensor or false)
   fixture:setMask(SPRITECAT, fixture:getMask())
-  fixture:setMask(JUMPCAT, fixture:getMask())
 
   if pp.masks then
     for _, mask in ipairs(pp.masks) do

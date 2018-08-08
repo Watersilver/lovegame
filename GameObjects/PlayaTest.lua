@@ -32,6 +32,11 @@ local start_stab = hps.start_stab
 local end_stab = hps.end_stab
 local check_hold = hps.check_hold
 local start_hold = hps.start_hold
+local start_jump = hps.start_jump
+local run_fall = hps.run_fall
+local check_fall = hps.check_fall
+local start_fall = hps.start_fall
+local end_fall = hps.end_fall
 
 local Playa = {}
 
@@ -48,8 +53,11 @@ function Playa.initialize(instance)
   instance.angvel = 0 -- angular velocity
   instance.x_scale = 1
   instance.y_scale = 1
-  instance.iox = 0 -- drawing offsets dou to item use (eg sword swing)
+  instance.iox = 0 -- drawing offsets due to item use (eg sword swing)
   instance.ioy = 0
+  instance.zo = 0 -- drawing offsets due to z axis
+  instance.zvel = 0 -- z axis velocity
+  instance.gravity = 350
   instance.image_speed = 0
   instance.mobility = 300 -- 600
   instance.breaks = 3 -- 6
@@ -724,6 +732,144 @@ function Playa.initialize(instance)
       o.removeFromWorld(instance.sword)
       instance.sword = nil
     end
+    },
+
+
+    downjump = {
+    run_state = function(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+    end,
+
+    start_state = function(instance, dt)
+      start_jump(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+    end
+    },
+
+
+    rightjump = {
+    run_state = function(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+    end,
+
+    start_state = function(instance, dt)
+      start_jump(instance, dt, "right")
+      instance.x_scale = -1
+    end,
+
+    end_state = function(instance, dt)
+      instance.x_scale = 1
+    end
+    },
+
+
+    leftjump = {
+    run_state = function(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+    end,
+
+    start_state = function(instance, dt)
+      start_jump(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+    end
+    },
+
+
+    upjump = {
+    run_state = function(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+    end,
+
+    start_state = function(instance, dt)
+      start_jump(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+    end
+    },
+
+
+    downfall = {
+    run_state = function(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+      check_fall(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      start_fall(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+      end_fall(instance, dt, "down")
+    end
+    },
+
+
+    rightfall = {
+    run_state = function(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+      check_fall(instance, dt, "right")
+    end,
+
+    start_state = function(instance, dt)
+      start_fall(instance, dt, "right")
+    end,
+
+    end_state = function(instance, dt)
+      end_fall(instance, dt, "right")
+    end
+    },
+
+
+    leftfall = {
+    run_state = function(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+      check_fall(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      start_fall(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      end_fall(instance, dt, "left")
+    end
+    },
+
+
+    upfall = {
+    run_state = function(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+      check_fall(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_fall(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      end_fall(instance, dt, "up")
+    end
     }
   }
 end
@@ -745,19 +891,27 @@ Playa.functions = {
     self.vx, self.vy = vx, vy
 
     -- Determine triggers
+    local trig = self.triggers
     self.angle = self.angle + dt*self.angvel
     while self.angle >= math.pi do
       self.angle = self.angle - math.pi
-      self.triggers.full_rotation = true
+      trig.full_rotation = true
     end
     self.image_index = (self.image_index + dt*60*self.image_speed)
     local frames = self.sprite.frames
     while self.image_index >= frames do
       self.image_index = self.image_index - frames
-      if frames > 1 then self.triggers.animation_end = true end
+      if frames > 1 then trig.animation_end = true end
     end
     td.determine_animation_triggers(self, dt)
     inv.determine_equipment_triggers(self, dt)
+    self.zo = self.zo - self.zvel * dt
+    if self.zo >= 0 then
+      self.zo = 0
+      self.zvel = 0
+    else
+      self.zvel = self.zvel - self.gravity * dt
+    end
 
     local ms = self.movement_state
     -- Check movement state
@@ -798,6 +952,10 @@ Playa.functions = {
 
   draw = function(self)
     local x, y = self.body:getPosition()
+    local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
+    -- if self.spritejoint then self.spritejoint:destroy() end
+    self.spritebody:setPosition(xtotal, ytotal)
+    -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
     self.x, self.y = x, y
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames
@@ -806,11 +964,11 @@ Playa.functions = {
     end
     local frame = sprite[floor(self.image_index)]
     love.graphics.draw(
-    sprite.img, frame, x + self.iox, y + self.ioy, self.angle,
+    sprite.img, frame, xtotal, ytotal, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-    -- love.graphics.polygon("line", self.body:getWorldPoints(self.spritefixture:getShape():getPoints()))
+    love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --
     -- love.graphics.setColor(COLORCONST, self.db.downcol, self.db.downcol, COLORCONST)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.downfixture:getShape():getPoints()))
@@ -826,7 +984,10 @@ Playa.functions = {
   load = function(self)
   end,
 
-  beginContact = function(self, a, b, coll, aob)
+  beginContact = function(self, a, b, coll, aob, bob)
+
+    if aob == bob then return end
+
     -- Find which fixture belongs to whom
     local myF
     local otherF

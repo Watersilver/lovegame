@@ -61,20 +61,20 @@ local mo = {}
       local mobility = object.mobility or 600
       local breaks = object.breaks or 6
       local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
-      local floorViscosity = object.floorViscosity
       local inversemaxspeed = 1/object.maxspeed
 
       if floorFriction < 1 then
         mobility = mobility * floorFriction
         breaks = breaks * floorFriction
       end
-      if floorViscosity then
-        if floorViscosity == "water" then
+      if object.floorViscosity then
+        if object.floorViscosity == "water" then
           inversemaxspeed = inversemaxspeed * 2
           mobility = mobility * 0.1
           breaks = breaks * 2
         end
       end
+      if object.jumping then end
 
       -- Calculate force due to input
       local infx, infy =

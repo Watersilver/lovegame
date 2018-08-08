@@ -143,16 +143,20 @@ Sword.functions = {
     local wox, woy = cr.iox, cr.ioy
 
     -- Set position and angle
-    self.body:setPosition(creatorx + sox + wox, creatory + soy + woy)
+    local x, y = creatorx + sox + wox, creatory + soy + woy
+    self.body:setPosition(x, y)
     self.body:setAngle(angle)
+
+    -- if self.spritejoint then self.spritejoint:destroy() end
+    self.spritebody:setPosition(x, y)
+    -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+
 
     -- Drawing angle
     self.angle = angle
 
     -- Weld
-    self.weld = love.physics.newWeldJoint(cr.body, self.body, creatorx + sox + wox, creatory + soy + woy, true)
-
-
+    self.weld = love.physics.newWeldJoint(cr.body, self.body, x, y, true)
 
     o.change_layer(self, cr.layer)
     self.previous_image_index = phase
@@ -171,8 +175,8 @@ Sword.functions = {
     sprite.img, frame, x, y, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
-    -- love.graphics.polygon("line",
-    -- self.body:getWorldPoints(self.spritefixture:getShape():getPoints()))
+    love.graphics.polygon("line",
+    self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     -- love.graphics.polygon("line",
     -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,

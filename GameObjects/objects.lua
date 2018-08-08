@@ -34,6 +34,7 @@ function o.to_be_deleted:remove_all()
   for _, object in ipairs(self) do
     if object.sprite_info then object:unload_sprites() end
     if object.body then object.body:destroy() end
+    if object.spritebody then object.spritebody:destroy() end
     if object.updater then
       u.free(o.updaters, object.updater)
       object.updater = nil
