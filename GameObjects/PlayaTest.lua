@@ -8,7 +8,10 @@ local sm = require "state_machine"
 local u = require "utilities"
 local game = require "game"
 local o = require "GameObjects.objects"
+
 local hps = require "GameObjects.Helpers.player_states"
+local dc = require "GameObjects.Helpers.determine_colliders"
+local ec = require "GameObjects.Helpers.edge_collisions"
 
 local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
@@ -51,6 +54,7 @@ function Playa.initialize(instance)
   instance.ids[#instance.ids+1] = "PlayaTest"
   instance.angle = 0
   instance.angvel = 0 -- angular velocity
+  instance.width = 10
   instance.x_scale = 1
   instance.y_scale = 1
   instance.iox = 0 -- drawing offsets due to item use (eg sword swing)
@@ -60,7 +64,7 @@ function Playa.initialize(instance)
   instance.gravity = 350
   instance.image_speed = 0
   instance.mobility = 300 -- 600
-  instance.breaks = 3 -- 6
+  instance.brakes = 3 -- 6
   instance.maxspeed = 100
   instance.triggers = {}
   instance.sensors = {}
@@ -77,7 +81,7 @@ function Playa.initialize(instance)
     upSensor = ps.shapes.plusens,
     leftSensor = ps.shapes.pllsens,
     rightSensor = ps.shapes.plrsens,
-    masks = {PLAYERATTACKCAT}
+    masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
   }
   instance.sprite_info = {
     {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
@@ -98,6 +102,7 @@ function Playa.initialize(instance)
     {'Witch/hold_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/hold_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/hold_down', 4, padding = 2, width = 16, height = 16},
+    {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
     {'GuyWalk', 4, width = 16, height = 16},
     {'Test', 1, padding = 0},
     {'Plrun_strip12', 12, padding = 0, width = 16, height = 16},
@@ -163,7 +168,7 @@ function Playa.initialize(instance)
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
-      if trig.swing_sword then
+      if trig.swing_sword and not otherstate:find("stab") then
         instance.movement_state:change_state(instance, dt, "using_sword")
       elseif instance.item_use_counter > instance.item_use_duration then
         instance.movement_state:change_state(instance, dt, "normal")
@@ -887,8 +892,21 @@ Playa.functions = {
 
     -- Store usefull stuff
     local vx, vy = self.body:getLinearVelocity()
+    local x, y = self.body:getPosition()
     self.speed = sqrt(vx*vx + vy*vy)
     self.vx, self.vy = vx, vy
+    self.x, self.y = x, y
+
+    -- Check if falling off edge
+    if self.edgeFall then
+      if self.edgeFall.step2 then
+        self.zo = self.zo - self.edgeFall.height
+        self.edgeFall = nil
+      else
+        self.body:setPosition(self.x, self.y + self.edgeFall.height)
+        self.edgeFall.step2 = true
+      end
+    end
 
     -- Determine triggers
     local trig = self.triggers
@@ -951,12 +969,20 @@ Playa.functions = {
   end,
 
   draw = function(self)
-    local x, y = self.body:getPosition()
+    local x, y = self.x, self.y
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
     -- if self.spritejoint then self.spritejoint:destroy() end
     self.spritebody:setPosition(xtotal, ytotal)
     -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
-    self.x, self.y = x, y
+
+    if self.zo ~= 0 then
+      local shaspri = self.shadownSprite
+      love.graphics.draw(
+      shaspri.img, shaspri[0], x, y, 0,
+      shaspri.res_x_scale, shaspri.res_y_scale,
+      shaspri.cx, shaspri.cy)
+    end
+
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames
     while self.image_index >= sprite.frames do
@@ -968,7 +994,7 @@ Playa.functions = {
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-    love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
+    -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --
     -- love.graphics.setColor(COLORCONST, self.db.downcol, self.db.downcol, COLORCONST)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.downfixture:getShape():getPoints()))
@@ -982,6 +1008,7 @@ Playa.functions = {
   end,
 
   load = function(self)
+    self.shadownSprite = im.sprites["Witch/shadow"]
   end,
 
   beginContact = function(self, a, b, coll, aob, bob)
@@ -989,56 +1016,50 @@ Playa.functions = {
     if aob == bob then return end
 
     -- Find which fixture belongs to whom
-    local myF
-    local otherF
-    if self == aob then
-      myF = a
-      otherF = b
-    else
-      myF = b
-      otherF = a
-    end
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
-      local sensor = myF:getUserData()
+      local sensorID = myF:getUserData() -- string
 
-      if sensor then
-        local sensors = self.sensors
+      if sensorID then
         if not otherF:getUserData() ~= "unpushable" then
-          sensors[sensor] = sensors[sensor] or 0
-          sensors[sensor] = sensors[sensor] + 1
+          local onEdge
+          if other.edge then
+            onEdge = ec.isOnEdge(other, self)
+          end
+          if not onEdge then
+            local sensors = self.sensors
+            sensors[sensorID] = sensors[sensorID] or 0
+            sensors[sensorID] = sensors[sensorID] + 1
+          end
         end
       end
 
     end
+
   end,
 
   endContact = function(self, a, b, coll, aob)
     -- Find which fixture belongs to whom
-    local myF
-    local otherF
-    if self == aob then
-      myF = a
-      otherF = b
-    else
-      myF = b
-      otherF = a
-    end
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
-      local sensor = myF:getUserData()
+      local sensorID = myF:getUserData()
 
-      if sensor then
+      if sensorID then
         if not otherF:getUserData() ~= "unpushable" then
           local sensors = self.sensors
-          sensors[sensor] = sensors[sensor] - 1
-          if sensors[sensor] == 0 then sensors[sensor] = nil end
+          if sensors[sensorID] then
+            sensors[sensorID] = sensors[sensorID] - 1
+            if sensors[sensorID] == 0 then sensors[sensorID] = nil end
+          end
         end
       end
 
     end
+
   end,
 
   preSolve = function(self, a, b, coll)

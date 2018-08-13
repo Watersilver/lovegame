@@ -6,7 +6,7 @@ SPRITECAT = 16
 PLAYERATTACKCAT = 15
 ENEMYATTACKCAT = 14
 FLOORCAT = 13
-JUMPABLECAT = 12
+PLAYERJUMPATTACKCAT = 12
 DEFAULTCAT = 1
 
 local ps = {}
@@ -29,12 +29,16 @@ ps.shapes = {
   swordIgniting = love.physics.newRectangleShape(0, 7, 2, 7+7),
   -- swordSwing = love.physics.newCircleShape(6), -- or rect(12, 13),
   swordSwing = love.physics.newPolygonShape(-7,-7, 5,-5, -10,10, 6,6),
-  swordStill = love.physics.newRectangleShape(0, 4, 2, 15+7),
+  swordStill = love.physics.newRectangleShape(0, 6, 1, 15 + 10),
+  -- swordStill = love.physics.newRectangleShape(0, 4, 1, 15 + 7),
+  swordHeld = love.physics.newRectangleShape(1, 15),
   -- EdgeBrick16.u:setPreviousVertex(-24, -8)
   -- EdgeBrick16.u:setNextVertex(24, -8)
+  edgeDown = love.physics.newEdgeShape(-7, 1, 7, 1)
 }
 -- Make player shapes
 local width, height = 10, 8
+ps.shapes.plshapeWidth = width
 -- Main collision shape
 ps.shapes.plshape = love.physics.newRectangleShape(
 0, height * 0.5,
@@ -70,7 +74,7 @@ function ps.shapes.edgeToTiles(instance, edgetable)
     local shape = edgetable[side]
     local newf = love.physics.newFixture(instance.body, shape)
     u.push(instance.fixtures, newf)
-    newf:setMask(SPRITECAT)
+    newf:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
     -- instance.fixtures[i]:setUserData(instance)
     i = i + 1
   end

@@ -25,6 +25,7 @@ function rm.build_room(room)
     local row_length = room_part.row_length or 0
     local col_length = room_part.col_length or 0
     local tileset = room_part.tileset
+    local init = room_part.init
     local tileset_index_table = room_part.tileset_index_table
 
     -- initialize indices
@@ -43,7 +44,7 @@ function rm.build_room(room)
       local symbol = room_part[symbol_index]
       -- If symbol exists, create corresponding object
       if symbol then
-        local element = rm.sto[symbol]:new()
+        local element = rm.sto[symbol]:new(init)
         element.xstart = x_that_I_start + (i-1) * tile_width
         element.ystart = y_that_I_start + (j-1) * tile_height
         -- Make sure to use as few edge shapes as necessary

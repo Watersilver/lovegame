@@ -1,5 +1,3 @@
-local ps = require "physics_settings"
-local im = require "image"
 local p = require "GameObjects.prototype"
 
 local Tile = {}
@@ -21,10 +19,7 @@ draw = function (self)
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
   if self.body then
-    for i, fixture in ipairs(self.fixtures) do
-      local shape = fixture:getShape()
-      love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
-    end
+    -- draw
   end
 end,
 }

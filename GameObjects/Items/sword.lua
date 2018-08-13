@@ -105,6 +105,14 @@ Sword.functions = {
     if not cr then
       o.removeFromWorld(self)
     end
+
+    -- Check if I'm on the air
+    if cr.zo ~= 0 then
+      self.onAir = true
+    else
+      self.onAir = false
+    end
+
     if self.weld then self.weld:destroy() end
 
     -- Calculate sprite_index
@@ -135,15 +143,20 @@ Sword.functions = {
         self.fixture = love.physics.newFixture(self.body, ps.shapes.swordStill, 0)
       end
       self.fixture:setSensor(true)
-      self.fixture:setCategory(PLAYERATTACKCAT)
 
+    end
+
+    if self.onAir then
+      self.fixture:setCategory(PLAYERJUMPATTACKCAT)
+    else
+      self.fixture:setCategory(PLAYERATTACKCAT)
     end
 
     -- Determine offset due to wielder's offset
     local wox, woy = cr.iox, cr.ioy
 
     -- Set position and angle
-    local x, y = creatorx + sox + wox, creatory + soy + woy
+    local x, y = creatorx + sox + wox, creatory + soy + woy + cr.zo
     self.body:setPosition(x, y)
     self.body:setAngle(angle)
 
@@ -175,8 +188,10 @@ Sword.functions = {
     sprite.img, frame, x, y, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
-    love.graphics.polygon("line",
-    self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
+
+    -- Debug
+    -- love.graphics.polygon("line",
+    -- self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     -- love.graphics.polygon("line",
     -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,
@@ -217,7 +232,11 @@ Sword.functions = {
       end
       cr.body:applyLinearImpulse(px, py)
       self.hitWall = true
+
     end
+  end,
+
+  preSolve = function(self, a, b, coll, aob, bob)
   end
 }
 

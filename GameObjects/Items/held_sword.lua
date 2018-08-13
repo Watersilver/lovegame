@@ -49,7 +49,7 @@ function HeldSword.initialize(instance)
     gravityScaleFactor = 0,
     sensor = true,
     density = 0,
-    shape = ps.shapes.swordStill,
+    shape = ps.shapes.swordHeld,
     categories = {PLAYERATTACKCAT}
   }
   instance.creator = nil -- Object that swings me
@@ -70,22 +70,33 @@ HeldSword.functions = {
     if not cr then
       o.removeFromWorld(self)
     end
+    if self.weld then self.weld:destroy() end
 
-    if not self.welded then
-      -- Calculate offset due to HeldSword swinging
-      local sox, soy, angle = calculate_offset(self.side, phase)
-      local creatorx, creatory = cr.body:getPosition()
+    -- Calculate offset due to HeldSword swinging
+    local sox, soy, angle = calculate_offset(self.side, phase)
+    local creatorx, creatory = cr.body:getPosition()
 
-      -- Set position and physical angle
-      self.body:setPosition(creatorx + sox, creatory + soy)
-      self.body:setAngle(angle)
+    -- Set position and physical angle
+    self.body:setPosition(creatorx + sox, creatory + soy + cr.zo)
+    self.body:setAngle(angle)
 
-      -- Drawing angle
-      self.angle = angle
+    -- Drawing angle
+    self.angle = angle
 
-      -- Weld
-      love.physics.newWeldJoint(cr.body, self.body, creatorx + sox, creatory + soy, true)
-      self.welded = true
+    -- Weld
+    self.weld = love.physics.newWeldJoint(cr.body, self.body, creatorx + sox, creatory + soy + cr.zo, true)
+
+    -- Check if I'm on the air
+    if cr.zo ~= 0 then
+      self.onAir = true
+    else
+      self.onAir = false
+    end
+
+    if self.onAir then
+      self.fixture:setCategory(PLAYERJUMPATTACKCAT)
+    else
+      self.fixture:setCategory(PLAYERATTACKCAT)
     end
 
     o.change_layer(self, cr.layer)
@@ -111,8 +122,8 @@ HeldSword.functions = {
     sprite.cx, sprite.cy)
 
     -- Debug
-    love.graphics.polygon("line",
-    self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
+    -- love.graphics.polygon("line",
+    -- self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     -- love.graphics.polygon("line",
     -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,

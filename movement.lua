@@ -59,22 +59,26 @@ local mo = {}
       local myinput = object.input
       local mass = object.body:getMass()
       local mobility = object.mobility or 600
-      local breaks = object.breaks or 6
+      local brakes = object.brakes or 6
       local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
       local inversemaxspeed = 1/object.maxspeed
 
-      if floorFriction < 1 then
-        mobility = mobility * floorFriction
-        breaks = breaks * floorFriction
-      end
-      if object.floorViscosity then
-        if object.floorViscosity == "water" then
-          inversemaxspeed = inversemaxspeed * 2
-          mobility = mobility * 0.1
-          breaks = breaks * 2
+      -- if on ground check how floor affects movement
+      if object.zo == 0 then
+        if floorFriction < 1 then
+          mobility = mobility * floorFriction
+          brakes = brakes * floorFriction
         end
+        if object.floorViscosity then
+          if object.floorViscosity == "water" then
+            inversemaxspeed = inversemaxspeed * 2
+            mobility = mobility * 0.1
+            brakes = brakes * 2
+          end
+        end
+      else
+        brakes = 0
       end
-      if object.jumping then end
 
       -- Calculate force due to input
       local infx, infy =
@@ -87,8 +91,8 @@ local mo = {}
       if infx == 0 and infy == 0 then
         -- This friction is for when you're actively trying to break
         -- Used when there is no input
-        ffx = - ffx * mass * breaks
-        ffy = - ffy * mass * breaks
+        ffx = - ffx * mass * brakes
+        ffy = - ffy * mass * brakes
       else
         -- This friction will ensure you don't get over maxspeed
         -- Used when there is input
@@ -101,28 +105,28 @@ local mo = {}
     end,
 
     stand_still = function(object, dt)
+      if object.zo ~= 0 then return end
       local mass = object.body:getMass()
       local mobility = object.mobility or 600
-      local breaks = object.breaks or 6
+      local brakes = object.brakes or 6
       local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
-      local floorViscosity = object.floorViscosity
 
       if floorFriction < 1 then
         mobility = mobility * floorFriction
-        breaks = breaks * floorFriction
+        brakes = brakes * floorFriction
       end
-      if floorViscosity then
-        if floorViscosity == "water" then
+      if object.floorViscosity then
+        if object.floorViscosity == "water" then
           inversemaxspeed = inversemaxspeed * 2
           mobility = mobility * 0.1
-          breaks = breaks * 2
+          brakes = brakes * 2
         end
       end
 
       -- Calculate friction force
       local ffx, ffy = object.vx, object.vy
-      ffx = - ffx * mass * breaks
-      ffy = - ffy * mass * breaks
+      ffx = - ffx * mass * brakes
+      ffy = - ffy * mass * brakes
 
       object.body:applyForce(ffx, ffy)
     end,
@@ -194,14 +198,14 @@ local mo = {}
         if sens.downTouch then
           if down == 1 then trig.push_down = true end
         end
-        if sens.upTouch then
-          if up == 1 then trig.push_up = true end
+        if sens.rightTouch then
+          if right == 1 then trig.push_right = true end
         end
         if sens.leftTouch then
           if left == 1 then trig.push_left = true end
         end
-        if sens.rightTouch then
-          if right == 1 then trig.push_right = true end
+        if sens.upTouch then
+          if up == 1 then trig.push_up = true end
         end
 
 

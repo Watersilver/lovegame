@@ -61,10 +61,10 @@ function endContact(a, b, coll)
     local bob = b:getBody():getUserData()
 
     if aob.endContact then
-      aob:endContact(a, b, coll, aob)
+      aob:endContact(a, b, coll, aob, bob)
     end
     if bob.endContact then
-      bob:endContact(a, b, coll, aob)
+      bob:endContact(a, b, coll, aob, bob)
     end
 end
 
@@ -88,10 +88,10 @@ function preSolve(a, b, coll)
     local bob = b:getBody():getUserData()
 
     if aob.preSolve then
-      aob:preSolve(a, b, coll)
+      aob:preSolve(a, b, coll, aob, bob)
     end
     if bob.preSolve then
-      bob:preSolve(a, b, coll)
+      bob:preSolve(a, b, coll, aob, bob)
     end
 end
 
@@ -140,7 +140,7 @@ function love.update(dt)
   local playaTest = o.identified.PlayaTest
   if playaTest and playaTest[1].x then
     cam.xt = playaTest[1].x or 0
-    cam.yt = playaTest[1].y or 0
+    cam.yt = playaTest[1].y + playaTest[1].zo or 0
   end
 
 end

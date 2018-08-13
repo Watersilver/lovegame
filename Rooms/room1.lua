@@ -13,6 +13,28 @@ room_part.y_that_I_start = 200
 
 table.insert(room.room_parts, room_part)
 ---
+local room_part = {'e', 'e'}
+room_part.x_that_I_start = 330
+room_part.y_that_I_start = 222
+room_part.tile_width = 16
+room_part.init = {height = 16, side = "down"}
+
+table.insert(room.room_parts, room_part)
+---
+local room_part = {'e'}
+room_part.x_that_I_start = 330
+room_part.y_that_I_start = 222
+room_part.init = {height = 16, side = "left"}
+
+table.insert(room.room_parts, room_part)
+---
+local room_part = {'e'}
+room_part.x_that_I_start = 346
+room_part.y_that_I_start = 222
+room_part.init = {height = 16, side = "right"}
+
+table.insert(room.room_parts, room_part)
+---
 local room_part = {
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',

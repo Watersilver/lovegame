@@ -12,6 +12,8 @@ local player_states = {}
 player_states.check_walk = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if inv.check_use(instance, trig, side) then
+  elseif instance.zo ~= 0 then
+    instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side) then
   elseif td.check_walk_while_walking(instance, trig, side) then
   elseif td.check_halt_a(instance, trig, side) then
@@ -23,6 +25,8 @@ end
 player_states.check_halt = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if inv.check_use(instance, trig, side) then
+  elseif instance.zo ~= 0 then
+    instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side) then
   elseif td.check_walk_a(instance, trig, side) then
   elseif trig.restish then
@@ -34,6 +38,8 @@ end
 player_states.check_still = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if inv.check_use(instance, trig, side) then
+  elseif instance.zo ~= 0 then
+    instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side) then
   elseif td.check_walk_a(instance, trig, side) then
   elseif td.check_halt_a(instance, trig, side) then
@@ -187,7 +193,10 @@ player_states.run_fall = function(instance, dt, side)
 end
 
 player_states.check_fall = function(instance, dt, side)
-  if instance.zo == 0 then
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if trig.swing_sword then
+    instance.animation_state:change_state(instance, dt, side .. "swing")
+  elseif instance.zo == 0 then
     instance.animation_state:change_state(instance, dt, side .. "still")
   end
 end
