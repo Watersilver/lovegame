@@ -43,14 +43,24 @@ function rm.build_room(room)
       -- Store symbol of room part
       local symbol = room_part[symbol_index]
       -- If symbol exists, create corresponding object
-      if symbol then
+      if symbol ~= 'n' then
         local element = rm.sto[symbol]:new(init)
         element.xstart = x_that_I_start + (i-1) * tile_width
         element.ystart = y_that_I_start + (j-1) * tile_height
         -- Make sure to use as few edge shapes as necessary
         local epp = element.physical_properties
         if epp and epp.tile then
-          if j == 1 then
+          if row_length == 0 then
+            epp.tile = {"u", "d", "l", "r"}
+          elseif col_length == 0 then
+            if i == 1 then
+              epp.tile = {"u", "d", "l"}
+            elseif i == row_length then
+              epp.tile = {"u", "d", "r"}
+            else
+              epp.tile = {"u", "d"}
+            end
+          elseif j == 1 then
             if i == 1 then
               epp.tile = {"u", "l"} -- upper left
             elseif i == row_length then

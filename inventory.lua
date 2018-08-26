@@ -14,13 +14,13 @@ inv.sword = {
   image_offset = function(object, dt, side)
     local offset = object.image_index * 3 * 0.5
     if side == "down" then
-      object.ioy = offset
+      object.ioy = (offset)
     elseif side == "right" then
-      object.iox = offset
+      object.iox = (offset)
     elseif side == "left"  then
-      object.iox = - offset
+      object.iox = - (offset)
     elseif side == "up" then
-      object.ioy = - offset
+      object.ioy = - (offset)
     end
   end
 }

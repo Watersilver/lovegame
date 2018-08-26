@@ -4,12 +4,13 @@ local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local game = require "game"
 
-local Brick = {}
+local wallDown = {}
 
-function Brick.initialize(instance)
+function wallDown.initialize(instance)
   instance.physical_properties = {
-    tile = true,
-    edgetable = ps.shapes.edgeRect1x1
+    bodyType = "static",
+    shape = ps.shapes.edgeRect1x1.d,
+    masks = {PLAYERJUMPATTACKCAT}
   }
   instance.sprite_info = {
     {'Brick', 2, 2}
@@ -17,7 +18,8 @@ function Brick.initialize(instance)
   instance.pushback = true
 end
 
-Brick.functions = {
+wallDown.functions = {
+
 draw = function (self)
   local x, y = self.body and self.body:getPosition() or self.xstart, self.ystart
   local sprite = self.sprite
@@ -28,16 +30,13 @@ draw = function (self)
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
   if self.body then
-    for i, fixture in ipairs(self.fixtures) do
-      local shape = fixture:getShape()
-      love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
-    end
+    local shape = self.fixture:getShape()
+    love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
   end
 end,
 
 trans_draw = function (self)
   local xtotal, ytotal = trans.still_objects_coords(self)
-
   local sprite = self.sprite
   self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
   local frame = sprite[self.image_index]
@@ -46,23 +45,21 @@ trans_draw = function (self)
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
   if self.body then
-    for i, fixture in ipairs(self.fixtures) do
-      local shape = fixture:getShape()
-      love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
-    end
+    local shape = self.fixture:getShape()
+    love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
   end
 end,
 
 load = function(self)
   self.image_speed = 0
-  self.image_index = math.random() > 0.5 and 0 or 3
+  self.image_index = 1
 end
 }
 
-function Brick:new(init)
+function wallDown:new(init)
   local instance = p:new() -- add parent functions and fields
-  p.new(Brick, instance, init) -- add own functions and fields
+  p.new(wallDown, instance, init) -- add own functions and fields
   return instance
 end
 
-return Brick
+return wallDown

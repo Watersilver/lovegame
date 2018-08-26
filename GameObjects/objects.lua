@@ -5,6 +5,7 @@ local o = {}
 o.identified = {} -- These can be referred to by name
 o.earlyUpdaters = {role = "earlyUpdater"} -- List of objects with early_update functions
 o.updaters = {role = "updater"} -- List of objects with update functions
+o.lateUpdaters = {role = "lateUpdater"} -- List of objects with late_update functions
 o.colliders = {role = "collider"} -- List of objects that can collide
 o.persistents = {role = "persistent"} -- List of objects that survive room trans
 o.draw_layers = {} -- List of layers(Lists of objects to be drawn)
@@ -43,6 +44,10 @@ function o.to_be_deleted:remove_all()
       u.free(o.earlyUpdaters, object.earlyUpdater)
       object.earlyUpdater = nil
     end
+    if object.lateUpdater then
+      u.free(o.lateUpdaters, object.lateUpdater)
+      object.lateUpdater = nil
+    end
     if object.collider then
       u.free(o.colliders, object.collider)
       object.collider = nil
@@ -64,7 +69,7 @@ function o.to_be_deleted:remove_all()
       end
       object.identifiable = nil
     end
-    if object.delete and not object.persistent then object:delete() end
+    if object.delete then object:delete() end
     -- Mark as not existing
     object.exists = false
   end
@@ -73,6 +78,13 @@ end
 -- Adds object to to_be_deleted table, ensuring it happens only once
 function o.removeFromWorld(object)
   if not object then return end
+  if object.persistent then return end
+  if not object.imdying then object.imdying = u.push(o.to_be_deleted, object) end
+end
+-- same as above only to be used during transitions
+function o.transRemoveFromWorld(object)
+  if not object then return end
+  if object.persistent or object.transPersistent then return end
   if not object.imdying then object.imdying = u.push(o.to_be_deleted, object) end
 end
 
@@ -114,6 +126,10 @@ function o.to_be_added:add_all()
     -- Add to earlyUpdaters if earlyUpdater and if not already there
     if object.early_update and not object.earlyUpdater then
       object[o.earlyUpdaters.role] = u.push(o.earlyUpdaters, object)
+    end
+    -- Add to lateUpdaters if lateUpdater and if not already there
+    if object.late_update and not object.lateUpdater then
+      object[o.lateUpdaters.role] = u.push(o.lateUpdaters, object)
     end
     -- Add to objects that will be drawn if not already there
     if object.draw and not object.drawable then

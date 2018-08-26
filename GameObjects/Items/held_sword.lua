@@ -1,6 +1,11 @@
 local p = require "GameObjects.prototype"
 local ps = require "physics_settings"
 local o = require "GameObjects.objects"
+local trans = require "transitions"
+local game = require "game"
+
+local ec = require "GameObjects.Helpers.edge_collisions"
+local dc = require "GameObjects.Helpers.determine_colliders"
 
 local HeldSword = {}
 
@@ -31,6 +36,8 @@ local function calculate_offset(side, phase)
 end
 
 function HeldSword.initialize(instance)
+
+  instance.transPersistent = true
   instance.iox = 0
   instance.ioy = 0
   instance.x_scale = 1
@@ -76,8 +83,14 @@ HeldSword.functions = {
     local sox, soy, angle = calculate_offset(self.side, phase)
     local creatorx, creatory = cr.body:getPosition()
 
+    -- Determine offset due to falling
+    local fy = 0
+    if cr.edgeFall and cr.edgeFall.step2 then
+      fy = - cr.edgeFall.height
+    end
+
     -- Set position and physical angle
-    self.body:setPosition(creatorx + sox, creatory + soy + cr.zo)
+    self.body:setPosition(creatorx + sox, creatory + soy + cr.zo + fy)
     self.body:setAngle(angle)
 
     -- Drawing angle
@@ -102,12 +115,17 @@ HeldSword.functions = {
     o.change_layer(self, cr.layer)
   end,
 
-  draw = function(self)
+  draw = function(self, td)
     local x, y = self.body:getPosition()
     -- self.spritebody:setPosition(x, y)
     -- if self.spritejoint then self.spritejoint:destroy() end
     self.spritebody:setPosition(x, y)
     -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+
+    if td then
+      x = x + trans.xtransform - game.transitioning.progress * trans.xadjust
+      y = y + trans.ytransform - game.transitioning.progress * trans.yadjust
+    end
 
     self.x, self.y = x, y
     local sprite = self.sprite
@@ -128,6 +146,10 @@ HeldSword.functions = {
     -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,
 
+  trans_draw = function(self)
+    self:draw(true)
+  end,
+
   beginContact = function(self, a, b, coll, aob, bob)
 
     local cr = self.creator
@@ -137,16 +159,11 @@ HeldSword.functions = {
     end
 
     -- Find which fixture belongs to whom
-    local myF
-    local otherF
-    if self == aob then
-      myF = a
-      otherF = b
-      other = bob
-    else
-      myF = b
-      otherF = a
-      other = aob
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+    -- If below edge, treat as wall
+    if other.edge then
+      if not ec.swordBelowEdge(other, cr) then return end
     end
 
     cr.triggers.stab = true

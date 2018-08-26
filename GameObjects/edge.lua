@@ -19,10 +19,10 @@ Edge.functions = {
 beginContact = function(self, a, b, coll, aob, bob)
   local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-  if other.player and not otherF:isSensor() then
+  if other.player and not otherF:isSensor() and self.side ~= "down" then
 
     -- Will be used to check if player goes overr edge
-    self.playerContactX, self.playerContactY = other.body:getPosition()
+    self.playerContactX = other.body:getPosition()
 
     -- Keep track of how many player fixtures touch me
     self.playerContacts = self.playerContacts + 1
@@ -30,12 +30,12 @@ beginContact = function(self, a, b, coll, aob, bob)
 end,
 
 endContact = function(self, a, b, coll, aob, bob)
+  if self.side == "down" then return end
   local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
   if other.player and not otherF:isSensor() then
-    local plx, ply = other.body:getPosition()
 
-    if self.wentOverEdge(self.playerContactX, self.playerContactY, plx, ply) then
+    if self:wentOverEdge(other) then
       if not other.edgeFall then
         other.edgeFall = {height = self.height, side = self.side}
       end
@@ -46,7 +46,6 @@ endContact = function(self, a, b, coll, aob, bob)
     if self.playerContacts == 0 then
       -- if this was last fixture ending contact, delete variables
       self.playerContactX = nil
-      self.playerContactY = nil
     end
   end
 end,
@@ -54,8 +53,20 @@ end,
 preSolve = function(self, a, b, coll, aob, bob)
   local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+
   if other.player then
     coll:setEnabled(self:belowEdge(other))
+  end
+  if self.side == "down" then
+
+    if other.player and not otherF:isSensor() then
+      if self:wentOverEdge(other) then
+        if not other.edgeFall then
+          other.edgeFall = {height = self.height, side = self.side}
+        end
+      end
+    end
+
   end
 end,
 
@@ -77,16 +88,20 @@ load = function (self)
     self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.l)
     self.belowEdge = ec.belowLeftEdge
     self.wentOverEdge = ec.wentOverLeftEdge
+    self.fixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
   elseif self.side == "right" then
     self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.r)
     self.belowEdge = ec.belowRightEdge
     self.wentOverEdge = ec.wentOverRightEdge
+    self.fixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
   else
-    self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeDown)
+    self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.d)
+    -- self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeDown)
     self.belowEdge = ec.belowDownEdge
     self.wentOverEdge = ec.wentOverDownEdge
+    self.fixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT, PLAYERATTACKCAT)
+    self.height = self.height + ps.shapes.plshapeHeight
   end
-  self.fixture:setMask(SPRITECAT)
 end
 }
 

@@ -7,11 +7,12 @@ local inp = require "input"
 local im = require "image"
 local game = require "game"
 local inv = require "inventory"
+local trans = require "transitions"
 
 local gamera = require "gamera.gamera"
 
-
-local cam = gamera.new(0,0,800,450)
+mainCamera = gamera.new(0,0,800,450)
+local cam = mainCamera
 cam.xt = 0
 cam.yt = 0
 
@@ -29,7 +30,7 @@ function love.load()
   ps.pw:setCallbacks(beginContact, endContact, preSolve, postSolve)
 
   --dofile("Rooms/room1.lua")
-  assert(love.filesystem.load("Rooms/room1.lua"))()
+  game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
 end
 
 function beginContact(a, b, coll)
@@ -95,6 +96,22 @@ function preSolve(a, b, coll)
     end
 end
 
+function postSolve(a, b, coll)
+
+    if a:getCategory() == SPRITECAT then return end
+
+    -- Store the objects that collided
+    local aob = a:getBody():getUserData()
+    local bob = b:getBody():getUserData()
+
+    if aob.postSolve then
+      aob:postSolve(a, b, coll, aob, bob)
+    end
+    if bob.postSolve then
+      bob:postSolve(a, b, coll, aob, bob)
+    end
+end
+
 
 function love.update(dt)
   if o.to_be_added[1] then
@@ -102,6 +119,40 @@ function love.update(dt)
   end
 
   inp.check_input()
+
+  -- manage transition
+  if game.transitioning then
+
+    if not game.transitioning.startedTransition then
+
+      trans.remove_from_world_previous_room()
+      local prevWidth = game.room.width
+      local prevHeight = game.room.height
+      game.room = assert(love.filesystem.load(game.transitioning.roomTarget))()
+      game.room.prevWidth = prevWidth
+      game.room.prevHeight = prevHeight
+      trans.caml, trans.camu, trans.camw, trans.camh = cam:getVisible()
+      trans.determine_coordinates_transformation()
+
+    elseif game.transitioning.progress < 1 then
+      game.transitioning.progress = game.transitioning.progress + 1 * dt
+      if game.transitioning.progress > 1 then game.transitioning.progress = 1 end
+      trans.determine_coordinates_transformation()
+    else
+
+      o.to_be_deleted:remove_all()
+      local room = game.room
+
+
+      local playa = game.transitioning.playa
+      playa.body:setPosition(trans.player_target_coords(playa.x, playa.y))
+
+      game.paused = false
+      game.transitioning = false
+
+    end
+
+  end
 
 
   if not game.paused then
@@ -122,7 +173,14 @@ function love.update(dt)
       end
     end
 
-  else
+    local lUpnum = #o.lateUpdaters
+    if lUpnum > 0 then
+      for i = 1, lUpnum do
+        o.lateUpdaters[i]:late_update(dt)
+      end
+    end
+
+  elseif not game.transitioning then
 
     inv.manage(game.paused)
     if inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0 then
@@ -132,15 +190,117 @@ function love.update(dt)
   end
 
 
-  if o.to_be_deleted[1] then
+  if o.to_be_deleted[1] and not game.transitioning then
     o.to_be_deleted:remove_all()
   end
 
 
   local playaTest = o.identified.PlayaTest
   if playaTest and playaTest[1].x then
-    cam.xt = playaTest[1].x or 0
-    cam.yt = playaTest[1].y + playaTest[1].zo or 0
+
+    if not game.transitioning then
+
+      local playa = playaTest[1]
+      local playax = playa.x
+      local playay = playa.y
+      local halfw = playa.width * 0.5
+      local fullh = playa.height
+      local l, t, w, h = cam:getWorld()
+      local room = game.room
+
+      cam.xt = playax or cam.xt
+      cam.yt = playay + playa.fo or cam.yt
+
+      -- check if a screen edge transition will happen
+      -- left
+      if playax - halfw < l then
+        if playa.vx < 0 then
+          for _, transInfo in ipairs(room.leftTrans) do
+            if playay > transInfo.yupper and playay < transInfo.ylower then
+
+              game.transition{
+                type = "scrolling",
+                progress = 0,
+                side = "left",
+                playa = playa,
+                xmod = transInfo.xmod,
+                ymod = transInfo.ymod,
+                roomTarget = transInfo.roomTarget
+              }
+
+              cam.xt = 0
+              cam.yt = playay + playa.fo or cam.yt
+
+            end
+          end
+        end
+      -- right
+      elseif playax + halfw > w then
+        if playa.vx > 0 then
+          for _, transInfo in ipairs(room.rightTrans) do
+            if playay > transInfo.yupper and playay < transInfo.ylower then
+
+              game.transition{
+                type = "scrolling",
+                progress = 0,
+                side = "right",
+                playa = playa,
+                xmod = transInfo.xmod,
+                ymod = transInfo.ymod,
+                roomTarget = transInfo.roomTarget
+              }
+
+              cam.xt = game.room.width
+              cam.yt = playay + playa.fo or cam.yt
+
+            end
+          end
+        end
+      -- down
+      elseif playay + fullh > h then
+        if playa.vy > 0 then
+          for _, transInfo in ipairs(room.downTrans) do
+            if playax > transInfo.xleftmost and playax < transInfo.yrightmost then
+
+              game.transition{
+                type = "scrolling",
+                progress = 0,
+                side = "down",
+                playa = playa,
+                xmod = transInfo.xmod,
+                ymod = transInfo.ymod,
+                roomTarget = transInfo.roomTarget
+              }
+
+            end
+          end
+        end
+      -- up
+      elseif playay - fullh < t then
+        if playa.vy < 0 then
+          for _, transInfo in ipairs(room.upTrans) do
+            if playax > transInfo.xleftmost and playax < transInfo.yrightmost then
+
+              game.transition{
+                type = "scrolling",
+                progress = 0,
+                side = "up",
+                playa = playa,
+                xmod = transInfo.xmod,
+                ymod = transInfo.ymod,
+                roomTarget = transInfo.roomTarget
+              }
+
+            end
+          end
+        end
+      end
+
+    else -- game.transitioning
+      local camxtmod, camytmod = trans.camera_modification()
+      cam.xt, cam.yt = cam.xt + camxtmod, cam.yt + camytmod
+    end -- game.transitioning
+
   end
 
 end
@@ -160,13 +320,32 @@ function love.draw()
 
     local layers = #o.draw_layers
     if layers > 0 then
-      for layer = 1, layers do
-        local drawnum = #o.draw_layers[layer]
-        for i = 1, drawnum do
-          o.draw_layers[layer][i]:draw()
+
+      -- Normal drawing mode
+      if not game.transitioning or
+      (game.transitioning and not game.transitioning.startedTransition) then
+
+        for layer = 1, layers do
+          local drawnum = #o.draw_layers[layer]
+          for i = 1, drawnum do
+            o.draw_layers[layer][i]:draw()
+          end
         end
+
+      -- Transition drawing mode
+      else
+
+        for layer = 1, layers do
+          local drawnum = #o.draw_layers[layer]
+          for i = 1, drawnum do
+            o.draw_layers[layer][i]:trans_draw()
+          end
+        end
+
       end
-    end
+
+    end -- if layers > 0
+
 
   end)
 
@@ -176,7 +355,7 @@ function love.draw()
   hud:draw(function(l,t,w,h)
     if im.sprites["GuyWalk"] then
       love.graphics.draw(im.sprites["GuyWalk"].img, 0, 0)
-      if game.paused then
+      if game.paused and not game.transitioning then
         local pr, pg, pb, pa = love.graphics.getColor()
         love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
         love.graphics.rectangle("fill", l, t, w, h)

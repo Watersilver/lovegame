@@ -1,4 +1,6 @@
 local p = require "GameObjects.prototype"
+local trans = require "transitions"
+local game = require "game"
 
 local Tile = {}
 
@@ -22,6 +24,22 @@ draw = function (self)
     -- draw
   end
 end,
+
+trans_draw = function (self)
+  local sprite = self.sprite
+  local frame = sprite[self.image_index]
+
+  local xtotal, ytotal = trans.still_objects_coords(self)
+
+  love.graphics.draw(
+  sprite.img, frame,
+  xtotal, ytotal, 0,
+  sprite.res_x_scale, sprite.res_y_scale,
+  sprite.cx, sprite.cy)
+  if self.body then
+    -- draw
+  end
+end
 }
 
 function Tile:new(init)

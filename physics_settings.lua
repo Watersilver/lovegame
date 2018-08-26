@@ -39,6 +39,7 @@ ps.shapes = {
 -- Make player shapes
 local width, height = 10, 8
 ps.shapes.plshapeWidth = width
+ps.shapes.plshapeHeight = height
 -- Main collision shape
 ps.shapes.plshape = love.physics.newRectangleShape(
 0, height * 0.5,

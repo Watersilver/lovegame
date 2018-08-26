@@ -8,6 +8,7 @@ local sm = require "state_machine"
 local u = require "utilities"
 local game = require "game"
 local o = require "GameObjects.objects"
+local trans = require "transitions"
 
 local hps = require "GameObjects.Helpers.player_states"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -51,15 +52,20 @@ function Playa.initialize(instance)
   instance.floorFriction = 1 -- For testing. This info will normaly ba aquired through floor collisions
   instance.floorViscosity = nil -- For testing. This info will normaly ba aquired through floor collisions
 
+  instance.persistent = true
+
   instance.ids[#instance.ids+1] = "PlayaTest"
   instance.angle = 0
   instance.angvel = 0 -- angular velocity
-  instance.width = 10
+  instance.width = ps.shapes.plshapeWidth
+  instance.height = ps.shapes.plshapeHeight
   instance.x_scale = 1
   instance.y_scale = 1
   instance.iox = 0 -- drawing offsets due to item use (eg sword swing)
   instance.ioy = 0
   instance.zo = 0 -- drawing offsets due to z axis
+  instance.fo = 0 -- drawing offsets due to falling
+  instance.jo = 0 -- drawing offsets due to jumping
   instance.zvel = 0 -- z axis velocity
   instance.gravity = 350
   instance.image_speed = 0
@@ -72,7 +78,7 @@ function Playa.initialize(instance)
   instance.physical_properties = {
     bodyType = "dynamic",
     fixedRotation = true,
-    density = 160, --160 is 50 kg when combined with lowr1x1 dimensions(w 10, h 8)
+    density = 160, --160 is 50 kg when combined with plshape dimensions(w 10, h 8)
     shape = ps.shapes.plshape,
     gravityScaleFactor = 0,
     restitution = 0,
@@ -102,6 +108,9 @@ function Playa.initialize(instance)
     {'Witch/hold_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/hold_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/hold_down', 4, padding = 2, width = 16, height = 16},
+    {'Witch/jump_down', 3, padding = 2, width = 16, height = 16},
+    {'Witch/jump_left', 3, padding = 2, width = 16, height = 16},
+    {'Witch/jump_up', 3, padding = 2, width = 16, height = 16},
     {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
     {'GuyWalk', 4, width = 16, height = 16},
     {'Test', 1, padding = 0},
@@ -808,6 +817,7 @@ function Playa.initialize(instance)
 
     downfall = {
     run_state = function(instance, dt)
+      run_fall(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
@@ -826,6 +836,7 @@ function Playa.initialize(instance)
 
     rightfall = {
     run_state = function(instance, dt)
+      run_fall(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
@@ -844,6 +855,7 @@ function Playa.initialize(instance)
 
     leftfall = {
     run_state = function(instance, dt)
+      run_fall(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
@@ -862,6 +874,7 @@ function Playa.initialize(instance)
 
     upfall = {
     run_state = function(instance, dt)
+      run_fall(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
@@ -900,10 +913,13 @@ Playa.functions = {
     -- Check if falling off edge
     if self.edgeFall then
       if self.edgeFall.step2 then
-        self.zo = self.zo - self.edgeFall.height
+        self.fo = self.fo - self.edgeFall.height
         self.edgeFall = nil
       else
         self.body:setPosition(self.x, self.y + self.edgeFall.height)
+        -- for sensorID, _ in pairs(self.sensors) do
+        --   self.sensors[sensorID] = nil
+        -- end
         self.edgeFall.step2 = true
       end
     end
@@ -923,13 +939,20 @@ Playa.functions = {
     end
     td.determine_animation_triggers(self, dt)
     inv.determine_equipment_triggers(self, dt)
-    self.zo = self.zo - self.zvel * dt
-    if self.zo >= 0 then
-      self.zo = 0
-      self.zvel = 0
+    self.jo = self.jo - self.zvel * dt
+    if self.jo >= 0 then
+      self.jo = 0
+      self.fo = self.fo - self.zvel * dt
+      if self.fo >= 0 then
+        self.fo = 0
+        self.zvel = 0
+      else
+        self.zvel = self.zvel - self.gravity * dt
+      end
     else
       self.zvel = self.zvel - self.gravity * dt
     end
+    self.zo = self.jo + self.fo
 
     local ms = self.movement_state
     -- Check movement state
@@ -966,6 +989,7 @@ Playa.functions = {
       if self.triggers[trigger] then triggersdebug[trigger] = true end
       self.triggers[trigger] = false
     end
+
   end,
 
   draw = function(self)
@@ -974,6 +998,48 @@ Playa.functions = {
     -- if self.spritejoint then self.spritejoint:destroy() end
     self.spritebody:setPosition(xtotal, ytotal)
     -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+
+    if self.zo ~= 0 then
+      local shaspri = self.shadownSprite
+      love.graphics.draw(
+      shaspri.img, shaspri[0], x, y, 0,
+      shaspri.res_x_scale, shaspri.res_y_scale,
+      shaspri.cx, shaspri.cy)
+    end
+
+    local sprite = self.sprite
+    -- Check again in case animation changed to something with fewer frames
+    while self.image_index >= sprite.frames do
+      self.image_index = self.image_index - sprite.frames
+    end
+    local frame = sprite[floor(self.image_index)]
+    love.graphics.draw(
+    sprite.img, frame, xtotal, ytotal, self.angle,
+    sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
+    sprite.cx, sprite.cy)
+    -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+    -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
+    --
+    -- love.graphics.setColor(COLORCONST, self.db.downcol, self.db.downcol, COLORCONST)
+    -- love.graphics.polygon("line", self.body:getWorldPoints(self.downfixture:getShape():getPoints()))
+    -- love.graphics.setColor(COLORCONST, self.db.upcol, self.db.upcol, COLORCONST)
+    -- love.graphics.polygon("line", self.body:getWorldPoints(self.upfixture:getShape():getPoints()))
+    -- love.graphics.setColor(COLORCONST, self.db.leftcol, self.db.leftcol, COLORCONST)
+    -- love.graphics.polygon("line", self.body:getWorldPoints(self.leftfixture:getShape():getPoints()))
+    -- love.graphics.setColor(COLORCONST, self.db.rightcol, self.db.rightcol, COLORCONST)
+    -- love.graphics.polygon("line", self.body:getWorldPoints(self.rightfixture:getShape():getPoints()))
+    -- love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  end,
+
+  trans_draw = function(self)
+
+    local x, y = self.x, self.y
+
+    -- x, y modifications because of transition
+    x = x + trans.xtransform - game.transitioning.progress * trans.xadjust
+    y = y + trans.ytransform - game.transitioning.progress * trans.yadjust
+
+    local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
 
     if self.zo ~= 0 then
       local shaspri = self.shadownSprite
@@ -1026,9 +1092,9 @@ Playa.functions = {
         if not otherF:getUserData() ~= "unpushable" then
           local onEdge
           if other.edge then
-            onEdge = ec.isOnEdge(other, self)
+            other.onEdge = ec.isOnEdge(other, self)
           end
-          if not onEdge then
+          if not other.onEdge then
             local sensors = self.sensors
             sensors[sensorID] = sensors[sensorID] or 0
             sensors[sensorID] = sensors[sensorID] + 1
@@ -1040,7 +1106,7 @@ Playa.functions = {
 
   end,
 
-  endContact = function(self, a, b, coll, aob)
+  endContact = function(self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
@@ -1051,10 +1117,14 @@ Playa.functions = {
       if sensorID then
         if not otherF:getUserData() ~= "unpushable" then
           local sensors = self.sensors
-          if sensors[sensorID] then
-            sensors[sensorID] = sensors[sensorID] - 1
-            if sensors[sensorID] == 0 then sensors[sensorID] = nil end
+
+          if not other.onEdge then
+            if sensors[sensorID] then
+              sensors[sensorID] = sensors[sensorID] - 1
+              if sensors[sensorID] == 0 then sensors[sensorID] = nil end
+            end
           end
+
         end
       end
 

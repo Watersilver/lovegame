@@ -1,6 +1,11 @@
 local p = require "GameObjects.prototype"
 local ps = require "physics_settings"
 local o = require "GameObjects.objects"
+local trans = require "transitions"
+local game = require "game"
+
+local ec = require "GameObjects.Helpers.edge_collisions"
+local dc = require "GameObjects.Helpers.determine_colliders"
 
 local Sword = {}
 
@@ -71,6 +76,8 @@ local function calculate_offset(side, phase)
 end
 
 function Sword.initialize(instance)
+
+  instance.transPersistent = true
   instance.iox = 0
   instance.ioy = 0
   instance.x_scale = 1
@@ -126,9 +133,9 @@ Sword.functions = {
     end
     local prevphase = self.previous_image_index
 
-    -- Calculate offset due to sword swinging
-    local sox, soy, angle = calculate_offset(self.side, phase)
-    local creatorx, creatory = cr.body:getPosition()
+    -- -- Calculate offset due to sword swinging
+    -- local sox, soy, angle = calculate_offset(self.side, phase)
+    -- local creatorx, creatory = cr.body:getPosition()
 
     if phase ~= prevphase then
 
@@ -152,11 +159,21 @@ Sword.functions = {
       self.fixture:setCategory(PLAYERATTACKCAT)
     end
 
+    -- Calculate offset due to sword swinging
+    local sox, soy, angle = calculate_offset(self.side, phase)
+    local creatorx, creatory = cr.body:getPosition()
+
     -- Determine offset due to wielder's offset
     local wox, woy = cr.iox, cr.ioy
 
+    -- Determine offset due to falling
+    local fy = 0
+    if cr.edgeFall and cr.edgeFall.step2 then
+      fy = - cr.edgeFall.height
+    end
+
     -- Set position and angle
-    local x, y = creatorx + sox + wox, creatory + soy + woy + cr.zo
+    local x, y = creatorx + sox + wox, creatory + soy + woy + cr.zo + fy
     self.body:setPosition(x, y)
     self.body:setAngle(angle)
 
@@ -175,8 +192,14 @@ Sword.functions = {
     self.previous_image_index = phase
   end,
 
-  draw = function(self)
+  draw = function(self, td)
     local x, y = self.body:getPosition()
+
+    if td then
+      x = x + trans.xtransform - game.transitioning.progress * trans.xadjust
+      y = y + trans.ytransform - game.transitioning.progress * trans.yadjust
+    end
+
     self.x, self.y = x, y
     local sprite = self.sprite
     -- Check in case animation changed to something with fewer frames
@@ -196,6 +219,10 @@ Sword.functions = {
     -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,
 
+  trans_draw = function(self)
+    self:draw(true)
+  end,
+
   beginContact = function(self, a, b, coll, aob, bob)
 
     local cr = self.creator
@@ -205,19 +232,17 @@ Sword.functions = {
     end
 
     -- Find which fixture belongs to whom
-    local myF
-    local otherF
-    if self == aob then
-      myF = a
-      otherF = b
-      other = bob
-    else
-      myF = b
-      otherF = a
-      other = aob
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+
+    local pushback = other.pushback
+
+    -- If below edge, treat as wall
+    if other.edge then
+      if ec.swordBelowEdge(other, cr) then pushback = true end
     end
 
-    if other.pushback and not self.hitWall then
+    if pushback and not self.hitWall then
       local lvx, lvy = cr.body:getLinearVelocity()
       local crmass = cr.body:getMass()
       cr.body:applyLinearImpulse(-lvx * crmass, -lvy * crmass)

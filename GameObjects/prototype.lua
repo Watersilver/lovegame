@@ -103,6 +103,9 @@ p.functions = {
     for i = 1, sinum do
       im.unload_sprite(si[i][1] or si[i][img_name])
     end
+  end,
+
+  trans_draw = function()
   end
 }
 
