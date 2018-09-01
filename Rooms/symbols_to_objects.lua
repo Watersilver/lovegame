@@ -6,6 +6,7 @@ local wallDown = require("GameObjects.wallDown")
 local wallLeft = require("GameObjects.wallLeft")
 local wallRight = require("GameObjects.wallRight")
 local wallUp = require("GameObjects.wallUp")
+local NpcTest = require("GameObjects.NpcTest")
 
 local symbols_to_objects_default = {
   w = Wall,
@@ -15,7 +16,8 @@ local symbols_to_objects_default = {
   d = wallDown,
   l = wallLeft,
   r = wallRight,
-  u = wallUp
+  u = wallUp,
+  NpcTest = NpcTest
 }
 
 return symbols_to_objects_default

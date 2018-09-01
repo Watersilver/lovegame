@@ -16,11 +16,13 @@ local ec = require "GameObjects.Helpers.edge_collisions"
 
 local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
+local mark = require "GameObjects.Items.mark"
 
 local sqrt = math.sqrt
 local floor = math.floor
 local choose = u.choose
 local max = math.max
+local abs = math.abs
 
 local check_walk = hps.check_walk
 local check_halt = hps.check_halt
@@ -41,6 +43,10 @@ local run_fall = hps.run_fall
 local check_fall = hps.check_fall
 local start_fall = hps.start_fall
 local end_fall = hps.end_fall
+local run_missile = hps.run_missile
+local check_missile = hps.check_missile
+local start_missile = hps.start_missile
+local end_missile = hps.end_missile
 
 local Playa = {}
 
@@ -50,7 +56,7 @@ function Playa.initialize(instance)
   -- Debug
   instance.db = {downcol = 255, upcol = 255, leftcol = 255, rightcol = 255}
   instance.floorFriction = 1 -- For testing. This info will normaly ba aquired through floor collisions
-  instance.floorViscosity = nil -- For testing. This info will normaly ba aquired through floor collisions
+  instance.floorViscosity = nil-- For testing. This info will normaly ba aquired through floor collisions
 
   instance.persistent = true
 
@@ -89,36 +95,10 @@ function Playa.initialize(instance)
     rightSensor = ps.shapes.plrsens,
     masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
   }
-  instance.sprite_info = {
-    {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
-    {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},
-    {'Witch/walk_down', 4, padding = 2, width = 16, height = 16},
-    {'Witch/push_up', 4, padding = 2, width = 16, height = 16},
-    {'Witch/push_left', 4, padding = 2, width = 16, height = 16},
-    {'Witch/push_down', 2, padding = 2, width = 16, height = 16},
-    {'Witch/halt_up', 1, padding = 2, width = 16, height = 16},
-    {'Witch/halt_left', 1, padding = 2, width = 16, height = 16},
-    {'Witch/halt_down', 1, padding = 2, width = 16, height = 16},
-    {'Witch/still_up', 1, padding = 2, width = 16, height = 16},
-    {'Witch/still_left', 1, padding = 2, width = 16, height = 16},
-    {'Witch/still_down', 1, padding = 2, width = 16, height = 16},
-    {'Witch/swing_up', 2, padding = 2, width = 16, height = 16},
-    {'Witch/swing_left', 2, padding = 2, width = 16, height = 16},
-    {'Witch/swing_down', 2, padding = 2, width = 16, height = 16},
-    {'Witch/hold_up', 4, padding = 2, width = 16, height = 16},
-    {'Witch/hold_left', 4, padding = 2, width = 16, height = 16},
-    {'Witch/hold_down', 4, padding = 2, width = 16, height = 16},
-    {'Witch/jump_down', 3, padding = 2, width = 16, height = 16},
-    {'Witch/jump_left', 3, padding = 2, width = 16, height = 16},
-    {'Witch/jump_up', 3, padding = 2, width = 16, height = 16},
-    {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
-    {'GuyWalk', 4, width = 16, height = 16},
-    {'Test', 1, padding = 0},
-    {'Plrun_strip12', 12, padding = 0, width = 16, height = 16},
-    spritefixture_properties = {
-      shape = ps.shapes.rect1x1
-    }
-  }
+  instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
+  instance.sprite_info = im.spriteSettings.playerSprites
+  -- instance.sprite_info.spritefixture_properties = {shape = ps.shapes.rect1x1}
+
   instance.player = "player1"
   instance.layer = 3
   instance.movement_state = sm.new_state_machine{
@@ -142,10 +122,18 @@ function Playa.initialize(instance)
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
-      if trig.stab then
-        instance.movement_state:change_state(instance, dt, "using_sword")
-      elseif trig.swing_sword then
-        instance.movement_state:change_state(instance, dt, "using_sword")
+      if not instance.missile_cooldown then
+        if trig.stab then
+          instance.movement_state:change_state(instance, dt, "using_sword")
+        elseif trig.swing_sword then
+          instance.movement_state:change_state(instance, dt, "using_sword")
+        elseif instance.zo == 0 then
+          if trig.mark then
+            instance.movement_state:change_state(instance, dt, "using_mark")
+          elseif trig.recall then
+            instance.movement_state:change_state(instance, dt, "using_recall")
+          end
+        end
       end
     end,
 
@@ -168,11 +156,33 @@ function Playa.initialize(instance)
     },
 
 
+    using_mark = {
+    start_state = function(instance, dt)
+      instance.movement_state:change_state(instance, dt, "using_item")
+    end,
+
+    end_state = function(instance, dt)
+      instance.item_use_duration = inv.mark.time
+    end
+    },
+
+
+    using_recall = {
+    start_state = function(instance, dt)
+      instance.movement_state:change_state(instance, dt, "using_item")
+    end,
+
+    end_state = function(instance, dt)
+      instance.item_use_duration = inv.recall.time
+    end
+    },
+
+
     using_item = {
     run_state = function(instance, dt)
       -- Apply movement table
       td.stand_still(instance, dt)
-      instance.item_use_counter = instance.item_use_counter + 1*dt
+      instance.item_use_counter = instance.item_use_counter + dt
     end,
 
     check_state = function(instance, dt)
@@ -273,8 +283,6 @@ function Playa.initialize(instance)
 
     start_state = function(instance, dt)
       instance.sprite = im.sprites["Witch/walk_up"]
-      instance.image_speed = 0
-      instance.image_index = 0
     end,
 
     end_state = function(instance, dt)
@@ -888,6 +896,172 @@ function Playa.initialize(instance)
     end_state = function(instance, dt)
       end_fall(instance, dt, "up")
     end
+    },
+
+
+    downmissile = {
+    run_state = function(instance, dt)
+      run_missile(instance, dt, "down")
+    end,
+
+    check_state = function(instance, dt)
+      check_missile(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      start_missile(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+      end_missile(instance, dt, "down")
+    end
+    },
+
+
+    rightmissile = {
+    run_state = function(instance, dt)
+      run_missile(instance, dt, "right")
+    end,
+
+    check_state = function(instance, dt)
+      check_missile(instance, dt, "right")
+    end,
+
+    start_state = function(instance, dt)
+      start_missile(instance, dt, "right")
+    end,
+
+    end_state = function(instance, dt)
+      end_missile(instance, dt, "right")
+    end
+    },
+
+
+    leftmissile = {
+    run_state = function(instance, dt)
+      run_missile(instance, dt, "left")
+    end,
+
+    check_state = function(instance, dt)
+      check_missile(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      start_missile(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      end_missile(instance, dt, "left")
+    end
+    },
+
+
+    upmissile = {
+    run_state = function(instance, dt)
+      run_missile(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      check_missile(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_missile(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      end_missile(instance, dt, "up")
+    end
+    },
+
+
+    downmark = {
+    run_state = function(instance, dt)
+      instance.markanim = instance.markanim - dt
+    end,
+
+    check_state = function(instance, dt)
+      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+      if trig.swing_sword then
+        if trig.restish then
+          instance.animation_state:change_state(instance, dt, "downswing")
+        elseif abs(instance.vx) > abs(instance.vy) then
+          if instance.vx > 0 then
+            instance.animation_state:change_state(instance, dt, "rightswing")
+          else
+            instance.animation_state:change_state(instance, dt, "leftswing")
+          end
+        else
+          if instance.vy < 0 then
+            instance.animation_state:change_state(instance, dt, "upswing")
+          else
+            instance.animation_state:change_state(instance, dt, "downswing")
+          end
+        end
+      elseif instance.markanim <= 0 then
+        instance.animation_state:change_state(instance, dt, "downwalk")
+      end
+    end,
+
+    start_state = function(instance, dt)
+      instance.markanim = inv.mark.time
+      instance.sprite = im.sprites["Witch/mark_down"]
+    end,
+
+    end_state = function(instance, dt)
+      if instance.markanim <= 0 and not instance.onEdge then
+        -- make mark
+        if instance.mark then o.removeFromWorld(instance.mark) end
+        instance.mark = mark:new{xstart = instance.x, ystart = instance.y, creator = instance}
+        o.addToWorld(instance.mark)
+      end
+    end
+    },
+
+
+    downrecall = {
+    run_state = function(instance, dt)
+      instance.recallanim = instance.recallanim - dt
+    end,
+
+    check_state = function(instance, dt)
+      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+      if trig.swing_sword then
+        if trig.restish then
+          instance.animation_state:change_state(instance, dt, "downswing")
+        elseif abs(instance.vx) > abs(instance.vy) then
+          if instance.vx > 0 then
+            instance.animation_state:change_state(instance, dt, "rightswing")
+          else
+            instance.animation_state:change_state(instance, dt, "leftswing")
+          end
+        else
+          if instance.vy < 0 then
+            instance.animation_state:change_state(instance, dt, "upswing")
+          else
+            instance.animation_state:change_state(instance, dt, "downswing")
+          end
+        end
+      elseif instance.recallanim <= 0 then
+        instance.animation_state:change_state(instance, dt, "downwalk")
+      end
+    end,
+
+    start_state = function(instance, dt)
+      instance.recallanim = inv.recall.time
+      instance.sprite = im.sprites["Witch/recall_down"]
+    end,
+
+    end_state = function(instance, dt)
+      if instance.recallanim <= 0 and not instance.onEdge then
+        if instance.mark then
+          instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
+        else
+        end
+      else
+        -- fail
+      end
+    end
     }
   }
 end
@@ -995,9 +1169,10 @@ Playa.functions = {
   draw = function(self)
     local x, y = self.x, self.y
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
-    -- if self.spritejoint then self.spritejoint:destroy() end
+
+    if self.spritejoint then self.spritejoint:destroy() end
     self.spritebody:setPosition(xtotal, ytotal)
-    -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
     if self.zo ~= 0 then
       local shaspri = self.shadownSprite
@@ -1018,7 +1193,7 @@ Playa.functions = {
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-    -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
+    love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --
     -- love.graphics.setColor(COLORCONST, self.db.downcol, self.db.downcol, COLORCONST)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.downfixture:getShape():getPoints()))
@@ -1029,6 +1204,7 @@ Playa.functions = {
     -- love.graphics.setColor(COLORCONST, self.db.rightcol, self.db.rightcol, COLORCONST)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.rightfixture:getShape():getPoints()))
     -- love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+if self.onEdge then fuck = fuck + 1 end
   end,
 
   trans_draw = function(self)
@@ -1075,6 +1251,7 @@ Playa.functions = {
 
   load = function(self)
     self.shadownSprite = im.sprites["Witch/shadow"]
+    -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
   end,
 
   beginContact = function(self, a, b, coll, aob, bob)
@@ -1089,7 +1266,7 @@ Playa.functions = {
       local sensorID = myF:getUserData() -- string
 
       if sensorID then
-        if not otherF:getUserData() ~= "unpushable" then
+        if not other.unpushable == true then
           local onEdge
           if other.edge then
             other.onEdge = ec.isOnEdge(other, self)
@@ -1102,6 +1279,9 @@ Playa.functions = {
         end
       end
 
+    else
+      -- Remember if I'm on an edge
+      if other.edge then self.onEdge = true end
     end
 
   end,
@@ -1115,7 +1295,7 @@ Playa.functions = {
       local sensorID = myF:getUserData()
 
       if sensorID then
-        if not otherF:getUserData() ~= "unpushable" then
+        if not other.unpushable == true then
           local sensors = self.sensors
 
           if not other.onEdge then
@@ -1128,6 +1308,9 @@ Playa.functions = {
         end
       end
 
+    else
+      -- Remember if I'm on an edge
+      if other.edge then self.onEdge = false end
     end
 
   end,

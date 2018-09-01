@@ -10,6 +10,40 @@ end
 
 local im = {}
 
+im.spriteSettings = {
+  testtiles = {'Tiles/TestTiles', 4, 7},
+  testbrick = {'Brick', 2, 2},
+  playerSprites = {
+    {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
+    {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},
+    {'Witch/walk_down', 4, padding = 2, width = 16, height = 16},
+    {'Witch/push_up', 4, padding = 2, width = 16, height = 16},
+    {'Witch/push_left', 4, padding = 2, width = 16, height = 16},
+    {'Witch/push_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/halt_up', 1, padding = 2, width = 16, height = 16},
+    {'Witch/halt_left', 1, padding = 2, width = 16, height = 16},
+    {'Witch/halt_down', 1, padding = 2, width = 16, height = 16},
+    {'Witch/still_up', 1, padding = 2, width = 16, height = 16},
+    {'Witch/still_left', 1, padding = 2, width = 16, height = 16},
+    {'Witch/still_down', 1, padding = 2, width = 16, height = 16},
+    {'Witch/swing_up', 2, padding = 2, width = 16, height = 16},
+    {'Witch/swing_left', 2, padding = 2, width = 16, height = 16},
+    {'Witch/swing_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/hold_up', 4, padding = 2, width = 16, height = 16},
+    {'Witch/hold_left', 4, padding = 2, width = 16, height = 16},
+    {'Witch/hold_down', 4, padding = 2, width = 16, height = 16},
+    {'Witch/jump_down', 3, padding = 2, width = 16, height = 16},
+    {'Witch/jump_left', 3, padding = 2, width = 16, height = 16},
+    {'Witch/jump_up', 3, padding = 2, width = 16, height = 16},
+    {'Witch/mark_down', 1, padding = 2, width = 16, height = 16},
+    {'Witch/recall_down', 1, padding = 2, width = 16, height = 16},
+    {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
+    {'GuyWalk', 4, width = 16, height = 16},
+    {'Test', 1, padding = 0},
+    {'Plrun_strip12', 12, padding = 0, width = 16, height = 16}
+  }
+}
+
 im.sprites = {}
 
 function im.load_sprite(args)
@@ -27,7 +61,7 @@ function im.load_sprite(args)
     -- Prepare sprite
     local sprite = {}
     -- Load image
-    sprite.img = love.graphics.newImage("sprites/" .. img_name .. ".png")
+    sprite.img = love.graphics.newImage("Sprites/" .. img_name .. ".png")
     local img = sprite.img
 
     -- Determine the width and height of each quad

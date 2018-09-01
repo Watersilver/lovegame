@@ -5,30 +5,30 @@ local u = require "utilities"
 local walktable = {
   down =
   {
-    first_check = {check1 = "walk_right", check2 = "walk_down", result = "rightwalk" },
-    second_check = {check1 = "walk_left", check2 = "walk_down", result = "leftwalk" },
-    third_check = {check1 = "walk_up", result = "upwalk" },
+    first_check = {check1 = "walk_right", check2 = "walk_down", result = "rightwalk", },
+    second_check = {check1 = "walk_left", check2 = "walk_down", result = "leftwalk", },
+    third_check = {check1 = "walk_up", result = "upwalk", },
     fourth_check = {check1 = "walk_down" }
   },
   right =
   {
-    first_check = {check1 = "walk_down", check2 = "walk_right", result = "downwalk" },
-    second_check = {check1 = "walk_up", check2 = "walk_right", result = "upwalk" },
-    third_check = {check1 = "walk_left", result = "leftwalk" },
+    first_check = {check1 = "walk_down", check2 = "walk_right", result = "downwalk", },
+    second_check = {check1 = "walk_up", check2 = "walk_right", result = "upwalk", },
+    third_check = {check1 = "walk_left", result = "leftwalk", },
     fourth_check = {check1 = "walk_right" }
   },
   left =
   {
-    first_check = {check1 = "walk_down", check2 = "walk_left", result = "downwalk" },
-    second_check = {check1 = "walk_up", check2 = "walk_left", result = "upwalk" },
-    third_check = {check1 = "walk_right", result = "rightwalk" },
+    first_check = {check1 = "walk_down", check2 = "walk_left", result = "downwalk", },
+    second_check = {check1 = "walk_up", check2 = "walk_left", result = "upwalk", },
+    third_check = {check1 = "walk_right", result = "rightwalk", },
     fourth_check = {check1 = "walk_left" }
   },
   up =
   {
-    first_check = {check1 = "walk_right", check2 = "walk_up", result = "rightwalk" },
-    second_check = {check1 = "walk_left", check2 = "walk_up", result = "leftwalk" },
-    third_check = {check1 = "walk_down", result = "downwalk" },
+    first_check = {check1 = "walk_right", check2 = "walk_up", result = "rightwalk", },
+    second_check = {check1 = "walk_left", check2 = "walk_up", result = "leftwalk", },
+    third_check = {check1 = "walk_down", result = "downwalk", },
     fourth_check = {check1 = "walk_up" }
   }
 }
@@ -55,6 +55,7 @@ local mo = {}
   end
 
   mo.top_down = {
+
     walk = function(object, dt)
       local myinput = object.input
       local mass = object.body:getMass()
@@ -134,7 +135,7 @@ local mo = {}
 
     image_speed = function(object, dt)
       local floorFriction = object.floorFriction or 1
-      local image_speed = 0.13 * object.speed/80--100 looks alright too. was object.maxspeed but looks better now
+      local image_speed = 0.13 * object.speed/80--100 looks alright too.
       if floorFriction < 1 then
         image_speed = image_speed * 1/floorFriction
       end

@@ -37,7 +37,7 @@ ps.shapes = {
   edgeDown = love.physics.newEdgeShape(-7, 1, 7, 1)
 }
 -- Make player shapes
-local width, height = 10, 8
+local width, height = 10, 7.8
 ps.shapes.plshapeWidth = width
 ps.shapes.plshapeHeight = height
 -- Main collision shape

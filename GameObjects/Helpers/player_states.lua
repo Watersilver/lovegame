@@ -6,6 +6,7 @@ local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
+local msl = require "GameObjects.Items.missile"
 
 local player_states = {}
 
@@ -223,6 +224,44 @@ player_states.end_fall = function(instance, dt, side)
   if side == "right" then
     instance.x_scale = 1
   end
+end
+
+player_states.run_missile = function(instance, dt, side)
+  instance.missile_cooldown = instance.missile_cooldown + dt
+  td.image_speed(instance, dt)
+end
+
+player_states.check_missile = function(instance, dt, side)
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if instance.missile_cooldown > instance.missile_cooldown_limit then
+    instance.animation_state:change_state(instance, dt, side .. "walk")
+  end
+end
+
+player_states.start_missile = function(instance, dt, side)
+  instance.missile_cooldown = 0
+  instance.missile_cooldown_limit = instance.missile_cooldown_limit or 0.3
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/hold_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/hold_left"]
+    instance.x_scale = -1
+  end
+  -- Create missile
+  instance.missile = msl:new{
+    creator = instance,
+    side = side,
+    layer = instance.layer
+  }
+  o.addToWorld(instance.missile)
+end
+
+player_states.end_missile = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = 1
+  end
+  instance.missile_cooldown = nil
+  if instance.missile then instance.missile.fired = true end
 end
 
 return player_states

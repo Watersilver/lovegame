@@ -85,11 +85,9 @@ function Sword.initialize(instance)
   instance.image_speed = 0
   instance.triggers = {}
   instance.sprite_info = {
-    {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
-    spritefixture_properties = {
-      shape = ps.shapes.swordSprite
-    }
+    {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15}
   }
+  instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",
     gravityScaleFactor = 0
@@ -177,9 +175,9 @@ Sword.functions = {
     self.body:setPosition(x, y)
     self.body:setAngle(angle)
 
-    -- if self.spritejoint then self.spritejoint:destroy() end
+    if self.spritejoint then self.spritejoint:destroy() end
     self.spritebody:setPosition(x, y)
-    -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
 
     -- Drawing angle
@@ -245,15 +243,16 @@ Sword.functions = {
     if pushback and not self.hitWall then
       local lvx, lvy = cr.body:getLinearVelocity()
       local crmass = cr.body:getMass()
+      local crbrakes = cr.brakes
       cr.body:applyLinearImpulse(-lvx * crmass, -lvy * crmass)
       if self.side == "down" then
-        px, py = 0, -30 * crmass
+        px, py = 0, -10 * crmass * crbrakes
       elseif self.side == "right" then
-        px, py = -30 * crmass, 0
+        px, py = -10 * crmass * crbrakes, 0
       elseif self.side == "left" then
-        px, py = 30 * crmass, 0
+        px, py = 10 * crmass * crbrakes, 0
       elseif self.side == "up" then
-        px, py = 0, 30 * crmass
+        px, py = 0, 10 * crmass * crbrakes
       end
       cr.body:applyLinearImpulse(px, py)
       self.hitWall = true

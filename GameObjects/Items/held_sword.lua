@@ -46,11 +46,9 @@ function HeldSword.initialize(instance)
   instance.image_index = 2
   instance.triggers = {}
   instance.sprite_info = {
-    {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
-    spritefixture_properties = {
-      shape = ps.shapes.swordSprite
-    }
+    {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15}
   }
+  instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",
     gravityScaleFactor = 0,
@@ -117,10 +115,10 @@ HeldSword.functions = {
 
   draw = function(self, td)
     local x, y = self.body:getPosition()
-    -- self.spritebody:setPosition(x, y)
-    -- if self.spritejoint then self.spritejoint:destroy() end
+
+    if self.spritejoint then self.spritejoint:destroy() end
     self.spritebody:setPosition(x, y)
-    -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
     if td then
       x = x + trans.xtransform - game.transitioning.progress * trans.xadjust

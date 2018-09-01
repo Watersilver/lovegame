@@ -36,13 +36,48 @@ inv.jump = {
   end
 }
 
+inv.missile = {
+  invImage = love.graphics.newImage("Sprites/Inventory/InvMissileL1.png"),
+  check_trigger = function(object, keyheld)
+    if keyheld == 0 then
+      return "fire_missile"
+    else
+      return "none"
+    end
+  end
+}
+
+inv.mark = {
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgJumpL1.png"),
+  time = 0.3,
+  check_trigger = function(object, keyheld)
+    if keyheld == 0 then
+      return "mark"
+    else
+      return "none"
+    end
+  end
+}
+
+inv.recall = {
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgJumpL1.png"),
+  time = 0.3,
+  check_trigger = function(object, keyheld)
+    if keyheld == 0 then
+      return "recall"
+    else
+      return "none"
+    end
+  end
+}
+
 inv.slots = {}
 
 inv.slots[6] = {key = "c", item = inv.sword}
 inv.slots[5] = {key = "x", item = inv.jump}
-inv.slots[4] = {key = "z"}
-inv.slots[3] = {key = "d"}
-inv.slots[2] = {key = "s"}
+inv.slots[4] = {key = "z", item = inv.missile}
+inv.slots[3] = {key = "d", item = inv.mark}
+inv.slots[2] = {key = "s", item = inv.recall}
 inv.slots[1] = {key = "a"}
 
 for index, contents in ipairs(inv.slots) do
@@ -77,6 +112,15 @@ function inv.check_use(instance, trig, side)
     return true
   elseif trig.jump then
     instance.animation_state:change_state(instance, dt, side .. "jump")
+    return true
+  elseif trig.fire_missile then
+    instance.animation_state:change_state(instance, dt, side .. "missile")
+    return true
+  elseif trig.mark then
+    instance.animation_state:change_state(instance, dt, "downmark")
+    return true
+  elseif trig.recall then
+    instance.animation_state:change_state(instance, dt, "downrecall")
     return true
   end
   return false
@@ -123,7 +167,7 @@ function inv.manage(pauser)
   cursor.x, cursor.y = x, y
 
   -- Check if position of item changes
-  local keypressed, keyspressed = single_inv_key_press(object, myinput)
+  local keypressed, keyspressed = single_inv_key_press(object, myinput, previnput)
   if keypressed and keyspressed == 1 and inv.slots[cursor.x + 3*cursor.y].item then
     inv.slots[cursor.x + 3*cursor.y].item, inv.slots[keypressed].item =
       inv.slots[keypressed].item, inv.slots[cursor.x + 3*cursor.y].item

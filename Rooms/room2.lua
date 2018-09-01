@@ -1,5 +1,6 @@
 local rm = require("Rooms.room_manager")
 local sh = require "scaling_handler"
+local im = require "image"
 
 local room = {}
 
@@ -35,7 +36,7 @@ room_part.y_that_I_start = 110
 room_part.row_length = 10
 room_part.col_length = #room_part/room_part.row_length
 room_part.tile_width = 16
-room_part.tileset = {'Tiles/TestTiles', 4, 4}
+room_part.tileset = im.spriteSettings.testtiles
 room_part.tileset_index_table = {
   0, 0, 14, 0, 14, 0, 0, 14, 0, 0,
   14, 2, 3, 15, 2, 15, 2, 0, 3, 0,

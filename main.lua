@@ -117,6 +117,9 @@ function love.update(dt)
   if o.to_be_added[1] then
     o.to_be_added:add_all()
   end
+  if o.to_be_deleted[1] and not game.transitioning then
+    o.to_be_deleted:remove_all()
+  end
 
   inp.check_input()
 
@@ -190,9 +193,10 @@ function love.update(dt)
   end
 
 
-  if o.to_be_deleted[1] and not game.transitioning then
-    o.to_be_deleted:remove_all()
-  end
+
+  -- if o.to_be_deleted[1] and not game.transitioning then
+  --   o.to_be_deleted:remove_all()
+  -- end
 
 
   local playaTest = o.identified.PlayaTest

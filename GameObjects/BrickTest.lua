@@ -27,12 +27,12 @@ draw = function (self)
   sprite.img, frame, x, y, 0,
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
-  if self.body then
-    for i, fixture in ipairs(self.fixtures) do
-      local shape = fixture:getShape()
-      love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
-    end
-  end
+  -- if self.body then
+  --   for i, fixture in ipairs(self.fixtures) do
+  --     local shape = fixture:getShape()
+  --     love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
+  --   end
+  -- end
 end,
 
 trans_draw = function (self)
@@ -45,17 +45,16 @@ trans_draw = function (self)
   sprite.img, frame, xtotal, ytotal, 0,
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
-  if self.body then
-    for i, fixture in ipairs(self.fixtures) do
-      local shape = fixture:getShape()
-      love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
-    end
-  end
+  -- if self.body then
+  --   for i, fixture in ipairs(self.fixtures) do
+  --     local shape = fixture:getShape()
+  --     love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
+  --   end
+  -- end
 end,
 
 load = function(self)
   self.image_speed = 0
-  self.image_index = math.random() > 0.5 and 0 or 3
 end
 }
 

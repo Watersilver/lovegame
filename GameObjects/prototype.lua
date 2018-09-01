@@ -73,9 +73,7 @@ p.functions = {
   end,
 
   build_spritefixture = function(self)
-    local sp = self.sprite_info.spritefixture_properties
-    -- if not self.body then self.body = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0) end
-    -- local body = self.body
+    local sp = self.spritefixture_properties
     if not self.spritebody then self.spritebody = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0, "dynamic") end
     local body = self.spritebody
     body:setUserData(self)
@@ -83,7 +81,7 @@ p.functions = {
     body:setFixedRotation(true)
     self.spritefixture = love.physics.newFixture(body, sp.shape, 0)
     self.spritefixture:setCategory(SPRITECAT)
-    self.sprite_info.spritefixture_properties = nil
+    self.spritefixture_properties = nil
   end,
 
   load_sprites = function(self)

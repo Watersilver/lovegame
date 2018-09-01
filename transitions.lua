@@ -99,16 +99,32 @@ function trans.camera_modification()
   return camxtmod, camytmod
 end
 
-function trans.still_objects_coords(self)
+function trans.still_objects_coords(instance)
   local xtotal, ytotal
 
-  if self.onPreviousRoom then
-    xtotal = self.xstart + trans.xtransform
-    ytotal = self.ystart + trans.ytransform
+  if instance.onPreviousRoom then
+    xtotal = instance.xstart + trans.xtransform
+    ytotal = instance.ystart + trans.ytransform
   else
-    xtotal = self.xstart + trans.xtransform
+    xtotal = instance.xstart + trans.xtransform
       - game.transitioning.xmod + trans.xdisplacement
-    ytotal = self.ystart + trans.ytransform
+    ytotal = instance.ystart + trans.ytransform
+      - game.transitioning.ymod + trans.ydisplacement
+  end
+
+  return xtotal, ytotal
+end
+
+function trans.moving_objects_coords(instance)
+  local xtotal, ytotal
+
+  if instance.onPreviousRoom then
+    xtotal = instance.x + trans.xtransform
+    ytotal = instance.y + trans.ytransform
+  else
+    xtotal = instance.x + trans.xtransform
+      - game.transitioning.xmod + trans.xdisplacement
+    ytotal = instance.y + trans.ytransform
       - game.transitioning.ymod + trans.ydisplacement
   end
 

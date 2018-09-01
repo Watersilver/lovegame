@@ -2,7 +2,10 @@ local ps = require "physics_settings"
 local p = require "GameObjects.prototype"
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
+local trans = require "transitions"
+local game = require "game"
 
+-- WARNING: NEVER make adjacent edges!!!
 local Edge = {}
 
 function Edge.initialize(instance)
@@ -71,19 +74,38 @@ preSolve = function(self, a, b, coll, aob, bob)
 end,
 
 draw = function (self)
-  -- local sprite = self.sprite
-  -- local frame = sprite[self.image_index]
-  -- love.graphics.draw(
-  -- sprite.img, frame, self.xstart, self.ystart, 0,
-  -- sprite.res_x_scale, sprite.res_y_scale,
-  -- sprite.cx, sprite.cy)
-  if self.body then
-    local shape = self.fixture:getShape()
-    love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
+  local sprite = self.sprite
+  if sprite then
+    local frame = sprite[self.image_index]
+    love.graphics.draw(
+    sprite.img, frame, self.xstart, self.ystart, 0,
+    sprite.res_x_scale, sprite.res_y_scale,
+    sprite.cx, sprite.cy)
   end
+  -- if self.body then
+  --   local shape = self.fixture:getShape()
+  --   love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
+  -- end
+end,
+
+trans_draw = function (self)
+  local sprite = self.sprite
+  if sprite then
+    local xtotal, ytotal = trans.still_objects_coords(self)
+    local frame = sprite[self.image_index]
+    love.graphics.draw(
+    sprite.img, frame, xtotal, ytotal, 0,
+    sprite.res_x_scale, sprite.res_y_scale,
+    sprite.cx, sprite.cy)
+  end
+  -- if self.body then
+  --   local shape = self.fixture:getShape()
+  --   love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
+  -- end
 end,
 
 load = function (self)
+  self.image_speed = 0
   if self.side == "left" then
     self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.l)
     self.belowEdge = ec.belowLeftEdge

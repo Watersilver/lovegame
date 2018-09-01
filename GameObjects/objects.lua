@@ -115,7 +115,7 @@ function o.to_be_added:add_all()
     -- Load sprites and build spritefixture if applicable
     if object.sprite_info then
       object:load_sprites()
-      if object.sprite_info.spritefixture_properties then
+      if object.spritefixture_properties then
         object:build_spritefixture()
       end
     end
