@@ -11,22 +11,23 @@ local Missile = {}
 
 local floor = math.floor
 local pi = math.pi
+local sqrt = math.sqrt
 
 --  Calculate sword position and angle offset due to creator's side
 local function calculate_offset(side, phase)
   local xoff, yoff, aoff = 0, 0, 0
   if side == "down" then
-    xoff = 3
-    yoff = 7
+    xoff = 0
+    yoff = 3
   elseif side == "right" then
-    xoff = 6
-    yoff = 4
+    xoff = 9
+    yoff = 3
   elseif side == "left" then
-    xoff = - 6
-    yoff = 4
+    xoff = - 9
+    yoff = 3
   elseif side == "up" then
-    xoff = - 4
-    yoff = - 3
+    xoff = 0
+    yoff = - 7
   end
   return xoff, yoff
 end
@@ -40,15 +41,15 @@ function Missile.initialize(instance)
   instance.image_speed = 0
   instance.triggers = {}
   instance.sprite_info = {
-    {'Inventory/UseMissileL1', 1, padding = 2, width = 16, height = 15}
+    {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4}
   }
-  instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
+  -- instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",
     gravityScaleFactor = 0,
     sensor = true,
     density = 0,
-    shape = ps.shapes.swordSprite,
+    shape = ps.shapes.missile,
     categories = {PLAYERATTACKCAT}
   }
   instance.creator = nil -- Object that swings me
@@ -63,9 +64,14 @@ Missile.functions = {
   early_update = function(self, dt)
     local cr = self.creator
 
-    if self.weld then self.weld:destroy() end
+    if self.weld and not self.weld:isDestroyed() then self.weld:destroy(); self.weld = nil end
 
     if not self.fired then
+
+      if cr.missile_cooldown then
+        local stage = cr.missile_cooldown/cr.missile_cooldown_limit
+        self.image_index = stage * (self.sprite.frames - 1)
+      end
 
       -- Determine offset due to falling
       local fy = 0
@@ -81,15 +87,17 @@ Missile.functions = {
       -- Weld
       self.weld = love.physics.newWeldJoint(cr.body, self.body, x, y, true)
 
-      o.change_layer(self, cr.layer)
-    else
-      self.weld = nil
+      local layeradjust = 0
+      if self.side == "up" then layeradjust = -1 end
+      o.change_layer(self, cr.layer+layeradjust)
+    -- else
+    --   self.weld = nil
     end
 
-    if self.spritejoint then self.spritejoint:destroy() end
+    -- if self.spritejoint then self.spritejoint:destroy() end
     local x, y = self.body:getPosition()
-    self.spritebody:setPosition(x, y)
-    self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    -- self.spritebody:setPosition(x, y)
+    -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
     self.x, self.y = x, y
 
@@ -109,17 +117,18 @@ Missile.functions = {
     while self.image_index >= sprite.frames do
       self.image_index = self.image_index - sprite.frames
     end
-    local frame = sprite[self.image_index]
+    local frame = sprite[floor(self.image_index)]
     love.graphics.draw(
     sprite.img, frame, x, y, 0,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
 
     -- Debug
-    love.graphics.polygon("line",
-    self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
+    -- love.graphics.polygon("line",
+    -- self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     -- love.graphics.polygon("line",
     -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+    -- love.graphics.circle("line", x, y, self.fixture:getShape():getRadius())
   end,
 
   trans_draw = function(self)
@@ -134,6 +143,26 @@ Missile.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    -- Check if propelled by sword
+    if other.sword == true then
+      local speed = 200
+      local prevvx, prevvy = self.body:getLinearVelocity()
+
+      local xadjust, yadjust
+      local side = other.side
+      if side == "left" or side == "right" then
+        xadjust, yadjust = 0, 4
+      elseif side == "up" then
+        xadjust, yadjust = -3, 0
+      else
+        xadjust, yadjust = 3, 0
+      end
+
+      local adj, opp = self.x - cr.x - xadjust, self.y - cr.y - yadjust
+      local hyp = sqrt(adj*adj + opp*opp)
+
+      self.body:setLinearVelocity(speed*adj/hyp, speed*opp/hyp)
+    end
 
     -- edge handling:
     -- store my velocity
@@ -142,6 +171,10 @@ Missile.functions = {
   end,
 
   preSolve = function(self, a, b, coll, aob, bob)
+  end,
+
+  delete = function(self)
+    if self == self.creator.missile then self.creator.missile = nil end
   end
 }
 

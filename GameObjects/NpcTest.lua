@@ -27,7 +27,8 @@ function NPC.initialize(instance)
   instance.image_index = 0
   instance.x_scale = 1
   instance.y_scale = 1
-  instance.layer = 3
+  instance.layer = 10
+  instance.zo = 0
 end
 
 NPC.functions = {
@@ -50,7 +51,7 @@ draw = function (self)
   sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
   sprite.cx, sprite.cy)
   -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-  love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
+  -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
   --
   -- love.graphics.setColor(COLORCONST, self.db.downcol, self.db.downcol, COLORCONST)
   -- love.graphics.polygon("line", self.body:getWorldPoints(self.downfixture:getShape():getPoints()))

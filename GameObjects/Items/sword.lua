@@ -78,6 +78,7 @@ end
 function Sword.initialize(instance)
 
   instance.transPersistent = true
+  instance.sword = true
   instance.iox = 0
   instance.ioy = 0
   instance.x_scale = 1
@@ -143,7 +144,7 @@ Sword.functions = {
       if phase == 0 then
         self.fixture = love.physics.newFixture(self.body, ps.shapes.swordIgniting, 0)
       elseif phase == 1 then
-        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwing, 0)
+        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwingWide, 0)
       elseif phase == 2 then
         self.fixture = love.physics.newFixture(self.body, ps.shapes.swordStill, 0)
       end

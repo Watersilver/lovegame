@@ -77,6 +77,10 @@ function preSolve(a, b, coll)
       local _, apos = abod:getPosition()
       local _, bpos = bbod:getPosition()
       local aob, bob = abod:getUserData(), bbod:getUserData()
+      if aob.zo and bob.zo then
+        apos = apos - aob.zo
+        bpos = bpos - bob.zo
+      end
       if aob.layer == bob.layer and (apos > bpos and aob.drawable < bob.drawable) or
       (apos < bpos and aob.drawable > bob.drawable) then
         u.swap(o.draw_layers[aob.layer], aob.drawable, bob.drawable)

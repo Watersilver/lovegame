@@ -18,9 +18,13 @@ local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
 local mark = require "GameObjects.Items.mark"
 
+local sh = require "GameObjects.shadow"
+
 local sqrt = math.sqrt
 local floor = math.floor
 local choose = u.choose
+local insert = table.insert
+local remove = table.remove
 local max = math.max
 local abs = math.abs
 
@@ -47,6 +51,10 @@ local run_missile = hps.run_missile
 local check_missile = hps.check_missile
 local start_missile = hps.start_missile
 local end_missile = hps.end_missile
+local run_gripping = hps.run_gripping
+local check_gripping = hps.check_gripping
+local start_gripping = hps.start_gripping
+local end_gripping = hps.end_gripping
 
 local Playa = {}
 
@@ -79,7 +87,8 @@ function Playa.initialize(instance)
   instance.brakes = 3 -- 6
   instance.maxspeed = 100
   instance.triggers = {}
-  instance.sensors = {}
+  instance.sensors = {downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={}}
+  instance.missile_cooldown_limit = 0.3
   instance.item_use_counter = 0 -- Counts how long you're still while using item
   instance.physical_properties = {
     bodyType = "dynamic",
@@ -100,7 +109,7 @@ function Playa.initialize(instance)
   -- instance.sprite_info.spritefixture_properties = {shape = ps.shapes.rect1x1}
 
   instance.player = "player1"
-  instance.layer = 3
+  instance.layer = 10
   instance.movement_state = sm.new_state_machine{
     state = "start",
     start = {
@@ -975,6 +984,82 @@ function Playa.initialize(instance)
     },
 
 
+    downgripping = {
+    run_state = function(instance, dt)
+      run_gripping(instance, dt, "down")
+    end,
+
+    check_state = function(instance, dt)
+      check_gripping(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      start_gripping(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+      end_gripping(instance, dt, "down")
+    end
+    },
+
+
+    rightgripping = {
+    run_state = function(instance, dt)
+      run_gripping(instance, dt, "right")
+    end,
+
+    check_state = function(instance, dt)
+      check_gripping(instance, dt, "right")
+    end,
+
+    start_state = function(instance, dt)
+      start_gripping(instance, dt, "right")
+    end,
+
+    end_state = function(instance, dt)
+      end_gripping(instance, dt, "right")
+    end
+    },
+
+
+    leftgripping = {
+    run_state = function(instance, dt)
+      run_gripping(instance, dt, "left")
+    end,
+
+    check_state = function(instance, dt)
+      check_gripping(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      start_gripping(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      end_gripping(instance, dt, "left")
+    end
+    },
+
+
+    upgripping = {
+    run_state = function(instance, dt)
+      run_gripping(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      check_gripping(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_gripping(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      end_gripping(instance, dt, "up")
+    end
+    },
+
+
     downmark = {
     run_state = function(instance, dt)
       instance.markanim = instance.markanim - dt
@@ -1127,6 +1212,18 @@ Playa.functions = {
       self.zvel = self.zvel - self.gravity * dt
     end
     self.zo = self.jo + self.fo
+    if self.zo < 0 then
+      if not self.shadow then
+        self.shadow = sh:new{
+          caster = self, layer = self.layer-1,
+          xstart = x, ystart = y, playershadow = true
+        }
+        o.addToWorld(self.shadow)
+      end
+    else
+      if self.shadow then o.removeFromWorld(self.shadow) end
+      self.shadow = nil
+    end
 
     local ms = self.movement_state
     -- Check movement state
@@ -1174,13 +1271,13 @@ Playa.functions = {
     self.spritebody:setPosition(xtotal, ytotal)
     self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
-    if self.zo ~= 0 then
-      local shaspri = self.shadownSprite
-      love.graphics.draw(
-      shaspri.img, shaspri[0], x, y, 0,
-      shaspri.res_x_scale, shaspri.res_y_scale,
-      shaspri.cx, shaspri.cy)
-    end
+    -- if self.zo ~= 0 then
+    --   local shaspri = self.shadownSprite
+    --   love.graphics.draw(
+    --   shaspri.img, shaspri[0], x, y, 0,
+    --   shaspri.res_x_scale, shaspri.res_y_scale,
+    --   shaspri.cx, shaspri.cy)
+    -- end
 
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames
@@ -1193,7 +1290,7 @@ Playa.functions = {
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-    love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
+    -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --
     -- love.graphics.setColor(COLORCONST, self.db.downcol, self.db.downcol, COLORCONST)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.downfixture:getShape():getPoints()))
@@ -1204,7 +1301,6 @@ Playa.functions = {
     -- love.graphics.setColor(COLORCONST, self.db.rightcol, self.db.rightcol, COLORCONST)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.rightfixture:getShape():getPoints()))
     -- love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-if self.onEdge then fuck = fuck + 1 end
   end,
 
   trans_draw = function(self)
@@ -1217,13 +1313,19 @@ if self.onEdge then fuck = fuck + 1 end
 
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
 
-    if self.zo ~= 0 then
-      local shaspri = self.shadownSprite
-      love.graphics.draw(
-      shaspri.img, shaspri[0], x, y, 0,
-      shaspri.res_x_scale, shaspri.res_y_scale,
-      shaspri.cx, shaspri.cy)
+    -- destroy joint to avoid funkyness during transition
+    if self.spritejoint then
+      self.spritejoint:destroy();
+      self.spritejoint = nil
     end
+
+    -- if self.zo ~= 0 then
+    --   local shaspri = self.shadownSprite
+    --   love.graphics.draw(
+    --   shaspri.img, shaspri[0], x, y, 0,
+    --   shaspri.res_x_scale, shaspri.res_y_scale,
+    --   shaspri.cx, shaspri.cy)
+    -- end
 
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames
@@ -1275,6 +1377,7 @@ if self.onEdge then fuck = fuck + 1 end
             local sensors = self.sensors
             sensors[sensorID] = sensors[sensorID] or 0
             sensors[sensorID] = sensors[sensorID] + 1
+            insert(sensors[sensorID .. "edObs"], other)
           end
         end
       end
@@ -1297,6 +1400,10 @@ if self.onEdge then fuck = fuck + 1 end
       if sensorID then
         if not other.unpushable == true then
           local sensors = self.sensors
+
+          for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
+            if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
+          end
 
           if not other.onEdge then
             if sensors[sensorID] then

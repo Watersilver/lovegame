@@ -42,7 +42,18 @@ inv.missile = {
     if keyheld == 0 then
       return "fire_missile"
     else
-      return "none"
+      return "fire_missile"
+    end
+  end
+}
+
+inv.grip = {
+  invImage = love.graphics.newImage("Sprites/Inventory/InvMissileL1.png"),
+  check_trigger = function(object, keyheld)
+    if keyheld == 0 then
+      return "gripping"
+    else
+      return "grip"
     end
   end
 }
@@ -78,7 +89,7 @@ inv.slots[5] = {key = "x", item = inv.jump}
 inv.slots[4] = {key = "z", item = inv.missile}
 inv.slots[3] = {key = "d", item = inv.mark}
 inv.slots[2] = {key = "s", item = inv.recall}
-inv.slots[1] = {key = "a"}
+inv.slots[1] = {key = "a", item = inv.grip}
 
 for index, contents in ipairs(inv.slots) do
   inv.slots[inv.slots[index].key] = inv.slots[index]
@@ -115,6 +126,9 @@ function inv.check_use(instance, trig, side)
     return true
   elseif trig.fire_missile then
     instance.animation_state:change_state(instance, dt, side .. "missile")
+    return true
+  elseif trig.gripping and instance.sensors[side .. "Touch"] then
+    instance.animation_state:change_state(instance, dt, side .. "gripping")
     return true
   elseif trig.mark then
     instance.animation_state:change_state(instance, dt, "downmark")

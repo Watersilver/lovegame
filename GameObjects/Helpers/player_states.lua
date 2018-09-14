@@ -8,6 +8,8 @@ local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
 local msl = require "GameObjects.Items.missile"
 
+local floor = math.floor
+
 local player_states = {}
 
 player_states.check_walk = function(instance, dt, side)
@@ -229,29 +231,40 @@ end
 player_states.run_missile = function(instance, dt, side)
   instance.missile_cooldown = instance.missile_cooldown + dt
   td.image_speed(instance, dt)
+  if instance.speed < 5 then
+    if floor(instance.image_index) ~= 3 then
+      instance.image_index = 1
+    end
+  end
 end
 
 player_states.check_missile = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if instance.missile_cooldown > instance.missile_cooldown_limit then
-    instance.animation_state:change_state(instance, dt, side .. "walk")
+    if trig.fire_missile then
+      instance.animation_state:change_state(instance, dt, side .. "missile")
+    else
+      instance.animation_state:change_state(instance, dt, side .. "walk")
+    end
   end
 end
 
 player_states.start_missile = function(instance, dt, side)
   instance.missile_cooldown = 0
-  instance.missile_cooldown_limit = instance.missile_cooldown_limit or 0.3
+  instance.missile_cooldown_limit = instance.missile_cooldown_limit
   if side ~= "right" then
-    instance.sprite = im.sprites["Witch/hold_" .. side]
+    instance.sprite = im.sprites["Witch/shoot_" .. side]
   else
-    instance.sprite = im.sprites["Witch/hold_left"]
+    instance.sprite = im.sprites["Witch/shoot_left"]
     instance.x_scale = -1
   end
   -- Create missile
+  local misslayer = instance.layer
+  if side == "up" then misslayer = misslayer - 1 end
   instance.missile = msl:new{
     creator = instance,
     side = side,
-    layer = instance.layer
+    layer = misslayer
   }
   o.addToWorld(instance.missile)
 end
@@ -260,8 +273,76 @@ player_states.end_missile = function(instance, dt, side)
   if side == "right" then
     instance.x_scale = 1
   end
+  if instance.missile_cooldown < instance.missile_cooldown_limit then
+    o.removeFromWorld(instance.missile)
+    return
+  end
   instance.missile_cooldown = nil
-  if instance.missile then instance.missile.fired = true end
+
+  if instance.missile then
+    instance.missile.fired = true
+
+    if not instance.missile.body:isDestroyed() then
+      local mslvx, mslvy = instance.missile.body:getLinearVelocity()
+      local firevelx, firevely = 0, 0
+
+      -- If I add spritebody to missile, the speed I add will get cut in half
+      if side == "up" then
+        firevely = - instance.maxspeed
+      elseif side == "down" then
+        firevely = instance.maxspeed
+      elseif side == "left" then
+        firevelx = - instance.maxspeed
+      else
+        firevelx = instance.maxspeed
+      end
+      instance.missile.image_index = instance.missile.sprite.frames - 1
+      instance.missile.body:setLinearVelocity(mslvx+firevelx, mslvy+firevely)
+    end
+
+  end -- instance.missile
+
+end
+
+player_states.run_gripping = function(instance, dt, side)
+  td.image_speed(instance, dt)
+  if instance.speed < 5 then
+    instance.image_index = 0
+  end
+end
+
+player_states.check_gripping = function(instance, dt, side)
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if not trig.grip then
+    instance.animation_state:change_state(instance, dt, side .. "walk")
+  end
+end
+
+player_states.start_gripping = function(instance, dt, side)
+  instance.image_index = 0
+  instance.image_speed = 0
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/grip_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/grip_left"]
+    instance.x_scale = -1
+  end
+  local other
+  local touchedObTable = instance.sensors[side .. "TouchedObs"]
+  for _, touchedOb in ipairs(touchedObTable) do
+    other = touchedOb
+  end
+  if other and other.body then
+    instance.grippedOb = other
+    instance.grip = love.physics.newWeldJoint(
+      other.body, instance.body, instance.x, instance.y, true
+    )
+  end
+end
+
+player_states.end_gripping = function(instance, dt, side)
+  instance.grippedOb = nil
+  if instance.grip then instance.grip:destroy(); instance.grip = nil end
 end
 
 return player_states
