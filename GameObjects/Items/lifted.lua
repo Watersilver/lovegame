@@ -5,6 +5,9 @@ local im = require "image"
 local o = require "GameObjects.objects"
 local ps = require "physics_settings"
 
+local thr = require "GameObjects.Items.thrown"
+
+
 local floor = math.floor
 
 local endOffset = {x = 0, y = -0.6 * ps.shapes.plshapeHeight}
@@ -38,7 +41,7 @@ local offsets = {
 local Lifted = {}
 
 function Lifted.initialize(instance)
-  instance.sprite_info = {im.spriteSettings.testlift}
+  instance.transPersistent = true
 end
 
 Lifted.functions = {
@@ -93,31 +96,57 @@ Lifted.functions = {
     local x, y = creatorx + xoff, creatory + yoff - cr.height + cr.zo + fy
 
     self.x, self.y = x, y
+
+    -- lift_update is a function fed by what I was before I was lifted
+    if self.lift_update then lift_update(self, dt) end
   end,
 
-  draw = function (self)
+  draw = function (self, td)
+    local x, y = self.x, self.y
+
+    if td then
+      x = x + trans.xtransform - game.transitioning.progress * trans.xadjust
+      y = y + trans.ytransform - game.transitioning.progress * trans.yadjust
+    end
+
     local sprite = self.sprite
     local frame = sprite[self.image_index]
     love.graphics.draw(
-    sprite.img, frame, self.x, self.y, self.angle,
+    sprite.img, frame, x, y, self.angle,
     sprite.res_x_scale, sprite.res_y_scale,
     sprite.cx, sprite.cy)
   end,
 
   trans_draw = function (self)
-    local sprite = self.sprite
-    local frame = sprite[self.image_index]
-
-    local xtotal, ytotal = trans.still_objects_coords(self)
-
-    love.graphics.draw(
-    sprite.img, frame,
-    xtotal, ytotal, 0,
-    sprite.res_x_scale, sprite.res_y_scale,
-    sprite.cx, sprite.cy)
+    self:draw(true)
   end,
 
-  delete = function (self)
+  get_thrown = function (self)
+
+    local cr = self.creator
+    local vx, vy
+    local side = self.side
+    local prevx, prevy = cr.body:getLinearVelocity()
+    prevx, prevy = 1.5 * prevx, 1.5 * prevy
+    if side == "up" then
+      vx, vy = prevx, prevy - 100
+    elseif side == "left" then
+      vx, vy = prevx - 100, prevy
+    elseif side == "down" then
+      vx, vy = prevx, prevy + 100
+    else
+      vx, vy = prevx + 100, prevy
+    end
+
+    local thrownOb = thr:new{
+      x = self.x, y = self.y,
+      vx = vx, vy = vy,
+      sprite_info = self.sprite_info,
+      layer = cr.layer + 1,
+      throw_update = self.throw_update
+    }
+    o.addToWorld(thrownOb)
+
   end
 }
 

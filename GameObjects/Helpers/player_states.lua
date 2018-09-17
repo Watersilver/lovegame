@@ -339,7 +339,10 @@ player_states.start_gripping = function(instance, dt, side)
       instance.liftedOb = lft:new{
         creator = instance,
         side = side,
-        layer = side == "up" and instance.layer - 1 or instance.layer + 1
+        layer = side == "up" and instance.layer - 1 or instance.layer + 1,
+        sprite_info = other.sprite_info or {im.spriteSettings.testlift},
+        lift_update = other.lift_updage,
+        throw_update = other.throw_update
       }
       o.addToWorld(instance.liftedOb)
       return
@@ -365,9 +368,10 @@ player_states.end_gripping = function(instance, dt, side)
 end
 
 player_states.run_lifting = function(instance, dt, side)
-  instance.liftingStage = instance.liftingStage + dt * 12
+  -- instance.liftingStage = instance.liftingStage + dt * 12
+  instance.liftingStage = 1 + 3 * instance.item_use_counter * instance.invGripTime
 
-  if instance.liftingStage > 4 then instance.liftingStage = 4 end
+  if instance.liftingStage >= 4 then instance.liftingStage = 4 end
 end
 
 player_states.check_lifting = function(instance, dt, side)
@@ -379,6 +383,7 @@ end
 
 player_states.start_lifting = function(instance, dt, side)
   instance.liftingStage = 1
+  instance.invGripTime = 1 / inv.grip.time
   instance.image_index = 0
   instance.image_speed = 0
   if side ~= "right" then
@@ -393,6 +398,7 @@ player_states.end_lifting = function(instance, dt, side)
   if side == "right" then
     instance.x_scale = 1
   end
+  instance.liftingStage = nil
 end
 
 player_states.run_lifted = function(instance, dt, side)
@@ -412,7 +418,7 @@ player_states.check_lifted = function(instance, dt, side)
   elseif td.check_carry_while_carrying(instance, trig, side) then
   end
   -- Variable to ensure lifted object won't be thrown when changing direction
-  -- Set at check_carry_while_carrying
+  -- Set at check_carry_while_carrying function in movement.top_down
   instance.dontThrow = false
 end
 
@@ -430,6 +436,7 @@ player_states.end_lifted = function(instance, dt, side)
     instance.x_scale = 1
   end
   if instance.liftedOb and not instance.dontThrow then
+    instance.liftedOb:get_thrown()
     o.removeFromWorld(instance.liftedOb)
     instance.liftedOb = nil
   end

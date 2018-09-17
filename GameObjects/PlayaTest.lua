@@ -144,6 +144,8 @@ function Playa.initialize(instance)
           instance.movement_state:change_state(instance, dt, "using_sword")
         elseif trig.swing_sword then
           instance.movement_state:change_state(instance, dt, "using_sword")
+        elseif instance.liftingStage then
+          instance.movement_state:change_state(instance, dt, "using_lift")
         elseif instance.zo == 0 then
           if trig.mark then
             instance.movement_state:change_state(instance, dt, "using_mark")
@@ -191,6 +193,17 @@ function Playa.initialize(instance)
 
     end_state = function(instance, dt)
       instance.item_use_duration = inv.recall.time
+    end
+    },
+
+
+    using_lift = {
+    start_state = function(instance, dt)
+      instance.movement_state:change_state(instance, dt, "using_item")
+    end,
+
+    end_state = function(instance, dt)
+      instance.item_use_duration = inv.grip.time
     end
     },
 

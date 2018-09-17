@@ -1,6 +1,7 @@
 local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local game = require "game"
+local o = require "GameObjects.objects"
 
 local Shadow = {}
 
@@ -19,7 +20,7 @@ draw = function (self)
   local sprite = self.sprite
   local frame = sprite[self.image_index]
   local ca = self.caster
-  if ca then self.x, self.y = ca.x, ca.y else o.removeFromWorld(self) end
+  if ca.exists then self.x, self.y = ca.x, ca.y else o.removeFromWorld(self) end
   love.graphics.draw(
   sprite.img, frame, ca.x, ca.y, 0,
   sprite.res_x_scale, sprite.res_y_scale,

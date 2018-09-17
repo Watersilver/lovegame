@@ -49,6 +49,7 @@ inv.missile = {
 
 inv.grip = {
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgGripL1.png"),
+  time = 0.25,
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
       return "gripping"
