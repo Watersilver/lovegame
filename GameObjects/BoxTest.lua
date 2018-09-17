@@ -14,6 +14,7 @@ function bt.initialize(instance)
     shape = ps.shapes.rect1x1,
     restitution = 0
   }
+  instance.liftable = true
 end
 
 bt.functions = {

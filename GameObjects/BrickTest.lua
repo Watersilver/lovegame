@@ -55,6 +55,9 @@ end,
 
 load = function(self)
   self.image_speed = 0
+end,
+
+lift_delete = function(self)
 end
 }
 

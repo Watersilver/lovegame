@@ -48,7 +48,7 @@ inv.missile = {
 }
 
 inv.grip = {
-  invImage = love.graphics.newImage("Sprites/Inventory/InvMissileL1.png"),
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgGripL1.png"),
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
       return "gripping"
@@ -59,7 +59,7 @@ inv.grip = {
 }
 
 inv.mark = {
-  invImage = love.graphics.newImage("Sprites/Inventory/InvImgJumpL1.png"),
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgMarkL1.png"),
   time = 0.3,
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
@@ -71,7 +71,7 @@ inv.mark = {
 }
 
 inv.recall = {
-  invImage = love.graphics.newImage("Sprites/Inventory/InvImgJumpL1.png"),
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgRecallL1.png"),
   time = 0.3,
   check_trigger = function(object, keyheld)
     if keyheld == 0 then

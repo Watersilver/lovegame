@@ -33,6 +33,38 @@ local walktable = {
   }
 }
 
+-- To be used in check_carry_while_carrying function
+local carrytable = {
+  down =
+  {
+    first_check = {check1 = "walk_right", check2 = "walk_down", result = "rightlifted", },
+    second_check = {check1 = "walk_left", check2 = "walk_down", result = "leftlifted", },
+    third_check = {check1 = "walk_up", result = "uplifted", },
+    fourth_check = {check1 = "walk_down" }
+  },
+  right =
+  {
+    first_check = {check1 = "walk_down", check2 = "walk_right", result = "downlifted", },
+    second_check = {check1 = "walk_up", check2 = "walk_right", result = "uplifted", },
+    third_check = {check1 = "walk_left", result = "leftlifted", },
+    fourth_check = {check1 = "walk_right" }
+  },
+  left =
+  {
+    first_check = {check1 = "walk_down", check2 = "walk_left", result = "downlifted", },
+    second_check = {check1 = "walk_up", check2 = "walk_left", result = "uplifted", },
+    third_check = {check1 = "walk_right", result = "rightlifted", },
+    fourth_check = {check1 = "walk_left" }
+  },
+  up =
+  {
+    first_check = {check1 = "walk_right", check2 = "walk_up", result = "rightlifted", },
+    second_check = {check1 = "walk_left", check2 = "walk_up", result = "leftlifted", },
+    third_check = {check1 = "walk_down", result = "downlifted", },
+    fourth_check = {check1 = "walk_up" }
+  }
+}
+
 local mo = {}
 
   local sqrt = math.sqrt
@@ -327,6 +359,26 @@ local mo = {}
         return true
       elseif trig.halt_up and myside ~= "up" then
         instance.animation_state:change_state(instance, dt, "uphalt")
+        return true
+      end
+      return false
+    end,
+
+    check_carry_while_carrying = function(instance, trig, myside)
+      -- Variable to ensure lifted object won't be thrown when changing direction
+      instance.dontThrow = true
+      if trig[carrytable[myside].first_check.check1]
+        and not trig[carrytable[myside].first_check.check2] then
+          instance.animation_state:change_state(instance, dt, carrytable[myside].first_check.result)
+          return true
+      elseif trig[carrytable[myside].second_check.check1]
+        and not trig[carrytable[myside].second_check.check2] then
+          instance.animation_state:change_state(instance, dt, carrytable[myside].second_check.result)
+          return true
+      elseif trig[carrytable[myside].third_check.check1] then
+        instance.animation_state:change_state(instance, dt, carrytable[myside].third_check.result)
+        return true
+      elseif trig[carrytable[myside].fourth_check.check1] then
         return true
       end
       return false

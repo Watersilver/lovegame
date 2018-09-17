@@ -7,6 +7,7 @@ local o = require "GameObjects.objects"
 local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
 local msl = require "GameObjects.Items.missile"
+local lft = require "GameObjects.Items.lifted"
 
 local floor = math.floor
 
@@ -319,6 +320,32 @@ player_states.check_gripping = function(instance, dt, side)
 end
 
 player_states.start_gripping = function(instance, dt, side)
+  -- Determine whether I will grip or lift
+  local other
+  local touchedObTable = instance.sensors[side .. "TouchedObs"]
+  for _, touchedOb in ipairs(touchedObTable) do
+    other = touchedOb
+  end
+  if other and other.body then
+    if not other.liftable then
+      instance.grippedOb = other
+      instance.grip = love.physics.newWeldJoint(
+        other.body, instance.body, instance.x, instance.y, true
+      )
+    else
+      instance.animation_state:change_state(instance, dt, side .. "lifting")
+      o.removeFromWorld(other)
+      other.delete = other.lift_delete
+      instance.liftedOb = lft:new{
+        creator = instance,
+        side = side,
+        layer = side == "up" and instance.layer - 1 or instance.layer + 1
+      }
+      o.addToWorld(instance.liftedOb)
+      return
+    end
+  end
+
   instance.image_index = 0
   instance.image_speed = 0
   if side ~= "right" then
@@ -327,22 +354,85 @@ player_states.start_gripping = function(instance, dt, side)
     instance.sprite = im.sprites["Witch/grip_left"]
     instance.x_scale = -1
   end
-  local other
-  local touchedObTable = instance.sensors[side .. "TouchedObs"]
-  for _, touchedOb in ipairs(touchedObTable) do
-    other = touchedOb
-  end
-  if other and other.body then
-    instance.grippedOb = other
-    instance.grip = love.physics.newWeldJoint(
-      other.body, instance.body, instance.x, instance.y, true
-    )
-  end
 end
 
 player_states.end_gripping = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = 1
+  end
   instance.grippedOb = nil
   if instance.grip then instance.grip:destroy(); instance.grip = nil end
+end
+
+player_states.run_lifting = function(instance, dt, side)
+  instance.liftingStage = instance.liftingStage + dt * 12
+
+  if instance.liftingStage > 4 then instance.liftingStage = 4 end
+end
+
+player_states.check_lifting = function(instance, dt, side)
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if instance.liftingStage == 4 then
+    instance.animation_state:change_state(instance, dt, side .. "lifted")
+  end
+end
+
+player_states.start_lifting = function(instance, dt, side)
+  instance.liftingStage = 1
+  instance.image_index = 0
+  instance.image_speed = 0
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/lifting_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/lifting_left"]
+    instance.x_scale = -1
+  end
+end
+
+player_states.end_lifting = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = 1
+  end
+end
+
+player_states.run_lifted = function(instance, dt, side)
+  td.image_speed(instance, dt)
+  if instance.speed < 5 then
+    instance.image_index = 0
+  end
+  if instance.liftedOb then
+    instance.liftedOb.side = side
+  end
+end
+
+player_states.check_lifted = function(instance, dt, side)
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if trig.gripping then
+    instance.animation_state:change_state(instance, dt, side .. "walk")
+  elseif td.check_carry_while_carrying(instance, trig, side) then
+  end
+  -- Variable to ensure lifted object won't be thrown when changing direction
+  -- Set at check_carry_while_carrying
+  instance.dontThrow = false
+end
+
+player_states.start_lifted = function(instance, dt, side)
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/lifted_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/lifted_left"]
+    instance.x_scale = -1
+  end
+end
+
+player_states.end_lifted = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = 1
+  end
+  if instance.liftedOb and not instance.dontThrow then
+    o.removeFromWorld(instance.liftedOb)
+    instance.liftedOb = nil
+  end
 end
 
 return player_states

@@ -17,11 +17,11 @@ room.downTrans = {
   }
 }
 room.rightTrans = {
-  {
-    roomTarget = "Rooms/room1.lua", -- Room you'll go to if this transition happens
-    yupper = 0, ylower = 450, -- Limits to check against
-    xmod = 0, ymod = 0 -- Modification of x, y variables for next room
-  }
+  -- {
+  --   roomTarget = "Rooms/room1.lua", -- Room you'll go to if this transition happens
+  --   yupper = 0, ylower = 450, -- Limits to check against
+  --   xmod = 0, ymod = 0 -- Modification of x, y variables for next room
+  -- }
 }
 room.leftTrans = {}
 room.upTrans = {}

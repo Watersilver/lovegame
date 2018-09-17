@@ -94,13 +94,15 @@ Missile.functions = {
     --   self.weld = nil
     end
 
+  end,
+
+  update = function(self, td)
     -- if self.spritejoint then self.spritejoint:destroy() end
     local x, y = self.body:getPosition()
     -- self.spritebody:setPosition(x, y)
     -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
     self.x, self.y = x, y
-
   end,
 
   draw = function(self, td)

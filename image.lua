@@ -13,6 +13,7 @@ local im = {}
 im.spriteSettings = {
   testtiles = {'Tiles/TestTiles', 4, 7},
   testbrick = {'Brick', 2, 2},
+  testlift = {'LiftableTest', 1, width = 16, height = 16},
   playerSprites = {
     {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},
@@ -23,6 +24,12 @@ im.spriteSettings = {
     {'Witch/grip_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/grip_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/grip_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/lifting_up', 1, padding = 2, width = 16, height = 16},
+    {'Witch/lifting_left', 1, padding = 2, width = 16, height = 16},
+    {'Witch/lifting_down', 1, padding = 2, width = 16, height = 16},
+    {'Witch/lifted_up', 4, padding = 2, width = 16, height = 16},
+    {'Witch/lifted_left', 4, padding = 2, width = 16, height = 16},
+    {'Witch/lifted_down', 4, padding = 2, width = 16, height = 16},
     {'Witch/halt_up', 1, padding = 2, width = 16, height = 16},
     {'Witch/halt_left', 1, padding = 2, width = 16, height = 16},
     {'Witch/halt_down', 1, padding = 2, width = 16, height = 16},

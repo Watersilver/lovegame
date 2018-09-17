@@ -55,6 +55,14 @@ local run_gripping = hps.run_gripping
 local check_gripping = hps.check_gripping
 local start_gripping = hps.start_gripping
 local end_gripping = hps.end_gripping
+local run_lifting = hps.run_lifting
+local check_lifting = hps.check_lifting
+local start_lifting = hps.start_lifting
+local end_lifting = hps.end_lifting
+local run_lifted = hps.run_lifted
+local check_lifted = hps.check_lifted
+local start_lifted = hps.start_lifted
+local end_lifted = hps.end_lifted
 
 local Playa = {}
 
@@ -1056,6 +1064,158 @@ function Playa.initialize(instance)
 
     end_state = function(instance, dt)
       end_gripping(instance, dt, "up")
+    end
+    },
+
+
+    downlifting = {
+    run_state = function(instance, dt)
+      run_lifting(instance, dt, "down")
+    end,
+
+    check_state = function(instance, dt)
+      check_lifting(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      start_lifting(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+      end_lifting(instance, dt, "down")
+    end
+    },
+
+
+    rightlifting = {
+    run_state = function(instance, dt)
+      run_lifting(instance, dt, "right")
+    end,
+
+    check_state = function(instance, dt)
+      check_lifting(instance, dt, "right")
+    end,
+
+    start_state = function(instance, dt)
+      start_lifting(instance, dt, "right")
+    end,
+
+    end_state = function(instance, dt)
+      end_lifting(instance, dt, "right")
+    end
+    },
+
+
+    leftlifting = {
+    run_state = function(instance, dt)
+      run_lifting(instance, dt, "left")
+    end,
+
+    check_state = function(instance, dt)
+      check_lifting(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      start_lifting(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      end_lifting(instance, dt, "left")
+    end
+    },
+
+
+    uplifting = {
+    run_state = function(instance, dt)
+      run_lifting(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      check_lifting(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_lifting(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      end_lifting(instance, dt, "up")
+    end
+    },
+
+
+    downlifted = {
+    run_state = function(instance, dt)
+      run_lifted(instance, dt, "down")
+    end,
+
+    check_state = function(instance, dt)
+      check_lifted(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      start_lifted(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+      end_lifted(instance, dt, "down")
+    end
+    },
+
+
+    rightlifted = {
+    run_state = function(instance, dt)
+      run_lifted(instance, dt, "right")
+    end,
+
+    check_state = function(instance, dt)
+      check_lifted(instance, dt, "right")
+    end,
+
+    start_state = function(instance, dt)
+      start_lifted(instance, dt, "right")
+    end,
+
+    end_state = function(instance, dt)
+      end_lifted(instance, dt, "right")
+    end
+    },
+
+
+    leftlifted = {
+    run_state = function(instance, dt)
+      run_lifted(instance, dt, "left")
+    end,
+
+    check_state = function(instance, dt)
+      check_lifted(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      start_lifted(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      end_lifted(instance, dt, "left")
+    end
+    },
+
+
+    uplifted = {
+    run_state = function(instance, dt)
+      run_lifted(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      check_lifted(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_lifted(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      end_lifted(instance, dt, "up")
     end
     },
 
