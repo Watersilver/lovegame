@@ -1,3 +1,4 @@
+local gs = require "game_settings"
 local ps = require "physics_settings"
 local im = require "image"
 local inp = require "input"
@@ -140,20 +141,28 @@ function Playa.initialize(instance)
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
       if not instance.missile_cooldown then
-        if trig.stab then
-          instance.movement_state:change_state(instance, dt, "using_sword")
-        elseif trig.swing_sword then
-          instance.movement_state:change_state(instance, dt, "using_sword")
-        elseif instance.liftingStage then
-          instance.movement_state:change_state(instance, dt, "using_lift")
-        elseif instance.zo == 0 then
-          if trig.mark then
-            instance.movement_state:change_state(instance, dt, "using_mark")
-          elseif trig.recall then
-            instance.movement_state:change_state(instance, dt, "using_recall")
+        if not instance.liftState then
+
+          if trig.stab then
+            instance.movement_state:change_state(instance, dt, "using_sword")
+          elseif trig.swing_sword then
+            instance.movement_state:change_state(instance, dt, "using_sword")
+          elseif instance.zo == 0 then
+            if trig.mark then
+              instance.movement_state:change_state(instance, dt, "using_mark")
+            elseif trig.recall then
+              instance.movement_state:change_state(instance, dt, "using_recall")
+            end
+          end
+
+        else
+          if instance.liftingStage then
+            instance.movement_state:change_state(instance, dt, "using_lift")
           end
         end
+
       end
+
     end,
 
     start_state = function(instance, dt)
@@ -217,7 +226,7 @@ function Playa.initialize(instance)
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
-      if trig.swing_sword and not otherstate:find("stab") then
+      if trig.swing_sword and not otherstate:find("stab") and not instance.liftState then
         instance.movement_state:change_state(instance, dt, "using_sword")
       elseif instance.item_use_counter > instance.item_use_duration then
         instance.movement_state:change_state(instance, dt, "normal")

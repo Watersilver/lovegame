@@ -392,6 +392,7 @@ player_states.start_lifting = function(instance, dt, side)
     instance.sprite = im.sprites["Witch/lifting_left"]
     instance.x_scale = -1
   end
+  instance.liftState = true
 end
 
 player_states.end_lifting = function(instance, dt, side)
@@ -399,6 +400,7 @@ player_states.end_lifting = function(instance, dt, side)
     instance.x_scale = 1
   end
   instance.liftingStage = nil
+  instance.liftState = false
 end
 
 player_states.run_lifted = function(instance, dt, side)
@@ -429,6 +431,7 @@ player_states.start_lifted = function(instance, dt, side)
     instance.sprite = im.sprites["Witch/lifted_left"]
     instance.x_scale = -1
   end
+  instance.liftState = true
 end
 
 player_states.end_lifted = function(instance, dt, side)
@@ -440,6 +443,7 @@ player_states.end_lifted = function(instance, dt, side)
     o.removeFromWorld(instance.liftedOb)
     instance.liftedOb = nil
   end
+  instance.liftState = false
 end
 
 return player_states
