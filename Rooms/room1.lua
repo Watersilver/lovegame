@@ -26,7 +26,7 @@ room.upTrans = {
   }
 }
 
-sh.calculate_total_scale{game_scale=2}
+room.game_scale = 2
 
 room.room_parts = {}
 

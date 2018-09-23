@@ -96,7 +96,7 @@ function im.load_sprite(args)
     sprite.cx = width * 0.5
     sprite.cy = height * 0.5
 
-    -- Slice image
+    -- Slice image WARNING: This table starts from ZERO!!!!
     local frames = 0
     for j = 0, columns-1 do
       for i = 0, rows-1 do

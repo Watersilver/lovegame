@@ -15,14 +15,14 @@ room.rightTrans = {}
 room.leftTrans = {}
 room.upTrans = {}
 
-room.game_scale = 2
+room.game_scale = 1
 
 room.room_parts = {}
 
 ----------Start of arrays of geography of parts of room----------
-local room_part = {'P1'}
-room_part.x_that_I_start = 300
-room_part.y_that_I_start = 200
+local room_part = {'mainMenu'}
+room_part.x_that_I_start = 0
+room_part.y_that_I_start = 0
 
 table.insert(room.room_parts, room_part)
 ---
@@ -31,4 +31,4 @@ table.insert(room.room_parts, room_part)
 
 rm.build_room(room)
 
-return assert(love.filesystem.load("Rooms/room1.lua"))()
+return room

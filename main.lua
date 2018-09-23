@@ -30,7 +30,9 @@ function love.load()
   ps.pw:setCallbacks(beginContact, endContact, preSolve, postSolve)
 
   --dofile("Rooms/room1.lua")
-  game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
+  -- game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
+  game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
+  sh.calculate_total_scale{game_scale=game.room.game_scale}
 end
 
 function beginContact(a, b, coll)
@@ -152,10 +154,22 @@ function love.update(dt)
 
 
       local playa = game.transitioning.playa
-      playa.body:setPosition(trans.player_target_coords(playa.x, playa.y))
+      if playa then
+        playa.body:setPosition(trans.player_target_coords(playa.x, playa.y))
+      end
 
       game.paused = false
       game.transitioning = false
+
+      for _, layer in ipairs(o.draw_layers) do
+        for _, object in ipairs(layer) do
+          -- turn off onPreviousRoom because the transition is over
+          -- It needs to be false for the next trans to function correctly
+          object.onPreviousRoom = false
+        end
+      end
+
+      sh.calculate_total_scale{game_scale=room.game_scale}
 
     end
 
@@ -341,7 +355,7 @@ function love.draw()
         end
 
       -- Transition drawing mode
-      else
+      elseif game.transitioning.type == "scrolling" then
 
         for layer = 1, layers do
           local drawnum = #o.draw_layers[layer]
@@ -349,6 +363,22 @@ function love.draw()
             o.draw_layers[layer][i]:trans_draw()
           end
         end
+
+      else -- White screen
+
+        for layer = 1, layers do
+          local drawnum = #o.draw_layers[layer]
+          for i = 1, drawnum do
+            local obj = o.draw_layers[layer][i]
+            if obj.onPreviousRoom then
+              obj:draw()
+            end
+          end
+        end
+        love.graphics.setColor(COLORCONST*0.9, COLORCONST*0.9, COLORCONST*0.9, COLORCONST)
+        love.graphics.rectangle("fill", 0, 0, 800, 450)
+        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+
 
       end
 
