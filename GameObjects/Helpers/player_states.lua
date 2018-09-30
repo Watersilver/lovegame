@@ -314,7 +314,7 @@ end
 
 player_states.check_gripping = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if not trig.grip then
+  if not trig.grip or not instance.grippedOb.exists then
     instance.animation_state:change_state(instance, dt, side .. "walk")
   end
 end
@@ -364,7 +364,7 @@ player_states.end_gripping = function(instance, dt, side)
     instance.x_scale = 1
   end
   instance.grippedOb = nil
-  if instance.grip then instance.grip:destroy(); instance.grip = nil end
+  if instance.grip and not instance.grip:isDestroyed() then instance.grip:destroy(); instance.grip = nil end
 end
 
 player_states.run_lifting = function(instance, dt, side)

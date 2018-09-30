@@ -1,13 +1,6 @@
 -- removes scaled sprite blurriness
 love.graphics.setDefaultFilter("nearest")
 
--- Constants
-if love.getVersion() < 11 then
-  COLORCONST = 255
-else
-  COLORCONST = 1
-end
-
 local im = {}
 
 im.spriteSettings = {

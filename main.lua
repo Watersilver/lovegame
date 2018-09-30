@@ -1,3 +1,4 @@
+local verh = require "version_handling"
 local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local p = require "GameObjects.BoxTest"
@@ -5,12 +6,38 @@ local u = require "utilities"
 local sh = require "scaling_handler"
 local inp = require "input"
 local im = require "image"
+local font = require "font"
 local game = require "game"
 local inv = require "inventory"
 local trans = require "transitions"
 
 local gamera = require "gamera.gamera"
 
+
+-- Set up save directory
+local sd = love.filesystem.getSaveDirectory()
+if love.getVersion() < 11 then
+  if not love.filesystem.exists("game_settings.lua") then
+    local gsdcontents = love.filesystem.read("game_settings_defaults.lua")
+    local newfile = love.filesystem.newFile("game_settings.lua")
+    newfile:close()
+    local success = love.filesystem.write("game_settings.lua", gsdcontents)
+    if not success then love.errhand("Failed to write game_settings") end
+  end
+else -- We'll see. Look at version handling
+end
+local success = love.filesystem.createDirectory("Saves")
+if not success then love.errhand("Failed to create save directory ") end
+
+-- Load stuff from save directory
+local gs = require "game_settings"
+
+-- Create table to save temporary stuff for current session
+session = {}
+local session = session
+
+
+-- Set up cameras
 mainCamera = gamera.new(0,0,800,450)
 local cam = mainCamera
 cam.xt = 0
@@ -23,7 +50,7 @@ hud.yt = 0
 sh.calculate_total_scale{game_scale=2}
 
 
-fuck = 0
+if not fuck then fuck = 0 end
 
 
 function love.load()

@@ -1435,7 +1435,7 @@ Playa.functions = {
     if self.sensors.rightTouch then
       self.db.rightcol = 0
     end
-if self.onPreviousRoom then fuck = 1 else fuck = 0 end
+
     -- Turn off triggers
     triggersdebug = {}
     for trigger, _ in pairs(self.triggers) do

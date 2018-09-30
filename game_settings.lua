@@ -1,3 +1,0 @@
-local gs = {}
-
-return gs

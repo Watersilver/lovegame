@@ -295,15 +295,19 @@ local mo = {}
       if trig.walk_down then
         instance.animation_state:change_state(instance, dt, "downwalk")
         return true
+      elseif trig.walk_up then
+        instance.animation_state:change_state(instance, dt, "upwalk")
+        return true
       elseif trig.walk_right then
         instance.animation_state:change_state(instance, dt, "rightwalk")
         return true
       elseif trig.walk_left then
         instance.animation_state:change_state(instance, dt, "leftwalk")
         return true
-      elseif trig.walk_up then
-        instance.animation_state:change_state(instance, dt, "upwalk")
-        return true
+      -- Changed this so up takes precedence in this case. Change back if needed
+      -- elseif trig.walk_up then
+      --   instance.animation_state:change_state(instance, dt, "upwalk")
+      --   return true
       end
       return false
     end,
