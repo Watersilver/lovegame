@@ -1,9 +1,10 @@
+local verh = require "version_handling"
 local id = require "input_defaults"
 
 local input = {}
 input.controllers = {}
 
-local player1defaults = id.player1defaults
+local player1defaults = id.player1
 
 function input.set_input(arg)
   input.controllers.player1 = arg or player1defaults
@@ -35,6 +36,16 @@ function input.check_input()
   end
 end
 
-input.set_input()
+if not verh.fileExists("key_config.lua") then
+  local inpcontents = love.filesystem.read("input_defaults.lua")
+  local newfile = love.filesystem.newFile("key_config.lua")
+  newfile:close()
+  local success = love.filesystem.write("key_config.lua", inpcontents)
+  if not success then love.errhand("Failed to write key_config") end
+end
+
+local kc = require "key_config"
+
+input.set_input(kc.player1)
 
 return input

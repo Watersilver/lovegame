@@ -73,7 +73,7 @@ function Playa.initialize(instance)
   -- Debug
   instance.db = {downcol = 255, upcol = 255, leftcol = 255, rightcol = 255}
   instance.floorFriction = 1 -- For testing. This info will normaly ba aquired through floor collisions
-  instance.floorViscosity = nil-- For testing. This info will normaly ba aquired through floor collisions
+  instance.floorViscosity = nil -- For testing. This info will normaly ba aquired through floor collisions
 
   instance.persistent = true
 

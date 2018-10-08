@@ -6,7 +6,7 @@ local u = require "utilities"
 local sh = require "scaling_handler"
 local inp = require "input"
 local im = require "image"
-local font = require "font"
+local text = require "text"
 local game = require "game"
 local inv = require "inventory"
 local trans = require "transitions"
@@ -15,25 +15,23 @@ local gamera = require "gamera.gamera"
 
 
 -- Set up save directory
-local sd = love.filesystem.getSaveDirectory()
-if love.getVersion() < 11 then
-  if not love.filesystem.exists("game_settings.lua") then
-    local gsdcontents = love.filesystem.read("game_settings_defaults.lua")
-    local newfile = love.filesystem.newFile("game_settings.lua")
-    newfile:close()
-    local success = love.filesystem.write("game_settings.lua", gsdcontents)
-    if not success then love.errhand("Failed to write game_settings") end
-  end
-else -- We'll see. Look at version handling
+if not verh.fileExists("game_settings.lua") then
+  local gsdcontents = love.filesystem.read("game_settings_defaults.lua")
+  local newfile = love.filesystem.newFile("game_settings.lua")
+  newfile:close()
+  local success = love.filesystem.write("game_settings.lua", gsdcontents)
+  if not success then love.errhand("Failed to write game_settings") end
 end
 local success = love.filesystem.createDirectory("Saves")
-if not success then love.errhand("Failed to create save directory ") end
+if not success then love.errhand("Failed to create save directory") end
 
 -- Load stuff from save directory
 local gs = require "game_settings"
 
 -- Create table to save temporary stuff for current session
-session = {}
+session = {
+  save = nil
+}
 local session = session
 
 
@@ -51,7 +49,7 @@ sh.calculate_total_scale{game_scale=2}
 
 
 if not fuck then fuck = 0 end
-
+-- love.keyboard.setTextInput(false)
 
 function love.load()
   ps.pw:setCallbacks(beginContact, endContact, preSolve, postSolve)
@@ -60,6 +58,18 @@ function love.load()
   -- game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
   game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
   sh.calculate_total_scale{game_scale=game.room.game_scale}
+end
+
+function love.textinput(t)
+  if string.len(text.input) > text.inputLim then return end
+  text.input = text.input .. t
+end
+
+function love.keypressed(key, scancode)
+  if key == "backspace" then
+    text.input = u.utf8_backspace(text.input, 1)
+  end
+  text.key = scancode ~= "return" and scancode or text.key
 end
 
 function beginContact(a, b, coll)
@@ -145,8 +155,10 @@ function postSolve(a, b, coll)
     end
 end
 
-
 function love.update(dt)
+  -- Handle backspace text delete here, because I'm stupid and didn't use the event
+  -- text.check_backspace()
+
   if o.to_be_added[1] then
     o.to_be_added:add_all()
   end

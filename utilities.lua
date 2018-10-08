@@ -1,3 +1,5 @@
+utf8 = require("utf8")
+
 local u = {}
 
 local random = math.random
@@ -43,6 +45,19 @@ end
 function u.choose(x, y)
   choice = random()
   return choice>0.5 and x or y
+end
+
+-- Delete "chars" characters from the end of the string. UTF-8 friendly
+function u.utf8_backspace(t, chars)
+    -- get the byte offset to the last UTF-8 character in the string.
+    local byteoffset = utf8.offset(t, -chars)
+
+    if byteoffset then
+        -- remove the last UTF-8 character.
+        -- string.sub operates on bytes rather than UTF-8 characters, so we couldn't do string.sub(text, 1, -2).
+        return string.sub(t, 1, byteoffset - 1)
+    end
+    return ""
 end
 
 return u

@@ -1,6 +1,6 @@
 local id = {}
 
-id.player1defaults = {
+id.player1 = {
   up = "up",
   down = "down",
   left = "left",
