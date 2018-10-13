@@ -10,6 +10,7 @@ local text = require "text"
 local game = require "game"
 local inv = require "inventory"
 local trans = require "transitions"
+local rm = require("Rooms.room_manager")
 
 local gamera = require "gamera.gamera"
 
@@ -28,9 +29,15 @@ if not success then love.errhand("Failed to create save directory") end
 -- Load stuff from save directory
 local gs = require "game_settings"
 
+if gs.fullscreen then love.window.setFullscreen(true) end
+
 -- Create table to save temporary stuff for current session
 session = {
-  save = nil
+  save = {
+    playerMobility = nil,
+    playerBrakes = nil
+  },
+  mslQueue = u.newQueue()
 }
 local session = session
 
@@ -68,6 +75,8 @@ end
 function love.keypressed(key, scancode)
   if key == "backspace" then
     text.input = u.utf8_backspace(text.input, 1)
+  elseif key == "f11" then
+    love.window.setFullscreen(not love.window.getFullscreen())
   end
   text.key = scancode ~= "return" and scancode or text.key
 end
@@ -156,9 +165,6 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
-  -- Handle backspace text delete here, because I'm stupid and didn't use the event
-  -- text.check_backspace()
-
   if o.to_be_added[1] then
     o.to_be_added:add_all()
   end
@@ -176,7 +182,10 @@ function love.update(dt)
       trans.remove_from_world_previous_room()
       local prevWidth = game.room.width
       local prevHeight = game.room.height
-      game.room = assert(love.filesystem.load(game.transitioning.roomTarget))()
+      -- game.room = assert(love.filesystem.load(game.transitioning.roomTarget))()
+      game.room = game.change_room(game.transitioning.roomTarget)
+      mainCamera:setWorld(0, 0, game.room.width, game.room.height)
+      rm.build_room(game.room)
       game.room.prevWidth = prevWidth
       game.room.prevHeight = prevHeight
       trans.caml, trans.camu, trans.camw, trans.camh = cam:getVisible()
@@ -216,6 +225,11 @@ function love.update(dt)
 
 
   if not game.paused then
+    -- Make sure missiles don't exceed mslLim game setting
+    if session.mslQueue.length > gs.mslLim then
+      local removedMsl = session.mslQueue:remove()
+      removedMsl.pastMslLim = true
+    end
 
     local eUpnum = #o.earlyUpdaters
     if eUpnum > 0 then
@@ -443,7 +457,7 @@ function love.draw()
   end)
 
   love.graphics.print(love.timer.getFPS())
-  if fuck then love.graphics.print(fuck, 0, 13) end
+  if fuck then love.graphics.print(fuck, 0, 133) end
   local debiter = 0
   if triggersdebug then
     for trigger, _ in pairs(triggersdebug) do
@@ -469,6 +483,7 @@ function love.resize( w, h )
 
   -- Set camera display window size and offset
   cam:setWindow(sh.calculate_resized_window( w, h ))
+  hud:setWindow(sh.calculate_resized_hud( w, h ))
 
   -- Determine camera scale due to window size
   sh.calculate_total_scale{resized=true}

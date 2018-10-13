@@ -1,6 +1,7 @@
 local rm = require("Rooms.room_manager")
 local sh = require "scaling_handler"
 local trans = require "transitions"
+local game = require "game"
 
 
 local room = {}
@@ -31,4 +32,5 @@ table.insert(room.room_parts, room_part)
 
 rm.build_room(room)
 
-return assert(love.filesystem.load("Rooms/room1.lua"))()
+-- return assert(love.filesystem.load("Rooms/room1.lua"))()
+return game.change_room("Rooms/room1.lua")

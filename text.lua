@@ -1,4 +1,4 @@
-u = require "utilities"
+local u = require "utilities"
 
 love.keyboard.setKeyRepeat(true)
 

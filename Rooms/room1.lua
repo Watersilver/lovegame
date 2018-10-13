@@ -7,7 +7,7 @@ local room = {}
 room.width = 800
 room.height = 450
 
-mainCamera:setWorld(0, 0, room.width, room.height)
+-- mainCamera:setWorld(0, 0, room.width, room.height)
 
 room.downTrans = {}
 room.rightTrans = {}
@@ -146,7 +146,7 @@ table.insert(room.room_parts, room_part)
 ----------End of arrays of geography of parts of room----------
 
 
-rm.build_room(room)
+-- rm.build_room(room)
 
 
 return room

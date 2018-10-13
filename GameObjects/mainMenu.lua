@@ -10,7 +10,7 @@ local inp = require "input"
 local gs = require "game_settings"
 
 local floor = math.floor
-local clamp = function (low, n, high) return math.min(math.max(n, low), high) end
+local clamp = u.clamp
 
 local font = text.font
 local textScale = 0.5
@@ -35,6 +35,9 @@ local backspaceMenu = {
   1, -- Game Settings
   5, -- Key Config
 }
+
+local tipboxX, tipboxY, tipboxRepeats, tipboxRepeatsH, tipboxTip =
+  9, 222, 0, 0, ""
 
 local function start_game(saveName)
   session.save = require ("Saves/" .. saveName)
@@ -204,7 +207,7 @@ MainMenu.functions = {
 
 load = function (self)
   self.menus = {
-    -- Menu1: New Game, Load Game, Game Settings
+    -- Menu1: New Game (draw tipbox), Load Game, Game Settings
     {
       items = {
         {
@@ -232,6 +235,14 @@ load = function (self)
             setFont(font.prstartk)
             love.graphics.print("New Game", x, y, 0, self.scale, self.scale, 0, 8)
             setFont(font.default)
+
+            -- TipBox
+            if tipboxTip ~= "" then
+              normal_menuBox(self, tipboxX, tipboxY, tipboxRepeats, tipboxRepeatsH)
+              setFont(font.prstartk)
+              love.graphics.print("Tip:\n\n" .. tipboxTip, tipboxX, tipboxY, 0, 0.5, 0.5, 0, 8)
+              setFont(font.default)
+            end
           end
         },
         {
@@ -528,7 +539,7 @@ load = function (self)
           scale = 0.5,
           sprite = "Menu/SimpleMenuBox",
           sprite2 = "Menu/SimpleSliderNTickbox",
-          repeats = 6,
+          repeats = 17,
           sliderRepeats = 4,
           cursorable = {xoff = - 20, yoff = 0},
           slider = 0.5,
@@ -559,10 +570,62 @@ load = function (self)
             horizontal_menuBox(self, x, y, self.repeats)
 
             -- Slider
-            normal_slider(self, x, y, self.sliderRepeats, 50)
+            normal_slider(self, x, y, self.sliderRepeats, 230)
 
             setFont(font.prstartk)
-            love.graphics.print(menuHandler.tempGs.mslLim, x, y, 0, self.scale, self.scale, 0, 8)
+            love.graphics.print("Bullets limit: " .. menuHandler.tempGs.mslLim, x, y, 0, self.scale, self.scale, 0, 8)
+            setFont(font.default)
+          end
+        },
+        {
+          -- Fullscreen
+          sprite = "Menu/SimpleMenuBox",
+          sprite2 = "Menu/SimpleSliderNTickbox",
+          cursorable = {xoff = - 20, yoff = 0},
+          x = 250,
+          y = 200,
+          scale = 0.5,
+          repeats = 15,
+          checkmark = 0, -- 0 = unchecked, 1 = checked
+          tipText =
+            "Press F11 to switch\n\z
+            between Fullscreen\n\z
+            and windowed modes.",
+          load = function (self, menuHandler)
+            self.checkmark = menuHandler.tempGs.fullscreen and 1 or 0
+          end,
+          action = function (self, menuHandler)
+            if menuHandler.tempGs.fullscreen then
+              menuHandler.tempGs.fullscreen = false
+            else
+              menuHandler.tempGs.fullscreen = true
+            end
+            self.checkmark = menuHandler.tempGs.fullscreen and 1 or 0
+          end,
+          tip = function (self)
+            if tipboxTip ~= self.tipText then tipboxTip = self.tipText end
+            tipboxRepeats = 13
+            tipboxRepeatsH = 4
+          end,
+          drawMe = function (self, image_index, x, y)
+            typical_drawMe(self.sprite, image_index, x, y)
+          end,
+          drawMe2 = function (self, image_index, x, y)
+            typical_drawMe(self.sprite2, image_index, x, y)
+          end,
+          -- Custom Draw
+          draw = function (self, menuHandler)
+            local gxo, gyo =
+            self.menu.globalXOffset or 0, self.menu.globalYOffset or 0
+            local x, y = self.x + gxo, self.y + gyo
+
+            -- MenuBox
+            horizontal_menuBox(self, x, y, self.repeats)
+
+            -- Text
+            setFont(font.prstartk)
+            love.graphics.print("Fullscreen on start: ", x, y, 0, self.scale, self.scale, 0, 8)
+            self:drawMe2(4+self.checkmark, x + 250, y)
             setFont(font.default)
           end
         },
@@ -571,7 +634,7 @@ load = function (self)
           sprite = "Menu/SimpleMenuBox",
           cursorable = {xoff = - 20, yoff = 0},
           x = 250,
-          y = 200,
+          y = 250,
           scale = 0.5,
           repeats = 7,
           action = function (self, menuHandler)
@@ -600,7 +663,7 @@ load = function (self)
           sprite = "Menu/SimpleMenuBox",
           cursorable = {xoff = - 20, yoff = 0},
           x = 250,
-          y = 250,
+          y = 300,
           scale = 0.5,
           repeats = 11,
           action = function (self, menuHandler)
@@ -631,7 +694,7 @@ load = function (self)
           sprite = "Menu/SimpleMenuBox",
           cursorable = {xoff = - 20, yoff = 0},
           x = 250,
-          y = 300,
+          y = 350,
           scale = 0.5,
           repeats = 8,
           action = function (self, menuHandler)
@@ -674,10 +737,10 @@ load = function (self)
           y = 177,
           repeats = 19,
           scale = 0.5,
-          keyNameTable = {"Up: ", "Right: ", "Left: ", "Down: ",
+          keyNameTable = {"Up: ", "Right: ", "Left: ", "Down: ", "Start (aka space): ",
             "Item1 (aka a): ", "Item2 (aka s): ", "Item3 (aka d): ",
             "Item4 (aka z): ", "Item5 (aka x): ", "Item6 (aka c): "},
-          keyTable = {"up", "right", "left", "down",
+          keyTable = {"up", "right", "left", "down", "start",
             "a", "s", "d",
             "z", "x", "c"},
           load = function (self, menuHandler)
@@ -784,6 +847,11 @@ update = function (self, dt)
     self.currentMenu = backspaceMenu[self.currentMenu]
   end
   if currMenu.cursor then
+    if currMenu.cursor.items[currMenu.cursor.pos].tip then
+      currMenu.cursor.items[currMenu.cursor.pos]:tip(self)
+    else
+      tipboxTip = ""
+    end
     if self.upPressed then
       currMenu.cursor.pos = currMenu.cursor.pos - 1
       if currMenu.cursor.pos < 1 then currMenu.cursor.pos = #currMenu.cursor.items end

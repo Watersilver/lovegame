@@ -1,4 +1,5 @@
 local p = require "GameObjects.prototype"
+local gs = require "game_settings"
 local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local trans = require "transitions"
@@ -33,7 +34,6 @@ local function calculate_offset(side, phase)
 end
 
 function Missile.initialize(instance)
-
   instance.iox = 0
   instance.ioy = 0
   instance.x_scale = 1
@@ -50,7 +50,8 @@ function Missile.initialize(instance)
     sensor = true,
     density = 0,
     shape = ps.shapes.missile,
-    categories = {PLAYERATTACKCAT}
+    categories = {PLAYERATTACKCAT},
+    -- masks = {FLOORCAT}
   }
   instance.creator = nil -- Object that swings me
   instance.side = nil -- down, right, left, up
@@ -59,6 +60,7 @@ end
 Missile.functions = {
   load = function (self)
     self.sox, self.soy = calculate_offset(self.side)
+    session.mslQueue:add(self)
   end,
 
   early_update = function(self, dt)
@@ -96,13 +98,30 @@ Missile.functions = {
 
   end,
 
-  update = function(self, td)
+  update = function(self, dt)
     -- if self.spritejoint then self.spritejoint:destroy() end
     local x, y = self.body:getPosition()
     -- self.spritebody:setPosition(x, y)
     -- self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
     self.x, self.y = x, y
+
+    if self.pastMslLim then
+      self.image_index = self.image_index - dt * 60
+      if self.image_index < 0 then
+        self.image_index = 0
+        o.removeFromWorld(self)
+      end
+    end
+    if not self.outOfBounds then
+      if x < 0 or x > game.room.width then
+        self.outOfBounds = true
+        self.trans_draw = function() end
+      elseif y < 0 or y > game.room.height then
+        self.outOfBounds = true
+        self.trans_draw = function() end
+      end
+    end
   end,
 
   draw = function(self, td)
@@ -176,6 +195,11 @@ Missile.functions = {
   end,
 
   delete = function(self)
+    if self.pastMslLim then
+
+    else
+      session.mslQueue:remove()
+    end
     if self == self.creator.missile then self.creator.missile = nil end
   end
 }

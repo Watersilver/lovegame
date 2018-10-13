@@ -3,6 +3,7 @@ local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local trans = require "transitions"
 local game = require "game"
+local u = require "utilities"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -10,6 +11,7 @@ local dc = require "GameObjects.Helpers.determine_colliders"
 local Sword = {}
 
 local floor = math.floor
+local clamp = u.clamp
 local pi = math.pi
 
 --  Calculate sword position and angle offset due to creator's side
@@ -91,7 +93,8 @@ function Sword.initialize(instance)
   instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",
-    gravityScaleFactor = 0
+    gravityScaleFactor = 0,
+    -- masks = {FLOORCAT}
   }
   instance.creator = nil -- Object that swings me
   instance.side = nil -- down, right, left, up
@@ -244,7 +247,7 @@ Sword.functions = {
     if pushback and not self.hitWall then
       local lvx, lvy = cr.body:getLinearVelocity()
       local crmass = cr.body:getMass()
-      local crbrakes = cr.brakes
+      local crbrakes = clamp(0, cr.brakes, cr.brakesLim)
       cr.body:applyLinearImpulse(-lvx * crmass, -lvy * crmass)
       if self.side == "down" then
         px, py = 0, -10 * crmass * crbrakes

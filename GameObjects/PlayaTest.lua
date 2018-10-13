@@ -24,10 +24,16 @@ local sh = require "GameObjects.shadow"
 local sqrt = math.sqrt
 local floor = math.floor
 local choose = u.choose
+local push = u.push
+local distanceSqared2d = u.distanceSqared2d
 local insert = table.insert
 local remove = table.remove
 local max = math.max
+local min = math.min
 local abs = math.abs
+
+local pi = math.pi
+local huge = math.huge
 
 local check_walk = hps.check_walk
 local check_halt = hps.check_halt
@@ -92,9 +98,12 @@ function Playa.initialize(instance)
   instance.zvel = 0 -- z axis velocity
   instance.gravity = 350
   instance.image_speed = 0
-  instance.mobility = 300 -- 600
-  instance.brakes = 3 -- 6
+  instance.mobility = session.save.playerMobility or 300 -- 600
+  instance.brakes = session.save.playerBrakes or 3 -- 6
+  instance.brakesLim = 10
   instance.maxspeed = 100
+  instance.input = {}
+  instance.previnput = {}
   instance.triggers = {}
   instance.sensors = {downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={}}
   instance.missile_cooldown_limit = 0.3
@@ -111,12 +120,12 @@ function Playa.initialize(instance)
     upSensor = ps.shapes.plusens,
     leftSensor = ps.shapes.pllsens,
     rightSensor = ps.shapes.plrsens,
+    categories = {DEFAULTCAT, FLOORCOLLIDECAT},
     masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.sprite_info = im.spriteSettings.playerSprites
-  -- instance.sprite_info.spritefixture_properties = {shape = ps.shapes.rect1x1}
-
+  instance.floorTiles = {role = "playerFloorTilesIndex"}
   instance.player = "player1"
   instance.layer = 10
   instance.movement_state = sm.new_state_machine{
@@ -1335,6 +1344,25 @@ end
 
 Playa.functions = {
   update = function(self, dt)
+    -- Determine movement modifiers due to floor
+    if self.floorTiles[1] then
+      -- I could be stepping on up to four tiles. Find closest to determine mods
+      local closestTile
+      local closestDistance = huge
+      local previousClosestDistance
+      for _, floorTile in ipairs(self.floorTiles) do
+        previousClosestDistance = closestDistance
+        closestDistance = min(distanceSqared2d(self.x, self.y, floorTile.xstart, floorTile.ystart), closestDistance)
+        if closestDistance < previousClosestDistance then
+          closestTile = floorTile
+        end
+      end
+      self.floorFriction = closestTile.floorFriction
+      self.floorViscosity = closestTile.floorViscosity
+    else
+      self.floorFriction = 1
+      self.floorViscosity = nil
+    end
 
     -- Return movement table based on the long term action you want to take (Npcs)
     -- Return movement table based on the given input (Players)
@@ -1342,6 +1370,33 @@ Playa.functions = {
     self.previnput = inp.previous[self.player]
     if self.input.start == 1 and self.previnput.start == 0 then
       game.pause(self)
+    end
+
+    -- Check if I must try to activate activatable
+    if inp.enterPressed then
+      local state = self.animation_state.state
+      local touchSide
+      if state:find("up") then
+        touchSide = "upTouchedObs"
+      elseif state:find("down") then
+        touchSide = "downTouchedObs"
+      elseif state:find("left") then
+        touchSide = "leftTouchedObs"
+      else
+        touchSide = "rightTouchedObs"
+      end
+      -- Cycle through touched obs to see if any are activatables!
+      local activatedSomething = false
+      for _, other in ipairs(self.sensors[touchSide]) do
+        if not activatedSomething then
+          -- Check if activatable and if yes activate
+          if other.activate and not other.unactivatable then
+            other.activated = true
+            other.unactivatable = true
+            other.activator = self
+          end
+        end
+      end
     end
 
     -- Store usefull stuff
@@ -1368,8 +1423,8 @@ Playa.functions = {
     -- Determine triggers
     local trig = self.triggers
     self.angle = self.angle + dt*self.angvel
-    while self.angle >= math.pi do
-      self.angle = self.angle - math.pi
+    while self.angle >= pi do
+      self.angle = self.angle - pi
       trig.full_rotation = true
     end
     self.image_index = (self.image_index + dt*60*self.image_speed)
@@ -1394,7 +1449,9 @@ Playa.functions = {
       self.zvel = self.zvel - self.gravity * dt
     end
     self.zo = self.jo + self.fo
+    -- If above ground level
     if self.zo < 0 then
+      -- Create shadow
       if not self.shadow then
         self.shadow = sh:new{
           caster = self, layer = self.layer-1,
@@ -1403,8 +1460,11 @@ Playa.functions = {
         o.addToWorld(self.shadow)
       end
     else
-      if self.shadow then o.removeFromWorld(self.shadow) end
-      self.shadow = nil
+      -- Destroy Shadow
+      if self.shadow then
+        o.removeFromWorld(self.shadow)
+        self.shadow = nil
+      end
     end
 
     local ms = self.movement_state
@@ -1545,23 +1605,29 @@ Playa.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    if other.floor then
+      other.playerFloorTilesIndex = push(self.floorTiles, other)
+    end
+
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
       local sensorID = myF:getUserData() -- string
 
       if sensorID then
+        local sensors = self.sensors
         if not other.unpushable == true then
           local onEdge
           if other.edge then
             other.onEdge = ec.isOnEdge(other, self)
           end
           if not other.onEdge then
-            local sensors = self.sensors
+            -- local sensors = self.sensors
             sensors[sensorID] = sensors[sensorID] or 0
             sensors[sensorID] = sensors[sensorID] + 1
-            insert(sensors[sensorID .. "edObs"], other)
+            -- insert(sensors[sensorID .. "edObs"], other)
           end
         end
+        insert(sensors[sensorID .. "edObs"], other)
       end
 
     else
@@ -1575,17 +1641,22 @@ Playa.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    if other.floor then
+      u.free(self.floorTiles, other.playerFloorTilesIndex)
+    end
+
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
       local sensorID = myF:getUserData()
 
       if sensorID then
+        local sensors = self.sensors
         if not other.unpushable == true then
-          local sensors = self.sensors
+          -- local sensors = self.sensors
 
-          for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
-            if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
-          end
+          -- for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
+          --   if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
+          -- end
 
           if not other.onEdge then
             if sensors[sensorID] then
@@ -1594,6 +1665,9 @@ Playa.functions = {
             end
           end
 
+        end
+        for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
+          if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
         end
       end
 

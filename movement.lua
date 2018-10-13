@@ -1,6 +1,8 @@
 local ps = require "physics_settings"
 local u = require "utilities"
 
+local clamp = u.clamp
+
 -- To be used in check_walk_while_walking function
 local walktable = {
   down =
@@ -92,7 +94,7 @@ local mo = {}
       local myinput = object.input
       local mass = object.body:getMass()
       local mobility = object.mobility or 600
-      local brakes = object.brakes or 6
+      local brakes = clamp(0, object.brakes or 6, object.brakesLim)
       local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
       local inversemaxspeed = 1/object.maxspeed
 
@@ -105,7 +107,6 @@ local mo = {}
         if object.floorViscosity then
           if object.floorViscosity == "water" then
             inversemaxspeed = inversemaxspeed * 2
-            mobility = mobility * 0.1
             brakes = brakes * 2
           end
         end
@@ -124,6 +125,7 @@ local mo = {}
       if infx == 0 and infy == 0 then
         -- This friction is for when you're actively trying to break
         -- Used when there is no input
+        if brakes > object.brakesLim then brakes = object.brakesLim end
         ffx = - ffx * mass * brakes
         ffy = - ffy * mass * brakes
       else
@@ -140,18 +142,14 @@ local mo = {}
     stand_still = function(object, dt)
       if object.zo ~= 0 then return end
       local mass = object.body:getMass()
-      local mobility = object.mobility or 600
-      local brakes = object.brakes or 6
+      local brakes = clamp(0, object.brakes or 6, object.brakesLim)
       local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
 
       if floorFriction < 1 then
-        mobility = mobility * floorFriction
         brakes = brakes * floorFriction
       end
       if object.floorViscosity then
         if object.floorViscosity == "water" then
-          inversemaxspeed = inversemaxspeed * 2
-          mobility = mobility * 0.1
           brakes = brakes * 2
         end
       end

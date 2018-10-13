@@ -74,6 +74,12 @@ function sh.calculate_resized_window( w, h )
 
 end
 
+-- Return the result of calculate_resized_window without doing
+-- any operations and messing up previous_w and previous_h
+function sh.calculate_resized_hud( w, h )
+  return (w - current_w) * 0.5, (h - current_h) * 0.5, current_w, current_h
+end
+
 function sh.calculate_initial_window(cam)
   local _,_,ww,wh = cam:getWorld()
   initial_w = math.max(initial_w, ww)

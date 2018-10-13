@@ -1,4 +1,4 @@
-utf8 = require("utf8")
+local utf8 = require("utf8")
 
 local u = {}
 
@@ -32,10 +32,19 @@ function u.swap(otable, index1, index2)
   otable[index2][otable.role], otable[index1][otable.role]
 end
 
+function u.clamp(low, n, high)
+  return math.min(math.max(n, low), high)
+end
+
 function u.normalize2d(x, y)
   local invmagn = sqrt(x*x + y*y)
   invmagn = invmagn>0 and 1/invmagn or 1
   return x*invmagn, y*invmagn
+end
+
+function u.distanceSqared2d(x0, y0, x1, y1)
+  local xd, yd = x1-x0, y1-y0
+  return xd * xd + yd * yd
 end
 
 function u.sign(x)
@@ -58,6 +67,29 @@ function u.utf8_backspace(t, chars)
         return string.sub(t, 1, byteoffset - 1)
     end
     return ""
+end
+
+-- Queue data structure
+function u.newQueue()
+  return {
+    first = 0,
+    last = -1,
+    length = 0,
+    add = function (self, value)
+      self.last = self.last + 1
+      self[self.last] = value
+      self.length = self.length + 1
+    end,
+    remove = function (self)
+      local first = self.first
+      if first > self.last then error("queue is empty") end
+      local value = self[first]
+      self[first] = nil        -- to allow garbage collection
+      self.first = first + 1
+      self.length = self.length - 1
+      return value
+    end
+  }
 end
 
 return u

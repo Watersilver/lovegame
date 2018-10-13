@@ -55,7 +55,8 @@ function HeldSword.initialize(instance)
     sensor = true,
     density = 0,
     shape = ps.shapes.swordHeld,
-    categories = {PLAYERATTACKCAT}
+    categories = {PLAYERATTACKCAT},
+    -- masks = {FLOORCAT}
   }
   instance.creator = nil -- Object that swings me
   instance.side = nil -- down, right, left, up
