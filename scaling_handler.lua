@@ -76,8 +76,22 @@ end
 
 -- Return the result of calculate_resized_window without doing
 -- any operations and messing up previous_w and previous_h
-function sh.calculate_resized_hud( w, h )
+-- USE ON RESIZE CALLBACK AFTER calculate_resized_window!
+function sh.get_resized_window( w, h )
   return (w - current_w) * 0.5, (h - current_h) * 0.5, current_w, current_h
+end
+
+-- USE ON RESIZE CALLBACK AFTER calculate_resized_window!
+function sh.get_resized_text_window( w, h )
+  return
+    -- top
+    (w - current_w * 0.5) * 0.5,
+    -- left
+    (h + current_h * 0.5) * 0.5,
+    -- width
+    current_w * 0.5,
+    -- height
+    current_h * 0.2
 end
 
 function sh.calculate_initial_window(cam)

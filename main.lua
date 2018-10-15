@@ -7,13 +7,14 @@ local sh = require "scaling_handler"
 local inp = require "input"
 local im = require "image"
 local text = require "text"
+local font = text.font
+local dialogue = require "dialogue"
 local game = require "game"
 local inv = require "inventory"
 local trans = require "transitions"
 local rm = require("Rooms.room_manager")
 
 local gamera = require "gamera.gamera"
-
 
 -- Set up save directory
 if not verh.fileExists("game_settings.lua") then
@@ -52,7 +53,14 @@ local hud = gamera.new(0,0,400,225)
 hud.xt = 0
 hud.yt = 0
 
-sh.calculate_total_scale{game_scale=2}
+local textCam = gamera.new(0,0,400,90)
+textCam.xt = 0
+textCam.yt = 0
+textCam:setWindow(sh.get_resized_text_window( love.graphics.getWidth(), love.graphics.getHeight() ))
+dialogue.textBox.l, dialogue.textBox.t, dialogue.textBox.w, dialogue.textBox.h = textCam:getWindow()
+dialogue.textBox.l, dialogue.textBox.t, dialogue.textBox.w, dialogue.textBox.h = dialogue.textBox.l*0.5, dialogue.textBox.t*0.5, dialogue.textBox.w*0.5, dialogue.textBox.h*0.5
+
+sh.calculate_total_scale{game_scale=1}
 
 
 if not fuck then fuck = 0 end
@@ -263,6 +271,11 @@ function love.update(dt)
 
   end
 
+  -- Handle dialogues
+  if dialogue.enable then dialogue.enabled = true; dialogue.enable = false end
+  if dialogue.enabled then
+    dialogue.currentMethod.logic(dt)
+  end
 
 
   -- if o.to_be_deleted[1] and not game.transitioning then
@@ -456,6 +469,15 @@ function love.draw()
     end
   end)
 
+  -- Print dialogues, signs, and generally, in-game text stuff
+  if dialogue.enabled then
+    textCam:setScale(sh.get_window_scale())
+    -- textCam:setWindow(textCam:getWindow())
+    -- textCam:setPosition(textCam.xt, textCam.yt)
+
+    dialogue.currentMethod.draw(textCam)
+  end
+
   love.graphics.print(love.timer.getFPS())
   if fuck then love.graphics.print(fuck, 0, 133) end
   local debiter = 0
@@ -483,7 +505,8 @@ function love.resize( w, h )
 
   -- Set camera display window size and offset
   cam:setWindow(sh.calculate_resized_window( w, h ))
-  hud:setWindow(sh.calculate_resized_hud( w, h ))
+  hud:setWindow(sh.get_resized_window( w, h ))
+  textCam:setWindow(sh.get_resized_text_window( w, h ))
 
   -- Determine camera scale due to window size
   sh.calculate_total_scale{resized=true}

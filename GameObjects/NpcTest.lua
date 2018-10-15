@@ -4,6 +4,7 @@ local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local game = require "game"
 local inp = require "input"
+local dlg = require "dialogue"
 
 local floor = math.floor
 
@@ -35,11 +36,27 @@ end
 NPC.functions = {
   activate = function (self, dt)
     if self.activated then
+      dlg.simpleWallOfText.setUp(
+        {{{COLORCONST,COLORCONST,COLORCONST,COLORCONST},"\z
+        Hi there, little monkey. \z
+        Name's Shitface. Nice to \z
+        meetcha. Fuck off, twit. ",
+        {COLORCONST,COLORCONST/2,COLORCONST/2,COLORCONST},
+        "Hi fuckwad. I must say \z
+        many things, so that we \z
+        may check the scrolling \z
+        thingy. So bear with me."
+        },
+        -1, "left"},
+        self.y,
+        function() self.counter = 5 end
+      )
+      dlg.enable = true
       self.activator.body:setType("static")
       inp.disable_controller(self.activator.player)
       self.counter = 0
     elseif self.active then
-      self.counter = self.counter + dt
+      -- self.counter = self.counter + dt
       if self.counter > 3 then self.active = false end
     else
       self.activator.body:setType("dynamic")

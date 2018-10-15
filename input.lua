@@ -50,13 +50,19 @@ function input.check_input()
       end
     end
   end
+
+  -- Check stuff independent of specific player input
   input.enterPrevious = input.enter
-  if love.keyboard.isDown("return") then
-    input.enter = true
-  else
-    input.enter = false
-  end
+  input.enter = love.keyboard.isDown("return")
   input.enterPressed = input.enter and not input.enterPrevious
+
+  input.upPrevious = input.up
+  input.up = love.keyboard.isDown("up")
+  input.upPressed = input.up and not input.upPrevious
+
+  input.downPrevious = input.down
+  input.down = love.keyboard.isDown("down")
+  input.downPressed = input.down and not input.downPrevious
 end
 
 function input.disable_controller(playername)
