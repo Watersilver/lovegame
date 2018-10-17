@@ -1,6 +1,7 @@
 local gs = require "game_settings"
 local ps = require "physics_settings"
 local im = require "image"
+local snd = require "sound"
 local inp = require "input"
 local inv = require "inventory"
 local p = require "GameObjects.prototype"
@@ -125,7 +126,10 @@ function Playa.initialize(instance)
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.sprite_info = im.spriteSettings.playerSprites
-  instance.floorTiles = {role = "playerFloorTilesIndex"}
+  instance.sounds = snd.load_sounds({
+    swordSwing = {"Lightsaber", extension = ".wav"}
+  })
+  instance.floorTiles = {role = "playerFloorTilesIndex"} -- Tracks what kind of floortiles I'm on
   instance.player = "player1"
   instance.layer = 10
   instance.movement_state = sm.new_state_machine{

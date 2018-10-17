@@ -239,6 +239,19 @@ local mo = {}
           if up == 1 then trig.push_up = true end
         end
 
+        if sens.downTouchedObs[1] then
+          if down == 1 then trig.walk_down = true end
+        end
+        if sens.rightTouchedObs[1] then
+          if right == 1 then trig.walk_right = true end
+        end
+        if sens.leftTouchedObs[1] then
+          if left == 1 then trig.walk_left = true end
+        end
+        if sens.upTouchedObs[1] then
+          if up == 1 then trig.walk_up = true end
+        end
+
 
       else
         if speed > 10 then

@@ -6,6 +6,7 @@ local u = require "utilities"
 local sh = require "scaling_handler"
 local inp = require "input"
 local im = require "image"
+local snd = require "sound"
 local text = require "text"
 local font = text.font
 local dialogue = require "dialogue"
@@ -390,6 +391,9 @@ function love.update(dt)
     end -- game.transitioning
 
   end
+
+  -- Play sounds.
+  snd.play_soundsToBePlayed()
 
 end
 

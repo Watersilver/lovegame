@@ -22,15 +22,14 @@ function NPC.initialize(instance)
     masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
-  instance.sprite_info = {
-    {'Witch/walk_up', 4, padding = 2, width = 16, height = 16}
-  }
-  instance.image_speed = 0
+  instance.sprite_info = im.spriteSettings.npcTestSprites
+  instance.image_speed = 0.05
   instance.image_index = 0
   instance.x_scale = 1
   instance.y_scale = 1
   instance.layer = 10
   instance.zo = 0
+  instance.unpushable = true
 end
 
 NPC.functions = {
@@ -76,6 +75,13 @@ NPC.functions = {
       self.unactivatable = false
       self:activate(dt)
       self.activator = nil
+    end
+  end,
+
+  update = function (self, dt)
+    self.image_index = (self.image_index + dt*60*self.image_speed)
+    while self.image_index >= self.sprite.frames do
+      self.image_index = self.image_index - self.sprite.frames
     end
   end,
 

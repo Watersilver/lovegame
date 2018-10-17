@@ -1,6 +1,7 @@
 local inv = require "inventory"
 local td = require "movement"; td = td.top_down
 local im = require "image"
+local snd = require "sound"
 local ps = require "physics_settings"
 
 local o = require "GameObjects.objects"
@@ -84,6 +85,7 @@ player_states.check_swing = function(instance, dt, side)
 end
 
 player_states.start_swing = function(instance, dt, side)
+  snd.play(instance.sounds.swordSwing)
   instance.image_index = 0
   instance.image_speed = 0.20
   instance.triggers.animation_end = false

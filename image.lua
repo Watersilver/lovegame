@@ -7,6 +7,9 @@ im.spriteSettings = {
   testtiles = {'Tiles/TestTiles', 4, 7},
   testbrick = {'Brick', 2, 2},
   testlift = {'LiftableTest', 1, width = 16, height = 16},
+  npcTestSprites = {
+    {'NPCs/NpcTest/down', 2, padding = 2, width = 16, height = 16}
+  },
   playerSprites = {
     {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},
