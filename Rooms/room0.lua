@@ -22,8 +22,8 @@ room.room_parts = {}
 
 ----------Start of arrays of geography of parts of room----------
 local room_part = {'P1'}
-room_part.x_that_I_start = 300
-room_part.y_that_I_start = 200
+room_part.x_that_I_start = session.save.playerX or 300
+room_part.y_that_I_start = session.save.playerY or 200
 
 table.insert(room.room_parts, room_part)
 ---
@@ -32,5 +32,7 @@ table.insert(room.room_parts, room_part)
 
 rm.build_room(room)
 
+-- Make sure there's no camera weirdness, even if I start in a tiny room
+sh.calculate_total_scale{game_scale=11}
 -- return assert(love.filesystem.load("Rooms/room1.lua"))()
-return game.change_room("Rooms/room1.lua")
+return game.change_room(session.save.room or "Rooms/room1.lua")

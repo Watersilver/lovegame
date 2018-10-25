@@ -92,4 +92,18 @@ function u.newQueue()
   }
 end
 
+-- Obliterate Body
+function u.obliterateBody(body)
+  for _, fixture in pairs(body:getFixtureList()) do
+    fixture:setUserData(nil)
+    fixture:destroy()
+  end
+  for _, joint in pairs(body:getJointList()) do
+    joint:setUserData(nil)
+    joint:destroy()
+  end
+  body:setUserData(nil)
+  body:destroy()
+end
+
 return u

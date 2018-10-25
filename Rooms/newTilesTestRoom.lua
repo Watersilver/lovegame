@@ -12,11 +12,11 @@ room.height = 350
 -- mainCamera:setWorld(0, 0, room.width, room.height)
 
 room.downTrans = {
-  {
-    roomTarget = "Rooms/room1.lua", -- Room you'll go to if this transition happens
-    xleftmost = 0, yrightmost = 800, -- Limits to check against
-    xmod = 0, ymod = 0 -- Modification of x, y variables for next room
-  }
+  -- {
+  --   roomTarget = "Rooms/room1.lua", -- Room you'll go to if this transition happens
+  --   xleftmost = 0, yrightmost = 800, -- Limits to check against
+  --   xmod = 0, ymod = 0 -- Modification of x, y variables for next room
+  -- }
 }
 room.rightTrans = {
   -- {
@@ -44,7 +44,7 @@ room_part.y_that_I_start = 160
 room_part.row_length = 15
 room_part.col_length = #room_part/room_part.row_length
 room_part.tile_width = 16
-room_part.tileset = im.spriteSettings.testtiles
+room_part.tileset = im.spriteSettings.floorOutside
 room_part.tileset_index_table = {
   0, 0, 14, 0, 14, 0, 0, 14, 0, 0, 3, 15, 2, 15, 2,
   14, 2, 3, 15, 2, 15, 2, 0, 3, 0, 0, 14, 0, 14, 0,

@@ -9,6 +9,7 @@ o.lateUpdaters = {role = "lateUpdater"} -- List of objects with late_update func
 o.colliders = {role = "collider"} -- List of objects that can collide
 o.persistents = {role = "persistent"} -- List of objects that survive room trans
 o.draw_layers = {} -- List of layers(Lists of objects to be drawn)
+o.noCamDrawables = {role = "noCamDrawable"} -- List of objects to be drawn out of gamera
 
 -- Function to change layer
 function o.change_layer(object, newLayer)
@@ -33,9 +34,9 @@ o.to_be_deleted = {}
 function o.to_be_deleted:remove_all()
   if not self[1] then return end
   for _, object in ipairs(self) do
-    if object.sprite_info then object:unload_sprites() end
-    if object.body then object.body:destroy() end
-    if object.spritebody then object.spritebody:destroy() end
+    if object.sprite_info then object:unload_sprites(); object.sprite_info = nil end
+    if object.body then u.obliterateBody(object.body); object.body = nil end
+    if object.spritebody then u.obliterateBody(object.spritebody); object.spritebody = nil end
     if object.updater then
       u.free(o.updaters, object.updater)
       object.updater = nil
@@ -56,6 +57,10 @@ function o.to_be_deleted:remove_all()
       u.free(o.draw_layers[object.layer], object.drawable)
       object.drawable = nil
     end
+    if object.noCamDrawable then
+      u.free(o.noCamDrawables, object.noCamDrawable)
+      object.noCamDrawable = nil
+    end
     if object.identifiable then
       -- Free for ALL ids
       for id, index_in_identified_table in pairs(object.identifiable) do
@@ -69,9 +74,14 @@ function o.to_be_deleted:remove_all()
       end
       object.identifiable = nil
     end
-    if object.delete then object:delete() end
+    if object.delete then object:delete(); object.delete = nil end
     -- Mark as not existing
     object.exists = false
+
+    -- Nilify. EXPERIMENTAL
+    for key, _ in pairs(object) do
+      object[key] = nil
+    end
   end
   o.to_be_deleted = {remove_all = o.to_be_deleted.remove_all}
 end
@@ -130,6 +140,10 @@ function o.to_be_added:add_all()
     -- Add to lateUpdaters if lateUpdater and if not already there
     if object.late_update and not object.lateUpdater then
       object[o.lateUpdaters.role] = u.push(o.lateUpdaters, object)
+    end
+    -- Add to noCamDrawables if noCamDrawable and if not already there
+    if object.noCamDraw and not object.noCamDrawable then
+      object[o.noCamDrawables.role] = u.push(o.noCamDrawables, object)
     end
     -- Add to objects that will be drawn if not already there
     if object.draw and not object.drawable then

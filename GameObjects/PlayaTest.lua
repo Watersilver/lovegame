@@ -127,7 +127,7 @@ function Playa.initialize(instance)
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.sprite_info = im.spriteSettings.playerSprites
   instance.sounds = snd.load_sounds({
-    swordSwing = {"Lightsaber", extension = ".wav"}
+    swordSwing = {"WitchSwordSwing"}
   })
   instance.floorTiles = {role = "playerFloorTilesIndex"} -- Tracks what kind of floortiles I'm on
   instance.player = "player1"
@@ -1348,6 +1348,13 @@ end
 
 Playa.functions = {
   update = function(self, dt)
+    -- Store usefull stuff
+    local vx, vy = self.body:getLinearVelocity()
+    local x, y = self.body:getPosition()
+    self.speed = sqrt(vx*vx + vy*vy)
+    self.vx, self.vy = vx, vy
+    self.x, self.y = x, y
+
     -- Determine movement modifiers due to floor
     if self.floorTiles[1] then
       -- I could be stepping on up to four tiles. Find closest to determine mods
@@ -1356,7 +1363,7 @@ Playa.functions = {
       local previousClosestDistance
       for _, floorTile in ipairs(self.floorTiles) do
         previousClosestDistance = closestDistance
-        closestDistance = min(distanceSqared2d(self.x, self.y, floorTile.xstart, floorTile.ystart), closestDistance)
+        closestDistance = min(distanceSqared2d(x, y, floorTile.xstart, floorTile.ystart), closestDistance)
         if closestDistance < previousClosestDistance then
           closestTile = floorTile
         end
@@ -1403,20 +1410,13 @@ Playa.functions = {
       end
     end
 
-    -- Store usefull stuff
-    local vx, vy = self.body:getLinearVelocity()
-    local x, y = self.body:getPosition()
-    self.speed = sqrt(vx*vx + vy*vy)
-    self.vx, self.vy = vx, vy
-    self.x, self.y = x, y
-
     -- Check if falling off edge
     if self.edgeFall then
       if self.edgeFall.step2 then
         self.fo = self.fo - self.edgeFall.height
         self.edgeFall = nil
       else
-        self.body:setPosition(self.x, self.y + self.edgeFall.height)
+        self.body:setPosition(x, y + self.edgeFall.height)
         -- for sensorID, _ in pairs(self.sensors) do
         --   self.sensors[sensorID] = nil
         -- end

@@ -37,11 +37,18 @@ if gs.fullscreen then love.window.setFullscreen(true) end
 session = {
   save = {
     playerMobility = nil,
-    playerBrakes = nil
+    playerBrakes = nil,
+    room = nil,
+    playerX = nil,
+    playerY = nil
   },
   mslQueue = u.newQueue()
 }
 local session = session
+
+-- Store mouse button info
+mouseB = {}
+local moub = mouseB
 
 
 -- Set up cameras
@@ -72,7 +79,8 @@ function love.load()
 
   --dofile("Rooms/room1.lua")
   -- game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
-  game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
+  -- game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
+  game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
   sh.calculate_total_scale{game_scale=game.room.game_scale}
 end
 
@@ -87,6 +95,7 @@ function love.keypressed(key, scancode)
   elseif key == "f11" then
     love.window.setFullscreen(not love.window.getFullscreen())
   end
+  -- if key == "c" then collectgarbage() end
   text.key = scancode ~= "return" and scancode or text.key
 end
 
@@ -174,6 +183,12 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
+  moub["1press"] = moub[1] and not moub["1prev"]
+  moub["2press"] = moub[2] and not moub["2prev"]
+  moub["1prev"] = moub[1]
+  moub["2prev"] = moub[2]
+
+  -- fuck = collectgarbage("count")
   if o.to_be_added[1] then
     o.to_be_added:add_all()
   end
@@ -211,12 +226,14 @@ function love.update(dt)
 
 
       local playa = game.transitioning.playa
-      if playa then
+      if playa and playa.exists then
         playa.body:setPosition(trans.player_target_coords(playa.x, playa.y))
       end
 
       game.paused = false
       game.transitioning = false
+
+      snd.bgm:load(newRoom.music_info)
 
       for _, layer in ipairs(o.draw_layers) do
         for _, object in ipairs(layer) do
@@ -395,6 +412,9 @@ function love.update(dt)
   -- Play sounds.
   snd.play_soundsToBePlayed()
 
+  -- Update music
+  snd.bgm:update(dt)
+
 end
 
 
@@ -492,16 +512,28 @@ function love.draw()
     end
   end
 
+  local nocamdnum = #o.noCamDrawables
+  if nocamdnum > 0 then
+    for i = 1, nocamdnum do
+      o.noCamDrawables[i]:noCamDraw()
+    end
+  end
+
 end
 
 
 function love.mousepressed(x, y, button, isTouch)
-  x, y = cam:toWorld(x, y)
-  if button == 2 then
-    o.removeFromWorld(o.updaters[2])
-    return
-  end
-  u.push(o.to_be_added, p:new{xstart=x, ystart=y})
+  -- x, y = cam:toWorld(x, y)
+  -- if button == 2 then
+  --   o.removeFromWorld(o.updaters[2])
+  --   return
+  -- end
+  -- u.push(o.to_be_added, p:new{xstart=x, ystart=y})
+  moub[button] = true
+end
+
+function love.mousereleased(x, y, button, isTouch)
+  moub[button] = false
 end
 
 

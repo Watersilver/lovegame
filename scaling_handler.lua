@@ -26,6 +26,9 @@ local total_scale
 function sh.get_total_scale()
   return total_scale
 end
+function sh.__set_total_scale(tsc)
+  total_scale = tsc
+end
 
 -- Used when zooming in out due to in game reasons or window resize
 -- Never set total_scale. Calculate through this
