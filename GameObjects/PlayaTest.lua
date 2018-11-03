@@ -131,7 +131,7 @@ function Playa.initialize(instance)
   })
   instance.floorTiles = {role = "playerFloorTilesIndex"} -- Tracks what kind of floortiles I'm on
   instance.player = "player1"
-  instance.layer = 10
+  instance.layer = 20
   instance.movement_state = sm.new_state_machine{
     state = "start",
     start = {

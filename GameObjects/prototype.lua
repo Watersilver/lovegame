@@ -13,6 +13,17 @@ p.functions = {
     --Check if tile
     if pp.tile then
       ps.shapes.edgeToTiles(self, pp.edgetable)
+    --Check if thick wall
+    elseif pp.thickWall then
+      if not self.body then self.body = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0) end
+      local body = self.body
+      body:setUserData(self)
+      self.fixtures = {}
+      for _, shape in ipairs(pp.thickWall) do
+        local newf = love.physics.newFixture(body, shape)
+        newf:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
+        u.push(instance.fixtures, newf)
+      end
     -- If not tile build normally
     else
       if not self.body then self.body = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0) end
@@ -69,6 +80,7 @@ p.functions = {
         end
         self.body:resetMassData()
       end
+
       if pp.mass then body:setMass(pp.mass) end
 
     end

@@ -5,8 +5,8 @@ local im = {}
 
 im.spriteSettings = {
   testtiles = {'Tiles/TestTiles', 4, 7},
-  floorOutside = {'Tiles/FloorOutside', 10, 10, padding = 2, width = 16, height = 16},
-  solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16},
+  floorOutside = {'Tiles/FloorOutside', 10, 10, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floorOutside"},
+  solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},
   testbrick = {'Brick', 2, 2},
   testlift = {'LiftableTest', 1, width = 16, height = 16},
   npcTestSprites = {

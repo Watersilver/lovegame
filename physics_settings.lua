@@ -25,6 +25,12 @@ ps.shapes = {
     r = love.physics.newEdgeShape(8, -8, 8, 8), -- right side
     d = love.physics.newEdgeShape(-8, 8, 8, 8) -- down side
   },
+  thickWallInner = {
+    u = love.physics.newEdgeShape(-8, -1, 8, -1), -- upper side
+    l = love.physics.newEdgeShape(-1, -8, -1, 8), -- left side
+    r = love.physics.newEdgeShape(1, -8, 1, 8), -- right side
+    d = love.physics.newEdgeShape(-8, 1, 8, 1) -- down side
+  },
   swordSprite = love.physics.newRectangleShape(16, 15),
   swordIgniting = love.physics.newRectangleShape(0, 7, 2, 7+7),
   -- swordSwing = love.physics.newCircleShape(6), -- or rect(12, 13),
