@@ -20,9 +20,10 @@ local moub = mouseB
 
 local grid = true
 
-local layer = 10 -- 10, 20, 30
 local layerUsable = false
-local maxLayer = 30
+local layerTable = {10, 11, 12, 30, 31, 32}
+local layerIndex = 1
+local layer = layerTable[layerIndex]
 local drawTiles = {}
 local drawSymbols = false
 
@@ -53,22 +54,75 @@ local tilesetUsable = false
 -- Tilesets index to symbols
 local tilesets_to_symbols = {}
 tilesets_to_symbols['Tiles/FloorOutside'] = {
-  'f', 'f', 'f', 'f', 'f', 'n', 'n', 'f', 'n', 'n',
+  'f', 'f', 'f', 'f', 'aF', 'n', 'n', 'aF', 'n', 'n',
   'f', 'f', 'f', 'f', 'f', 'f', 'n', 'n', 'n', 'n',
   'f', 'f', 'f', 'f', 'f', 'f', 'n', 'n', 'n', 'n',
   'f', 'f', 'f', 'f', 'f', 'f', 'n', 'n', 'n', 'n',
 }
 tilesets_to_symbols['Tiles/SolidsOutside'] = {
-  'twnw', 'twu', 'twne', 'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+  'twnw', 'twu', 'twne', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'twl', 'w', 'twr', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'e', 'e', 'e', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
-  'twsw', 'twd', 'twse', 'b', 'b', 'b', 'b', 'b', 'b', 'w', 'n',
+  'twsw', 'twd', 'twse', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n',
   'w', 'b', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n', 'n',
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n', 'n',
-  'w', 'f', 'w', 'w', 'f', 'w', 'w', 'f', 'w', 'n', 'n',
+  'w', 'f', 'w', 'w', 'u', 'w', 'w', 'u', 'w', 'n', 'n',
 }
 
 -- Functions always below vars, so they can recognise them
+local function roomPartDrawFunctionsMaker(room_part)
+  room_part.draw = function (self, drawinglayer)
+    if self.layer ~= drawinglayer then return end
+    local sx, sy = self.x_that_I_start, self.y_that_I_start
+    local loaded_sprite = im.load_sprite({room_part.tileset[1]})
+    for rpindex = 1, #self do
+      if self[rpindex] ~= 'n' then
+        love.graphics.draw(
+          loaded_sprite.img,
+          loaded_sprite[self.tileset_index_table[rpindex]],
+          sx,
+          sy
+        )
+      end
+      sx = sx + self.tile_width
+      if sx >= self.x_that_I_start + self.row_length * self.tile_width then
+        sx, sy = self.x_that_I_start, sy + self.tile_width
+      end
+    end
+  end
+  room_part.drawSymbols = function (self, drawinglayer)
+    if self.layer ~= drawinglayer then return end
+    local sx, sy = self.x_that_I_start, self.y_that_I_start
+    for rpindex = 1, #self do
+      love.graphics.print(self[rpindex], sx, sy, 0, 0.5)
+      sx = sx + self.tile_width
+      if sx >= self.x_that_I_start + self.row_length * self.tile_width then
+        sx, sy = self.x_that_I_start, sy + self.tile_width
+      end
+    end
+  end
+end
+
+local function loadMap(mapName)
+  room = require(mapName)
+  mainCamera:setWorld(0, 0, room.width, room.height)
+  for _, room_part in ipairs(room.room_parts) do
+    local selflayer = room_part.layer
+    if not selflayer then
+      if room_part.init then
+        selflayer = room_part.init.layer
+      else
+        selflayer = 10
+      end
+    end
+    room_part.x_that_I_start = room_part.x_that_I_start - 8
+    room_part.y_that_I_start = room_part.y_that_I_start - 8
+    room_part.layer = selflayer
+    roomPartDrawFunctionsMaker(room_part)
+  end
+  currentRoomPartIndex = 1
+  currentRoomPart = room.room_parts[currentRoomPartIndex]
+end
 
 -- Save room to disk in useable format
 local function SaveMap()
@@ -106,8 +160,8 @@ local function SaveMap()
     local room_part = {\n" ..
       rpsymbols .. "\n\z
     }\n\z
-    room_part.x_that_I_start = " .. rp.x_that_I_start .. "\n\z
-    room_part.y_that_I_start = " .. rp.y_that_I_start .. "\n\z
+    room_part.x_that_I_start = " .. rp.x_that_I_start + 8 .. "\n\z
+    room_part.y_that_I_start = " .. rp.y_that_I_start + 8 .. "\n\z
     room_part.row_length = " .. rp.row_length .. "\n\z
     room_part.col_length = " .. rp.col_length .. "\n\z
     room_part.tile_width = " .. rp.tile_width .. "\n\z
@@ -148,39 +202,7 @@ local function newRoomPart(partInfo)
     tileset.name = tilesets[tilesets.index][1] -- [1] is the name field; a string
     room_part.first = true
   end
-  room_part.draw = function (self, drawinglayer)
-    if self.layer ~= drawinglayer then return end
-    local sx, sy = self.x_that_I_start, self.y_that_I_start
-    local loaded_sprite = im.load_sprite({room_part.tileset[1]})
-    for rpindex = 1, #self do
-      if self[rpindex] ~= 'n' then
-        love.graphics.draw(
-          loaded_sprite.img,
-          loaded_sprite[self.tileset_index_table[rpindex]],
-          sx,
-          sy
-          -- r,
-          -- sx,
-          -- sy
-        )
-      end
-      sx = sx + self.tile_width
-      if sx >= self.x_that_I_start + self.row_length * self.tile_width then
-        sx, sy = self.x_that_I_start, sy + self.tile_width
-      end
-    end
-  end
-  room_part.drawSymbols = function (self, drawinglayer)
-    if self.layer ~= drawinglayer then return end
-    local sx, sy = self.x_that_I_start, self.y_that_I_start
-    for rpindex = 1, #self do
-      love.graphics.print(self[rpindex], sx, sy, 0, 0.5)
-      sx = sx + self.tile_width
-      if sx >= self.x_that_I_start + self.row_length * self.tile_width then
-        sx, sy = self.x_that_I_start, sy + self.tile_width
-      end
-    end
-  end
+  roomPartDrawFunctionsMaker(room_part)
   local room_partIndex = u.push(room.room_parts, room_part)
   return room_part, room_partIndex
 end
@@ -201,7 +223,19 @@ end
 local states = {
   initial = {
     update = function (self, dt)
-      self.state = "getW"
+      text.inputLim = 999
+      fbTxt = "room name to load room"
+      if enterP then
+        if text.input == "" then self.state = "getW"; fbTxt = "Give room width and height in order"
+        else loadMap(text.input); self.state = "building"
+        end
+        text.inputLim = 10
+      end
+    end,
+
+    noCamDraw = function (self)
+      love.graphics.print(text.input, 400, 50)
+      love.graphics.print(fbTxt, 400)
     end
   },
 
@@ -211,6 +245,7 @@ local states = {
         self.state = "getH"
         room.width = tonumber(text.input) or 100
         text.input = ""
+        room.width = math.floor(room.width / 16) * 16
         fbTxt = "room.width set to " .. room.width
       end
     end,
@@ -226,6 +261,7 @@ local states = {
       if enterP then
         self.state = "building"
         room.height = tonumber(text.input) or 100
+        room.height = math.floor(room.height / 16) * 16
         text.input = ""
         fbTxt = "room.height set to " .. room.height
         mainCamera:setWorld(0, 0, room.width, room.height)
@@ -289,7 +325,7 @@ local states = {
         self.state = "getNewRoomPartH"
         newRPwidth = tonumber(text.input) or 100
         text.input = ""
-        fbTxt = "newRPwidth set to " .. newRPwidth
+        fbTxt = "room part rows set to " .. newRPwidth
       end
     end,
 
@@ -305,7 +341,7 @@ local states = {
         self.state = "confirmNewRoomPart"
         newRPheight = tonumber(text.input) or 100
         text.input = ""
-        fbTxt = "newRPwidth = " .. newRPwidth .. ", newRPheight = " .. newRPheight ..
+        fbTxt = "room part rows = " .. newRPwidth .. ", room part cols = " .. newRPheight ..
           "\nOk? r = yes, d = no (origin will be at mouse)"
       end
     end,
@@ -323,7 +359,10 @@ local states = {
         currentRoomPart, currentRoomPartIndex = newRoomPart{
           math.floor(worldMouseX / 16) * 16,
           math.floor(worldMouseY / 16) * 16,
-          newRPwidth, newRPheight}
+          newRPwidth * 16, newRPheight * 16}
+      end
+      if dP then
+        self.state = "building"
       end
     end,
 
@@ -427,7 +466,11 @@ Re.functions = {
       tileset.height = selftileset.img:getHeight()
       tileset.index = 1
     end
-    if lP then layer = layer + 10 if layer > maxLayer then layer = 10 end end
+    if lP then
+      layerIndex = layerIndex + 1
+      if layerIndex > #layerTable then layerIndex = 1 end
+      layer = layerTable[layerIndex]
+    end
     if gP then grid = not grid end
     if nP then drawSymbols = not drawSymbols end
     if tileset.name then
@@ -463,6 +506,13 @@ Re.functions = {
   end,
 
   draw = function (self)
+    -- Draw room parts
+    for _, rp in ipairs(room.room_parts) do
+      for _, drawinglayer in ipairs(layerTable) do
+        rp:draw(drawinglayer)
+        if drawSymbols then rp:drawSymbols(drawinglayer) end
+      end
+    end
     -- Draw grid
     if currentRoomPart and grid then
       for j = 1, currentRoomPart.col_length do
@@ -482,16 +532,6 @@ Re.functions = {
           currentRoomPart.y_that_I_start + currentRoomPart.col_length * currentRoomPart.tile_width
         )
       end
-    end
-
-    -- Draw room parts
-    for _, rp in ipairs(room.room_parts) do
-      rp:draw(10)
-      if drawSymbols then rp:drawSymbols(10) end
-      rp:draw(20)
-      if drawSymbols then rp:drawSymbols(20) end
-      rp:draw(30)
-      if drawSymbols then rp:drawSymbols(30) end
     end
   end,
 

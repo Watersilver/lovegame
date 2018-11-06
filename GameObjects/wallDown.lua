@@ -13,6 +13,7 @@ function wallDown.initialize(instance)
     masks = {PLAYERJUMPATTACKCAT}
   }
   instance.pushback = true
+  instance.ballbreaker = true
 end
 
 wallDown.functions = {

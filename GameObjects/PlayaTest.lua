@@ -1292,7 +1292,7 @@ function Playa.initialize(instance)
       if instance.markanim <= 0 and not instance.onEdge then
         -- make mark
         if instance.mark then o.removeFromWorld(instance.mark) end
-        instance.mark = mark:new{xstart = instance.x, ystart = instance.y, creator = instance}
+        instance.mark = mark:new{xstart = instance.x, ystart = instance.y, creator = instance, layer = instance.layer - 1}
         o.addToWorld(instance.mark)
       end
     end

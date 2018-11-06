@@ -15,6 +15,7 @@ function Brick.initialize(instance)
     {'Brick', 2, 2}
   }
   instance.pushback = true
+  instance.ballbreaker = true
 end
 
 Brick.functions = {

@@ -16,6 +16,7 @@ function Edge.initialize(instance)
     bodyType = "static",
   }
   instance.edge = true
+  instance.ballbreaker = true
 end
 
 Edge.functions = {
@@ -55,7 +56,6 @@ end,
 
 preSolve = function(self, a, b, coll, aob, bob)
   local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-
 
   if other.player then
     coll:setEnabled(self:belowEdge(other))
@@ -121,7 +121,7 @@ load = function (self)
     -- self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeDown)
     self.belowEdge = ec.belowDownEdge
     self.wentOverEdge = ec.wentOverDownEdge
-    self.fixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT, PLAYERATTACKCAT)
+    self.fixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)--, PLAYERATTACKCAT)
     self.height = self.height + ps.shapes.plshapeHeight
   end
 end

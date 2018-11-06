@@ -18,6 +18,7 @@ ps.pw = love.physics.newWorld(0, 280)--280)
 -- Make shapes
 ps.shapes = {
   rect1x1 = love.physics.newRectangleShape(16, 16),
+    rect1x1minusinfinitesimal = love.physics.newRectangleShape(15, 15),
   circle1 = love.physics.newCircleShape(8),
   edgeRect1x1 = {
     u = love.physics.newEdgeShape(-8, -8, 8, -8), -- upper side
@@ -89,6 +90,15 @@ function ps.shapes.edgeToTiles(instance, edgetable)
     -- instance.fixtures[i]:setUserData(instance)
     i = i + 1
   end
+
+  -- WARNING: This is here so that walls aren't paper thin. Might want to find better way
+  -- WARNING: HATCHET JOB
+  local shape = ps.shapes.rect1x1minusinfinitesimal
+  local newf = love.physics.newFixture(instance.body, shape)
+  u.push(instance.fixtures, newf)
+  newf:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
+  -- WARNING: HATCHET JOB
+
 end
 
 function ps.getFixtureInfo(fixture)

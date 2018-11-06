@@ -1,5 +1,6 @@
 local ps = require "physics_settings"
 local im = require "image"
+local u = require "utilities"
 
 local lp = love.physics
 
@@ -22,7 +23,7 @@ p.functions = {
       for _, shape in ipairs(pp.thickWall) do
         local newf = love.physics.newFixture(body, shape)
         newf:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
-        u.push(instance.fixtures, newf)
+        u.push(self.fixtures, newf)
       end
     -- If not tile build normally
     else

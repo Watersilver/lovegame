@@ -14,6 +14,8 @@ local floor = math.floor
 local pi = math.pi
 local sqrt = math.sqrt
 
+local emptyFunc = function() end
+
 --  Calculate sword position and angle offset due to creator's side
 local function calculate_offset(side, phase)
   local xoff, yoff, aoff = 0, 0, 0
@@ -60,6 +62,7 @@ end
 Missile.functions = {
   load = function (self)
     self.sox, self.soy = calculate_offset(self.side)
+    self.x, self.y = 0, 0
     session.mslQueue:add(self)
   end,
 
@@ -106,8 +109,21 @@ Missile.functions = {
 
     self.x, self.y = x, y
 
-    if self.pastMslLim then
+    if self.broken and self.fired and self.image_index ~= 0 then
+      self.body:setLinearVelocity(0, 0)
       self.image_index = self.image_index - dt * 60
+      if self.image_index < 0 then
+        self.image_index = 0
+        self.trans_draw = emptyFunc
+        self.draw = emptyFunc
+        self.update = emptyFunc
+        self.early_update = emptyFunc
+        -- Stop colliding
+        self.fixture:setMask(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)
+      end
+    end
+    if self.pastMslLim then
+      if not self.broken then self.image_index = self.image_index - dt * 60 end
       if self.image_index < 0 then
         self.image_index = 0
         o.removeFromWorld(self)
@@ -116,10 +132,10 @@ Missile.functions = {
     if not self.outOfBounds then
       if x < 0 or x > game.room.width then
         self.outOfBounds = true
-        self.trans_draw = function() end
+        self.trans_draw = emptyFunc
       elseif y < 0 or y > game.room.height then
         self.outOfBounds = true
-        self.trans_draw = function() end
+        self.trans_draw = emptyFunc
       end
     end
   end,
@@ -163,6 +179,21 @@ Missile.functions = {
 
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+    -- Check if I will be broken
+    if other.ballbreaker == true then
+      if not other.edge then
+        self.broken = true
+      else
+        if other.side == "down" then
+          self.broken = true
+        elseif other.side == "left" then
+          if self.x < other.xstart - 8 then self.broken = true end
+        else
+          if self.x > other.xstart + 8 then self.broken = true end
+        end
+      end
+    end
 
     -- Check if propelled by sword
     if other.sword == true then

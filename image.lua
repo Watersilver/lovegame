@@ -1,7 +1,24 @@
 -- removes scaled sprite blurriness
 love.graphics.setDefaultFilter("nearest")
 
+local floor = math.floor
+
 local im = {}
+
+-- For animated background
+local giiSpeed = 3
+local gii1234float = 0
+local giiMax = 4
+im.globimage_index1234 = gii1234float
+local gii1213table = {1, 0, 2, [0] = 0}
+im.globimage_index1213 = gii1213table[im.globimage_index1234]
+
+function im.updateGlobalImageIndexes(dt)
+  gii1234float = gii1234float + giiSpeed * dt
+  if gii1234float >= giiMax then gii1234float = gii1234float - giiMax end
+  im.globimage_index1234 = floor(gii1234float)
+  im.globimage_index1213 = gii1213table[im.globimage_index1234]
+end
 
 im.spriteSettings = {
   testtiles = {'Tiles/TestTiles', 4, 7},
@@ -9,6 +26,7 @@ im.spriteSettings = {
   solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},
   testbrick = {'Brick', 2, 2},
   testlift = {'LiftableTest', 1, width = 16, height = 16},
+  mark = {'Inventory/UseMarkL1', 3, padding = 2, width = 16, height = 16},
   npcTestSprites = {
     {'NPCs/NpcTest/down', 2, padding = 2, width = 16, height = 16}
   },

@@ -1,6 +1,8 @@
 local Wall = require("GameObjects.BrickTest")
 local Player = require("GameObjects.PlayaTest")
 local floorTile = require("GameObjects.floorTile")
+local animatedFloorTile1213 = require("GameObjects.animatedFloorTile1213")
+local animatedFloorTile1234 = require("GameObjects.animatedFloorTile1234")
 local noBody = require("GameObjects.noBody")
 local edge = require("GameObjects.edge")
 local wallDown = require("GameObjects.wallDown")
@@ -22,6 +24,8 @@ local symbols_to_objects_default = {
   w = Wall,
   P1 = Player,
   f = floorTile,
+  aF = animatedFloorTile1213,
+  aF2 = animatedFloorTile1234,
   b = noBody,
   e = edge,
   d = wallDown,

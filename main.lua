@@ -79,8 +79,8 @@ function love.load()
 
   --dofile("Rooms/room1.lua")
   -- game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
-  -- game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
-  game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
+  game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
+  -- game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
   sh.calculate_total_scale{game_scale=game.room.game_scale}
 end
 
@@ -183,6 +183,7 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
+  -- Store mouse input
   moub["1press"] = moub[1] and not moub["1prev"]
   moub["2press"] = moub[2] and not moub["2prev"]
   moub["1prev"] = moub[1]
@@ -228,6 +229,8 @@ function love.update(dt)
       local playa = game.transitioning.playa
       if playa and playa.exists then
         playa.body:setPosition(trans.player_target_coords(playa.x, playa.y))
+        playa.body:setLinearVelocity(u.sign(playa.vx), u.sign(playa.vy))
+        playa.zvel = 0
       end
 
       game.paused = false
@@ -256,6 +259,9 @@ function love.update(dt)
       local removedMsl = session.mslQueue:remove()
       removedMsl.pastMslLim = true
     end
+
+    -- Image indexes for background animations
+    im.updateGlobalImageIndexes(dt)
 
     local eUpnum = #o.earlyUpdaters
     if eUpnum > 0 then
@@ -302,6 +308,7 @@ function love.update(dt)
 
 
   local playaTest = o.identified.PlayaTest
+
   if playaTest and playaTest[1].x then
 
     if not game.transitioning then
