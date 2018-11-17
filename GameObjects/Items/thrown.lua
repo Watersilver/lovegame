@@ -14,6 +14,11 @@ local Thrown = {}
 local floor = math.floor
 local pi = math.pi
 
+local function destroyself(self)
+  self:throw_collision()
+  o.removeFromWorld(self)
+end
+
 function Thrown.initialize(instance)
 
   instance.x_scale = 1
@@ -49,7 +54,7 @@ Thrown.functions = {
       -- self.zvel = 0
       if self.shadow then o.removeFromWorld(self.shadow) end
       self.shadow = nil
-      o.removeFromWorld(self)
+      destroyself(self)
     else
       self.zvel = self.zvel - self.gravity * dt
       if not self.shadow then
@@ -98,12 +103,14 @@ Thrown.functions = {
 
   beginContact = function(self, a, b, coll, aob, bob)
 
-    if self.shadow then o.removeFromWorld(self.shadow) end
-    self.shadow = nil
-    o.removeFromWorld(self)
-
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+    if other.grass then return end
+
+    if self.shadow then o.removeFromWorld(self.shadow) end
+    self.shadow = nil
+    destroyself(self)
 
 
   end,

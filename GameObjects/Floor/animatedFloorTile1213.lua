@@ -11,6 +11,7 @@ local Tile = {}
 
 function Tile.initialize(instance)
   instance.globimage_index = "globimage_index1213"
+  instance.image_index = 0
 end
 
 Tile.functions = {

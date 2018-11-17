@@ -45,7 +45,22 @@ function Lifted.initialize(instance)
 end
 
 Lifted.functions = {
-  update = function(self, dt)
+  load = function (self)
+    local cr = self.creator
+    -- Set initial position
+    local creatorx, creatory = cr.body:getPosition()
+    local offs = offsets[self.side][#offsets[self.side]-1]
+    local xoff, yoff = offs.x, offs.y
+    local fy = 0
+    if cr.edgeFall and cr.edgeFall.step2 then
+      fy = - cr.edgeFall.height
+    end
+    local x, y = creatorx + xoff, creatory + yoff - cr.height + cr.zo + fy
+
+    self.x, self.y = x, y
+  end,
+
+  update = function (self, dt)
     local cr = self.creator
 
     -- Determine offset due to falling
@@ -57,7 +72,7 @@ Lifted.functions = {
 
     -- Determine offset due to lifting stage
     if not self.lifted then
-      local stage = floor(cr.liftingStage)
+      local stage = floor(cr.liftingStage or 1)
       local offs = offsets[self.side][stage]
       xoff, yoff = offs.x, offs.y
       if stage == 4 then
@@ -142,8 +157,14 @@ Lifted.functions = {
       x = self.x, y = self.y,
       vx = vx, vy = vy,
       sprite_info = self.sprite_info,
+      image_index = floor(self.image_index),
       layer = cr.layer + 1,
-      throw_update = self.throw_update
+      throw_update = self.throw_update,
+      throw_collision = self.throw_collision,
+      explosionNumber = self.explosionNumber,
+      explosionSprite = self.explosionSprite,
+      explosionSpeed = self.explosionSpeed,
+      explosionSound = self.explosionSound
     }
     o.addToWorld(thrownOb)
 

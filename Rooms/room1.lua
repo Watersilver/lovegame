@@ -23,7 +23,7 @@ room.leftTrans = {
 room.upTrans = {
   {
     roomTarget = "Rooms/room3.lua", -- Room you'll go to if this transition happens
-    xleftmost = 0, yrightmost = 800, -- Limits to check against
+    xleftmost = 0, xrightmost = 800, -- Limits to check against
     xmod = 0, ymod = 0 -- Modification of x, y variables for next room
   }
 }

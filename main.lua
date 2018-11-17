@@ -40,7 +40,8 @@ session = {
     playerBrakes = nil,
     room = nil,
     playerX = nil,
-    playerY = nil
+    playerY = nil,
+    walkOnWater = nil
   },
   mslQueue = u.newQueue()
 }
@@ -73,6 +74,9 @@ sh.calculate_total_scale{game_scale=1}
 
 if not fuck then fuck = 0 end
 -- love.keyboard.setTextInput(false)
+
+-- Threshold before screen transitions are triggered
+local screenEdgeThreshold = 0.1
 
 function love.load()
   ps.pw:setCallbacks(beginContact, endContact, preSolve, postSolve)
@@ -326,7 +330,7 @@ function love.update(dt)
 
       -- check if a screen edge transition will happen
       -- left
-      if playax - halfw < l then
+      if playax - halfw < l - screenEdgeThreshold then
         if playa.vx < 0 then
           for _, transInfo in ipairs(room.leftTrans) do
             if playay > transInfo.yupper and playay < transInfo.ylower then
@@ -348,7 +352,7 @@ function love.update(dt)
           end
         end
       -- right
-      elseif playax + halfw > w then
+      elseif playax + halfw > w + screenEdgeThreshold then
         if playa.vx > 0 then
           for _, transInfo in ipairs(room.rightTrans) do
             if playay > transInfo.yupper and playay < transInfo.ylower then
@@ -370,10 +374,10 @@ function love.update(dt)
           end
         end
       -- down
-      elseif playay + fullh > h then
+      elseif playay + fullh > h + screenEdgeThreshold then
         if playa.vy > 0 then
           for _, transInfo in ipairs(room.downTrans) do
-            if playax > transInfo.xleftmost and playax < transInfo.yrightmost then
+            if playax > transInfo.xleftmost and playax < transInfo.xrightmost then
 
               game.transition{
                 type = "scrolling",
@@ -389,10 +393,10 @@ function love.update(dt)
           end
         end
       -- up
-      elseif playay - fullh < t then
+      elseif playay - fullh < t - screenEdgeThreshold then
         if playa.vy < 0 then
           for _, transInfo in ipairs(room.upTrans) do
-            if playax > transInfo.xleftmost and playax < transInfo.yrightmost then
+            if playax > transInfo.xleftmost and playax < transInfo.xrightmost then
 
               game.transition{
                 type = "scrolling",
@@ -530,12 +534,12 @@ end
 
 
 function love.mousepressed(x, y, button, isTouch)
-  -- x, y = cam:toWorld(x, y)
-  -- if button == 2 then
-  --   o.removeFromWorld(o.updaters[2])
-  --   return
-  -- end
-  -- u.push(o.to_be_added, p:new{xstart=x, ystart=y})
+  x, y = cam:toWorld(x, y)
+  if button == 2 then
+    o.removeFromWorld(o.updaters[2])
+    return
+  end
+  u.push(o.to_be_added, p:new{xstart=x, ystart=y})
   moub[button] = true
 end
 

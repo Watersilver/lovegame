@@ -50,7 +50,7 @@ function rm.build_room(room)
         -- Make sure to use as few edge shapes as necessary
         local epp = element.physical_properties
         if epp and epp.tile then
-          if row_length == 0 then
+          if row_length == 0 or row_length == 1 or element.allsides then
             epp.tile = {"u", "d", "l", "r"}
           elseif col_length == 0 then
             if i == 1 then

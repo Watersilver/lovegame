@@ -3,6 +3,11 @@ love.graphics.setDefaultFilter("nearest")
 
 local floor = math.floor
 
+-- Will try to avoid gaps for adjacent tiles by making them slightly bigger
+-- Set to nullify by setting to 0
+local dw = 0.1
+local dh = dw
+
 local im = {}
 
 -- For animated background
@@ -15,7 +20,7 @@ im.globimage_index1213 = gii1213table[im.globimage_index1234]
 
 function im.updateGlobalImageIndexes(dt)
   gii1234float = gii1234float + giiSpeed * dt
-  if gii1234float >= giiMax then gii1234float = gii1234float - giiMax end
+  while gii1234float >= giiMax do gii1234float = gii1234float - giiMax end
   im.globimage_index1234 = floor(gii1234float)
   im.globimage_index1213 = gii1213table[im.globimage_index1234]
 end
@@ -25,6 +30,7 @@ im.spriteSettings = {
   floorOutside = {'Tiles/FloorOutside', 10, 10, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floorOutside"},
   solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},
   testbrick = {'Brick', 2, 2},
+  testsplosion = {'Testplosion', 5, padding = 2, width = 16, height = 16},
   testlift = {'LiftableTest', 1, width = 16, height = 16},
   mark = {'Inventory/UseMarkL1', 3, padding = 2, width = 16, height = 16},
   npcTestSprites = {
@@ -66,7 +72,12 @@ im.spriteSettings = {
     {'Witch/jump_up', 3, padding = 2, width = 16, height = 16},
     {'Witch/mark_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/recall_down', 1, padding = 2, width = 16, height = 16},
+    {'Witch/drown_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/climb_up', 2, padding = 2, width = 16, height = 16},
+    {'Witch/plummet', 3, padding = 2, width = 16, height = 16},
     {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
+    {'Witch/defaultGrass', 2, padding = 2, width = 16, height = 16},
+    {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
     {'GuyWalk', 4, width = 16, height = 16},
     {'Test', 1, padding = 0},
     {'Plrun_strip12', 12, padding = 0, width = 16, height = 16}
@@ -77,7 +88,12 @@ im.sprites = {}
 
 function im.load_sprite(args)
 
-  local img_name = args.img_name or args[1]
+  local img_name
+  if type(args) == "string" then
+    img_name = args
+  else
+    img_name = args.img_name or args[1]
+  end
 
   -- if it already exists, don't add it again
   if not im.sprites[img_name] then
@@ -109,16 +125,18 @@ function im.load_sprite(args)
     end
 
     -- Determine center
-    sprite.cx = width * 0.5
-    sprite.cy = height * 0.5
+    sprite.cx = width * 0.5 + dw -- sprite.cx = width * 0.5
+    sprite.cy = height * 0.5 + dh -- sprite.cy = height * 0.5
 
     -- Slice image WARNING: This table starts from ZERO!!!!
     local frames = 0
     for j = 0, columns-1 do
       for i = 0, rows-1 do
-        sprite[frames] = love.graphics.newQuad(padding+i*(width + 2 * padding ),
-        padding+j*(height + 2 * padding ),
-        width, height, img:getDimensions())
+        sprite[frames] = love.graphics.newQuad(
+        padding-dw*0.5+i*(width + 2 * padding ), --x= padding+i*(width + 2 * padding ),
+        padding-dh*0.5+j*(height + 2 * padding ), --y= padding+j*(height + 2 * padding ),
+        width+dw, height+dh, --width, height,
+        img:getDimensions())
         frames = frames + 1
       end
     end

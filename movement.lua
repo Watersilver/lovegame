@@ -35,6 +35,38 @@ local walktable = {
   }
 }
 
+-- To be used to determine modifiers because of viscosity
+local viscosityTable = {
+  water = function(object, brakes, inversemaxspeed)
+    inversemaxspeed = inversemaxspeed * 2
+    brakes = brakes * 2
+    return brakes, inversemaxspeed
+  end,
+
+  grass = function(object, brakes, inversemaxspeed)
+    inversemaxspeed = inversemaxspeed * 2
+    brakes = brakes * 2
+    return brakes, inversemaxspeed
+  end,
+
+  ladder = function(object, brakes, inversemaxspeed)
+    inversemaxspeed = inversemaxspeed * 4
+    brakes = brakes * 100
+    return brakes, inversemaxspeed
+  end,
+
+  stairs = function(object, brakes, inversemaxspeed)
+    if object.vy < -0.1 then
+      inversemaxspeed = inversemaxspeed * 3
+      brakes = brakes * 2
+    elseif object.vy > 0.1 then
+      inversemaxspeed = inversemaxspeed * 2
+      brakes = brakes * 2
+    end
+    return brakes, inversemaxspeed
+  end,
+}
+
 -- To be used in check_carry_while_carrying function
 local carrytable = {
   down =
@@ -94,7 +126,7 @@ local mo = {}
       local myinput = object.input
       local mass = object.body:getMass()
       local mobility = object.mobility or 600
-      local brakes = clamp(0, object.brakes or 6, object.brakesLim)
+      local brakes = object.brakes or 6
       local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
       local inversemaxspeed = 1/object.maxspeed
 
@@ -105,14 +137,35 @@ local mo = {}
           brakes = brakes * floorFriction
         end
         if object.floorViscosity then
-          if object.floorViscosity == "water" then
-            inversemaxspeed = inversemaxspeed * 2
-            brakes = brakes * 2
-          end
+          brakes, inversemaxspeed = viscosityTable[object.floorViscosity](object, brakes, inversemaxspeed)
         end
       else
-        brakes = 0
+        if object.floorViscosity then
+          if object.floorViscosity == "ladder" then
+            if object.vy < 0 then
+              inversemaxspeed = inversemaxspeed * 8
+              brakes = brakes * 100
+            else
+              brakes = 0
+            end
+          elseif object.floorViscosity == "stairs" then
+            if object.vy < -0.1 then
+              inversemaxspeed = inversemaxspeed * 3
+              brakes = brakes * 3
+            else
+              brakes = 0
+            end
+          else
+            brakes = 0
+          end
+        else
+          brakes = 0
+        end
       end
+      -- High brakes values cause funkyness. This is here to avoid that
+      brakes = clamp(0, brakes, object.brakesLim)
+      -- As do high inversemaxspeed values
+      inversemaxspeed = clamp(0, inversemaxspeed, 0.08) -- lowest max speed = 12.5
 
       -- Calculate force due to input
       local infx, infy =
@@ -142,17 +195,17 @@ local mo = {}
     stand_still = function(object, dt)
       if object.zo ~= 0 then return end
       local mass = object.body:getMass()
-      local brakes = clamp(0, object.brakes or 6, object.brakesLim)
+      local brakes = object.brakes or 6
       local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
 
       if floorFriction < 1 then
         brakes = brakes * floorFriction
       end
       if object.floorViscosity then
-        if object.floorViscosity == "water" then
-          brakes = brakes * 2
-        end
+        brakes = viscosityTable[object.floorViscosity](object, brakes, 0)
       end
+      -- High brakes values cause funkyness. This is here to avoid that
+      brakes = clamp(0, brakes, object.brakesLim)
 
       -- Calculate friction force
       local ffx, ffy = object.vx, object.vy

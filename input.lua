@@ -26,7 +26,7 @@ end
 function input.check_input()
   local controllers = input.controllers
   for playername, controller in pairs(controllers) do
-    if not controller.disabled then
+    if not controller.disabled then -- WARNING !!!MUST BE NIL, NOT FALSE!!!
       -- Handle controller if not disabled
       local player = input.current[playername]
       -- Store previous input
@@ -35,6 +35,7 @@ function input.check_input()
       end
       -- Check what the current input is and store it
       for name, key in pairs(controller) do
+        -- WARNING If I crash here, look at line 29 warning
         player[name] = love.keyboard.isDown(key) == true and 1 or 0
       end
     else

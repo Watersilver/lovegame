@@ -33,14 +33,14 @@ ps.shapes = {
     d = love.physics.newEdgeShape(-8, 1, 8, 1) -- down side
   },
   swordSprite = love.physics.newRectangleShape(16, 15),
-  swordIgniting = love.physics.newRectangleShape(0, 7, 2, 7+7),
-  -- swordSwing = love.physics.newCircleShape(6), -- or rect(12, 13),
-  swordSwing = love.physics.newPolygonShape(-7,-7, 5,-5, -10,10, 6,6),
+  -- swordIgniting = love.physics.newRectangleShape(0, 7, 2, 7+7),
+  swordIgniting = love.physics.newRectangleShape(0, -2, 2, 7),
+  swordSwing = love.physics.newPolygonShape(-7,-7, 5,-5, -5,5, 6,6),
   -- swordSwingWide = love.physics.newPolygonShape(-14,-9, 5,-5, -10,10, 9,14),
-  swordSwingWide = love.physics.newPolygonShape(-13,-9, 5,-5, -10,10, 9,14),
-  swordStill = love.physics.newRectangleShape(0, 6, 1, 15 + 10),
-  -- swordStill = love.physics.newRectangleShape(0, 4, 1, 15 + 7),
-  swordHeld = love.physics.newRectangleShape(1, 15),
+  swordSwingWide = love.physics.newPolygonShape(-12,-10, -12,1, 0,11, 8,11, 4,-4),
+  swordStill = love.physics.newRectangleShape(0, 1, 1, 16),
+  -- swordStill = love.physics.newRectangleShape(0, 6, 1, 15 + 10),
+  swordHeld = love.physics.newRectangleShape(0, -2, 1, 10),
   -- EdgeBrick16.u:setPreviousVertex(-24, -8)
   -- EdgeBrick16.u:setNextVertex(24, -8)
   edgeDown = love.physics.newEdgeShape(-7, 1, 7, 1),

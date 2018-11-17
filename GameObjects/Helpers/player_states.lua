@@ -12,11 +12,19 @@ local lft = require "GameObjects.Items.lifted"
 
 local floor = math.floor
 
+local emptyfunc = function() end
+
 local player_states = {}
 
 player_states.check_walk = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if inv.check_use(instance, trig, side) then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif inv.check_use(instance, trig, side) then
   elseif instance.zo ~= 0 then
     instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side) then
@@ -29,7 +37,13 @@ end
 
 player_states.check_halt = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if inv.check_use(instance, trig, side) then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif inv.check_use(instance, trig, side) then
   elseif instance.zo ~= 0 then
     instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side) then
@@ -42,7 +56,13 @@ end
 
 player_states.check_still = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if inv.check_use(instance, trig, side) then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif inv.check_use(instance, trig, side) then
   elseif instance.zo ~= 0 then
     instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side) then
@@ -53,7 +73,13 @@ end
 
 player_states.check_push = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if inv.check_use(instance, trig, side) then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif inv.check_use(instance, trig, side) then
   elseif not trig["push_" .. side] then
     instance.animation_state:change_state(instance, dt, side .. "still")
   end
@@ -73,7 +99,11 @@ end
 
 player_states.check_swing = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if trig.swing_sword then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif otherstate == "normal" then
     if trig.hold_sword then
@@ -136,7 +166,11 @@ end
 
 player_states.check_stab = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if otherstate == "normal" then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif otherstate == "normal" then
     if trig.hold_sword then
       instance.animation_state:change_state(instance, dt, side .. "hold")
     else
@@ -170,7 +204,13 @@ player_states.end_stab = player_states.end_swing
 
 player_states.check_hold = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if trig.stab then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif trig.stab then
     instance.animation_state:change_state(instance, dt, side .. "stab")
   elseif not trig.hold_sword then
     instance.animation_state:change_state(instance, dt, side .. "walk")
@@ -207,7 +247,11 @@ end
 
 player_states.check_fall = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if trig.swing_sword then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif instance.zo == 0 then
     instance.animation_state:change_state(instance, dt, side .. "still")
@@ -243,7 +287,13 @@ end
 
 player_states.check_missile = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.missile_cooldown > instance.missile_cooldown_limit then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif instance.missile_cooldown > instance.missile_cooldown_limit then
     if trig.fire_missile then
       instance.animation_state:change_state(instance, dt, side .. "missile")
     else
@@ -277,7 +327,9 @@ player_states.end_missile = function(instance, dt, side)
     instance.x_scale = 1
   end
   if instance.missile_cooldown < instance.missile_cooldown_limit then
-    o.removeFromWorld(instance.missile)
+    instance.missile.broken = true
+    instance.missile.fired = true
+    instance.missile_cooldown = nil
     return
   end
   instance.missile_cooldown = nil
@@ -316,7 +368,13 @@ end
 
 player_states.check_gripping = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if not trig.grip or not instance.grippedOb.exists then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif not trig.grip or not instance.grippedOb.exists then
     instance.animation_state:change_state(instance, dt, side .. "walk")
   end
 end
@@ -343,8 +401,14 @@ player_states.start_gripping = function(instance, dt, side)
         side = side,
         layer = side == "up" and instance.layer - 1 or instance.layer + 1,
         sprite_info = other.sprite_info or {im.spriteSettings.testlift},
+        image_index = floor(other.image_index),
         lift_update = other.lift_updage,
-        throw_update = other.throw_update
+        throw_update = other.throw_update,
+        explosionNumber = other.explosionNumber,
+        explosionSprite = other.explosionSprite,
+        explosionSpeed = other.explosionSpeed,
+        explosionSound = other.explosionSound,
+        throw_collision = other.throw_collision or emptyfunc
       }
       o.addToWorld(instance.liftedOb)
       return
@@ -378,9 +442,15 @@ end
 
 player_states.check_lifting = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.liftingStage == 4 then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.liftingStage == 4 then
+    instance.dontThrow = true
     instance.animation_state:change_state(instance, dt, side .. "lifted")
   end
+  instance.dontThrow = false
 end
 
 player_states.start_lifting = function(instance, dt, side)
@@ -401,6 +471,11 @@ player_states.end_lifting = function(instance, dt, side)
   if side == "right" then
     instance.x_scale = 1
   end
+  if instance.liftedOb and not instance.dontThrow then
+    instance.liftedOb:get_thrown()
+    o.removeFromWorld(instance.liftedOb)
+    instance.liftedOb = nil
+  end
   instance.liftingStage = nil
   instance.liftState = false
 end
@@ -417,7 +492,13 @@ end
 
 player_states.check_lifted = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if trig.gripping then
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif trig.gripping then
     instance.animation_state:change_state(instance, dt, side .. "walk")
   elseif td.check_carry_while_carrying(instance, trig, side) then
   end
@@ -446,6 +527,24 @@ player_states.end_lifted = function(instance, dt, side)
     instance.liftedOb = nil
   end
   instance.liftState = false
+end
+
+player_states.run_climbing = function(instance, dt, side)
+  td.image_speed(instance, dt)
+end
+
+player_states.check_climbing = function(instance, dt, side)
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if not instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upstill")
+  end
+end
+
+player_states.start_climbing = function(instance, dt, side)
+  instance.sprite = im.sprites["Witch/climb_up"]
+end
+
+player_states.end_climbing = function(instance, dt, side)
 end
 
 return player_states

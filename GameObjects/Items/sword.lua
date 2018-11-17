@@ -81,6 +81,7 @@ function Sword.initialize(instance)
 
   instance.transPersistent = true
   instance.sword = true
+  instance.immasword = true
   instance.iox = 0
   instance.ioy = 0
   instance.x_scale = 1
@@ -236,12 +237,14 @@ Sword.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    -- If other is grass, at most play a sound (not yet implemented)
+    if other.grass then return end
 
     local pushback = other.pushback
 
     -- If below edge, treat as wall
     if other.edge then
-      if ec.swordBelowEdge(other, cr) then pushback = true end
+      if ec.swordBelowEdge(other, cr) then pushback = true else return end
     end
 
     if pushback and not self.hitWall then

@@ -55,16 +55,18 @@ local tilesetUsable = false
 local tilesets_to_symbols = {}
 tilesets_to_symbols['Tiles/FloorOutside'] = {
   'f', 'f', 'f', 'f', 'aF', 'n', 'n', 'aF', 'n', 'n',
-  'f', 'f', 'f', 'f', 'f', 'f', 'n', 'n', 'n', 'n',
-  'f', 'f', 'f', 'f', 'f', 'f', 'n', 'n', 'n', 'n',
-  'f', 'f', 'f', 'f', 'f', 'f', 'n', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'f', 'f', 'g', 'n', 'b', 'st',
+  'f', 'f', 'f', 'f', 'f', 'f', 'ga', 'ga', 'ld', 'n',
+  'f', 'f', 'f', 'f', 'f', 'f', 'n', 'n', 'ld', 'n',
+  'shW', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
+  'wa', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
 }
 tilesets_to_symbols['Tiles/SolidsOutside'] = {
   'twnw', 'twu', 'twne', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'twl', 'w', 'twr', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
-  'e', 'e', 'e', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'eL', 'eD', 'eR', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'twsw', 'twd', 'twse', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n',
-  'w', 'b', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n', 'n',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'sL', 'n',
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n', 'n',
   'w', 'f', 'w', 'w', 'u', 'w', 'w', 'u', 'w', 'n', 'n',
 }

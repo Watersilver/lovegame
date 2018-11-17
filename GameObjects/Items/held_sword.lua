@@ -164,11 +164,15 @@ HeldSword.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    -- If other is grass, do nothing
+    if other.grass then return end
+
     -- If below edge, treat as wall
     if other.edge then
       if not ec.swordBelowEdge(other, cr) then return end
     end
 
+    -- This will destroy held sword and create a sword that is stabbing
     cr.triggers.stab = true
 
   end

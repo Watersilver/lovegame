@@ -15,6 +15,7 @@ local trans = require "transitions"
 local hps = require "GameObjects.Helpers.player_states"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local ec = require "GameObjects.Helpers.edge_collisions"
+local sg = require "GameObjects.Helpers.set_ghost"
 
 local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
@@ -71,11 +72,18 @@ local run_lifted = hps.run_lifted
 local check_lifted = hps.check_lifted
 local start_lifted = hps.start_lifted
 local end_lifted = hps.end_lifted
+local run_climbing = hps.run_climbing
+local check_climbing = hps.check_climbing
+local start_climbing = hps.start_climbing
+local end_climbing = hps.end_climbing
 
 local Playa = {}
 
 
 function Playa.initialize(instance)
+
+  -- Load stuff from save
+  instance.walkOnWater = session.save.walkOnWater
 
   -- Debug
   instance.db = {downcol = 255, upcol = 255, leftcol = 255, rightcol = 255}
@@ -83,6 +91,7 @@ function Playa.initialize(instance)
   instance.floorViscosity = nil -- For testing. This info will normaly ba aquired through floor collisions
 
   instance.persistent = true
+  instance.setGhost = sg.setGhost
 
   instance.ids[#instance.ids+1] = "PlayaTest"
   instance.angle = 0
@@ -109,6 +118,7 @@ function Playa.initialize(instance)
   instance.sensors = {downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={}}
   instance.missile_cooldown_limit = 0.3
   instance.item_use_counter = 0 -- Counts how long you're still while using item
+  instance.currentMasks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
   instance.physical_properties = {
     bodyType = "dynamic",
     fixedRotation = true,
@@ -122,7 +132,7 @@ function Playa.initialize(instance)
     leftSensor = ps.shapes.pllsens,
     rightSensor = ps.shapes.plrsens,
     categories = {DEFAULTCAT, FLOORCOLLIDECAT},
-    masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
+    masks = instance.currentMasks
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.sprite_info = im.spriteSettings.playerSprites
@@ -155,19 +165,21 @@ function Playa.initialize(instance)
       local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
       if not instance.missile_cooldown then
         if not instance.liftState then
+          if not instance.climbing then
 
-          if trig.stab then
-            instance.movement_state:change_state(instance, dt, "using_sword")
-          elseif trig.swing_sword then
-            instance.movement_state:change_state(instance, dt, "using_sword")
-          elseif instance.zo == 0 then
-            if trig.mark then
-              instance.movement_state:change_state(instance, dt, "using_mark")
-            elseif trig.recall then
-              instance.movement_state:change_state(instance, dt, "using_recall")
+            if trig.stab then
+              instance.movement_state:change_state(instance, dt, "using_sword")
+            elseif trig.swing_sword then
+              instance.movement_state:change_state(instance, dt, "using_sword")
+            elseif instance.zo == 0 then
+              if trig.mark then
+                instance.movement_state:change_state(instance, dt, "using_mark")
+              elseif trig.recall then
+                instance.movement_state:change_state(instance, dt, "using_recall")
+              end
             end
-          end
 
+          end
         else
           if instance.liftingStage then
             instance.movement_state:change_state(instance, dt, "using_lift")
@@ -1262,7 +1274,13 @@ function Playa.initialize(instance)
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.swing_sword then
+      if instance.overGap then
+        instance.animation_state:change_state(instance, dt, "plummet")
+      elseif instance.inDeepWater then
+        instance.animation_state:change_state(instance, dt, "downdrown")
+      elseif instance.climbing then
+        instance.animation_state:change_state(instance, dt, "upclimbing")
+      elseif trig.swing_sword then
         if trig.restish then
           instance.animation_state:change_state(instance, dt, "downswing")
         elseif abs(instance.vx) > abs(instance.vy) then
@@ -1306,7 +1324,13 @@ function Playa.initialize(instance)
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.swing_sword then
+      if instance.overGap then
+        instance.animation_state:change_state(instance, dt, "plummet")
+      elseif instance.inDeepWater then
+        instance.animation_state:change_state(instance, dt, "downdrown")
+      elseif instance.climbing then
+        instance.animation_state:change_state(instance, dt, "upclimbing")
+      elseif trig.swing_sword then
         if trig.restish then
           instance.animation_state:change_state(instance, dt, "downswing")
         elseif abs(instance.vx) > abs(instance.vy) then
@@ -1342,6 +1366,170 @@ function Playa.initialize(instance)
         -- fail
       end
     end
+    },
+
+
+    upclimbing = {
+    run_state = function(instance, dt)
+      run_climbing(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      check_climbing(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_climbing(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      end_climbing(instance, dt, "up")
+    end
+    },
+
+
+    downdrown = {
+    run_state = function(instance, dt)
+      instance.body:setLinearVelocity(0, 0)
+    end,
+
+    check_state = function(instance, dt)
+      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+      if trig.animation_end then
+        instance.animation_state:change_state(instance, dt, "respawn")
+      end
+    end,
+
+    start_state = function(instance, dt)
+      instance.image_index = 0
+      instance.image_speed = 0.1
+      instance.xUnsteppable = instance.x
+      instance.yUnsteppable = instance.y
+      -- Ensure you're not jumping while drowning
+      instance.jo = 0
+      instance.fo = 0
+      instance.zvel = 0
+      instance.sprite = im.sprites["Witch/drown_down"]
+      inp.controllers[instance.player].disabled = true
+      instance:setGhost(true)
+    end,
+
+    end_state = function(instance, dt)
+      instance.image_index = 0
+      instance.image_speed = 0
+      inp.controllers[instance.player].disabled = nil
+      instance:setGhost(false)
+    end
+    },
+
+
+    plummet = {
+    run_state = function(instance, dt)
+      if instance.triggers.animation_end then
+        instance.image_speed = 0
+        instance.image_index = instance.plummetFrames - 1
+      end
+      local pmod = 1
+      if instance.image_speed > 0 then
+        pmod = instance.image_index
+        if pmod > 1 then pmod = 1 end
+      end
+      instance.body:setPosition(
+        instance.xPlummetStart + pmod * (instance.xClosestTile - instance.xPlummetStart),
+        instance.yPlummetStart + pmod * (instance.yClosestTile - instance.yPlummetStart)
+      )
+    end,
+
+    check_state = function(instance, dt)
+      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+      if trig.animation_end then
+        instance.animation_state:change_state(instance, dt, "respawn")
+      end
+    end,
+
+    start_state = function(instance, dt)
+      instance.sprite = im.sprites["Witch/plummet"]
+      instance.xPlummetStart = instance.x
+      instance.yPlummetStart = instance.y
+      instance.plummetFrames = instance.sprite.frames
+      instance.image_index = 0
+      instance.image_speed = 0.1
+      inp.controllers[instance.player].disabled = true
+      instance:setGhost(true)
+    end,
+
+    end_state = function(instance, dt)
+      instance.xUnsteppable = instance.x
+      instance.yUnsteppable = instance.y
+      inp.controllers[instance.player].disabled = nil
+      instance:setGhost(false)
+    end
+    },
+
+
+    respawn = {
+    run_state = function(instance, dt)
+      instance.body:setLinearVelocity(0, 0)
+      local rmod = instance.respawnCounter / instance.respawnCounterMax
+      instance.body:setPosition(
+        instance.xUnsteppable + rmod * (instance.xLastSteppable - instance.xUnsteppable),
+        instance.yUnsteppable + rmod * (instance.yLastSteppable - instance.yUnsteppable)
+      )
+      if instance.respawnCounter then
+        instance.respawnCounter = instance.respawnCounter + dt
+      end
+    end,
+
+    check_state = function(instance, dt)
+      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+      if instance.respawnCounter > instance.respawnCounterMax then
+        instance.animation_state:change_state(instance, dt, "downstill")
+      end
+    end,
+
+    start_state = function(instance, dt)
+      instance.respawnCounter = 0
+      instance.respawnCounterMax = 0.4
+      instance.invisible = true
+      inp.controllers[instance.player].disabled = true
+      instance:setGhost(true)
+    end,
+
+    end_state = function(instance, dt)
+      instance.body:setPosition(instance.xLastSteppable, instance.yLastSteppable)
+      instance.invisible = false
+      inp.controllers[instance.player].disabled = nil
+      instance:setGhost(false)
+    end
+    },
+
+
+    dontdraw = {
+    run_state = function(instance, dt)
+      if instance.dontdrawRun then instance:dontdrawRun(dt) end
+    end,
+
+    check_state = function(instance, dt)
+      if instance.dontdrawCheck then instance:dontdrawCheck(dt) end
+    end,
+
+    start_state = function(instance, dt)
+      if instance.dontdrawStart then instance:dontdrawStart(dt) end
+      instance.invisible = true
+      inp.controllers[instance.player].disabled = true
+      instance:setGhost(true)
+    end,
+
+    end_state = function(instance, dt)
+      if instance.dontdrawEnd then instance:dontdrawEnd(dt) end
+      dontdrawRun = nil
+      dontdrawCheck = nil
+      dontdrawStart = nil
+      dontdrawEnd = nil
+      instance.invisible = false
+      inp.controllers[instance.player].disabled = nil
+      instance:setGhost(false)
+    end
     }
   }
 end
@@ -1355,7 +1543,15 @@ Playa.functions = {
     self.vx, self.vy = vx, vy
     self.x, self.y = x, y
 
+    -- Track position for debugging
+    -- fuck = "x = " .. floor(x) .. ", y = " .. floor(y) .. "\n\z
+    --         xSqare = " .. floor(x/16)*16 .. ", ySquare = " .. floor(y/16)*16
+
     -- Determine movement modifiers due to floor
+    self.ongrass = nil
+    self.inShallowWater = nil
+    self.inDeepWater = nil
+    self.overGap = nil
     if self.floorTiles[1] then
       -- I could be stepping on up to four tiles. Find closest to determine mods
       local closestTile
@@ -1363,16 +1559,48 @@ Playa.functions = {
       local previousClosestDistance
       for _, floorTile in ipairs(self.floorTiles) do
         previousClosestDistance = closestDistance
-        closestDistance = min(distanceSqared2d(x, y, floorTile.xstart, floorTile.ystart), closestDistance)
+        -- Magic number to account for player height
+        closestDistance = min(distanceSqared2d(x, y+6, floorTile.xstart, floorTile.ystart), closestDistance)
         if closestDistance < previousClosestDistance then
           closestTile = floorTile
         end
       end
+      self.xClosestTile = closestTile.xstart
+      self.yClosestTile = closestTile.ystart
+
       self.floorFriction = closestTile.floorFriction
       self.floorViscosity = closestTile.floorViscosity
+      if closestTile.grass then
+        if self.zo == 0 then
+          self.ongrass = im.sprites[closestTile.grass]
+        end
+      elseif closestTile.shallowWater then
+        if self.zo == 0 then
+          self.inShallowWater = im.sprites[closestTile.shallowWater]
+        end
+      elseif closestTile.water then
+        if self.zo == 0 then
+          if self.walkOnWater then
+            self.inShallowWater = im.sprites[closestTile.water]
+          else
+            self.inDeepWater = true
+          end
+        end
+      elseif closestTile.gap then
+        if self.zo == 0 then
+          self.overGap = true
+        end
+      end
+      if closestTile.climbable and self.zo == 0 then self.climbing = true else self.climbing = nil end
+      -- Where to respawn if I fall in a gap or drown
+      if not closestTile.unsteppable then
+        self.xLastSteppable = closestTile.xstart
+        self.yLastSteppable = closestTile.ystart - 2
+      end
     else
       self.floorFriction = 1
       self.floorViscosity = nil
+      self.climbing = nil
     end
 
     -- Return movement table based on the long term action you want to take (Npcs)
@@ -1439,6 +1667,8 @@ Playa.functions = {
     end
     td.determine_animation_triggers(self, dt)
     inv.determine_equipment_triggers(self, dt)
+
+    -- Determine z axis offset
     self.jo = self.jo - self.zvel * dt
     if self.jo >= 0 then
       self.jo = 0
@@ -1510,6 +1740,8 @@ Playa.functions = {
   end,
 
   draw = function(self)
+    if self.invisible then return end
+
     local x, y = self.x, self.y
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
 
@@ -1535,6 +1767,29 @@ Playa.functions = {
     sprite.img, frame, xtotal, ytotal, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
+
+    -- Draw Grass
+    if self.ongrass then
+      local grassSprite = self.ongrass
+      local imgIndexFrameMod = (0.5*self.image_index)%1
+      local grassFrame = grassSprite[floor(grassSprite.frames*imgIndexFrameMod)]
+      love.graphics.draw(
+      grassSprite.img, grassFrame, xtotal, ytotal, self.angle,
+      grassSprite.res_x_scale*self.x_scale, grassSprite.res_y_scale*self.y_scale,
+      grassSprite.cx, grassSprite.cy)
+    end
+
+    -- Draw Water Ripples
+    if self.inShallowWater then
+      local shwSprite = self.inShallowWater
+      local imgIndex = im.globimage_index1234
+      local shwFrame = shwSprite[floor(imgIndex)]
+      love.graphics.draw(
+      shwSprite.img, shwFrame, xtotal, ytotal + 8, self.angle,
+      shwSprite.res_x_scale*self.x_scale, shwSprite.res_y_scale*self.y_scale,
+      shwSprite.cx, shwSprite.cy)
+    end
+
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --
@@ -1550,6 +1805,7 @@ Playa.functions = {
   end,
 
   trans_draw = function(self)
+    if self.animation_state.state == "dontdraw" then return end
 
     local x, y = self.x, self.y
 
@@ -1583,6 +1839,29 @@ Playa.functions = {
     sprite.img, frame, xtotal, ytotal, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
+
+    -- Draw Grass
+    if self.ongrass then
+      local grassSprite = self.ongrass
+      local imgIndexFrameMod = (0.5*self.image_index)%1
+      local grassFrame = grassSprite[floor(grassSprite.frames*imgIndexFrameMod)]
+      love.graphics.draw(
+      grassSprite.img, grassFrame, xtotal, ytotal, self.angle,
+      grassSprite.res_x_scale*self.x_scale, grassSprite.res_y_scale*self.y_scale,
+      grassSprite.cx, grassSprite.cy)
+    end
+
+    -- Draw Water Ripples
+    if self.inShallowWater then
+      local shwSprite = self.inShallowWater
+      local imgIndex = im.globimage_index1234
+      local shwFrame = shwSprite[floor(imgIndex)]
+      love.graphics.draw(
+      shwSprite.img, shwFrame, xtotal, ytotal + 8, self.angle,
+      shwSprite.res_x_scale*self.x_scale, shwSprite.res_y_scale*self.y_scale,
+      shwSprite.cx, shwSprite.cy)
+    end
+
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --
@@ -1609,10 +1888,6 @@ Playa.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-    if other.floor then
-      other.playerFloorTilesIndex = push(self.floorTiles, other)
-    end
-
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
       local sensorID = myF:getUserData() -- string
@@ -1637,6 +1912,11 @@ Playa.functions = {
     else
       -- Remember if I'm on an edge
       if other.edge then self.onEdge = true end
+
+      -- Remember Floor tiles
+      if other.floor then
+        other.playerFloorTilesIndex = push(self.floorTiles, other)
+      end
     end
 
   end,
@@ -1644,10 +1924,6 @@ Playa.functions = {
   endContact = function(self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-
-    if other.floor then
-      u.free(self.floorTiles, other.playerFloorTilesIndex)
-    end
 
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
@@ -1678,6 +1954,11 @@ Playa.functions = {
     else
       -- Remember if I'm on an edge
       if other.edge then self.onEdge = false end
+
+      -- Forget Floor tiles
+      if other.floor then
+        u.free(self.floorTiles, other.playerFloorTilesIndex)
+      end
     end
 
   end,
