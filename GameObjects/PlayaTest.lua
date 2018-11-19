@@ -13,6 +13,7 @@ local o = require "GameObjects.objects"
 local trans = require "transitions"
 
 local hps = require "GameObjects.Helpers.player_states"
+local ors = require "GameObjects.Helpers.object_read_save"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local ec = require "GameObjects.Helpers.edge_collisions"
 local sg = require "GameObjects.Helpers.set_ghost"
@@ -22,6 +23,8 @@ local hsw = require "GameObjects.Items.held_sword"
 local mark = require "GameObjects.Items.mark"
 
 local sh = require "GameObjects.shadow"
+
+local go = require "GameObjects.gameOver"
 
 local sqrt = math.sqrt
 local floor = math.floor
@@ -82,16 +85,18 @@ local Playa = {}
 
 function Playa.initialize(instance)
 
-  -- Load stuff from save
-  instance.walkOnWater = session.save.walkOnWater
-
   -- Debug
   instance.db = {downcol = 255, upcol = 255, leftcol = 255, rightcol = 255}
   instance.floorFriction = 1 -- For testing. This info will normaly ba aquired through floor collisions
   instance.floorViscosity = nil -- For testing. This info will normaly ba aquired through floor collisions
 
-  instance.persistent = true
+  -- instance.persistent = true
+  instance.transPersistent = true
   instance.setGhost = sg.setGhost
+  instance.readSave = ors.player
+  -- Load stuff from save
+  instance:readSave()
+
 
   instance.ids[#instance.ids+1] = "PlayaTest"
   instance.angle = 0
@@ -108,10 +113,8 @@ function Playa.initialize(instance)
   instance.zvel = 0 -- z axis velocity
   instance.gravity = 350
   instance.image_speed = 0
-  instance.mobility = session.save.playerMobility or 300 -- 600
-  instance.brakes = session.save.playerBrakes or 3 -- 6
   instance.brakesLim = 10
-  instance.maxspeed = 100
+  instance.health = instance.maxHealth or 3
   instance.input = {}
   instance.previnput = {}
   instance.triggers = {}
@@ -141,6 +144,7 @@ function Playa.initialize(instance)
   })
   instance.floorTiles = {role = "playerFloorTilesIndex"} -- Tracks what kind of floortiles I'm on
   instance.player = "player1"
+  inp.controllers[instance.player].disabled = nil
   instance.layer = 20
   instance.movement_state = sm.new_state_machine{
     state = "start",
@@ -1419,6 +1423,7 @@ function Playa.initialize(instance)
       instance.image_speed = 0
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
+      instance.health = instance.health - 1
     end
     },
 
@@ -1463,6 +1468,7 @@ function Playa.initialize(instance)
       instance.yUnsteppable = instance.y
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
+      instance.health = instance.health - 1
     end
     },
 
@@ -1500,6 +1506,84 @@ function Playa.initialize(instance)
       instance.invisible = false
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
+    end
+    },
+
+
+    downdie = {
+    run_state = function(instance, dt)
+      if instance.deathPhase == 1 then
+        if instance.image_index >= 3 then
+          instance.image_index = 2
+          instance.image_speed = - instance.image_speed
+          instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
+        elseif instance.image_index <= 0 then
+          instance.image_index = 1
+          instance.image_speed = - instance.image_speed
+          instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
+          instance.x_scale = - instance.x_scale
+          if instance.deathDizzinesCounter >= instance.deathDizzinesRepeats then
+            instance.deathPhase = 2
+            instance.image_speed = 0.1
+            instance.image_index = 1
+            instance.deathDizzinesCounter = 0
+          end
+        end
+      elseif instance.deathPhase == 2 then
+        if instance.image_index >= 2 then
+          instance.image_index = 1
+          instance.image_speed = - instance.image_speed
+          instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
+        elseif instance.image_index <= 0 then
+          instance.image_index = 1
+          instance.image_speed = - instance.image_speed
+          instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
+          instance.x_scale = - instance.x_scale
+          if instance.deathDizzinesCounter >= instance.deathDizzinesFastRepeats then
+            instance.deathPhase = 3
+            instance.image_speed = 0
+            instance.image_index = 0
+            instance.x_scale = 1
+          end
+        end
+      elseif instance.deathPhase == 3 then
+        instance.deathFallCounter = instance.deathFallCounter + dt
+        if instance.deathFallCounter > 0 then
+          instance.deathFallCounter = 0
+          instance.image_index = 6
+          instance.deathPhase = 4
+        end
+      elseif instance.deathPhase == 4 then
+        instance.deathFallCounter = instance.deathFallCounter + dt
+        if instance.deathFallCounter > 0.4 then
+          instance.deathFallCounter = 0
+          instance.deathPhase = 5
+          o.addToWorld(go:new{player = instance})
+        end
+        instance.ioy = instance.ioyDeathStart + math.sin(instance.deathFallCounter * 10)
+      end
+    end,
+
+    check_state = function(instance, dt)
+    end,
+
+    start_state = function(instance, dt)
+      instance.sprite = im.sprites["Witch/die"]
+      inp.controllers[instance.player].disabled = true
+      instance.deathPhase = 1
+      instance.image_index = 0
+      instance.image_speed = 0.1
+      instance.deathDizzinesCounter = 0
+      instance.deathDizzinesRepeats = 10
+      instance.deathDizzinesFastRepeats = 4
+      instance.deathFallCounter = 0
+      instance.ioyDeathStart = instance.ioy
+      instance.deathPhase = 1
+      instance:setGhost(true)
+    end,
+
+    end_state = function(instance, dt)
+      -- Go back to main menu
     end
     },
 
@@ -1665,6 +1749,7 @@ Playa.functions = {
       self.image_index = self.image_index - frames
       if frames > 1 then trig.animation_end = true end
     end
+    if self.health <= 0 then trig.noHealth = true end
     td.determine_animation_triggers(self, dt)
     inv.determine_equipment_triggers(self, dt)
 

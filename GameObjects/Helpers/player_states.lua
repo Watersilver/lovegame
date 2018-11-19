@@ -18,7 +18,9 @@ local player_states = {}
 
 player_states.check_walk = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
+  if trig.noHealth then
+    instance.animation_state:change_state(instance, dt, "downdie")
+  elseif instance.overGap then
     instance.animation_state:change_state(instance, dt, "plummet")
   elseif instance.inDeepWater then
     instance.animation_state:change_state(instance, dt, "downdrown")
@@ -37,7 +39,9 @@ end
 
 player_states.check_halt = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
+  if trig.noHealth then
+    instance.animation_state:change_state(instance, dt, "downdie")
+  elseif instance.overGap then
     instance.animation_state:change_state(instance, dt, "plummet")
   elseif instance.inDeepWater then
     instance.animation_state:change_state(instance, dt, "downdrown")
@@ -56,7 +60,9 @@ end
 
 player_states.check_still = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
+  if trig.noHealth then
+    instance.animation_state:change_state(instance, dt, "downdie")
+  elseif instance.overGap then
     instance.animation_state:change_state(instance, dt, "plummet")
   elseif instance.inDeepWater then
     instance.animation_state:change_state(instance, dt, "downdrown")

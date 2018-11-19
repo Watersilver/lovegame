@@ -80,7 +80,7 @@ end
 
 function trans.camera_modification()
   local side = game.transitioning.side
-  local camxtmod, camytmod
+  local camxtmod, camytmod = 0, 0
 
   if side == "left" then
     camxtmod = 0
