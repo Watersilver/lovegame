@@ -71,7 +71,6 @@ dialogue.textBox.l, dialogue.textBox.t, dialogue.textBox.w, dialogue.textBox.h =
 
 sh.calculate_total_scale{game_scale=1}
 
-
 if not fuck then fuck = 0 end
 -- love.keyboard.setTextInput(false)
 

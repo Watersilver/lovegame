@@ -27,7 +27,7 @@ function NPC.initialize(instance)
   instance.image_index = 0
   instance.x_scale = 1
   instance.y_scale = 1
-  instance.layer = 10
+  instance.layer = 20
   instance.zo = 0
   instance.unpushable = true
 end

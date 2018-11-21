@@ -26,6 +26,8 @@ local sh = require "GameObjects.shadow"
 
 local go = require "GameObjects.gameOver"
 
+local hitShader = love.graphics.newShader("Shaders/player_damage.fs")
+
 local sqrt = math.sqrt
 local floor = math.floor
 local choose = u.choose
@@ -1506,6 +1508,7 @@ function Playa.initialize(instance)
       instance.invisible = false
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
+      instance.invulnerable = 1
     end
     },
 
@@ -1749,7 +1752,21 @@ Playa.functions = {
       self.image_index = self.image_index - frames
       if frames > 1 then trig.animation_end = true end
     end
-    if self.health <= 0 then trig.noHealth = true end
+    if self.health <= 0 then
+      trig.noHealth = true
+    else
+      -- Decrease invulnerablity counter
+      -- It's here because it's only relevant if I'm alive
+      if self.invulnerable then
+        self.invulnerable = self.invulnerable - dt
+        if floor(7 * self.invulnerable % 2) == 1 then
+          trig.enableHitShader = true
+        end
+        if self.invulnerable < 0 then
+          self.invulnerable = nil
+        end
+      end
+    end
     td.determine_animation_triggers(self, dt)
     inv.determine_equipment_triggers(self, dt)
 
@@ -1815,6 +1832,13 @@ Playa.functions = {
       self.db.rightcol = 0
     end
 
+    -- set Shader
+    if trig.enableHitShader then
+      self.playerShader = hitShader
+    else
+      self.playerShader = nil
+    end
+
     -- Turn off triggers
     triggersdebug = {}
     for trigger, _ in pairs(self.triggers) do
@@ -1848,10 +1872,13 @@ Playa.functions = {
       self.image_index = self.image_index - sprite.frames
     end
     local frame = sprite[floor(self.image_index)]
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.playerShader)
     love.graphics.draw(
     sprite.img, frame, xtotal, ytotal, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
 
     -- Draw Grass
     if self.ongrass then
@@ -1920,10 +1947,13 @@ Playa.functions = {
       self.image_index = self.image_index - sprite.frames
     end
     local frame = sprite[floor(self.image_index)]
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.playerShader)
     love.graphics.draw(
     sprite.img, frame, xtotal, ytotal, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
 
     -- Draw Grass
     if self.ongrass then
