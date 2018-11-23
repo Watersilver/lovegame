@@ -68,7 +68,7 @@ tilesets_to_symbols['Tiles/SolidsOutside'] = {
   'twsw', 'twd', 'twse', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n',
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'sL', 'n',
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n', 'n',
-  'w', 'f', 'w', 'w', 'u', 'w', 'w', 'u', 'w', 'n', 'n',
+  'w', 'ptl', 'w', 'w', 'ptl', 'w', 'w', 'ptl', 'w', 'n', 'n',
 }
 
 -- Functions always below vars, so they can recognise them

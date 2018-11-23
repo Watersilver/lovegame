@@ -85,12 +85,19 @@ inv.recall = {
 
 inv.slots = {}
 
-inv.slots[6] = {key = "c", item = inv.sword}
-inv.slots[5] = {key = "x", item = inv.jump}
-inv.slots[4] = {key = "z", item = inv.missile}
-inv.slots[3] = {key = "d", item = inv.mark}
-inv.slots[2] = {key = "s", item = inv.recall}
-inv.slots[1] = {key = "a", item = inv.grip}
+-- inv.slots[6] = {key = "c", item = inv.sword}
+-- inv.slots[5] = {key = "x", item = inv.jump}
+-- inv.slots[4] = {key = "z", item = inv.missile}
+-- inv.slots[3] = {key = "d", item = inv.mark}
+-- inv.slots[2] = {key = "s", item = inv.recall}
+-- inv.slots[1] = {key = "a", item = inv.grip}
+
+inv.slots[6] = {key = "c"}
+inv.slots[5] = {key = "x"}
+inv.slots[4] = {key = "z"}
+inv.slots[3] = {key = "d"}
+inv.slots[2] = {key = "s"}
+inv.slots[1] = {key = "a"}
 
 for index, contents in ipairs(inv.slots) do
   inv.slots[inv.slots[index].key] = inv.slots[index]
@@ -203,7 +210,7 @@ function inv.draw()
       love.graphics.rectangle("line", x, y, 18, 18)
     end
     if contents.item then love.graphics.draw(contents.item.invImage, x+1, y+1) end
-    love.graphics.print(contents.key, x+1, y)
+    love.graphics.print(contents.key, x+1, y, 0, 0.2, 0.2)
     x = x + 19
     if index % 3 == 0 then
       y = y + 19

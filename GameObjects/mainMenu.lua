@@ -44,9 +44,11 @@ local function start_game(saveName)
   -- Taking save game into account TBI
   game.transition{
     type = "whiteScreen",
+    noFade = true,
     progress = 0,
     roomTarget = "Rooms/room0.lua"
   }
+  Hud.visible = true
 end
 
 -- Make sure the cursor knows its menu and its items and each item knows its menu
@@ -201,6 +203,7 @@ function MainMenu.initialize(instance)
     {'Menu/SimpleSliderNTickbox', 6, padding = 2, width = 16, height = 16},
     {'Inventory/InvMissileL1'}
   }
+  Hud.visible = false
 end
 
 MainMenu.functions = {

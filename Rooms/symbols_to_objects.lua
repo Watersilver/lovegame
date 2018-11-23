@@ -28,7 +28,11 @@ local thickWallLeft = require("GameObjects.ThickWall.thickWallLeft")
 local thickWallRight = require("GameObjects.ThickWall.thickWallRight")
 local thickWallUp = require("GameObjects.ThickWall.thickWallUp")
 local NpcTest = require("GameObjects.NpcTest")
+local portal = require("GameObjects.portal")
 local mainMenu = require("GameObjects.mainMenu")
+
+-- global Npcs
+local itemGiver = require "GameObjects.GlobalNpcs.itemGiver"
 
 local symbols_to_objects_default = {
   w = Wall,
@@ -43,6 +47,7 @@ local symbols_to_objects_default = {
   st = stairs,
   aF = animatedFloorTile1213,
   aF2 = animatedFloorTile1234,
+  ptl = portal,
   b = noBody,
   e = edge,
   eL = edgeLeft,
@@ -61,7 +66,10 @@ local symbols_to_objects_default = {
   twr = thickWallRight,
   twu = thickWallUp,
   NpcTest = NpcTest,
-  mainMenu = mainMenu
+  mainMenu = mainMenu,
+
+  --global Npcs
+  itgvr = itemGiver
 }
 
 return symbols_to_objects_default

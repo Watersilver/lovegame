@@ -17,6 +17,9 @@ local ors = require "GameObjects.Helpers.object_read_save"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local ec = require "GameObjects.Helpers.edge_collisions"
 local sg = require "GameObjects.Helpers.set_ghost"
+local asp = require "GameObjects.Helpers.add_spell"
+local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDrownPlummet
+
 
 local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
@@ -95,6 +98,7 @@ function Playa.initialize(instance)
   -- instance.persistent = true
   instance.transPersistent = true
   instance.setGhost = sg.setGhost
+  instance.insertToSpellSlot = asp.insertToSpellSlot
   instance.readSave = ors.player
   -- Load stuff from save
   instance:readSave()
@@ -1280,10 +1284,7 @@ function Playa.initialize(instance)
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if instance.overGap then
-        instance.animation_state:change_state(instance, dt, "plummet")
-      elseif instance.inDeepWater then
-        instance.animation_state:change_state(instance, dt, "downdrown")
+      if pddp(instance, trig, side) then
       elseif instance.climbing then
         instance.animation_state:change_state(instance, dt, "upclimbing")
       elseif trig.swing_sword then
@@ -1330,10 +1331,7 @@ function Playa.initialize(instance)
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if instance.overGap then
-        instance.animation_state:change_state(instance, dt, "plummet")
-      elseif instance.inDeepWater then
-        instance.animation_state:change_state(instance, dt, "downdrown")
+      if pddp(instance, trig, side) then
       elseif instance.climbing then
         instance.animation_state:change_state(instance, dt, "upclimbing")
       elseif trig.swing_sword then
@@ -1581,12 +1579,10 @@ function Playa.initialize(instance)
       instance.deathDizzinesFastRepeats = 4
       instance.deathFallCounter = 0
       instance.ioyDeathStart = instance.ioy
-      instance.deathPhase = 1
       instance:setGhost(true)
     end,
 
     end_state = function(instance, dt)
-      -- Go back to main menu
     end
     },
 

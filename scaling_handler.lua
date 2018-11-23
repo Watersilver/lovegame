@@ -87,10 +87,23 @@ end
 -- USE ON RESIZE CALLBACK AFTER calculate_resized_window!
 function sh.get_resized_text_window( w, h )
   return
-    -- top
-    (w - current_w * 0.5) * 0.5,
     -- left
+    (w - current_w * 0.5) * 0.5,
+    -- top
     (h + current_h * 0.5) * 0.5,
+    -- width
+    current_w * 0.5,
+    -- height
+    current_h * 0.2
+end
+
+-- USE ON RESIZE CALLBACK AFTER calculate_resized_window!
+function sh.get_resized_choice_window( w, h )
+  return
+    -- left
+    (w - current_w * 0.5) * 0.5,
+    -- top
+    (h + current_h * 0.5) * 0.583,
     -- width
     current_w * 0.5,
     -- height

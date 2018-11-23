@@ -8,7 +8,13 @@ room.music_info = {"Silence"}--{"Music/MusicTest"}
 
 room.width = 496
 room.height = 448
-room.downTrans = {}
+room.downTrans = {
+  {
+    roomTarget = "Rooms/NWTestRoom.lua", -- Room you'll go to if this transition happens
+    xleftmost = 0, xrightmost = 496, -- Limits to check against
+    xmod = 0, ymod = 0 -- Modification of x, y variables for next room
+  }
+}
 room.rightTrans = {
   {
     roomTarget = "Rooms/newTilesTestRoom2.lua", -- Room you'll go to if this transition happens
@@ -16,7 +22,13 @@ room.rightTrans = {
     xmod = 0, ymod = 0 -- Modification of x, y variables for next room
   }
 }
-room.leftTrans = {}
+room.leftTrans = {
+  {
+    roomTarget = "Rooms/newTilesTestRoom2.lua", -- Room you'll go to if this transition happens
+    yupper = 0, ylower = 450, -- Limits to check against
+    xmod = 0, ymod = 0 -- Modification of x, y variables for next room
+  }
+}
 room.upTrans = {
   {
     roomTarget = "Rooms/NWTestRoom.lua", -- Room you'll go to if this transition happens
@@ -180,6 +192,19 @@ room_part.tileset = im.spriteSettings.solidsOutside
 room_part.tileset_index_table = {
 53, 53, 53, 53, 53, 53, 53, 53, 53,
 }
+
+table.insert(room.room_parts, room_part)
+---
+local room_part = {
+'itgvr'
+}
+room_part.x_that_I_start = 222
+room_part.y_that_I_start = 188
+room_part.row_length = 1
+room_part.col_length = 1
+room_part.tile_width = 16
+room_part.init = {}
+room_part.init.layer = 20
 
 table.insert(room.room_parts, room_part)
 ----------End of arrays of geography of parts of room----------

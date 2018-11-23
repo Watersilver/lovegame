@@ -58,7 +58,8 @@ local cam = mainCamera
 cam.xt = 0
 cam.yt = 0
 
-local hud = gamera.new(0,0,400,225)
+Hud = gamera.new(0,0,400,225)
+local hud = Hud
 hud.xt = 0
 hud.yt = 0
 
@@ -66,8 +67,15 @@ local textCam = gamera.new(0,0,400,90)
 textCam.xt = 0
 textCam.yt = 0
 textCam:setWindow(sh.get_resized_text_window( love.graphics.getWidth(), love.graphics.getHeight() ))
-dialogue.textBox.l, dialogue.textBox.t, dialogue.textBox.w, dialogue.textBox.h = textCam:getWindow()
-dialogue.textBox.l, dialogue.textBox.t, dialogue.textBox.w, dialogue.textBox.h = dialogue.textBox.l*0.5, dialogue.textBox.t*0.5, dialogue.textBox.w*0.5, dialogue.textBox.h*0.5
+dialogue.textBox.l, dialogue.textBox.t, dialogue.textBox.w, dialogue.textBox.h =
+  200,337.5,400,90
+
+local choiceCam = gamera.new(0, 0, 300, 20)
+choiceCam.xt = 0
+choiceCam.yt = 0
+choiceCam:setWindow(sh.get_resized_choice_window( love.graphics.getWidth(), love.graphics.getHeight() ))
+
+
 
 sh.calculate_total_scale{game_scale=1}
 
@@ -302,6 +310,10 @@ function love.update(dt)
   if dialogue.enable then dialogue.enabled = true; dialogue.enable = false end
   if dialogue.enabled then
     dialogue.currentMethod.logic(dt)
+
+    if dialogue.currentChoice then
+      dialogue.currentChoice.logic(dt)
+    end
   end
 
 
@@ -312,6 +324,7 @@ function love.update(dt)
 
   local playaTest = o.identified.PlayaTest
 
+  -- Check edge transitions
   if playaTest and playaTest[1].x then
 
     if not game.transitioning then
@@ -430,6 +443,12 @@ end
 
 function love.draw()
 
+  local playaTest, pl1 = o.identified.PlayaTest
+
+  if playaTest and playaTest[1].x then
+    pl1 = playaTest[1]
+  end
+
   cam:setScale(sh.get_total_scale())
   cam:setPosition(cam.xt, cam.yt)
 
@@ -466,19 +485,23 @@ function love.draw()
 
       else -- White screen
 
-        for layer = 1, layers do
-          local drawnum = #o.draw_layers[layer]
-          for i = 1, drawnum do
-            local obj = o.draw_layers[layer][i]
-            if obj.onPreviousRoom then
-              obj:draw()
-            end
-          end
+        -- for layer = 1, layers do
+        --   local drawnum = #o.draw_layers[layer]
+        --   for i = 1, drawnum do
+        --     local obj = o.draw_layers[layer][i]
+        --     if obj.onPreviousRoom then
+        --       obj:draw()
+        --     end
+        --   end
+        -- end
+        if game.transitioning.playa then
+          game.transitioning.playa.body:setPosition(game.transitioning.desx, game.transitioning.desy)
+          game.transitioning.playa.body:setLinearVelocity(0, 0)
+          game.transitioning.playa = nil
         end
         love.graphics.setColor(COLORCONST*0.9, COLORCONST*0.9, COLORCONST*0.9, COLORCONST)
         love.graphics.rectangle("fill", 0, 0, 800, 450)
         love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-
 
       end
 
@@ -490,35 +513,56 @@ function love.draw()
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)
 
-  hud:draw(function(l,t,w,h)
-    if im.sprites["GuyWalk"] then
-      love.graphics.draw(im.sprites["GuyWalk"].img, 0, 0)
-      if game.paused and not game.transitioning then
-        local pr, pg, pb, pa = love.graphics.getColor()
-        love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
-        love.graphics.rectangle("fill", l, t, w, h)
-        love.graphics.setColor(pr, pg, pb, pa)
-        inv.draw()
+  if hud.visible and pl1 then
+    hud:draw(function(l,t,w,h)
+      local hpspr = im.sprites["health"]
+      if hpspr then
+        -- Draw as many filled hearts as player has health
+        for i = 1, pl1.maxHealth do
+          local healthFrame
+          if pl1.health < i then
+            healthFrame = hpspr[1]
+          else
+            healthFrame = hpspr[0]
+          end
+          love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5)
+        end
+
+        if game.paused and not game.transitioning then
+          local pr, pg, pb, pa = love.graphics.getColor()
+          love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
+          love.graphics.rectangle("fill", l, t, w, h)
+          love.graphics.setColor(pr, pg, pb, pa)
+          inv.draw()
+        end
       end
-    end
-  end)
+    end)
+  end
 
   -- Print dialogues, signs, and generally, in-game text stuff
   if dialogue.enabled then
     textCam:setScale(sh.get_window_scale())
-    -- textCam:setWindow(textCam:getWindow())
-    -- textCam:setPosition(textCam.xt, textCam.yt)
 
     dialogue.currentMethod.draw(textCam)
-  end
 
-  love.graphics.print(love.timer.getFPS())
-  if fuck then love.graphics.print(fuck, 0, 133) end
+    if dialogue.currentChoice then
+      choiceCam:setScale(sh.get_window_scale())
+      dialogue.currentChoice.draw(choiceCam)
+    end
+  end
+  -- debug choice
+  -- choiceCam:setScale(sh.get_window_scale())
+  -- dialogue.simpleBinaryChoice.logic()
+  -- dialogue.simpleBinaryChoice.draw(choiceCam)
+  -- end debug choice
+
+  love.graphics.print(love.timer.getFPS(),0,120)
+  if fuck then love.graphics.print(fuck, 0, 77+120) end
   local debiter = 0
   if triggersdebug then
     for trigger, _ in pairs(triggersdebug) do
       debiter = debiter + 10
-      love.graphics.print(trigger, 0, 20+debiter)
+      love.graphics.print(trigger, 0, 20+debiter+120)
     end
   end
 
@@ -553,6 +597,7 @@ function love.resize( w, h )
   cam:setWindow(sh.calculate_resized_window( w, h ))
   hud:setWindow(sh.get_resized_window( w, h ))
   textCam:setWindow(sh.get_resized_text_window( w, h ))
+  choiceCam:setWindow(sh.get_resized_choice_window( w, h ))
 
   -- Determine camera scale due to window size
   sh.calculate_total_scale{resized=true}

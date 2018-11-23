@@ -2,6 +2,7 @@ local text = require "text"
 local font = text.font
 local inp = require "input"
 local sh = require "scaling_handler"
+local u = require "utilities"
 
 local max = math.max
 local sin = math.sin
@@ -15,6 +16,11 @@ local tb = dialogue.textBox
 
 dialogue.enabled = false
 dialogue.text = love.graphics.newText(font.prstart)
+dialogue.choiceL = love.graphics.newText(font.prstart)
+dialogue.choiceR = love.graphics.newText(font.prstart)
+  dialogue.choiceL:set("Yes")
+  dialogue.choiceR:set("No")
+  dialogue.cursor = 0
 dialogue.x = 0
 dialogue.y = 0
 
@@ -42,6 +48,7 @@ dialogue.simpleWallOfText ={
     end
     if dialogue.canSkip and inp.enterPressed then
       dialogue.enabled = false
+      dialogue.currentChoice = nil
       if dialogue.onDialogueEnd then dialogue.onDialogueEnd() end
     end
   end,
@@ -92,6 +99,7 @@ dialogue.simpleWallOfText ={
       love.graphics.polygon("fill", xsh, ysh-5, xsh+5, ysh, xsh-5, ysh)
 
       if dialogue.canSkip then
+        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
         xsh = l+w*0.98
         ysh = t+h*0.93
         love.graphics.circle("fill", xsh, ysh, dialogue.skipButtonRadius)
@@ -134,6 +142,60 @@ dialogue.simpleWallOfText ={
   end
 }
 
+
+dialogue.simpleBinaryChoice = {
+  logic = function(dt)
+    if inp.leftPressed then dialogue.cursor = dialogue.cursor - 1 end
+    if inp.rightPressed then dialogue.cursor = dialogue.cursor + 1 end
+    dialogue.cursor = u.clamp(0, dialogue.cursor, 1)
+  end,
+
+  draw = function(choiceCam)
+    choiceCam:draw(function(l,t,w,h)
+      local pr, pg, pb, pa = love.graphics.getColor()
+      local choiceAlpha = 0.3 * COLORCONST
+      if dialogue.canSkip then
+        choiceAlpha = COLORCONST
+      end
+      love.graphics.setColor(0, 0, 0, choiceAlpha)
+      -- love.graphics.rectangle("fill", l-1, t-1, w+1, h+1)
+      love.graphics.rectangle("fill", 0, 0, w+1, h+1)
+      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, choiceAlpha)
+      love.graphics.draw(
+        dialogue.choiceL, -- Text or ColouredText (rgbtable1, text1, ...etc)
+        5, -- x
+        6, -- y
+        0,
+        0.5,
+        0.5
+      )
+      love.graphics.draw(
+        dialogue.choiceR, -- Text or ColouredText (rgbtable1, text1, ...etc)
+        155, -- x
+        6, -- y
+        0,
+        0.5,
+        0.5
+      )
+      love.graphics.setColor(0, COLORCONST*0.2, COLORCONST, choiceAlpha)
+      local halfw = (w+1) * 0.5
+      love.graphics.rectangle("line", dialogue.cursor * halfw, 0, halfw, h+1)
+      love.graphics.setColor(pr, pg, pb, pa)
+    end)
+  end,
+
+  setUp = function(cleft, cright)
+    dialogue.currentChoice = dialogue.simpleBinaryChoice
+    dialogue.choiceL:set(cleft or "Yes")
+    dialogue.choiceR:set(cright or "No")
+    dialogue.text:setFont(font.prstart)
+    dialogue.xscale = 0.5
+    dialogue.yscale = 0.5
+    dialogue.cursor = 0
+  end
+}
+
 dialogue.currentMethod = dialogue.simpleWallOfText
+dialogue.currentChoice = nil
 
 return dialogue

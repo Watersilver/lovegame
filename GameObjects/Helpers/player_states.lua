@@ -9,6 +9,7 @@ local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
 local msl = require "GameObjects.Items.missile"
 local lft = require "GameObjects.Items.lifted"
+local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDrownPlummet
 
 local floor = math.floor
 
@@ -18,12 +19,7 @@ local player_states = {}
 
 player_states.check_walk = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if trig.noHealth then
-    instance.animation_state:change_state(instance, dt, "downdie")
-  elseif instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif inv.check_use(instance, trig, side) then
@@ -39,12 +35,7 @@ end
 
 player_states.check_halt = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if trig.noHealth then
-    instance.animation_state:change_state(instance, dt, "downdie")
-  elseif instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif inv.check_use(instance, trig, side) then
@@ -60,12 +51,7 @@ end
 
 player_states.check_still = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if trig.noHealth then
-    instance.animation_state:change_state(instance, dt, "downdie")
-  elseif instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif inv.check_use(instance, trig, side) then
@@ -79,10 +65,7 @@ end
 
 player_states.check_push = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif inv.check_use(instance, trig, side) then
@@ -105,10 +88,7 @@ end
 
 player_states.check_swing = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif otherstate == "normal" then
@@ -172,10 +152,7 @@ end
 
 player_states.check_stab = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif otherstate == "normal" then
     if trig.hold_sword then
       instance.animation_state:change_state(instance, dt, side .. "hold")
@@ -210,10 +187,7 @@ player_states.end_stab = player_states.end_swing
 
 player_states.check_hold = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif trig.stab then
@@ -253,10 +227,7 @@ end
 
 player_states.check_fall = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif instance.zo == 0 then
@@ -293,10 +264,7 @@ end
 
 player_states.check_missile = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif instance.missile_cooldown > instance.missile_cooldown_limit then
@@ -374,10 +342,7 @@ end
 
 player_states.check_gripping = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif not trig.grip or not instance.grippedOb.exists then
@@ -448,10 +413,7 @@ end
 
 player_states.check_lifting = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif instance.liftingStage == 4 then
     instance.dontThrow = true
     instance.animation_state:change_state(instance, dt, side .. "lifted")
@@ -498,10 +460,7 @@ end
 
 player_states.check_lifted = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if instance.overGap then
-    instance.animation_state:change_state(instance, dt, "plummet")
-  elseif instance.inDeepWater then
-    instance.animation_state:change_state(instance, dt, "downdrown")
+  if pddp(instance, trig, side) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif trig.gripping then
@@ -541,7 +500,9 @@ end
 
 player_states.check_climbing = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if not instance.climbing then
+  if trig.noHealth then
+    instance.animation_state:change_state(instance, dt, "downdie")
+  elseif not instance.climbing then
     instance.animation_state:change_state(instance, dt, "upstill")
   end
 end

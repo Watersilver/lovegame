@@ -79,7 +79,7 @@ im.spriteSettings = {
     {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
     {'Witch/defaultGrass', 2, padding = 2, width = 16, height = 16},
     {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
-    {'GuyWalk', 4, width = 16, height = 16},
+    {'health', 2, padding = 2, width = 8, height = 8},
     {'Test', 1, padding = 0},
     {'Plrun_strip12', 12, padding = 0, width = 16, height = 16}
   }
