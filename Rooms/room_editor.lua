@@ -32,6 +32,7 @@ local camscale = 1
 local tilesets = {
   im.spriteSettings.floorOutside,
   im.spriteSettings.solidsOutside,
+  im.spriteSettings.basicFriendlyInterior,
   index = 1
 }
 
@@ -69,6 +70,15 @@ tilesets_to_symbols['Tiles/SolidsOutside'] = {
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'sL', 'n',
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n', 'n',
   'w', 'ptl', 'w', 'w', 'ptl', 'w', 'w', 'ptl', 'w', 'n', 'n',
+}
+tilesets_to_symbols['Tiles/BasicFriendlyInterior'] = {
+  'w', 'w', 'w', 'w', 'w', 'n', 'n', 'n', 'n', 'n', 'n',
+  'w', 'f', 'w', 'w', 'w', 'n', 'n', 'n', 'n', 'n', 'n',
+  'w', 'w', 'w', 'w', 'w', 'n', 'n', 'n', 'n', 'n', 'n',
+  'w', 'ptl', 'w', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
+  'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
+  'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
+  'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
 }
 
 -- Functions always below vars, so they can recognise them

@@ -38,13 +38,14 @@ NPC.functions = {
       dlg.simpleWallOfText.setUp(
         {{{COLORCONST,COLORCONST,COLORCONST,COLORCONST},"\z
         Hi there, little monkey. \z
-        Name's Shitface. Nice to \z
-        meetcha. Fuck off, twit. ",
+        This house's layout looks \z
+        different from the outside, eh? \z
+        Isn't it weird? ",
         {COLORCONST,COLORCONST/2,COLORCONST/2,COLORCONST},
-        "Hi fuckwad. I must say \z
-        many things, so that we \z
-        may check the scrolling \z
-        thingy. So bear with me."
+        "I also don't have any furniture, for some reason. \z
+        HAHAHAHAHAHAHAHAHAHAHAHAHAHAHA \z
+        HAHAHAHAHAHAHAHAHAHAHAHAHAHAHA \z
+        HAHAHAHAHAHAAAAAAAAAAAAAAARGH!"
         },
         -1, "left"},
         self.y,

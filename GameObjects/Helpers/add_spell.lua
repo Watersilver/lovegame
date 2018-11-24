@@ -20,4 +20,10 @@ function asp.insertToSpellSlot (self, spellName, spellKey)
   -- If I reach this point, I've failed
 end
 
+function asp.emptySpellSlots()
+  for _, slot in ipairs(inv.slots) do
+    slot.item = nil
+  end
+end
+
 return asp

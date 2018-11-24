@@ -32,7 +32,7 @@ table.insert(room.room_parts, room_part)
 
 rm.build_room(room)
 
--- Make sure there's no camera weirdness, even if I start in a tiny room
-sh.calculate_total_scale{game_scale=11}
+-- -- Make sure there's no camera weirdness, even if I start in a tiny room
+-- sh.calculate_total_scale{game_scale=11}
 -- return assert(love.filesystem.load("Rooms/room1.lua"))()
 return game.change_room(session.save.room or "Rooms/newTilesTestRoom.lua")

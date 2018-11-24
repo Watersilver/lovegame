@@ -4,6 +4,7 @@ local o = require "GameObjects.objects"
 local trans = require "transitions"
 local game = require "game"
 local u = require "utilities"
+local im = require "image"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -88,9 +89,7 @@ function Sword.initialize(instance)
   instance.y_scale = 1
   instance.image_speed = 0
   instance.triggers = {}
-  instance.sprite_info = {
-    {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15}
-  }
+  instance.sprite_info = {im.spriteSettings.playerSword}
   instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",

@@ -26,10 +26,10 @@ local function typical_activate(self, dt, textIndex)
 end
 
 local myText = {
-  {{{cc,cc,cc,cc},"Hey there. I am the Spell Giver!"},-1, "left"},
-  {{{cc,cc,cc,cc},"Wanna learn all spells?",{0.5*cc,cc*0.8,cc,cc},"\n(Choose 'Teach me' to unlock every equippable spell.",{cc,cc*0.2,cc*0.2,cc}," Warning: If you don't want to have the full game abilities spoiled, choose 'No'.",{0.5*cc,cc*0.8,cc,cc},")"},-1, "left"},
-  {{{cc,cc,cc,cc},"Done! You now know: Sword, magic missile, grip, mark recall, jump and water walk(passive). You can open your inventory with space(default) and swap spell positions by pressing the corresponding buttons."},-1, "left"},
-  {{{cc,cc,cc,cc},"Suit yourself."},-1, "left"}
+  {{{cc,cc,cc,cc},"You're awfully sluggish. And your shoes look quite slippery..."},-1, "left"},
+  {{{cc,cc,cc,cc},"I can make you a bit less slippery and improve your mobility. Do you want me to?"},-1, "left"},
+  {{{cc,cc,cc,cc},"Done!"},-1, "left"},
+  {{{cc,cc,cc,cc},"All right then..."},-1, "left"}
 }
 
 local activateFuncs = {}
@@ -39,18 +39,13 @@ activateFuncs[1] = function (self, dt, textIndex)
 end
 activateFuncs[2] = function (self, dt, textIndex)
   typical_activate(self, dt, textIndex)
-  dlg.simpleBinaryChoice.setUp("Teach me!", "No!")
+  dlg.simpleBinaryChoice.setUp("Sure.", "Nah.")
   self.next = {3, 4}
 end
 activateFuncs[3] = function (self, dt, textIndex)
   typical_activate(self, dt, textIndex)
-  session.save.hasSword = "sword"
-  session.save.hasJump = "jump"
-  session.save.hasMissile = "missile"
-  session.save.hasMark = "mark"
-  session.save.hasRecall = "recall"
-  session.save.hasGrip = "grip"
-  session.save.walkOnWater = true
+  session.save.playerMobility = 600
+  session.save.playerBrakes = 6
   self.activator:readSave()
   self.next = "end"
 end

@@ -4,6 +4,7 @@ local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local trans = require "transitions"
 local game = require "game"
+local im = require "image"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -42,9 +43,7 @@ function Missile.initialize(instance)
   instance.y_scale = 1
   instance.image_speed = 0
   instance.triggers = {}
-  instance.sprite_info = {
-    {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4}
-  }
+  instance.sprite_info = {im.spriteSettings.playerMissile}
   -- instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",

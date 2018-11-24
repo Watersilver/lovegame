@@ -35,81 +35,90 @@ function rm.build_room(room)
     -- Store calculation to avoid repeating in the for loop
     local number_of_elements = #room_part
 
-    -- iterate over all elements of a room_part
-    for _ = 1, number_of_elements do
+    -- If there are symbols, look for element in symbol_to_objects table
+    if number_of_elements > 0 then
+      -- iterate over all elements of a room_part
+      for _ = 1, number_of_elements do
 
-      -- Store place on room part table
-      local symbol_index = i+(j-1)*row_length
-      -- Store symbol of room part
-      local symbol = room_part[symbol_index]
-      -- If symbol exists, create corresponding object
-      if symbol ~= 'n' then
-        local element = rm.sto[symbol]:new(init)
-        element.xstart = x_that_I_start + (i-1) * tile_width
-        element.ystart = y_that_I_start + (j-1) * tile_height
-        -- Make sure to use as few edge shapes as necessary
-        local epp = element.physical_properties
-        if epp and epp.tile then
-          if row_length == 0 or row_length == 1 or element.allsides then
-            epp.tile = {"u", "d", "l", "r"}
-          elseif col_length == 0 then
-            if i == 1 then
-              epp.tile = {"u", "d", "l"}
-            elseif i == row_length then
-              epp.tile = {"u", "d", "r"}
+        -- Store place on room part table
+        local symbol_index = i+(j-1)*row_length
+        -- Store symbol of room part
+        local symbol = room_part[symbol_index]
+        -- If symbol exists, create corresponding object
+        if symbol ~= 'n' then
+          local element = rm.sto[symbol]:new(init)
+          element.xstart = x_that_I_start + (i-1) * tile_width
+          element.ystart = y_that_I_start + (j-1) * tile_height
+          -- Make sure to use as few edge shapes as necessary
+          local epp = element.physical_properties
+          if epp and epp.tile then
+            if row_length == 0 or row_length == 1 or element.allsides then
+              epp.tile = {"u", "d", "l", "r"}
+            elseif col_length == 0 then
+              if i == 1 then
+                epp.tile = {"u", "d", "l"}
+              elseif i == row_length then
+                epp.tile = {"u", "d", "r"}
+              else
+                epp.tile = {"u", "d"}
+              end
+            elseif j == 1 then
+              if i == 1 then
+                epp.tile = {"u", "l"} -- upper left
+              elseif i == row_length then
+                epp.tile = {"u", "r"} -- upper right and so forth
+              else
+                epp.tile = {"u"}
+              end
+            elseif j == col_length then
+              if i == 1 then
+                epp.tile = {"d", "l"}
+              elseif i == row_length then
+                epp.tile = {"d", "r"}
+              else
+                epp.tile = {"d"}
+              end
             else
-              epp.tile = {"u", "d"}
-            end
-          elseif j == 1 then
-            if i == 1 then
-              epp.tile = {"u", "l"} -- upper left
-            elseif i == row_length then
-              epp.tile = {"u", "r"} -- upper right and so forth
-            else
-              epp.tile = {"u"}
-            end
-          elseif j == col_length then
-            if i == 1 then
-              epp.tile = {"d", "l"}
-            elseif i == row_length then
-              epp.tile = {"d", "r"}
-            else
-              epp.tile = {"d"}
-            end
-          else
-            if i == 1 then
-              epp.tile = {"l"}
-            elseif i == row_length then
-              epp.tile = {"r"}
-            else
-              epp.tile = {"none"}
+              if i == 1 then
+                epp.tile = {"l"}
+              elseif i == row_length then
+                epp.tile = {"r"}
+              else
+                epp.tile = {"none"}
+              end
             end
           end
+
+          -- Determine sprite
+          if tileset then
+            element.sprite_info = {tileset}
+            element.image_index = tileset_index_table[symbol_index]
+          end
+
+          o.addToWorld(element)
         end
 
-        -- Determine sprite
-        if tileset then
-          element.sprite_info = {tileset}
-          element.image_index = tileset_index_table[symbol_index]
+        -- Progress iterators
+        i = i + 1
+        if row_length > 0 and row_length < i then
+          i = 1
+          j = j + 1
         end
-
-        o.addToWorld(element)
       end
 
-      -- Progress iterators
-      i = i + 1
-      if row_length > 0 and row_length < i then
-        i = 1
-        j = j + 1
-      end
+    -- If there are no symbols, require element from blueprint variable
+    else
+      local blueprint = require("GameObjects." .. room_part.blueprint)
+      local element = blueprint:new(init)
+      element.xstart = x_that_I_start
+      element.ystart = y_that_I_start
+      element.x = element.xstart
+      element.y = element.ystart
+      o.addToWorld(element)
     end
 
   end
 
-end
-
-function rm.clear_room()
--- todo
 end
 
 return rm

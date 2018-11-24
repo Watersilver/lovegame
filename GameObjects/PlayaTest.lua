@@ -101,6 +101,7 @@ function Playa.initialize(instance)
   instance.insertToSpellSlot = asp.insertToSpellSlot
   instance.readSave = ors.player
   -- Load stuff from save
+  asp.emptySpellSlots()
   instance:readSave()
 
 
@@ -1627,8 +1628,9 @@ Playa.functions = {
     self.x, self.y = x, y
 
     -- Track position for debugging
-    -- fuck = "x = " .. floor(x) .. ", y = " .. floor(y) .. "\n\z
-    --         xSqare = " .. floor(x/16)*16 .. ", ySquare = " .. floor(y/16)*16
+    fuck = "x = " .. floor(x) .. ", y = " .. floor(y) .. "\n\z
+            xSquare = " .. floor(x/16)*16 .. ", ySquare = " .. floor(y/16)*16 .. "\n\z
+            xCenter = " .. floor(x/16)*16+8 .. ", yCenter = " .. floor(y/16)*16+8
 
     -- Determine movement modifiers due to floor
     self.ongrass = nil

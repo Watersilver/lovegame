@@ -227,6 +227,11 @@ function love.update(dt)
       trans.caml, trans.camu, trans.camw, trans.camh = cam:getVisible()
       trans.determine_coordinates_transformation()
 
+      if game.transitioning.type ~= "scrolling" then
+        -- Scale the room here too in whitescreen transitions
+        -- sh.calculate_total_scale{game_scale=game.room.game_scale}
+      end
+
     elseif game.transitioning.progress < 1 then
       game.transitioning.progress = game.transitioning.progress + 1 * dt
       if game.transitioning.progress > 1 then game.transitioning.progress = 1 end
@@ -239,7 +244,13 @@ function love.update(dt)
 
       local playa = game.transitioning.playa
       if playa and playa.exists then
-        playa.body:setPosition(trans.player_target_coords(playa.x, playa.y))
+        if game.transitioning.type == "scrolling" then
+          playa.body:setPosition(trans.player_target_coords(playa.x, playa.y))
+        else -- White Screen
+          playa.body:setPosition(game.transitioning.desx, game.transitioning.desy)
+          -- Also set spritebody to avoid funkyness
+          playa.spritebody:setPosition(game.transitioning.desx, game.transitioning.desy)
+        end
         playa.body:setLinearVelocity(u.sign(playa.vx), u.sign(playa.vy))
         playa.zvel = 0
       end
@@ -454,9 +465,9 @@ function love.draw()
 
   cam:draw(function(l,t,w,h)
 
-    local curcol = love.graphics.getColor()
-    love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.6, COLORCONST*0.6, COLORCONST)
-    love.graphics.rectangle("fill", 0, 0, 800, 450)
+    -- local curcol = love.graphics.getColor()
+    -- love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.6, COLORCONST*0.6, COLORCONST)
+    -- love.graphics.rectangle("fill", 0, 0, 800, 450)
     love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
 
     local layers = #o.draw_layers
@@ -494,13 +505,11 @@ function love.draw()
         --     end
         --   end
         -- end
-        if game.transitioning.playa then
-          game.transitioning.playa.body:setPosition(game.transitioning.desx, game.transitioning.desy)
-          game.transitioning.playa.body:setLinearVelocity(0, 0)
-          game.transitioning.playa = nil
-        end
         love.graphics.setColor(COLORCONST*0.9, COLORCONST*0.9, COLORCONST*0.9, COLORCONST)
-        love.graphics.rectangle("fill", 0, 0, 800, 450)
+        -- love.graphics.rectangle("fill", 0, 0, 800, 450)
+        local wl, lt = cam:toWorld(0, 0)
+        local ww, wh = cam:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
+        love.graphics.rectangle("fill", wl, lt, ww-wl, wh-lt)
         love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
 
       end
@@ -556,12 +565,12 @@ function love.draw()
   -- dialogue.simpleBinaryChoice.draw(choiceCam)
   -- end debug choice
 
-  love.graphics.print(love.timer.getFPS(),0,120)
-  if fuck then love.graphics.print(fuck, 0, 77+120) end
+  love.graphics.print("FPS: " .. love.timer.getFPS(),0,120)
+  if fuck then love.graphics.print(fuck, 0, 177+120) end
   local debiter = 0
   if triggersdebug then
     for trigger, _ in pairs(triggersdebug) do
-      debiter = debiter + 10
+      debiter = debiter + 24
       love.graphics.print(trigger, 0, 20+debiter+120)
     end
   end
@@ -577,12 +586,12 @@ end
 
 
 function love.mousepressed(x, y, button, isTouch)
-  x, y = cam:toWorld(x, y)
-  if button == 2 then
-    o.removeFromWorld(o.updaters[2])
-    return
-  end
-  u.push(o.to_be_added, p:new{xstart=x, ystart=y})
+  -- x, y = cam:toWorld(x, y)
+  -- if button == 2 then
+  --   o.removeFromWorld(o.updaters[2])
+  --   return
+  -- end
+  -- u.push(o.to_be_added, p:new{xstart=x, ystart=y})
   moub[button] = true
 end
 

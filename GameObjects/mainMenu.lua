@@ -40,8 +40,18 @@ local tipboxX, tipboxY, tipboxRepeats, tipboxRepeatsH, tipboxTip =
   9, 222, 0, 0, ""
 
 local function start_game(saveName)
-  session.save = require ("Saves/" .. saveName)
-  -- Taking save game into account TBI
+  local readSave = require ("Saves/" .. saveName)
+  -- Nilify save
+  for key, value in pairs(session.save) do
+    session.save[key] = nil
+  end
+  -- Load imported save values to save
+  for key, value in pairs(readSave) do
+    session.save[key] = value
+  end
+  -- Remember which save I am
+  session.save.saveName = saveName
+  
   game.transition{
     type = "whiteScreen",
     noFade = true,

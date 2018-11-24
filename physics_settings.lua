@@ -49,7 +49,10 @@ ps.shapes = {
   portal = love.physics.newRectangleShape(4,4)
 }
 -- Make player shapes
-local width, height = 10, 7.8
+local width, height = 9.5, 7.6 -- 10, 8 x 0.95
+-- Player width and height adjusted slightly because
+-- there was a small gap when touching objects
+-- default values (oldest last)--10, 7.8 -- 10, 8
 ps.shapes.plshapeWidth = width
 ps.shapes.plshapeHeight = height
 -- Main collision shape

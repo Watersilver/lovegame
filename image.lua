@@ -29,6 +29,7 @@ im.spriteSettings = {
   testtiles = {'Tiles/TestTiles', 4, 7},
   floorOutside = {'Tiles/FloorOutside', 10, 10, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floorOutside"},
   solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},
+  basicFriendlyInterior = {'Tiles/BasicFriendlyInterior', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.basicFriendlyInterior"},
   testbrick = {'Brick', 2, 2},
   testsplosion = {'Testplosion', 5, padding = 2, width = 16, height = 16},
   testlift = {'LiftableTest', 1, width = 16, height = 16},
@@ -82,7 +83,9 @@ im.spriteSettings = {
     {'health', 2, padding = 2, width = 8, height = 8},
     {'Test', 1, padding = 0},
     {'Plrun_strip12', 12, padding = 0, width = 16, height = 16}
-  }
+  },
+  playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
+  playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4}
 }
 
 im.sprites = {}
@@ -158,5 +161,15 @@ function im.unload_sprite(img_name)
   im.sprites[img_name].times_loaded = im.sprites[img_name].times_loaded - 1
   if im.sprites[img_name].times_loaded == 0 then im.sprites[img_name] = nil end
 end
+
+-- Preload some stuff here
+for _, plSprite in ipairs(im.spriteSettings.playerSprites) do
+  im.load_sprite(plSprite)
+end
+im.load_sprite(im.spriteSettings.floorOutside)
+im.load_sprite(im.spriteSettings.solidsOutside)
+im.load_sprite(im.spriteSettings.basicFriendlyInterior)
+im.load_sprite(im.spriteSettings.playerSword)
+im.load_sprite(im.spriteSettings.playerMissile)
 
 return im
