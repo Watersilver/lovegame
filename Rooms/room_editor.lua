@@ -68,7 +68,7 @@ tilesets_to_symbols['Tiles/SolidsOutside'] = {
   'eL', 'eD', 'eR', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'twsw', 'twd', 'twse', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n',
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'sL', 'n',
-  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'n', 'n',
+  'w', 'd', 'w', 'w', 'd', 'w', 'w', 'd', 'w', 'n', 'n',
   'w', 'ptl', 'w', 'w', 'ptl', 'w', 'w', 'ptl', 'w', 'n', 'n',
 }
 tilesets_to_symbols['Tiles/BasicFriendlyInterior'] = {

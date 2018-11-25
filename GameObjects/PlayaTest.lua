@@ -1431,15 +1431,8 @@ function Playa.initialize(instance)
 
     plummet = {
     run_state = function(instance, dt)
-      if instance.triggers.animation_end then
-        instance.image_speed = 0
-        instance.image_index = instance.plummetFrames - 1
-      end
-      local pmod = 1
-      if instance.image_speed > 0 then
-        pmod = instance.image_index
-        if pmod > 1 then pmod = 1 end
-      end
+      pmod = instance.image_index
+      if pmod > 1 then pmod = 1 end
       instance.body:setPosition(
         instance.xPlummetStart + pmod * (instance.xClosestTile - instance.xPlummetStart),
         instance.yPlummetStart + pmod * (instance.yClosestTile - instance.yPlummetStart)
@@ -1628,9 +1621,9 @@ Playa.functions = {
     self.x, self.y = x, y
 
     -- Track position for debugging
-    fuck = "x = " .. floor(x) .. ", y = " .. floor(y) .. "\n\z
-            xSquare = " .. floor(x/16)*16 .. ", ySquare = " .. floor(y/16)*16 .. "\n\z
-            xCenter = " .. floor(x/16)*16+8 .. ", yCenter = " .. floor(y/16)*16+8
+    -- fuck = "x = " .. floor(x) .. ", y = " .. floor(y) .. "\n\z
+    --         xSquare = " .. floor(x/16)*16 .. ", ySquare = " .. floor(y/16)*16 .. "\n\z
+    --         xCenter = " .. floor(x/16)*16+8 .. ", yCenter = " .. floor(y/16)*16+8
 
     -- Determine movement modifiers due to floor
     self.ongrass = nil

@@ -4,7 +4,7 @@ local im = require "image"
 
 local room = {}
 
-room.music_info = {"Silence"}--{"Music/MusicTest"}
+room.music_info = {"Music/MusicTest2"}--{"Music/MusicTest"}
 
 room.width = 496
 room.height = 448
@@ -213,6 +213,19 @@ blueprint = "GlobalNpcs.mobilityGiver"
 }
 room_part.x_that_I_start = 272
 room_part.y_that_I_start = 222
+room_part.row_length = 1
+room_part.col_length = 1
+room_part.tile_width = 16
+room_part.init = {}
+room_part.init.layer = 20
+
+table.insert(room.room_parts, room_part)
+---
+local room_part = {
+blueprint = "GlobalNpcs.instructionsDialogue"
+}
+room_part.x_that_I_start = 292
+room_part.y_that_I_start = 0
 room_part.row_length = 1
 room_part.col_length = 1
 room_part.tile_width = 16

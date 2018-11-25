@@ -5,6 +5,8 @@ local trans = require "transitions"
 
 local room = {}
 
+room.music_info = {"Silence"}--{"Music/MusicTest"}
+
 room.width = 800
 room.height = 450
 
@@ -28,7 +30,6 @@ table.insert(room.room_parts, room_part)
 ---
 ----------End of arrays of geography of parts of room----------
 
-
-rm.build_room(room)
+-- rm.build_room(room)
 
 return room

@@ -19,7 +19,6 @@ Go.functions = {
     if inp.enterPressed and not self.pressed then
       self.pressed = true
       if self.player then
-        -- o.removeFromWorld(self.player)
         self.player.transPersistent = nil
         game.transition{
           type = "whiteScreen",

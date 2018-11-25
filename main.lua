@@ -91,6 +91,7 @@ function love.load()
   --dofile("Rooms/room1.lua")
   -- game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
   game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
+  rm.build_room(game.room)
   -- game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
   sh.calculate_total_scale{game_scale=game.room.game_scale}
 end
@@ -226,11 +227,6 @@ function love.update(dt)
       game.room.prevHeight = prevHeight
       trans.caml, trans.camu, trans.camw, trans.camh = cam:getVisible()
       trans.determine_coordinates_transformation()
-
-      if game.transitioning.type ~= "scrolling" then
-        -- Scale the room here too in whitescreen transitions
-        -- sh.calculate_total_scale{game_scale=game.room.game_scale}
-      end
 
     elseif game.transitioning.progress < 1 then
       game.transitioning.progress = game.transitioning.progress + 1 * dt

@@ -6,6 +6,7 @@ local im = require "image"
 local text = require "text"
 local u = require "utilities"
 local inp = require "input"
+local input = inp
 
 local gs = require "game_settings"
 
@@ -39,8 +40,13 @@ local backspaceMenu = {
 local tipboxX, tipboxY, tipboxRepeats, tipboxRepeatsH, tipboxTip =
   9, 222, 0, 0, ""
 
+
 local function start_game(saveName)
   local readSave = require ("Saves/" .. saveName)
+  -- Nilify session (Only values!!!)
+  for key, value in pairs(session) do
+    if type(value) ~= "table" then session[key] = nil end
+  end
   -- Nilify save
   for key, value in pairs(session.save) do
     session.save[key] = nil
@@ -51,7 +57,7 @@ local function start_game(saveName)
   end
   -- Remember which save I am
   session.save.saveName = saveName
-  
+
   game.transition{
     type = "whiteScreen",
     noFade = true,
@@ -235,7 +241,7 @@ load = function (self)
           cursorable = {xoff = - 20, yoff = 0},
           -- What to do when selected
           action = function (self, menuHandler)
-            menuHandler.currentMenu = 3 -- Name new save game/confirm new game
+            menuHandler.currentMenu = 3 -- Name new save game/confirm new
           end,
           drawMe = function(self, image_index, x, y)
             typical_drawMe(self.sprite, image_index, x, y)
@@ -827,29 +833,29 @@ update = function (self, dt)
   end
 
   -- Check input
-  self.prevUp = self.up
-  self.up = love.keyboard.isDown("up")
-  self.upPressed = self.up == true and self.up ~= self.prevUp
+  self.prevUp = input.upPrevious
+  self.up = input.up
+  self.upPressed = input.upPressed
 
-  self.prevDown = self.down
-  self.down = love.keyboard.isDown("down")
-  self.downPressed = self.down == true and self.down ~= self.prevDown
+  self.prevDown = input.downPrevious
+  self.down = input.down
+  self.downPressed = input.downPressed
 
-  self.prevLeft = self.left
-  self.left = love.keyboard.isDown("left")
-  self.leftPressed = self.left == true and self.left ~= self.prevLeft
+  self.prevLeft = input.leftPrevious
+  self.left = input.left
+  self.leftPressed = input.leftPressed
 
-  self.prevRight = self.right
-  self.right = love.keyboard.isDown("right")
-  self.rightPressed = self.right == true and self.right ~= self.prevRight
+  self.prevRight = input.rightPrevious
+  self.right = input.right
+  self.rightPressed = input.rightPressed
 
   self.prevShift = self.shift
   self.shift = love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift")
   self.shiftPressed = self.shift == true and self.shift ~= self.prevShift
 
-  self.prevEnter = self.enter
-  self.enter = love.keyboard.isDown("return")
-  self.enterPressed = self.enter == true and self.enter ~= self.prevEnter
+  self.prevEnter = input.enterPrevious
+  self.enter = input.enter
+  self.enterPressed = input.enterPressed
 
   self.prevEscape = self.escape
   self.escape = love.keyboard.isDown("escape")
@@ -880,6 +886,7 @@ update = function (self, dt)
         currMenu.cursor.items[currMenu.cursor.pos]:action(self)
         -- Make it nil to make sure that next menu doesn't also get activated
         self.enterPressed = nil
+        -- fuck = fuck + 1
       end
     end
 

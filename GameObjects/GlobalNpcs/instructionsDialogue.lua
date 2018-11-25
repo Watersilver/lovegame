@@ -1,6 +1,7 @@
 local ps = require "physics_settings"
 local im = require "image"
 local p = require "GameObjects.prototype"
+local o = require "GameObjects.objects"
 local trans = require "transitions"
 local game = require "game"
 local inp = require "input"
@@ -26,30 +27,11 @@ local function typical_activate(self, dt, textIndex)
 end
 
 local myText = {
-  {{{cc,cc,cc,cc},"You're awfully sluggish. And your shoes look quite slippery..."},-1, "left"},
-  {{{cc,cc,cc,cc},"I can make your shoes a bit less slippery and improve your mobility. Do you want me to?"},-1, "left"},
-  {{{cc,cc,cc,cc},"Done!"},-1, "left"},
-  {{{cc,cc,cc,cc},"All right then..."},-1, "left"}
+  {{{cc,cc*0.5,cc*0.5,cc}, "Up & down arrow keys to read textbox.\n", {cc,cc,cc,cc},"Default controls (changeable in main menu):\n-arrow keys: movement\n-a,s,d,z,x,c: spell slots\n-space: inventory/pause\nOther controls (Not changeable): \n-arrow keys: navigate main menu/dialogue/inventory\n-enter: accept/activate/choose\n-escape: back(main menu)\n-F11: fullscreen on/off"},-1, "left"},
 }
 
 local activateFuncs = {}
 activateFuncs[1] = function (self, dt, textIndex)
-  typical_activate(self, dt, textIndex)
-  self.next = 2
-end
-activateFuncs[2] = function (self, dt, textIndex)
-  typical_activate(self, dt, textIndex)
-  dlg.simpleBinaryChoice.setUp("Sure.", "Nah.")
-  self.next = {3, 4}
-end
-activateFuncs[3] = function (self, dt, textIndex)
-  typical_activate(self, dt, textIndex)
-  session.save.playerMobility = 600
-  session.save.playerBrakes = 6
-  self.activator:readSave()
-  self.next = "end"
-end
-activateFuncs[4] = function (self, dt, textIndex)
   typical_activate(self, dt, textIndex)
   self.next = "end"
 end
@@ -57,6 +39,12 @@ end
 function NPC.initialize(instance)
   instance.counter = 1
   instance.myText = myText
+  instance.physical_properties = nil
+  instance.spritefixture_properties = nil
+  instance.sprite_info = nil
+  instance.update = nil
+  instance.draw = nil
+  instance.trans_draw = nil
   instance.onDialogueEnd = function()
     if type(instance.next) == "table" then
       instance.counter = instance.next[dlg.cursor+1] -- cursor starts from 0, arrays start from 1, so add 1
@@ -73,6 +61,15 @@ function NPC.initialize(instance)
 end
 
 NPC.functions = {
+  load = function (self)
+    if session.instructionsDialogueRead then
+      o.removeFromWorld(self)
+      return
+    end
+    self.activator = o.identified.PlayaTest[1]
+    self.activated = true
+  end,
+
   activate = function (self, dt)
     if self.activated then
       activateFuncs[self.counter](self, dt, self.counter)
@@ -81,6 +78,7 @@ NPC.functions = {
       self.counter = 1
       self.activator.body:setType("dynamic")
       inp.enable_controller(self.activator.player)
+      session.instructionsDialogueRead = true
     end
   end
 }

@@ -216,9 +216,9 @@ player_states.start_jump = function(instance, dt, side)
 end
 
 player_states.run_fall = function(instance, dt, side)
-  if instance.zvel > 40 then -- H 10
+  if instance.zvel > 40 then -- 40 H 10
     instance.image_index = 0
-  elseif instance.zvel < -40 then -- H -10
+  elseif instance.zvel < -40 then -- -40 H -10
     instance.image_index = 2
   else
     instance.image_index = 1
