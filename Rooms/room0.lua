@@ -21,7 +21,7 @@ room.game_scale = 2
 room.room_parts = {}
 
 ----------Start of arrays of geography of parts of room----------
-local room_part = {'P1'}
+local room_part = {blueprint = 'PlayaTest'}
 room_part.x_that_I_start = session.save.playerX or 300
 room_part.y_that_I_start = session.save.playerY or 200
 

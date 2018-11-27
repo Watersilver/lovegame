@@ -1,4 +1,18 @@
 local verh = require "version_handling"
+-- Set up save directory
+if not verh.fileExists("game_settings.lua") then
+  local gsdcontents = love.filesystem.read("game_settings_defaults.lua")
+  local newfile = love.filesystem.newFile("game_settings.lua")
+  newfile:close()
+  local success = love.filesystem.write("game_settings.lua", gsdcontents)
+  if not success then love.errhand("Failed to write game_settings") end
+end
+local success = love.filesystem.createDirectory("Saves")
+if not success then love.errhand("Failed to create save directory") end
+
+-- Load stuff from save directory
+local gs = require "game_settings"
+
 local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local p = require "GameObjects.BoxTest"
@@ -16,20 +30,6 @@ local trans = require "transitions"
 local rm = require("Rooms.room_manager")
 
 local gamera = require "gamera.gamera"
-
--- Set up save directory
-if not verh.fileExists("game_settings.lua") then
-  local gsdcontents = love.filesystem.read("game_settings_defaults.lua")
-  local newfile = love.filesystem.newFile("game_settings.lua")
-  newfile:close()
-  local success = love.filesystem.write("game_settings.lua", gsdcontents)
-  if not success then love.errhand("Failed to write game_settings") end
-end
-local success = love.filesystem.createDirectory("Saves")
-if not success then love.errhand("Failed to create save directory") end
-
--- Load stuff from save directory
-local gs = require "game_settings"
 
 if gs.fullscreen then love.window.setFullscreen(true) end
 

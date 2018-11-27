@@ -37,6 +37,12 @@ im.spriteSettings = {
   npcTestSprites = {
     {'NPCs/NpcTest/down', 2, padding = 2, width = 16, height = 16}
   },
+  npcTest2Sprites = {
+    {'NPCs/NpcTest2/down', 2, padding = 2, width = 16, height = 16}
+  },
+  npcTest3Sprites = {
+    {'NPCs/NpcTest3/down', 2, padding = 2, width = 16, height = 16}
+  },
   playerSprites = {
     {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},

@@ -55,6 +55,7 @@ activateFuncs[4] = function (self, dt, textIndex)
 end
 
 function NPC.initialize(instance)
+  instance.sprite_info = im.spriteSettings.npcTest2Sprites
   instance.counter = 1
   instance.myText = myText
   instance.onDialogueEnd = function()
