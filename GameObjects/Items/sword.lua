@@ -122,7 +122,7 @@ Sword.functions = {
       self.onAir = false
     end
 
-    if self.weld then self.weld:destroy() end
+    if self.weld and (not self.weld:isDestroyed()) then self.weld:destroy() end
 
     -- Calculate sprite_index
     local phase

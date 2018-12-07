@@ -946,9 +946,9 @@ update = function (self, dt)
   self.enter = input.enter
   self.enterPressed = input.enterPressed
 
-  self.prevEscape = self.escape
-  self.escape = love.keyboard.isDown("escape")
-  self.escapePressed = self.escape == true and self.escape ~= self.prevEscape
+  self.prevEscape = input.escapePrevious
+  self.escape = input.escape
+  self.escapePressed = input.escapePressed
 
   -- Act on input
   if self.escapePressed then

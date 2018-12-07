@@ -75,7 +75,7 @@ HeldSword.functions = {
     if not cr then
       o.removeFromWorld(self)
     end
-    if self.weld then self.weld:destroy() end
+    if self.weld and (not self.weld:isDestroyed()) then self.weld:destroy() end
 
     -- Calculate offset due to HeldSword swinging
     local sox, soy, angle = calculate_offset(self.side, phase)

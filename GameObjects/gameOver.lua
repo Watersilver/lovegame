@@ -20,12 +20,12 @@ Go.functions = {
       self.pressed = true
       if self.player then
         self.player.transPersistent = nil
-        game.transition{
-          type = "whiteScreen",
-          progress = 0,
-          roomTarget = "Rooms/main_menu.lua"
-        }
       end
+      game.transition{
+        type = "whiteScreen",
+        progress = 0,
+        roomTarget = "Rooms/main_menu.lua"
+      }
     end
   end,
 

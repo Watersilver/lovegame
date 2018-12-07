@@ -1,4 +1,7 @@
 local gs = require "game_settings"
+local inp = require "input"
+local game = require "game"
+local o = require "GameObjects.objects"
 
 local pam = {}
 
@@ -38,7 +41,27 @@ function pam.logic()
       gs.musicOn = not gs.musicOn
     elseif bindex == 2 then
       gs.soundsOn = not gs.soundsOn
+    elseif bindex == 3 then
+      pam.quitting = true
     end
+  end
+  if pam.quitting then
+    inp.disable_controller("player1")
+    if inp.enterPressed then
+      pam.quitting = nil
+      if o.identified.PlayaTest and o.identified.PlayaTest[1] then
+        o.identified.PlayaTest[1].transPersistent = nil
+      end
+      game.transition{
+        type = "whiteScreen",
+        progress = 0,
+        roomTarget = "Rooms/main_menu.lua"
+      }
+    elseif inp.escapePressed then
+      pam.quitting = nil
+    end
+  else
+    inp.enable_controller("player1")
   end
 end
 
@@ -55,6 +78,10 @@ function pam.draw()
   alpha = COLORCONST
   love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
   love.graphics.print("Quit", bbb[3].x.l, bbb[3].y.u, 0, 0.2)
+  if pam.quitting then
+    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    love.graphics.print("Are you sure you want to quit?\n\zYes(Enter)   No(Escape)", 22, 88, 0, 0.5)
+  end
   love.graphics.setColor(pr, pg, pb, pa)
 end
 

@@ -312,10 +312,10 @@ function love.update(dt)
   elseif not game.transitioning then -- not game.paused
 
     inv.manage(game.paused)
-    pam.logic()
     if inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0 then
       game.pause(false)
     end
+    pam.logic()
 
   end
 
@@ -540,6 +540,8 @@ function love.draw()
 
   if playaTest and playaTest[1].x then
     pl1 = playaTest[1]
+  else
+    pl1 = nil
   end
 
   cam:setScale(sh.get_total_scale())
