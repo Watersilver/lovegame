@@ -7,6 +7,7 @@ local game = require "game"
 local inp = require "input"
 local dlg = require "dialogue"
 local npcTest = require "GameObjects.NpcTest"
+local snd = require "sound"
 
 
 local floor = math.floor
@@ -62,12 +63,15 @@ end
 
 NPC.functions = {
   load = function (self)
-    if session.instructionsDialogueRead then
+    if session.save.instructionsDialogueRead then
+      self.skipDelete = true
       o.removeFromWorld(self)
       return
     end
     self.activator = o.identified.PlayaTest[1]
     self.activated = true
+    self.roomMusic = game.room.music_info
+    game.room.music_info = nil
   end,
 
   activate = function (self, dt)
@@ -78,8 +82,18 @@ NPC.functions = {
       self.counter = 1
       self.activator.body:setType("dynamic")
       inp.enable_controller(self.activator.player)
-      session.instructionsDialogueRead = true
+      session.save.instructionsDialogueRead = true
+      o.removeFromWorld(self)
     end
+  end,
+
+  -- update = function (self, dt)
+  --   snd.bgm:load()
+  -- end,
+
+  delete = function (self)
+    if self.skipDelete then return end
+    snd.bgm:load(self.roomMusic)
   end
 }
 

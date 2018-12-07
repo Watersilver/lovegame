@@ -18,6 +18,7 @@ local o = require "GameObjects.objects"
 local p = require "GameObjects.BoxTest"
 local u = require "utilities"
 local sh = require "scaling_handler"
+local pam = require "pause_menu"
 local inp = require "input"
 local im = require "image"
 local snd = require "sound"
@@ -50,6 +51,8 @@ local session = session
 -- Store mouse button info
 mouseB = {}
 local moub = mouseB
+mouseP = {x = 0, y = 0}
+local moup = mouseP
 
 
 -- Set up cameras
@@ -87,11 +90,12 @@ local screenEdgeThreshold = 0.1
 
 function love.load()
   ps.pw:setCallbacks(beginContact, endContact, preSolve, postSolve)
-
+  pam.init()
   --dofile("Rooms/room1.lua")
   -- game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
   game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
   rm.build_room(game.room)
+  snd.bgm:load(game.room.music_info)
   -- game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
   sh.calculate_total_scale{game_scale=game.room.game_scale}
 end
@@ -200,6 +204,7 @@ function love.update(dt)
   moub["2press"] = moub[2] and not moub["2prev"]
   moub["1prev"] = moub[1]
   moub["2prev"] = moub[2]
+  moup.x, moup.y = love.mouse.getX(), love.mouse.getY()
 
   -- fuck = collectgarbage("count")
   if o.to_be_added[1] then
@@ -304,9 +309,10 @@ function love.update(dt)
       end
     end
 
-  elseif not game.transitioning then
+  elseif not game.transitioning then -- not game.paused
 
     inv.manage(game.paused)
+    pam.logic()
     if inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0 then
       game.pause(false)
     end
@@ -447,10 +453,90 @@ function love.update(dt)
 
 end
 
+-- Variables to be used in love.draw and its local functions
+local pl1
+-- Functions to be used in love.draw
+local function mainCameraDraw(l,t,w,h)
 
+  -- local curcol = love.graphics.getColor()
+  -- love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.6, COLORCONST*0.6, COLORCONST)
+  -- love.graphics.rectangle("fill", 0, 0, 800, 450)
+  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+
+  local layers = #o.draw_layers
+  if layers > 0 then
+
+    -- Normal drawing mode
+    if not game.transitioning or
+    (game.transitioning and not game.transitioning.startedTransition) then
+
+      for layer = 1, layers do
+        local drawnum = #o.draw_layers[layer]
+        for i = 1, drawnum do
+          o.draw_layers[layer][i]:draw()
+        end
+      end
+
+    -- Transition drawing mode
+    elseif game.transitioning.type == "scrolling" then
+
+      for layer = 1, layers do
+        local drawnum = #o.draw_layers[layer]
+        for i = 1, drawnum do
+          o.draw_layers[layer][i]:trans_draw()
+        end
+      end
+
+    else -- White screen
+
+      -- for layer = 1, layers do
+      --   local drawnum = #o.draw_layers[layer]
+      --   for i = 1, drawnum do
+      --     local obj = o.draw_layers[layer][i]
+      --     if obj.onPreviousRoom then
+      --       obj:draw()
+      --     end
+      --   end
+      -- end
+      love.graphics.setColor(COLORCONST*0.9, COLORCONST*0.9, COLORCONST*0.9, COLORCONST)
+      -- love.graphics.rectangle("fill", 0, 0, 800, 450)
+      local wl, lt = cam:toWorld(0, 0)
+      local ww, wh = cam:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
+      love.graphics.rectangle("fill", wl, lt, ww-wl, wh-lt)
+      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+
+    end
+
+  end -- if layers > 0
+
+end
+local function hudDraw(l,t,w,h)
+  local hpspr = im.sprites["health"]
+  if hpspr then
+    -- Draw as many filled hearts as player has health
+    for i = 1, pl1.maxHealth do
+      local healthFrame
+      if pl1.health < i then
+        healthFrame = hpspr[1]
+      else
+        healthFrame = hpspr[0]
+      end
+      love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5)
+    end
+
+    if game.paused and not game.transitioning then
+      local pr, pg, pb, pa = love.graphics.getColor()
+      love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
+      love.graphics.rectangle("fill", l, t, w, h)
+      love.graphics.setColor(pr, pg, pb, pa)
+      inv.draw()
+      pam.draw()
+    end
+  end
+end
 function love.draw()
 
-  local playaTest, pl1 = o.identified.PlayaTest
+  local playaTest = o.identified.PlayaTest
 
   if playaTest and playaTest[1].x then
     pl1 = playaTest[1]
@@ -458,90 +544,13 @@ function love.draw()
 
   cam:setScale(sh.get_total_scale())
   cam:setPosition(cam.xt, cam.yt)
-
-  cam:draw(function(l,t,w,h)
-
-    -- local curcol = love.graphics.getColor()
-    -- love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.6, COLORCONST*0.6, COLORCONST)
-    -- love.graphics.rectangle("fill", 0, 0, 800, 450)
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-
-    local layers = #o.draw_layers
-    if layers > 0 then
-
-      -- Normal drawing mode
-      if not game.transitioning or
-      (game.transitioning and not game.transitioning.startedTransition) then
-
-        for layer = 1, layers do
-          local drawnum = #o.draw_layers[layer]
-          for i = 1, drawnum do
-            o.draw_layers[layer][i]:draw()
-          end
-        end
-
-      -- Transition drawing mode
-      elseif game.transitioning.type == "scrolling" then
-
-        for layer = 1, layers do
-          local drawnum = #o.draw_layers[layer]
-          for i = 1, drawnum do
-            o.draw_layers[layer][i]:trans_draw()
-          end
-        end
-
-      else -- White screen
-
-        -- for layer = 1, layers do
-        --   local drawnum = #o.draw_layers[layer]
-        --   for i = 1, drawnum do
-        --     local obj = o.draw_layers[layer][i]
-        --     if obj.onPreviousRoom then
-        --       obj:draw()
-        --     end
-        --   end
-        -- end
-        love.graphics.setColor(COLORCONST*0.9, COLORCONST*0.9, COLORCONST*0.9, COLORCONST)
-        -- love.graphics.rectangle("fill", 0, 0, 800, 450)
-        local wl, lt = cam:toWorld(0, 0)
-        local ww, wh = cam:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
-        love.graphics.rectangle("fill", wl, lt, ww-wl, wh-lt)
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-
-      end
-
-    end -- if layers > 0
-
-
-  end)
+  cam:draw(mainCameraDraw)
 
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)
 
   if hud.visible and pl1 then
-    hud:draw(function(l,t,w,h)
-      local hpspr = im.sprites["health"]
-      if hpspr then
-        -- Draw as many filled hearts as player has health
-        for i = 1, pl1.maxHealth do
-          local healthFrame
-          if pl1.health < i then
-            healthFrame = hpspr[1]
-          else
-            healthFrame = hpspr[0]
-          end
-          love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5)
-        end
-
-        if game.paused and not game.transitioning then
-          local pr, pg, pb, pa = love.graphics.getColor()
-          love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
-          love.graphics.rectangle("fill", l, t, w, h)
-          love.graphics.setColor(pr, pg, pb, pa)
-          inv.draw()
-        end
-      end
-    end)
+    hud:draw(hudDraw)
   end
 
   -- Print dialogues, signs, and generally, in-game text stuff

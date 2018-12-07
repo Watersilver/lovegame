@@ -5,7 +5,7 @@ local trans = require "transitions"
 
 local room = {}
 
-room.music_info = {"Silence"}--{"Music/MusicTest"}
+room.music_info = {"Music/MusicTest"}
 
 room.width = 800
 room.height = 450

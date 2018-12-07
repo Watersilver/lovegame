@@ -27,6 +27,52 @@ dialogue.y = 0
 local dlgBoxBorderH = 5
 local dlgBoxBorderW = 25
 
+
+-- Functions to be used in dialogue.simpleWallOfText
+local function simpleWallOfTextDraw(l,t,w,h)
+  local pr, pg, pb, pa = love.graphics.getColor()
+  love.graphics.setColor(0, 0, 0, COLORCONST)
+  love.graphics.rectangle("fill", l-1, t-1, w+1, h+1)
+  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  -- setFont(dialogue.font) -- Use if dialogue text ISN'T text object
+  love.graphics.draw(
+    dialogue.text, -- Text or ColouredText (rgbtable1, text1, ...etc)
+    dialogue.x, -- x
+    dialogue.y, -- y
+    dialogue.angle, -- angle
+    dialogue.xscale, -- scaleX
+    dialogue.yscale, -- scaleY
+    dialogue.xoffset, -- Origin offset x
+    dialogue.yoffset, -- Origin offset y
+    dialogue.xshear, -- Shearing factor (x-axis) (Can be used for italics)
+    dialogue.yshear) -- Shearing factor (y-axis)
+  -- setFont(font.default) -- Use if dialogue text ISN'T text object
+  love.graphics.setColor(0, 0, 0, COLORCONST)
+  love.graphics.rectangle("fill", l-1, t-1, w+1, dlgBoxBorderH)
+  love.graphics.rectangle("fill", l-1, t+h-dlgBoxBorderH, w+1, dlgBoxBorderH)
+
+  local xsh, ysh -- Shape coordinates
+  -- Arrows
+  -- Downarrow
+  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, dialogue.downArrowAlpha)
+  local xsh = l+w*0.98
+  local ysh = t+h*0.7
+  love.graphics.polygon("fill", xsh, ysh, xsh+5, ysh-5, xsh-5, ysh-5)
+  -- Uparrow
+  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, dialogue.upArrowAlpha)
+  xsh = l+w*0.98
+  ysh = t+h*0.3
+  love.graphics.polygon("fill", xsh, ysh-5, xsh+5, ysh, xsh-5, ysh)
+
+  if dialogue.canSkip then
+    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    xsh = l+w*0.98
+    ysh = t+h*0.93
+    love.graphics.circle("fill", xsh, ysh, dialogue.skipButtonRadius)
+  end
+
+  love.graphics.setColor(pr, pg, pb, pa)
+end
 -- Simple dialogue printing and controls, fit for reading signs letters etc.
 dialogue.simpleWallOfText ={
   logic = function(dt)
@@ -63,50 +109,7 @@ dialogue.simpleWallOfText ={
     end
     textCam:setWindow(gwsl, gwst - topOffset, gwsw, gwsh)
 
-    textCam:draw(function(l,t,w,h)
-      local pr, pg, pb, pa = love.graphics.getColor()
-      love.graphics.setColor(0, 0, 0, COLORCONST)
-      love.graphics.rectangle("fill", l-1, t-1, w+1, h+1)
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-      -- setFont(dialogue.font) -- Use if dialogue text ISN'T text object
-      love.graphics.draw(
-        dialogue.text, -- Text or ColouredText (rgbtable1, text1, ...etc)
-        dialogue.x, -- x
-        dialogue.y, -- y
-        dialogue.angle, -- angle
-        dialogue.xscale, -- scaleX
-        dialogue.yscale, -- scaleY
-        dialogue.xoffset, -- Origin offset x
-        dialogue.yoffset, -- Origin offset y
-        dialogue.xshear, -- Shearing factor (x-axis) (Can be used for italics)
-        dialogue.yshear) -- Shearing factor (y-axis)
-      -- setFont(font.default) -- Use if dialogue text ISN'T text object
-      love.graphics.setColor(0, 0, 0, COLORCONST)
-      love.graphics.rectangle("fill", l-1, t-1, w+1, dlgBoxBorderH)
-      love.graphics.rectangle("fill", l-1, t+h-dlgBoxBorderH, w+1, dlgBoxBorderH)
-
-      local xsh, ysh -- Shape coordinates
-      -- Arrows
-      -- Downarrow
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, dialogue.downArrowAlpha)
-      local xsh = l+w*0.98
-      local ysh = t+h*0.7
-      love.graphics.polygon("fill", xsh, ysh, xsh+5, ysh-5, xsh-5, ysh-5)
-      -- Uparrow
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, dialogue.upArrowAlpha)
-      xsh = l+w*0.98
-      ysh = t+h*0.3
-      love.graphics.polygon("fill", xsh, ysh-5, xsh+5, ysh, xsh-5, ysh)
-
-      if dialogue.canSkip then
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-        xsh = l+w*0.98
-        ysh = t+h*0.93
-        love.graphics.circle("fill", xsh, ysh, dialogue.skipButtonRadius)
-      end
-
-      love.graphics.setColor(pr, pg, pb, pa)
-    end)
+    textCam:draw(simpleWallOfTextDraw)
 
     -- restore the textbox to its proper place in
     -- case it changed to avoid covering the speaker
@@ -142,7 +145,38 @@ dialogue.simpleWallOfText ={
   end
 }
 
-
+-- Functions to be used in dialogue.simpleBinaryChoice
+local function simpleBinaryChoiceDraw(l,t,w,h)
+  local pr, pg, pb, pa = love.graphics.getColor()
+  local choiceAlpha = 0.3 * COLORCONST
+  if dialogue.canSkip then
+    choiceAlpha = COLORCONST
+  end
+  love.graphics.setColor(0, 0, 0, choiceAlpha)
+  -- love.graphics.rectangle("fill", l-1, t-1, w+1, h+1)
+  love.graphics.rectangle("fill", 0, 0, w+1, h+1)
+  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, choiceAlpha)
+  love.graphics.draw(
+    dialogue.choiceL, -- Text or ColouredText (rgbtable1, text1, ...etc)
+    5, -- x
+    6, -- y
+    0,
+    0.5,
+    0.5
+  )
+  love.graphics.draw(
+    dialogue.choiceR, -- Text or ColouredText (rgbtable1, text1, ...etc)
+    155, -- x
+    6, -- y
+    0,
+    0.5,
+    0.5
+  )
+  love.graphics.setColor(0, COLORCONST*0.2, COLORCONST, choiceAlpha)
+  local halfw = (w+1) * 0.5
+  love.graphics.rectangle("line", dialogue.cursor * halfw, 0, halfw, h+1)
+  love.graphics.setColor(pr, pg, pb, pa)
+end
 dialogue.simpleBinaryChoice = {
   logic = function(dt)
     if inp.leftPressed then dialogue.cursor = dialogue.cursor - 1 end
@@ -151,37 +185,7 @@ dialogue.simpleBinaryChoice = {
   end,
 
   draw = function(choiceCam)
-    choiceCam:draw(function(l,t,w,h)
-      local pr, pg, pb, pa = love.graphics.getColor()
-      local choiceAlpha = 0.3 * COLORCONST
-      if dialogue.canSkip then
-        choiceAlpha = COLORCONST
-      end
-      love.graphics.setColor(0, 0, 0, choiceAlpha)
-      -- love.graphics.rectangle("fill", l-1, t-1, w+1, h+1)
-      love.graphics.rectangle("fill", 0, 0, w+1, h+1)
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, choiceAlpha)
-      love.graphics.draw(
-        dialogue.choiceL, -- Text or ColouredText (rgbtable1, text1, ...etc)
-        5, -- x
-        6, -- y
-        0,
-        0.5,
-        0.5
-      )
-      love.graphics.draw(
-        dialogue.choiceR, -- Text or ColouredText (rgbtable1, text1, ...etc)
-        155, -- x
-        6, -- y
-        0,
-        0.5,
-        0.5
-      )
-      love.graphics.setColor(0, COLORCONST*0.2, COLORCONST, choiceAlpha)
-      local halfw = (w+1) * 0.5
-      love.graphics.rectangle("line", dialogue.cursor * halfw, 0, halfw, h+1)
-      love.graphics.setColor(pr, pg, pb, pa)
-    end)
+    choiceCam:draw(simpleBinaryChoiceDraw)
   end,
 
   setUp = function(cleft, cright)

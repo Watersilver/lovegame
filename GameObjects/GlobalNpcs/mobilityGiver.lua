@@ -45,7 +45,7 @@ end
 activateFuncs[3] = function (self, dt, textIndex)
   typical_activate(self, dt, textIndex)
   session.save.playerMobility = 600
-  session.save.playerBrakes = 6
+  session.save.playerBrakes = 9
   self.activator:readSave()
   self.next = "end"
 end

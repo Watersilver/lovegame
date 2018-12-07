@@ -3,6 +3,7 @@ local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local game = require "game"
 local im = require "image"
+local snd = require "sound"
 local text = require "text"
 local u = require "utilities"
 local inp = require "input"
@@ -42,6 +43,8 @@ local tipboxX, tipboxY, tipboxRepeats, tipboxRepeatsH, tipboxTip =
 
 
 local function start_game(saveName)
+  -- Disable menu music
+  snd.bgm:load(snd.silence)
   local readSave = require ("Saves/" .. saveName)
   -- Nilify session (Only values!!!)
   for key, value in pairs(session) do
@@ -597,12 +600,98 @@ load = function (self)
           end
         },
         {
-          -- Fullscreen
+          -- Music
           sprite = "Menu/SimpleMenuBox",
           sprite2 = "Menu/SimpleSliderNTickbox",
           cursorable = {xoff = - 20, yoff = 0},
           x = 250,
           y = 200,
+          scale = 0.5,
+          repeats = 15,
+          checkmark = 0, -- 0 = unchecked, 1 = checked
+          load = function (self, menuHandler)
+            self.checkmark = menuHandler.tempGs.musicOn and 1 or 0
+          end,
+          action = function (self, menuHandler)
+            if menuHandler.tempGs.musicOn then
+              menuHandler.tempGs.musicOn = false
+            else
+              menuHandler.tempGs.musicOn = true
+            end
+            self.checkmark = menuHandler.tempGs.musicOn and 1 or 0
+          end,
+          drawMe = function (self, image_index, x, y)
+            typical_drawMe(self.sprite, image_index, x, y)
+          end,
+          drawMe2 = function (self, image_index, x, y)
+            typical_drawMe(self.sprite2, image_index, x, y)
+          end,
+          -- Custom Draw
+          draw = function (self, menuHandler)
+            local gxo, gyo =
+            self.menu.globalXOffset or 0, self.menu.globalYOffset or 0
+            local x, y = self.x + gxo, self.y + gyo
+
+            -- MenuBox
+            horizontal_menuBox(self, x, y, self.repeats)
+
+            -- Text
+            setFont(font.prstartk)
+            love.graphics.print("Music: ", x, y, 0, self.scale, self.scale, 0, 8)
+            self:drawMe2(4+self.checkmark, x + 250, y)
+            setFont(font.default)
+          end
+        },
+        {
+          -- Sounds
+          sprite = "Menu/SimpleMenuBox",
+          sprite2 = "Menu/SimpleSliderNTickbox",
+          cursorable = {xoff = - 20, yoff = 0},
+          x = 250,
+          y = 250,
+          scale = 0.5,
+          repeats = 15,
+          checkmark = 0, -- 0 = unchecked, 1 = checked
+          load = function (self, menuHandler)
+            self.checkmark = menuHandler.tempGs.soundsOn and 1 or 0
+          end,
+          action = function (self, menuHandler)
+            if menuHandler.tempGs.soundsOn then
+              menuHandler.tempGs.soundsOn = false
+            else
+              menuHandler.tempGs.soundsOn = true
+            end
+            self.checkmark = menuHandler.tempGs.soundsOn and 1 or 0
+          end,
+          drawMe = function (self, image_index, x, y)
+            typical_drawMe(self.sprite, image_index, x, y)
+          end,
+          drawMe2 = function (self, image_index, x, y)
+            typical_drawMe(self.sprite2, image_index, x, y)
+          end,
+          -- Custom Draw
+          draw = function (self, menuHandler)
+            local gxo, gyo =
+            self.menu.globalXOffset or 0, self.menu.globalYOffset or 0
+            local x, y = self.x + gxo, self.y + gyo
+
+            -- MenuBox
+            horizontal_menuBox(self, x, y, self.repeats)
+
+            -- Text
+            setFont(font.prstartk)
+            love.graphics.print("Sounds: ", x, y, 0, self.scale, self.scale, 0, 8)
+            self:drawMe2(4+self.checkmark, x + 250, y)
+            setFont(font.default)
+          end
+        },
+        {
+          -- Fullscreen
+          sprite = "Menu/SimpleMenuBox",
+          sprite2 = "Menu/SimpleSliderNTickbox",
+          cursorable = {xoff = - 20, yoff = 0},
+          x = 250,
+          y = 300,
           scale = 0.5,
           repeats = 15,
           checkmark = 0, -- 0 = unchecked, 1 = checked
@@ -653,7 +742,7 @@ load = function (self)
           sprite = "Menu/SimpleMenuBox",
           cursorable = {xoff = - 20, yoff = 0},
           x = 250,
-          y = 250,
+          y = 350,
           scale = 0.5,
           repeats = 7,
           action = function (self, menuHandler)
@@ -682,7 +771,7 @@ load = function (self)
           sprite = "Menu/SimpleMenuBox",
           cursorable = {xoff = - 20, yoff = 0},
           x = 250,
-          y = 300,
+          y = 400,
           scale = 0.5,
           repeats = 11,
           action = function (self, menuHandler)
@@ -713,7 +802,7 @@ load = function (self)
           sprite = "Menu/SimpleMenuBox",
           cursorable = {xoff = - 20, yoff = 0},
           x = 250,
-          y = 350,
+          y = 450,
           scale = 0.5,
           repeats = 8,
           action = function (self, menuHandler)

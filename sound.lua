@@ -1,4 +1,8 @@
+local gs = require "game_settings"
+
 local snd = {}
+
+snd.silence = {"Silence"}
 
 snd.sounds = {}
 snd.bgm = {} -- Background Music
@@ -43,7 +47,7 @@ end
 -- Used in the main update every frame to play soundsToBePlayed
 function snd.play_soundsToBePlayed()
   for i, sound in ipairs(soundsToBePlayed) do
-    sound:play()
+    if gs.soundsOn then sound:play() end
     soundsToBePlayed[i] = nil
   end
 end
@@ -71,10 +75,18 @@ function snd.bgm:update(dt)
   if not self.current then
     -- If next doesn't exist either do nothing
     if not self.next then return end
+    -- If music is off do nothing
+    if not gs.musicOn then return end
     self.current = self.next
     self.currentName = self.nextName
     self.current:play()
   else
+    if not gs.musicOn then
+      self.current:stop()
+      -- delete current and reset next so I can resume music that's cut off.
+      self.next = self.current
+      self.current = nil
+    end
   end
 end
 
