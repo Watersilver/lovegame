@@ -145,38 +145,6 @@ dialogue.simpleWallOfText ={
   end
 }
 
--- Functions to be used in dialogue.simpleBinaryChoice
-local function simpleBinaryChoiceDraw(l,t,w,h)
-  local pr, pg, pb, pa = love.graphics.getColor()
-  local choiceAlpha = 0.3 * COLORCONST
-  if dialogue.canSkip then
-    choiceAlpha = COLORCONST
-  end
-  love.graphics.setColor(0, 0, 0, choiceAlpha)
-  -- love.graphics.rectangle("fill", l-1, t-1, w+1, h+1)
-  love.graphics.rectangle("fill", 0, 0, w+1, h+1)
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, choiceAlpha)
-  love.graphics.draw(
-    dialogue.choiceL, -- Text or ColouredText (rgbtable1, text1, ...etc)
-    5, -- x
-    6, -- y
-    0,
-    0.5,
-    0.5
-  )
-  love.graphics.draw(
-    dialogue.choiceR, -- Text or ColouredText (rgbtable1, text1, ...etc)
-    155, -- x
-    6, -- y
-    0,
-    0.5,
-    0.5
-  )
-  love.graphics.setColor(0, COLORCONST*0.2, COLORCONST, choiceAlpha)
-  local halfw = (w+1) * 0.5
-  love.graphics.rectangle("line", dialogue.cursor * halfw, 0, halfw, h+1)
-  love.graphics.setColor(pr, pg, pb, pa)
-end
 dialogue.simpleBinaryChoice = {
   logic = function(dt)
     if inp.leftPressed then dialogue.cursor = dialogue.cursor - 1 end
@@ -184,8 +152,38 @@ dialogue.simpleBinaryChoice = {
     dialogue.cursor = u.clamp(0, dialogue.cursor, 1)
   end,
 
-  draw = function(choiceCam)
-    choiceCam:draw(simpleBinaryChoiceDraw)
+  draw = function(l,t,w,h)
+    local pr, pg, pb, pa = love.graphics.getColor()
+    local ts = sh.get_total_scale()
+    local cbl, cbt, cbw, cbh = l+w*0.3, t+h*0.95, w*0.4, h*0.05 -- choice box
+    local choiceAlpha = 0.3 * COLORCONST
+    if dialogue.canSkip then
+      choiceAlpha = COLORCONST
+    end
+    -- choice box
+    love.graphics.setColor(0, 0, 0, choiceAlpha)
+    love.graphics.rectangle("fill", cbl, cbt-1, cbw, cbh)
+    -- cursor box
+    love.graphics.setColor(0, COLORCONST*0.2, COLORCONST, choiceAlpha)
+    local halfw = cbw * 0.5
+    love.graphics.rectangle("line", cbl+dialogue.cursor * halfw, cbt-1, halfw, cbh)
+    -- choice text
+    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, choiceAlpha)
+    love.graphics.draw(
+      dialogue.choiceL, -- Text or ColouredText (rgbtable1, text1, ...etc)
+      cbl+cbw*0.02, -- x
+      cbt+cbh*0.25, -- y
+      0,
+      ts*0.25
+    )
+    love.graphics.draw(
+      dialogue.choiceR, -- Text or ColouredText (rgbtable1, text1, ...etc)
+      cbl+cbw*0.52, -- x
+      cbt+cbh*0.25, -- y
+      0,
+      ts*0.25
+    )
+    love.graphics.setColor(pr, pg, pb, pa)
   end,
 
   setUp = function(cleft, cright)

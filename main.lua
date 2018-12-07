@@ -79,7 +79,6 @@ choiceCam.yt = 0
 choiceCam:setWindow(sh.get_resized_choice_window( love.graphics.getWidth(), love.graphics.getHeight() ))
 
 
-
 sh.calculate_total_scale{game_scale=1}
 
 if not fuck then fuck = 0 end
@@ -563,14 +562,10 @@ function love.draw()
 
     if dialogue.currentChoice then
       choiceCam:setScale(sh.get_window_scale())
-      dialogue.currentChoice.draw(choiceCam)
+      local l,t,w,h = cam:getWindow()
+      dialogue.currentChoice.draw(l,t,w,h)
     end
   end
-  -- debug choice
-  -- choiceCam:setScale(sh.get_window_scale())
-  -- dialogue.simpleBinaryChoice.logic()
-  -- dialogue.simpleBinaryChoice.draw(choiceCam)
-  -- end debug choice
 
   love.graphics.print("FPS: " .. love.timer.getFPS(),0,120)
   if fuck then love.graphics.print(fuck, 0, 177+120) end

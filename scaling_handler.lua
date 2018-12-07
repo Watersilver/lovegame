@@ -103,7 +103,7 @@ function sh.get_resized_choice_window( w, h )
     -- left
     (w - current_w * 0.5) * 0.5,
     -- top
-    (h + current_h * 0.5) * 0.583,
+    (h + current_h * 0.5) * 0.5,--83,
     -- width
     current_w * 0.5,
     -- height
