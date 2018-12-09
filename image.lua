@@ -31,6 +31,7 @@ im.spriteSettings = {
   solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},
   basicFriendlyInterior = {'Tiles/BasicFriendlyInterior', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.basicFriendlyInterior"},
   testbrick = {'Brick', 2, 2},
+  testenemy = {'Enem', padding = 0, width = 16, height = 16},
   testsplosion = {'Testplosion', 5, padding = 2, width = 16, height = 16},
   testlift = {'LiftableTest', 1, width = 16, height = 16},
   mark = {'Inventory/UseMarkL1', 3, padding = 2, width = 16, height = 16},

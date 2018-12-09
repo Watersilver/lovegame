@@ -179,7 +179,7 @@ Sword.functions = {
     self.body:setPosition(x, y)
     self.body:setAngle(angle)
 
-    if self.spritejoint then self.spritejoint:destroy() end
+    if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
     self.spritebody:setPosition(x, y)
     self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 

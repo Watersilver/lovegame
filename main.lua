@@ -73,11 +73,6 @@ textCam:setWindow(sh.get_resized_text_window( love.graphics.getWidth(), love.gra
 dialogue.textBox.l, dialogue.textBox.t, dialogue.textBox.w, dialogue.textBox.h =
   200,337.5,400,90
 
-local choiceCam = gamera.new(0, 0, 300, 20)
-choiceCam.xt = 0
-choiceCam.yt = 0
-choiceCam:setWindow(sh.get_resized_choice_window( love.graphics.getWidth(), love.graphics.getHeight() ))
-
 
 sh.calculate_total_scale{game_scale=1}
 
@@ -561,9 +556,7 @@ function love.draw()
     dialogue.currentMethod.draw(textCam)
 
     if dialogue.currentChoice then
-      choiceCam:setScale(sh.get_window_scale())
-      local l,t,w,h = cam:getWindow()
-      dialogue.currentChoice.draw(l,t,w,h)
+      dialogue.currentChoice.draw(cam:getWindow())
     end
   end
 
@@ -608,7 +601,6 @@ function love.resize( w, h )
   cam:setWindow(sh.calculate_resized_window( w, h ))
   hud:setWindow(sh.get_resized_window( w, h ))
   textCam:setWindow(sh.get_resized_text_window( w, h ))
-  choiceCam:setWindow(sh.get_resized_choice_window( w, h ))
 
   -- Determine camera scale due to window size
   sh.calculate_total_scale{resized=true}

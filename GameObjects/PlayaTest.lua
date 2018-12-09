@@ -80,6 +80,10 @@ local run_lifted = hps.run_lifted
 local check_lifted = hps.check_lifted
 local start_lifted = hps.start_lifted
 local end_lifted = hps.end_lifted
+local run_damaged = hps.run_damaged
+local check_damaged = hps.check_damaged
+local start_damaged = hps.start_damaged
+local end_damaged = hps.end_damaged
 local run_climbing = hps.run_climbing
 local check_climbing = hps.check_climbing
 local start_climbing = hps.start_climbing
@@ -1278,6 +1282,82 @@ function Playa.initialize(instance)
     },
 
 
+    downdamaged = {
+    run_state = function(instance, dt)
+      run_damaged(instance, dt, "down")
+    end,
+
+    check_state = function(instance, dt)
+      check_damaged(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      start_damaged(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+      end_damaged(instance, dt, "down")
+    end
+    },
+
+
+    rightdamaged = {
+    run_state = function(instance, dt)
+      run_damaged(instance, dt, "right")
+    end,
+
+    check_state = function(instance, dt)
+      check_damaged(instance, dt, "right")
+    end,
+
+    start_state = function(instance, dt)
+      start_damaged(instance, dt, "right")
+    end,
+
+    end_state = function(instance, dt)
+      end_damaged(instance, dt, "right")
+    end
+    },
+
+
+    leftdamaged = {
+    run_state = function(instance, dt)
+      run_damaged(instance, dt, "left")
+    end,
+
+    check_state = function(instance, dt)
+      check_damaged(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      start_damaged(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      end_damaged(instance, dt, "left")
+    end
+    },
+
+
+    updamaged = {
+    run_state = function(instance, dt)
+      run_damaged(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      check_damaged(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      start_damaged(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      end_damaged(instance, dt, "up")
+    end
+    },
+
+
     downmark = {
     run_state = function(instance, dt)
       instance.markanim = instance.markanim - dt
@@ -1845,7 +1925,7 @@ Playa.functions = {
     local x, y = self.x, self.y
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
 
-    if self.spritejoint then self.spritejoint:destroy() end
+    if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
     self.spritebody:setPosition(xtotal, ytotal)
     self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
@@ -2069,7 +2149,26 @@ Playa.functions = {
 
   end,
 
-  preSolve = function(self, a, b, coll)
+  preSolve = function(self, a, b, coll, aob, bob)
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+    if not myF:isSensor() then
+      -- jump over stuff on ground
+      if other.grounded then
+        if self.zo < 0 then coll:setEnabled(false); return end
+      end
+      if other.damager and not self.invulnerable then
+        self.triggers.damaged = true
+        local mybod = self.body
+        local mymass = mybod:getMass()
+        local lvx, lvy = mybod:getLinearVelocity()
+        mybod:applyLinearImpulse(-lvx * mymass, -lvy * mymass)
+        local impdirx, impdiry =
+          u.normalize2d(self.x - other.x or self.x, self.y - other.y or self.y)
+        local clbrakes = u.clamp(0, self.brakes, self.brakesLim)
+        local ipct = other.impact or 10
+        mybod:applyLinearImpulse(impdirx*ipct*clbrakes*mymass, impdiry*ipct*clbrakes*mymass)
+      end
+    end
   end,
 
   postSolve = function(self, a, b, coll, normalimpulse, tangentimpulse)

@@ -1,6 +1,7 @@
 local inv = require "inventory"
 local td = require "movement"; td = td.top_down
 local im = require "image"
+local inp = require "input"
 local snd = require "sound"
 local ps = require "physics_settings"
 
@@ -492,6 +493,46 @@ player_states.end_lifted = function(instance, dt, side)
     instance.liftedOb = nil
   end
   instance.liftState = false
+end
+
+player_states.run_damaged = function(instance, dt, side)
+  instance.damCounter = instance.damCounter - dt
+end
+
+player_states.check_damaged = function(instance, dt, side)
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if instance.overGap then
+    instance.animation_state:change_state(instance, dt, "plummet")
+  elseif instance.inDeepWater then
+    instance.animation_state:change_state(instance, dt, "downdrown")
+  elseif instance.damCounter < 0 then
+    instance.animation_state:change_state(instance, dt, side .. "still")
+  end
+end
+
+player_states.start_damaged = function(instance, dt, side)
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/lifted_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/lifted_left"]
+    instance.x_scale = -1
+  end
+  instance.image_index = 0
+  instance.image_speed = 0
+  instance.health = instance.health - 1
+  inp.controllers[instance.player].disabled = true
+  instance.invulnerable = 1
+  instance.damCounter = 0.5
+end
+
+player_states.end_damaged = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = 1
+  end
+  inp.controllers[instance.player].disabled = nil
+  if instance.floorFriction > 0.9 then
+    instance.body:setLinearVelocity(0, 0)
+  end
 end
 
 player_states.run_climbing = function(instance, dt, side)

@@ -118,6 +118,7 @@ HeldSword.functions = {
 
     if self.spritejoint then
       self.spritejoint:destroy()
+      if not self.spritejoint:isDestroyed() then self.spritejoint:destroy() end
       self.spritejoint = nil
     end
 
