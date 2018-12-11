@@ -35,6 +35,7 @@ function Thrown.initialize(instance)
     gravityScaleFactor = 0,
     categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
   }
+  instance.seeThrough = true
 end
 
 Thrown.functions = {

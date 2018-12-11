@@ -42,6 +42,7 @@ local Lifted = {}
 
 function Lifted.initialize(instance)
   instance.transPersistent = true
+  instance.seeThrough = true
 end
 
 Lifted.functions = {

@@ -98,6 +98,7 @@ function Sword.initialize(instance)
   }
   instance.creator = nil -- Object that swings me
   instance.side = nil -- down, right, left, up
+  instance.seeThrough = true
 end
 
 Sword.functions = {

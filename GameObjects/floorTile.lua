@@ -23,6 +23,7 @@ function Tile.initialize(instance)
   instance.floorViscosity = nil
   instance.floor = true
   instance.playerFloorTilesIndex = nil
+  instance.seeThrough = true
 end
 
 Tile.functions = {

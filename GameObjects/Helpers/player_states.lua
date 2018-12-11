@@ -512,9 +512,9 @@ end
 
 player_states.start_damaged = function(instance, dt, side)
   if side ~= "right" then
-    instance.sprite = im.sprites["Witch/lifted_" .. side]
+    instance.sprite = im.sprites["Witch/hurt_" .. side]
   else
-    instance.sprite = im.sprites["Witch/lifted_left"]
+    instance.sprite = im.sprites["Witch/hurt_left"]
     instance.x_scale = -1
   end
   instance.image_index = 0
@@ -543,6 +543,8 @@ player_states.check_climbing = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if trig.noHealth then
     instance.animation_state:change_state(instance, dt, "downdie")
+  elseif trig.damaged then
+    instance.animation_state:change_state(instance, dt, "updamaged")
   elseif not instance.climbing then
     instance.animation_state:change_state(instance, dt, "upstill")
   end

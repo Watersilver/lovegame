@@ -15,6 +15,7 @@ function Mark.initialize(instance)
   image_indexProgress = 0
   image_indexProgressDirection = 1
   instance.image_index = image_indexProgress
+  instance.seeThrough = true
 end
 
 Mark.functions = {

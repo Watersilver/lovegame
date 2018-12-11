@@ -49,6 +49,8 @@ function rm.build_room(room)
           local element = rm.sto[symbol]:new(init)
           element.xstart = x_that_I_start + (i-1) * tile_width
           element.ystart = y_that_I_start + (j-1) * tile_height
+          element.x = element.xstart
+          element.y = element.ystart
           -- Make sure to use as few edge shapes as necessary
           local epp = element.physical_properties
           if epp and epp.tile then

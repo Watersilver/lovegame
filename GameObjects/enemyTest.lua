@@ -1,10 +1,12 @@
 local ps = require "physics_settings"
 local p = require "GameObjects.prototype"
+local o = require "GameObjects.objects"
 local trans = require "transitions"
 local game = require "game"
 local u = require "utilities"
 local im = require "image"
 local td = require "movement"; td = td.top_down
+local si = require "sight"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
@@ -20,7 +22,8 @@ function Enemy.initialize(instance)
     gravityScaleFactor = 0,
     restitution = 0,
     friction = 0,
-    masks = {ENEMYATTACKCAT}
+    masks = {ENEMYATTACKCAT},
+    categories = {DEFAULTCAT, FLOORCOLLIDECAT}
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.zo = 0
@@ -29,6 +32,7 @@ function Enemy.initialize(instance)
   instance.impact = 20 -- how far I throw the player
   instance.damager = 1 -- how much damage I cause
   instance.grounded = true -- can be jumped over
+  instance.lookFor = si.lookFor
 end
 
 Enemy.functions = {
@@ -37,9 +41,18 @@ Enemy.functions = {
     self.y = self.ystart
   end,
 
+  enemyUpdate = function (self, dt)
+    if self.invulnerable then
+      self.invulnerable = self.invulnerable - dt
+      if self.invulnerable < 0 then self.invulnerable = nil end
+    end
+    if self.lookFor then self.canSeePlayer = self:lookFor(player) end
+  end,
+
   update = function (self, dt)
     self.x, self.y = self.body:getPosition()
     self.vx, self.vy = self.body:getLinearVelocity()
+    self:enemyUpdate(dt)
     td.stand_still(self, dt)
   end,
 
@@ -58,13 +71,15 @@ Enemy.functions = {
     -- if self.body then
     --   love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- end
+
+    si.drawRay(self, player)
   end,
 
   trans_draw = function (self)
     local sprite = self.sprite
     local frame = sprite[self.image_index]
 
-    local xtotal, ytotal = trans.still_objects_coords(self)
+    local xtotal, ytotal = trans.moving_objects_coords(self)
 
     love.graphics.draw(
     sprite.img, frame,
@@ -81,26 +96,32 @@ Enemy.functions = {
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     -- Check if propelled by sword
-    if other.immasword == true then
-      local speed = 111
+    if other.immasword == true and not self.invulnerable then
+      self.invulnerable = 0.25
+      local speed = 111 * self.body:getMass()
       local prevvx, prevvy = self.body:getLinearVelocity()
 
       local xadjust, yadjust
-      local side = other.side
-      if side == "left" or side == "right" then
-        xadjust, yadjust = 0, 4
-      elseif side == "up" then
-        xadjust, yadjust = -3, 0
-      else
-        xadjust, yadjust = 3, 0
-      end
 
       local ox, oy = other.body:getPosition()
-      local adj, opp = self.x - ox - xadjust, self.y - oy - yadjust
+      local adj, opp = self.x - ox, self.y - oy
       local hyp = math.sqrt(adj*adj + opp*opp)
 
-      self.body:setLinearVelocity(speed*adj/hyp, speed*opp/hyp)
-      -- mybod:applyLinearImpulse(h, g)
+      -- self.body:setLinearVelocity(speed*adj/hyp, speed*opp/hyp)
+      self.body:applyLinearImpulse(speed*adj/hyp, speed*opp/hyp)
+    end
+
+    if self.grounded then
+      if other.floor then
+        if other.water then
+          o.removeFromWorld(self)
+          if not other.startSinking then other.startSinking = true end
+        end
+        if other.gap then
+          o.removeFromWorld(self)
+          if not other.startFalling then other.startFalling = true end
+        end
+      end
     end
 
     -- edge handling:

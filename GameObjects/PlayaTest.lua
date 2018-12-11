@@ -145,7 +145,7 @@ function Playa.initialize(instance)
     upSensor = ps.shapes.plusens,
     leftSensor = ps.shapes.pllsens,
     rightSensor = ps.shapes.plrsens,
-    categories = {DEFAULTCAT, FLOORCOLLIDECAT},
+    categories = {DEFAULTCAT, FLOORCOLLIDECAT, PLAYERCAT},
     masks = instance.currentMasks
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
@@ -1723,6 +1723,7 @@ Playa.functions = {
           closestTile = floorTile
         end
       end
+
       self.xClosestTile = closestTile.xstart
       self.yClosestTile = closestTile.ystart
 

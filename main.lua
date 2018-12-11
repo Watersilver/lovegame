@@ -105,7 +105,7 @@ function love.keypressed(key, scancode)
   elseif key == "f11" then
     love.window.setFullscreen(not love.window.getFullscreen())
   end
-  -- if key == "c" then collectgarbage() end
+  -- if key == "c" then collectgarbage(); fuck = collectgarbage("count") end
   text.key = scancode ~= "return" and scancode or text.key
 end
 
@@ -193,6 +193,7 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
+	dt = math.min(0.03333333, dt)
   -- Store mouse input
   moub["1press"] = moub[1] and not moub["1prev"]
   moub["2press"] = moub[2] and not moub["2prev"]
@@ -206,6 +207,15 @@ function love.update(dt)
   end
   if o.to_be_deleted[1] and not game.transitioning then
     o.to_be_deleted:remove_all()
+  end
+
+  -- Store player
+  local playaTest = o.identified.PlayaTest
+
+  if playaTest and playaTest[1].x then
+    player = playaTest[1]
+  else
+    player = nil
   end
 
   inp.check_input()
@@ -328,15 +338,12 @@ function love.update(dt)
   --   o.to_be_deleted:remove_all()
   -- end
 
-
-  local playaTest = o.identified.PlayaTest
-
   -- Check edge transitions
-  if playaTest and playaTest[1].x then
+  if player then
 
     if not game.transitioning then
 
-      local playa = playaTest[1]
+      local playa = player
       local playax = playa.x
       local playay = playa.y
       local halfw = playa.width * 0.5
@@ -447,8 +454,7 @@ function love.update(dt)
 
 end
 
--- Variables to be used in love.draw and its local functions
-local pl1
+
 -- Functions to be used in love.draw
 local function mainCameraDraw(l,t,w,h)
 
@@ -508,9 +514,9 @@ local function hudDraw(l,t,w,h)
   local hpspr = im.sprites["health"]
   if hpspr then
     -- Draw as many filled hearts as player has health
-    for i = 1, pl1.maxHealth do
+    for i = 1, player.maxHealth do
       local healthFrame
-      if pl1.health < i then
+      if player.health < i then
         healthFrame = hpspr[1]
       else
         healthFrame = hpspr[0]
@@ -530,14 +536,6 @@ local function hudDraw(l,t,w,h)
 end
 function love.draw()
 
-  local playaTest = o.identified.PlayaTest
-
-  if playaTest and playaTest[1].x then
-    pl1 = playaTest[1]
-  else
-    pl1 = nil
-  end
-
   cam:setScale(sh.get_total_scale())
   cam:setPosition(cam.xt, cam.yt)
   cam:draw(mainCameraDraw)
@@ -545,7 +543,7 @@ function love.draw()
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)
 
-  if hud.visible and pl1 then
+  if hud.visible and player then
     hud:draw(hudDraw)
   end
 
