@@ -6,6 +6,8 @@ local si = {}
 
 --- defaultSightDistance
 local dsg = 96
+--- defaultSightWidth
+local dsw = 48
 
 local self
 
@@ -24,9 +26,20 @@ function si.lookFor(seer, target)
   -- Return if I don't have to cast ray
   if not target then return end
   local sd = seer.sightDistance or dsg
-  local sx, sy, tx, ty = seer.x, seer.y, target.x, target.y
+  local sw = seer.sightWidth or dsw
+  local sx, sy, tx, ty = seer.x, seer.y, target.x, target.y + 0.5 * ps.shapes.plshapeHeight
   if u.distanceSqared2d(sx, sy, tx, ty) > sd*sd then return end
-  if side then end
+  if seer.side then
+    if seer.side == "up" then
+      if not (sy > ty and math.abs(sx - tx) < sw) then return end
+    elseif seer.side == "down" then
+      if not (sy < ty and math.abs(sx - tx) < sw) then return end
+    elseif seer.side == "left" then
+      if not (sx > tx and math.abs(sy - ty) < sw) then return end
+    else
+      if not (sx < tx and math.abs(sy - ty) < sw) then return end
+    end
+  end
 
   ps.pw:rayCast(sx, sy, tx, ty, control)
   local seenObjsNum = #seenObjs
@@ -40,7 +53,7 @@ end
 
 function si.drawRay(seer, target)
   love.graphics.circle("line", seer.x, seer.y, seer.sightDistance or dsg)
-  love.graphics.line(seer.x, seer.y, target.x, target.y)
+  love.graphics.line(seer.x, seer.y, target.x, target.y + 0.5 * ps.shapes.plshapeHeight)
 end
 
 return si

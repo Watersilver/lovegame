@@ -33,6 +33,7 @@ function Enemy.initialize(instance)
   instance.damager = 1 -- how much damage I cause
   instance.grounded = true -- can be jumped over
   instance.lookFor = si.lookFor
+  instance.side = "up"
 end
 
 Enemy.functions = {
@@ -47,11 +48,11 @@ Enemy.functions = {
       if self.invulnerable < 0 then self.invulnerable = nil end
     end
     if self.lookFor then self.canSeePlayer = self:lookFor(player) end
+    self.x, self.y = self.body:getPosition()
+    self.vx, self.vy = self.body:getLinearVelocity()
   end,
 
   update = function (self, dt)
-    self.x, self.y = self.body:getPosition()
-    self.vx, self.vy = self.body:getLinearVelocity()
     self:enemyUpdate(dt)
     td.stand_still(self, dt)
   end,
