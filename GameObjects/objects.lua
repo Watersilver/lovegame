@@ -75,13 +75,13 @@ function o.to_be_deleted:remove_all()
       object.identifiable = nil
     end
     if object.delete then object:delete(); object.delete = nil end
-    -- Mark as not existing
-    object.exists = false
 
     -- Nilify. EXPERIMENTAL
     for key, _ in pairs(object) do
       object[key] = nil
     end
+    -- Mark as not existing
+    object.exists = false
   end
   o.to_be_deleted = {remove_all = o.to_be_deleted.remove_all}
 end

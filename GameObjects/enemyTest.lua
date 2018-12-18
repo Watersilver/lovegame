@@ -7,6 +7,7 @@ local u = require "utilities"
 local im = require "image"
 local td = require "movement"; td = td.top_down
 local si = require "sight"
+local ebh = require "enemy_behaviours"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
@@ -32,6 +33,7 @@ function Enemy.initialize(instance)
   instance.impact = 20 -- how far I throw the player
   instance.damager = 1 -- how much damage I cause
   instance.grounded = true -- can be jumped over
+  instance.behaviourTimer = 0
   instance.lookFor = si.lookFor
   instance.side = "up"
 end
@@ -43,18 +45,26 @@ Enemy.functions = {
   end,
 
   enemyUpdate = function (self, dt)
+    -- Look for player
+    if self.lookFor then self.canSeePlayer = self:lookFor(pl1) end
+    -- Movement behaviour
+    self.behaviourTimer = self.behaviourTimer - dt
+    if self.behaviourTimer < 0 then
+      ebh.randomizeAnalogue(self)
+    end
+    td.analogueWalk(self, dt)
+  end,
+
+  update = function (self, dt)
+    -- Do necessary stuff
     if self.invulnerable then
       self.invulnerable = self.invulnerable - dt
       if self.invulnerable < 0 then self.invulnerable = nil end
     end
-    if self.lookFor then self.canSeePlayer = self:lookFor(player) end
     self.x, self.y = self.body:getPosition()
     self.vx, self.vy = self.body:getLinearVelocity()
-  end,
-
-  update = function (self, dt)
+    -- Do specialised stuff
     self:enemyUpdate(dt)
-    td.stand_still(self, dt)
   end,
 
   draw = function (self)
@@ -73,7 +83,7 @@ Enemy.functions = {
     --   love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- end
 
-    si.drawRay(self, player)
+    si.drawRay(self, pl1)
   end,
 
   trans_draw = function (self)
@@ -112,23 +122,27 @@ Enemy.functions = {
       self.body:applyLinearImpulse(speed*adj/hyp, speed*opp/hyp)
     end
 
+    -- edge handling:
+    -- store my velocity
+    -- compare it to edge side.
+    -- if I go through one edge without getting destroyed I go through all of them
+  end,
+
+  preSolve = function(self, a, b, coll, aob, bob)
     if self.grounded then
+      -- Find which fixture belongs to whom
+      local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
       if other.floor then
-        if other.water then
+        if other.water and self.invulnerable then
           o.removeFromWorld(self)
           if not other.startSinking then other.startSinking = true end
         end
-        if other.gap then
+        if other.gap and self.invulnerable then
           o.removeFromWorld(self)
           if not other.startFalling then other.startFalling = true end
         end
       end
     end
-
-    -- edge handling:
-    -- store my velocity
-    -- compare it to edge side.
-    -- if I go through one edge without getting destroyed I go through all of them
   end
 }
 

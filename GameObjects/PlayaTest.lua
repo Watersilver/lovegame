@@ -160,6 +160,10 @@ function Playa.initialize(instance)
   instance.movement_state = sm.new_state_machine{
     state = "start",
     start = {
+    run_state = function(instance, dt)
+    end,
+    start_state = function(instance, dt)
+    end,
     check_state = function(instance, dt)
       if true then
         instance.movement_state:change_state(instance, dt, "normal")
@@ -285,6 +289,10 @@ function Playa.initialize(instance)
   instance.animation_state = sm.new_state_machine{
     state = "start",
     start = {
+    run_state = function(instance, dt)
+    end,
+    start_state = function(instance, dt)
+    end,
     check_state = function(instance, dt)
       if true then
         instance.animation_state:change_state(instance, dt, "downwalk")
@@ -1843,37 +1851,9 @@ Playa.functions = {
     inv.determine_equipment_triggers(self, dt)
 
     -- Determine z axis offset
-    self.jo = self.jo - self.zvel * dt
-    if self.jo >= 0 then
-      self.jo = 0
-      self.fo = self.fo - self.zvel * dt
-      if self.fo >= 0 then
-        self.fo = 0
-        self.zvel = 0
-      else
-        self.zvel = self.zvel - self.gravity * dt
-      end
-    else
-      self.zvel = self.zvel - self.gravity * dt
-    end
-    self.zo = self.jo + self.fo
-    -- If above ground level
-    if self.zo < 0 then
-      -- Create shadow
-      if not self.shadow then
-        self.shadow = sh:new{
-          caster = self, layer = self.layer-1,
-          xstart = x, ystart = y, playershadow = true
-        }
-        o.addToWorld(self.shadow)
-      end
-    else
-      -- Destroy Shadow
-      if self.shadow then
-        o.removeFromWorld(self.shadow)
-        self.shadow = nil
-      end
-    end
+    td.zAxisPlayer(self, dt)
+
+    sh.handleShadow(self)
 
     local ms = self.movement_state
     -- Check movement state
@@ -2145,6 +2125,7 @@ Playa.functions = {
       -- Forget Floor tiles
       if other.floor then
         u.free(self.floorTiles, other.playerFloorTilesIndex)
+        other.playerFloorTilesIndex = nil
       end
     end
 
@@ -2152,6 +2133,7 @@ Playa.functions = {
 
   preSolve = function(self, a, b, coll, aob, bob)
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+    if other.floor then coll:setEnabled(false) return end
     if not myF:isSensor() then
       -- jump over stuff on ground
       if other.grounded then

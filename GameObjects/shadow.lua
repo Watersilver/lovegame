@@ -60,4 +60,24 @@ function Shadow:new(init)
   return instance
 end
 
+function Shadow.handleShadow(object)
+  -- If above ground level
+  if object.zo < 0 then
+    -- Create shadow
+    if not object.shadow then
+      object.shadow = Shadow:new{
+        caster = object, layer = object.layer-1,
+        xstart = x, ystart = y, playershadow = true
+      }
+      o.addToWorld(object.shadow)
+    end
+  else
+    -- Destroy Shadow
+    if object.shadow then
+      o.removeFromWorld(object.shadow)
+      object.shadow = nil
+    end
+  end
+end
+
 return Shadow

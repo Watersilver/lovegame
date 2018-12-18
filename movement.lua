@@ -167,12 +167,60 @@ local mo = {}
       brakes = clamp(0, brakes, brakesLim)
       -- As do high inversemaxspeed values
       inversemaxspeed = clamp(0, inversemaxspeed, 0.08) -- lowest max speed = 12.5
+      -- As do high mobility values
+      mobility = clamp(0, mobility, 1000)
 
       -- Calculate force due to input
       local infx, infy =
         u.normalize2d(myinput.right - myinput.left, myinput.down - myinput.up)
       infx = infx * mass * mobility
       infy = infy * mass * mobility
+
+      -- Calculate friction force
+      local ffx, ffy = object.vx, object.vy
+      if infx == 0 and infy == 0 then
+        -- This friction is for when you're actively trying to break
+        -- Used when there is no input
+        if brakes > brakesLim then brakes = brakesLim end
+        ffx = - ffx * mass * brakes
+        ffy = - ffy * mass * brakes
+      else
+        -- This friction will ensure you don't get over maxspeed
+        -- Used when there is input
+        ffx = - ffx * mass * mobility * inversemaxspeed
+        ffy = - ffy * mass * mobility * inversemaxspeed
+      end
+
+      object.body:applyForce(infx, infy)
+      object.body:applyForce(ffx, ffy)
+    end,
+
+    analogueWalk = function(object, dt)
+      local mass = object.body:getMass()
+      local mobility = object.mobility or 600
+      local brakes = object.brakes or 6
+      local brakesLim = object.brakesLim or 10
+      local direction = object.direction
+      local normalisedSpeed = object.normalisedSpeed or 1
+      local inversemaxspeed = object.maxspeed or 100
+      inversemaxspeed = 1/(inversemaxspeed * normalisedSpeed)
+
+      -- High brakes values cause funkyness. This is here to avoid that
+      brakes = clamp(0, brakes, brakesLim)
+      -- As do high inversemaxspeed values
+      inversemaxspeed = clamp(0, inversemaxspeed, 0.08) -- lowest max speed = 12.5
+      -- As do high mobility values
+      mobility = clamp(0, mobility, 1000)
+
+      -- Calculate directional force
+      local infx, infy
+      if direction then
+        infx = cos(direction) * mass * mobility
+        infy = sin(direction) * mass * mobility
+      else
+        infx = 0
+        infy = 0
+      end
 
       -- Calculate friction force
       local ffx, ffy = object.vx, object.vy
@@ -218,14 +266,46 @@ local mo = {}
     end,
 
 
-    image_speed = function(object, dt)
+    image_speed = function(object, dt, speedMod)
       local floorFriction = object.floorFriction or 1
       local image_speed = 0.13 * object.speed/80--100 looks alright too.
+      -- take into account different number of frames (assume there are four frames)
+      local framemod = speedMod or (object.sprite.frames)*0.25
+      image_speed = image_speed * framemod
       if floorFriction < 1 then
         image_speed = image_speed * 1/floorFriction
       end
       if image_speed > 0.3 then image_speed = 0.3 end
       object.image_speed = image_speed
+    end,
+
+
+    zAxisPlayer = function(object, dt)
+      -- different from zAxis because player also has jo (jump offset) for cam purposes
+      if object.jo >= 0 then
+        object.jo = 0
+        object.fo = object.fo - object.zvel * dt
+        if object.fo >= 0 then
+          object.fo = 0
+          object.zvel = 0
+        else
+          object.zvel = object.zvel - object.gravity * dt
+        end
+      else
+        object.zvel = object.zvel - object.gravity * dt
+      end
+      object.zo = object.jo + object.fo
+    end,
+
+
+    zAxis = function(object, dt)
+      object.zo = object.zo - object.zvel * dt
+      if object.zo >= 0 then
+        object.zo = 0
+        object.zvel = 0
+      else
+        object.zvel = object.zvel - object.gravity * dt
+      end
     end,
 
 

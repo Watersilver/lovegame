@@ -20,6 +20,7 @@ function Tile.initialize(instance)
   instance.floorFriction = 0.6
   instance.unsteppable = true
   instance.water = 'Witch/defaultWaterRipples'
+  instance.physical_properties.sensor = false
 end
 
 Tile.functions = {}

@@ -52,6 +52,7 @@ function si.lookFor(seer, target)
 end
 
 function si.drawRay(seer, target)
+  if not target then return end
   love.graphics.circle("line", seer.x, seer.y, seer.sightDistance or dsg)
   love.graphics.line(seer.x, seer.y, target.x, target.y + 0.5 * ps.shapes.plshapeHeight)
 end

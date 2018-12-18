@@ -112,7 +112,7 @@ Sword.functions = {
   early_update = function(self, dt)
     local cr = self.creator
     -- Check if I have to be destroyed
-    if not cr then
+    if (not cr) then
       o.removeFromWorld(self)
     end
 

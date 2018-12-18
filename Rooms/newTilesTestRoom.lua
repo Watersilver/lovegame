@@ -24,7 +24,7 @@ room.rightTrans = {
 }
 room.leftTrans = {
   {
-    roomTarget = "Rooms/newTilesTestRoom2.lua", -- Room you'll go to if this transition happens
+    roomTarget = "Rooms/TestRoom1.lua", -- Room you'll go to if this transition happens
     yupper = 0, ylower = 450, -- Limits to check against
     xmod = 0, ymod = 0 -- Modification of x, y variables for next room
   }
@@ -37,7 +37,7 @@ room.upTrans = {
   }
 }
 
-room.game_scale = 2
+room.game_scale = 3
 
 room.room_parts = {}
 ----------Start of arrays of geography of parts of room----------

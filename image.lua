@@ -45,8 +45,9 @@ im.spriteSettings = {
     {'NPCs/NpcTest3/down', 2, padding = 2, width = 16, height = 16}
   },
   playerSprites = {
+    -- {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
-    {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},
+    {'Witch/walk_left', 8, padding = 0, width = 16, height = 16},
     {'Witch/walk_down', 4, padding = 2, width = 16, height = 16},
     {'Witch/push_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/push_left', 4, padding = 2, width = 16, height = 16},

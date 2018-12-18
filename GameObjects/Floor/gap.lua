@@ -17,6 +17,7 @@ local Tile = {}
 function Tile.initialize(instance)
   instance.gap = true
   instance.unsteppable = true
+  instance.physical_properties.sensor = false
 end
 
 Tile.functions = {}

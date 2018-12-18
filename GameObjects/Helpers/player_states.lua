@@ -536,7 +536,7 @@ player_states.end_damaged = function(instance, dt, side)
 end
 
 player_states.run_climbing = function(instance, dt, side)
-  td.image_speed(instance, dt)
+  td.image_speed(instance, dt, 1)
 end
 
 player_states.check_climbing = function(instance, dt, side)
