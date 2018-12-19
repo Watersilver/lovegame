@@ -1,6 +1,7 @@
 local gs = require "game_settings"
 local ps = require "physics_settings"
 local im = require "image"
+local shdrs = require "Shaders.shaders"
 local snd = require "sound"
 local inp = require "input"
 local inv = require "inventory"
@@ -29,7 +30,7 @@ local sh = require "GameObjects.shadow"
 
 local go = require "GameObjects.gameOver"
 
-local hitShader = love.graphics.newShader("Shaders/player_damage.fs")
+local hitShader = shdrs.playerHitShader
 
 local sqrt = math.sqrt
 local floor = math.floor
@@ -1707,7 +1708,6 @@ Playa.functions = {
     self.speed = sqrt(vx*vx + vy*vy)
     self.vx, self.vy = vx, vy
     self.x, self.y = x, y
-
     -- Track position for debugging
     -- fuck = "x = " .. floor(x) .. ", y = " .. floor(y) .. "\n\z
     --         xSquare = " .. floor(x/16)*16 .. ", ySquare = " .. floor(y/16)*16 .. "\n\z

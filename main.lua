@@ -225,6 +225,10 @@ function love.update(dt)
 
     if not game.transitioning.startedTransition then
 
+      if pl1 and pl1.sword and game.transitioning.type == "whiteScreen" then
+        o.removeFromWorld(pl1.sword)
+        pl1.sword = nil
+      end
       trans.remove_from_world_previous_room()
       local prevWidth = game.room.width
       local prevHeight = game.room.height

@@ -15,6 +15,7 @@ function Portal.initialize(instance)
     bodyType = "static",
     sensor = true,
     shape = ps.shapes.portal,
+    masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
   }
   instance.destination = "Rooms/room1.lua"
   instance.desx = 55

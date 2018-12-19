@@ -5,16 +5,19 @@ local trans = require "transitions"
 local game = require "game"
 local u = require "utilities"
 local im = require "image"
+local shdrs = require "Shaders.shaders"
 local td = require "movement"; td = td.top_down
 local si = require "sight"
 local ebh = require "enemy_behaviours"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
+local hitShader = shdrs.playerHitShader
+
 local Enemy = {}
 
 function Enemy.initialize(instance)
-  instance.sprite_info = { im.spriteSettings.testenemy }
+  instance.sprite_info = { im.spriteSettings.testenemy2 }
   instance.physical_properties = {
     bodyType = "dynamic",
     fixedRotation = true,
@@ -33,9 +36,11 @@ function Enemy.initialize(instance)
   instance.impact = 20 -- how far I throw the player
   instance.damager = 1 -- how much damage I cause
   instance.grounded = true -- can be jumped over
+  instance.hp = love.math.random(3)
+  instance.maxspeed = 20
   instance.behaviourTimer = 0
   instance.lookFor = si.lookFor
-  instance.side = "up"
+  -- instance.side = "up"
 end
 
 Enemy.functions = {
@@ -50,7 +55,10 @@ Enemy.functions = {
     -- Movement behaviour
     self.behaviourTimer = self.behaviourTimer - dt
     if self.behaviourTimer < 0 then
-      ebh.randomizeAnalogue(self)
+      ebh.randomizeAnalogue(self, true)
+    end
+    if self.invulnerable then
+      self.direction = nil
     end
     td.analogueWalk(self, dt)
   end,
@@ -58,8 +66,14 @@ Enemy.functions = {
   update = function (self, dt)
     -- Do necessary stuff
     if self.invulnerable then
+      self.myShader = hitShader
       self.invulnerable = self.invulnerable - dt
       if self.invulnerable < 0 then self.invulnerable = nil end
+    else
+      self.myShader = nil
+      if self.hp <= 0 then
+        ebh.die(self)
+      end
     end
     self.x, self.y = self.body:getPosition()
     self.vx, self.vy = self.body:getLinearVelocity()
@@ -75,10 +89,13 @@ Enemy.functions = {
     local sprite = self.sprite
     local frame = sprite[self.image_index]
 
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
     love.graphics.draw(
     sprite.img, frame, self.x, self.y, 0,
     sprite.res_x_scale, sprite.res_y_scale,
     sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
     -- if self.body then
     --   love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- end
@@ -109,6 +126,7 @@ Enemy.functions = {
     -- Check if propelled by sword
     if other.immasword == true and not self.invulnerable then
       self.invulnerable = 0.25
+      if self.hp then self.hp = self.hp - 1 end
       local speed = 111 * self.body:getMass()
       local prevvx, prevvy = self.body:getLinearVelocity()
 

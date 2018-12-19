@@ -202,7 +202,7 @@ local mo = {}
       local brakesLim = object.brakesLim or 10
       local direction = object.direction
       local normalisedSpeed = object.normalisedSpeed or 1
-      local inversemaxspeed = object.maxspeed or 100
+      local inversemaxspeed = object.maxspeed or 50
       inversemaxspeed = 1/(inversemaxspeed * normalisedSpeed)
 
       -- High brakes values cause funkyness. This is here to avoid that
@@ -215,8 +215,8 @@ local mo = {}
       -- Calculate directional force
       local infx, infy
       if direction then
-        infx = cos(direction) * mass * mobility
-        infy = sin(direction) * mass * mobility
+        infx = math.cos(direction) * mass * mobility
+        infy = math.sin(direction) * mass * mobility
       else
         infx = 0
         infy = 0

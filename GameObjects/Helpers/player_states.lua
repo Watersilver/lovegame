@@ -93,7 +93,7 @@ player_states.check_swing = function(instance, dt, side)
   elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif otherstate == "normal" then
-    if trig.hold_sword then
+    if trig.hold_sword and instance.sword then
       instance.animation_state:change_state(instance, dt, side .. "hold")
     else
       instance.animation_state:change_state(instance, dt, side .. "still")
@@ -125,7 +125,7 @@ player_states.end_swing = function(instance, dt, side)
   instance.ioy, instance.iox = 0, 0
   instance.image_index = 0
   instance.image_speed = 0
-  if instance.floorFriction > 0.9 and instance.sword.hitWall then
+  if instance.floorFriction > 0.9 and instance.sword and instance.sword.hitWall then
     instance.body:setLinearVelocity(0, 0)
   end
   -- Delete sword
@@ -155,7 +155,7 @@ player_states.check_stab = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if pddp(instance, trig, side) then
   elseif otherstate == "normal" then
-    if trig.hold_sword then
+    if trig.hold_sword and instance.sword then
       instance.animation_state:change_state(instance, dt, side .. "hold")
     else
       instance.animation_state:change_state(instance, dt, side .. "still")
@@ -193,7 +193,7 @@ player_states.check_hold = function(instance, dt, side)
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif trig.stab then
     instance.animation_state:change_state(instance, dt, side .. "stab")
-  elseif not trig.hold_sword then
+  elseif not trig.hold_sword or not instance.sword then
     instance.animation_state:change_state(instance, dt, side .. "walk")
   end
 end

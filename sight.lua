@@ -28,7 +28,9 @@ function si.lookFor(seer, target)
   local sd = seer.sightDistance or dsg
   local sw = seer.sightWidth or dsw
   local sx, sy, tx, ty = seer.x, seer.y, target.x, target.y + 0.5 * ps.shapes.plshapeHeight
+  -- If target isn't close enough, don't see target
   if u.distanceSqared2d(sx, sy, tx, ty) > sd*sd then return end
+  -- If target isn't in the direction you're looking for, don't see target
   if seer.side then
     if seer.side == "up" then
       if not (sy > ty and math.abs(sx - tx) < sw) then return end
@@ -40,7 +42,7 @@ function si.lookFor(seer, target)
       if not (sx < tx and math.abs(sy - ty) < sw) then return end
     end
   end
-
+  -- If there are obstacles between self and target, don't see target
   ps.pw:rayCast(sx, sy, tx, ty, control)
   local seenObjsNum = #seenObjs
   -- empty seen objs
