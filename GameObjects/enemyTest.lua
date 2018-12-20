@@ -27,7 +27,7 @@ function Enemy.initialize(instance)
     restitution = 0,
     friction = 0,
     masks = {ENEMYATTACKCAT},
-    categories = {DEFAULTCAT, FLOORCOLLIDECAT}
+    categories = {DEFAULTCAT, FLOORCOLLIDECAT, ROOMEDGECOLLIDECAT}
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.zo = 0
@@ -36,8 +36,9 @@ function Enemy.initialize(instance)
   instance.impact = 20 -- how far I throw the player
   instance.damager = 1 -- how much damage I cause
   instance.grounded = true -- can be jumped over
+  instance.flying = false -- can go through walls
   instance.hp = love.math.random(3)
-  instance.maxspeed = 20
+  instance.maxspeed = 220
   instance.behaviourTimer = 0
   instance.lookFor = si.lookFor
   -- instance.side = "up"
@@ -123,6 +124,8 @@ Enemy.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    -- if other.roomEdge then end
+
     -- Check if propelled by sword
     if other.immasword == true and not self.invulnerable then
       self.invulnerable = 0.25
@@ -147,7 +150,11 @@ Enemy.functions = {
   end,
 
   preSolve = function(self, a, b, coll, aob, bob)
-    if self.grounded then
+    if self.flying then
+      -- Find which fixture belongs to whom
+      local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+      if not other.roomEdge then coll:setEnabled(false) end
+    else
       -- Find which fixture belongs to whom
       local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
       if other.floor then

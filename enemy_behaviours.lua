@@ -38,4 +38,7 @@ function ebh.randomizeAnalogue(object, setTimer)
   end
 end
 
+function ebh.beehaviour(object)
+end
+
 return ebh

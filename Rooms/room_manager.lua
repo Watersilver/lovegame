@@ -1,5 +1,8 @@
 local u = require "utilities"
 local o = require "GameObjects.objects"
+local ps = require "physics_settings"
+
+local rees = require "GameObjects.roomEdgeEnemyStopper"
 
 local rm = {}
 
@@ -7,10 +10,53 @@ rm.sto = require "Rooms.symbols_to_objects"
 
 -- Table that takes a room table and builds it in the world
 function rm.build_room(room)
-
   -- Probably for the camera world
   local rwidth = room.width
   local rheight = room.height
+
+  -- Make room edge tiles to stop enemies from wandering off room
+  if not room.dontbuildedgetiles then
+    local tile_width = 160
+    local tile_height = 160
+    local rows = math.ceil(rwidth * 0.00625)
+    local columns = math.ceil(rheight * 0.00625)
+    -- top edge tiles
+    for i = 1, rows do
+      local edgeTile = rees:new()
+      edgeTile.xstart = tile_width * (i - 1)
+      edgeTile.ystart = 0
+      edgeTile.physical_properties.shape = ps.shapes.edge10hor
+      edgeTile.roomEdge = "up"
+      o.addToWorld(edgeTile)
+    end
+    -- bottom edge tiles
+    for i = 1, rows do
+      local edgeTile = rees:new()
+      edgeTile.xstart = tile_width * (i - 1)
+      edgeTile.ystart = rheight
+      edgeTile.physical_properties.shape = ps.shapes.edge10hor
+      edgeTile.roomEdge = "down"
+      o.addToWorld(edgeTile)
+    end
+    -- left edge tiles
+    for i = 1, columns do
+      local edgeTile = rees:new()
+      edgeTile.xstart = 0
+      edgeTile.ystart = tile_height * (i - 1)
+      edgeTile.physical_properties.shape = ps.shapes.edge10ver
+      edgeTile.roomEdge = "left"
+      o.addToWorld(edgeTile)
+    end
+    -- right edge tiles
+    for i = 1, columns do
+      local edgeTile = rees:new()
+      edgeTile.xstart = rwidth
+      edgeTile.ystart = tile_height * (i - 1)
+      edgeTile.physical_properties.shape = ps.shapes.edge10ver
+      edgeTile.roomEdge = "right"
+      o.addToWorld(edgeTile)
+    end
+  end
 
   -- Store room parts (e.g. a set of blocks, background stuff, player, etc.)
   local rparts = room.room_parts

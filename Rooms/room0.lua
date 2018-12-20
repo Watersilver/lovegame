@@ -9,6 +9,8 @@ local room = {}
 room.width = 800
 room.height = 450
 
+room.dontbuildedgetiles = true
+
 mainCamera:setWorld(0, 0, room.width, room.height)
 
 room.downTrans = {}

@@ -8,6 +8,7 @@ ENEMYATTACKCAT = 14
 FLOORCOLLIDECAT = 13
 PLAYERJUMPATTACKCAT = 12
 PLAYERCAT = 11
+ROOMEDGECOLLIDECAT = 10
 DEFAULTCAT = 1
 
 local ps = {}
@@ -19,6 +20,9 @@ ps.pw = love.physics.newWorld(0, 280)--280)
 -- Make shapes
 ps.shapes = {
   rect1x1 = love.physics.newRectangleShape(16, 16),
+  edge10hor = love.physics.newEdgeShape(0, 0, 160, 0),
+  edge10ver = love.physics.newEdgeShape(0, 0, 0, 160),
+  -- edge10x10 = love.physics.newRectangleShape(160, 160),
     rect1x1minusinfinitesimal = love.physics.newRectangleShape(15, 15),
   circle1 = love.physics.newCircleShape(8),
   edgeRect1x1 = {
