@@ -30,7 +30,10 @@ function Enemy.initialize(instance)
     categories = {DEFAULTCAT, FLOORCOLLIDECAT, ROOMEDGECOLLIDECAT}
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
+  instance.input = {left = 0, right = 0, up = 0, down = 0}
   instance.zo = 0
+  instance.x_scale = 1
+  instance.y_scale = 1
   instance.image_speed = 0
   instance.image_index = 0
   instance.impact = 20 -- how far I throw the player
@@ -38,8 +41,10 @@ function Enemy.initialize(instance)
   instance.grounded = true -- can be jumped over
   instance.flying = false -- can go through walls
   instance.hp = love.math.random(3)
-  instance.maxspeed = 220
+  instance.maxspeed = 20
   instance.behaviourTimer = 0
+  instance.bounceEdge = true
+  instance.ignoreFloorMovementModifiers = true
   instance.lookFor = si.lookFor
   -- instance.side = "up"
 end
@@ -48,13 +53,14 @@ Enemy.functions = {
   load = function (self)
     self.x = self.xstart
     self.y = self.ystart
+    self.vx = 0
+    self.vy = 0
   end,
 
   enemyUpdate = function (self, dt)
     -- Look for player
     if self.lookFor then self.canSeePlayer = self:lookFor(pl1) end
     -- Movement behaviour
-    self.behaviourTimer = self.behaviourTimer - dt
     if self.behaviourTimer < 0 then
       ebh.randomizeAnalogue(self, true)
     end
@@ -64,12 +70,27 @@ Enemy.functions = {
     td.analogueWalk(self, dt)
   end,
 
+  hitBySword = function (self, other, myF, otherF)
+    ebh.propelledByHit(self, other, myF, otherF, 3)
+  end,
+
+  hitPlayer = function (self, other, myF, otherF)
+  end,
+
+  hitSolidStatic = function (self, other, myF, otherF)
+  end,
+
   update = function (self, dt)
     -- Do necessary stuff
+    self.behaviourTimer = self.behaviourTimer - dt
+    self.invulnerableEnd = nil
     if self.invulnerable then
-      self.myShader = hitShader
       self.invulnerable = self.invulnerable - dt
-      if self.invulnerable < 0 then self.invulnerable = nil end
+      if self.invulnerable < 0 then
+        self.invulnerable = nil
+        self.invulnerableEnd = true
+      end
+      if not self.shielded or self.shieldDown then self.myShader = hitShader end
     else
       self.myShader = nil
       if self.hp <= 0 then
@@ -87,33 +108,38 @@ Enemy.functions = {
     self.spritebody:setPosition(self.x, self.y)
     self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
+    local zo = self.zo or 0
+    local xtotal, ytotal = self.x, self.y + zo
+
     local sprite = self.sprite
     local frame = sprite[self.image_index]
 
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.myShader)
     love.graphics.draw(
-    sprite.img, frame, self.x, self.y, 0,
-    sprite.res_x_scale, sprite.res_y_scale,
+    sprite.img, frame, xtotal, ytotal, 0,
+    self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
     sprite.cx, sprite.cy)
     love.graphics.setShader(worldShader)
     -- if self.body then
     --   love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- end
 
-    si.drawRay(self, pl1)
+    -- si.drawRay(self, pl1)
   end,
 
   trans_draw = function (self)
     local sprite = self.sprite
     local frame = sprite[self.image_index]
 
+    local zo = self.zo or 0
     local xtotal, ytotal = trans.moving_objects_coords(self)
+    ytotal = ytotal + zo
 
     love.graphics.draw(
     sprite.img, frame,
     xtotal, ytotal, 0,
-    sprite.res_x_scale, sprite.res_y_scale,
+    self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
     sprite.cx, sprite.cy)
     -- if self.body then
     --   -- draw
@@ -124,29 +150,40 @@ Enemy.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-    -- if other.roomEdge then end
+    self.edgeSide = other.roomEdge
+    self.avoidDir = other.roomEdge
 
-    -- Check if propelled by sword
-    if other.immasword == true and not self.invulnerable then
-      self.invulnerable = 0.25
-      if self.hp then self.hp = self.hp - 1 end
-      local speed = 111 * self.body:getMass()
-      local prevvx, prevvy = self.body:getLinearVelocity()
-
-      local xadjust, yadjust
-
-      local ox, oy = other.body:getPosition()
-      local adj, opp = self.x - ox, self.y - oy
-      local hyp = math.sqrt(adj*adj + opp*opp)
-
-      -- self.body:setLinearVelocity(speed*adj/hyp, speed*opp/hyp)
-      self.body:applyLinearImpulse(speed*adj/hyp, speed*opp/hyp)
+    -- Check if touched player
+    if other.player then
+      self:hitPlayer(other, myF, otherF)
     end
 
-    -- edge handling:
-    -- store my velocity
-    -- compare it to edge side.
-    -- if I go through one edge without getting destroyed I go through all of them
+    -- Check if hit static
+    if otherF:getBody():getType() == "static" and not otherF:isSensor() then
+      self:hitSolidStatic(other, myF, otherF)
+    end
+
+    -- Force next direction to avoid further collisions
+    if not otherF:isSensor() then
+      if math.abs(self.vx) > math.abs(self.vy) then
+        if self.vx > 0 then
+          self.forcedDir = "left"
+        else
+          self.forcedDir = "right"
+        end
+      else
+        if self.vy > 0 then
+          self.forcedDir = "up"
+        else
+          self.forcedDir = "down"
+        end
+      end
+    end
+
+    -- Check if hit by sword
+    if other.immasword == true and not self.invulnerable then
+      self:hitBySword(other, myF, otherF)
+    end
   end,
 
   preSolve = function(self, a, b, coll, aob, bob)
@@ -158,11 +195,11 @@ Enemy.functions = {
       -- Find which fixture belongs to whom
       local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
       if other.floor then
-        if other.water and self.invulnerable then
+        if other.water and self.invulnerable and not self.shieldWall then
           o.removeFromWorld(self)
           if not other.startSinking then other.startSinking = true end
         end
-        if other.gap and self.invulnerable then
+        if other.gap and self.invulnerable and not self.shieldWall then
           o.removeFromWorld(self)
           if not other.startFalling then other.startFalling = true end
         end

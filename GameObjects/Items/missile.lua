@@ -215,11 +215,6 @@ Missile.functions = {
 
       self.body:setLinearVelocity(speed*adj/hyp, speed*opp/hyp)
     end
-
-    -- edge handling:
-    -- store my velocity
-    -- compare it to edge side.
-    -- if I go through one edge without getting destroyed I go through all of them
   end,
 
   preSolve = function(self, a, b, coll, aob, bob)

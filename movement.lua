@@ -99,6 +99,92 @@ local carrytable = {
   }
 }
 
+-- inputForceFuncs
+local iff = {
+  keyboardInput = function(myinput, direction, mass, mobility)
+    local normx, normy =
+      u.normalize2d(myinput.right - myinput.left, myinput.down - myinput.up)
+    return normx * mass * mobility, normy * mass * mobility
+  end,
+
+  analogueInput = function(myinput, direction, mass, mobility)
+    if direction then
+      return math.cos(direction) * mass * mobility, math.sin(direction) * mass * mobility
+    else
+      return 0, 0
+    end
+  end
+}
+
+local universalWalk = function(object, dt, inputForceFunc)
+  local myinput = object.input
+  local direction = object.direction
+  local mass = object.body:getMass()
+  local mobility = object.mobility or 600
+  local brakes = object.brakes or 6
+  local brakesLim = object.brakesLim or 10
+  local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
+  local normalisedSpeed = object.normalisedSpeed or 1
+  local inversemaxspeed = object.maxspeed or 50
+  inversemaxspeed = 1/(inversemaxspeed * normalisedSpeed) -- could be inf, don't worry
+
+  -- if on ground check how floor affects movement
+  if object.zo == 0 or object.actAsGrounded then
+    if floorFriction < 1 then
+      mobility = mobility * floorFriction
+      brakes = brakes * floorFriction
+    end
+    if object.floorViscosity then
+      brakes, inversemaxspeed = viscosityTable[object.floorViscosity](object, brakes, inversemaxspeed)
+    end
+  else
+    brakes = 0
+    if object.floorViscosity then
+      -- When on the air certain viscocities still affect movement
+      -- (The ones that exist because of height differences)
+      -- Handle them here
+      if object.floorViscosity == "ladder" then
+        if object.vy < 0 then
+          inversemaxspeed = inversemaxspeed * 8
+          brakes = brakes * 100
+        end
+      elseif object.floorViscosity == "stairs" then
+        if object.vy < -0.1 then
+          inversemaxspeed = inversemaxspeed * 3
+          brakes = brakes * 3
+        end
+      end
+    end
+  end
+  -- High brakes values cause funkyness. This is here to avoid that
+  brakes = clamp(0, brakes, brakesLim)
+  -- As do high inversemaxspeed values
+  inversemaxspeed = clamp(0, inversemaxspeed, 0.08) -- lowest max speed = 12.5
+  -- As do high mobility values
+  mobility = clamp(0, mobility, 1000)
+
+  -- Calculate force due to input
+  local infx, infy = iff[inputForceFunc](myinput, direction, mass, mobility)
+
+  -- Calculate friction force
+  local ffx, ffy = object.vx, object.vy
+  if infx == 0 and infy == 0 then
+    -- This friction is for when you're actively trying to break
+    -- Used when there is no input
+    if brakes > brakesLim then brakes = brakesLim end
+    ffx = - ffx * mass * brakes
+    ffy = - ffy * mass * brakes
+  else
+    -- This friction will ensure you don't get over maxspeed
+    -- Used when there is input
+    ffx = - ffx * mass * mobility * inversemaxspeed
+    ffy = - ffy * mass * mobility * inversemaxspeed
+  end
+
+  object.body:applyForce(infx, infy)
+  object.body:applyForce(ffx, ffy)
+end
+
 local mo = {}
 
   local sqrt = math.sqrt
@@ -123,122 +209,11 @@ local mo = {}
   mo.top_down = {
 
     walk = function(object, dt)
-      local myinput = object.input
-      local mass = object.body:getMass()
-      local mobility = object.mobility or 600
-      local brakes = object.brakes or 6
-      local brakesLim = object.brakesLim or 10
-      local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
-      local inversemaxspeed = 1/object.maxspeed
-
-      -- if on ground check how floor affects movement
-      if object.zo == 0 then
-        if floorFriction < 1 then
-          mobility = mobility * floorFriction
-          brakes = brakes * floorFriction
-        end
-        if object.floorViscosity then
-          brakes, inversemaxspeed = viscosityTable[object.floorViscosity](object, brakes, inversemaxspeed)
-        end
-      else
-        if object.floorViscosity then
-          if object.floorViscosity == "ladder" then
-            if object.vy < 0 then
-              inversemaxspeed = inversemaxspeed * 8
-              brakes = brakes * 100
-            else
-              brakes = 0
-            end
-          elseif object.floorViscosity == "stairs" then
-            if object.vy < -0.1 then
-              inversemaxspeed = inversemaxspeed * 3
-              brakes = brakes * 3
-            else
-              brakes = 0
-            end
-          else
-            brakes = 0
-          end
-        else
-          brakes = 0
-        end
-      end
-      -- High brakes values cause funkyness. This is here to avoid that
-      brakes = clamp(0, brakes, brakesLim)
-      -- As do high inversemaxspeed values
-      inversemaxspeed = clamp(0, inversemaxspeed, 0.08) -- lowest max speed = 12.5
-      -- As do high mobility values
-      mobility = clamp(0, mobility, 1000)
-
-      -- Calculate force due to input
-      local infx, infy =
-        u.normalize2d(myinput.right - myinput.left, myinput.down - myinput.up)
-      infx = infx * mass * mobility
-      infy = infy * mass * mobility
-
-      -- Calculate friction force
-      local ffx, ffy = object.vx, object.vy
-      if infx == 0 and infy == 0 then
-        -- This friction is for when you're actively trying to break
-        -- Used when there is no input
-        if brakes > brakesLim then brakes = brakesLim end
-        ffx = - ffx * mass * brakes
-        ffy = - ffy * mass * brakes
-      else
-        -- This friction will ensure you don't get over maxspeed
-        -- Used when there is input
-        ffx = - ffx * mass * mobility * inversemaxspeed
-        ffy = - ffy * mass * mobility * inversemaxspeed
-      end
-
-      object.body:applyForce(infx, infy)
-      object.body:applyForce(ffx, ffy)
+      universalWalk(object, dt, "keyboardInput")
     end,
 
     analogueWalk = function(object, dt)
-      local mass = object.body:getMass()
-      local mobility = object.mobility or 600
-      local brakes = object.brakes or 6
-      local brakesLim = object.brakesLim or 10
-      local direction = object.direction
-      local normalisedSpeed = object.normalisedSpeed or 1
-      local inversemaxspeed = object.maxspeed or 50
-      inversemaxspeed = 1/(inversemaxspeed * normalisedSpeed)
-
-      -- High brakes values cause funkyness. This is here to avoid that
-      brakes = clamp(0, brakes, brakesLim)
-      -- As do high inversemaxspeed values
-      inversemaxspeed = clamp(0, inversemaxspeed, 0.08) -- lowest max speed = 12.5
-      -- As do high mobility values
-      mobility = clamp(0, mobility, 1000)
-
-      -- Calculate directional force
-      local infx, infy
-      if direction then
-        infx = math.cos(direction) * mass * mobility
-        infy = math.sin(direction) * mass * mobility
-      else
-        infx = 0
-        infy = 0
-      end
-
-      -- Calculate friction force
-      local ffx, ffy = object.vx, object.vy
-      if infx == 0 and infy == 0 then
-        -- This friction is for when you're actively trying to break
-        -- Used when there is no input
-        if brakes > brakesLim then brakes = brakesLim end
-        ffx = - ffx * mass * brakes
-        ffy = - ffy * mass * brakes
-      else
-        -- This friction will ensure you don't get over maxspeed
-        -- Used when there is input
-        ffx = - ffx * mass * mobility * inversemaxspeed
-        ffy = - ffy * mass * mobility * inversemaxspeed
-      end
-
-      object.body:applyForce(infx, infy)
-      object.body:applyForce(ffx, ffy)
+      universalWalk(object, dt, "analogueInput")
     end,
 
     stand_still = function(object, dt)

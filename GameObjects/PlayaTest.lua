@@ -1853,7 +1853,7 @@ Playa.functions = {
     -- Determine z axis offset
     td.zAxisPlayer(self, dt)
 
-    sh.handleShadow(self)
+    sh.handleShadow(self, true)
 
     local ms = self.movement_state
     -- Check movement state

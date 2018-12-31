@@ -2,7 +2,7 @@ local utf8 = require("utf8")
 
 local u = {}
 
-local random = math.random
+local random = love.math.random
 local remove = table.remove
 local sqrt = math.sqrt
 
@@ -52,8 +52,29 @@ function u.sign(x)
 end
 
 function u.choose(x, y)
-  choice = random()
-  return choice>0.5 and x or y
+  return random()>0.5 and x or y
+end
+
+-- ... is keys to avoid
+function u.chooseKeyFromTable(tbl, ...)
+  local returnKey
+  local seq = {}
+  -- put table keys in sequence (skipping the keys to be avoided)
+  for key in pairs(tbl) do
+    local skip
+    -- google "lua Variable Number of Arguments issue" to understand
+    for i = 1, select("#",...) do
+      local keyToAvoid = select(i,...)
+      if key == keyToAvoid then skip = true end
+    end
+    if not skip then table.insert(seq, key) end
+  end
+  -- pick random key from sequence
+  local choice = random(#seq)
+  for i, value in ipairs(seq) do
+    if choice == i then returnKey = seq[i] break end
+  end
+  return returnKey
 end
 
 -- Delete "chars" characters from the end of the string. UTF-8 friendly

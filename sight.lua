@@ -31,12 +31,12 @@ function si.lookFor(seer, target)
   -- If target isn't close enough, don't see target
   if u.distanceSqared2d(sx, sy, tx, ty) > sd*sd then return end
   -- If target isn't in the direction you're looking for, don't see target
-  if seer.side then
-    if seer.side == "up" then
+  if seer.facing then
+    if seer.facing == "up" then
       if not (sy > ty and math.abs(sx - tx) < sw) then return end
-    elseif seer.side == "down" then
+    elseif seer.facing == "down" then
       if not (sy < ty and math.abs(sx - tx) < sw) then return end
-    elseif seer.side == "left" then
+    elseif seer.facing == "left" then
       if not (sx > tx and math.abs(sy - ty) < sw) then return end
     else
       if not (sx < tx and math.abs(sy - ty) < sw) then return end

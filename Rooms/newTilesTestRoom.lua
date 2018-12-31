@@ -37,7 +37,7 @@ room.upTrans = {
   }
 }
 
-room.game_scale = 3
+room.game_scale = 2
 
 room.room_parts = {}
 ----------Start of arrays of geography of parts of room----------

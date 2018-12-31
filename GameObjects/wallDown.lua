@@ -29,10 +29,6 @@ draw = function (self)
     sprite.res_x_scale, sprite.res_y_scale,
     sprite.cx, sprite.cy)
   end
-  -- if self.body then
-  --   local shape = self.fixture:getShape()
-  --   love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
-  -- end
 end,
 
 trans_draw = function (self)
@@ -46,10 +42,6 @@ trans_draw = function (self)
     sprite.res_x_scale, sprite.res_y_scale,
     sprite.cx, sprite.cy)
   end
-  -- if self.body then
-  --   local shape = self.fixture:getShape()
-  --   love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
-  -- end
 end,
 
 load = function(self)
