@@ -44,6 +44,7 @@ function Enemy.initialize(instance)
   instance.maxspeed = 20
   instance.behaviourTimer = 0
   instance.bounceEdge = true
+  instance.ballbreaker = true
   instance.ignoreFloorMovementModifiers = true
   instance.lookFor = si.lookFor
   -- instance.side = "up"
@@ -71,6 +72,14 @@ Enemy.functions = {
   end,
 
   hitBySword = function (self, other, myF, otherF)
+    ebh.propelledByHit(self, other, myF, otherF, 3)
+  end,
+
+  hitByMissile = function (self, other, myF, otherF)
+    ebh.propelledByHit(self, other, myF, otherF, 1, 0.5)
+  end,
+
+  hitByThrown = function (self, other, myF, otherF)
     ebh.propelledByHit(self, other, myF, otherF, 3)
   end,
 
@@ -178,11 +187,36 @@ Enemy.functions = {
           self.forcedDir = "down"
         end
       end
+      -- Check if the fixture I've collided with is a tile with a side to help with forced dir
+      local tileSide = otherF:getUserData()
+      if tileSide then
+        if tileSide == "u" then
+          self.forcedDir = "up"
+        elseif tileSide == "l" then
+          self.forcedDir = "left"
+        elseif tileSide == "d" then
+          self.forcedDir = "down"
+        elseif tileSide == "r" then
+          self.forcedDir = "right"
+        end
+      end
+      -- If I'm on the room edge, go to the opposite direction
+      if other.oppositeDir then self.forcedDir = other.oppositeDir end
     end
 
     -- Check if hit by sword
     if other.immasword == true and not self.invulnerable then
       self:hitBySword(other, myF, otherF)
+    end
+
+    -- Check if hit by missile
+    if other.immamissile == true and not self.invulnerable then
+      self:hitByMissile(other, myF, otherF)
+    end
+
+    -- Check if hit by thrown object
+    if other.immathrown == true and not self.invulnerable then
+      self:hitByThrown(other, myF, otherF)
     end
   end,
 

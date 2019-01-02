@@ -27,6 +27,7 @@ function rm.build_room(room)
       edgeTile.ystart = 0
       edgeTile.physical_properties.shape = ps.shapes.edge10hor
       edgeTile.roomEdge = "up"
+      edgeTile.oppositeDir = "down"
       o.addToWorld(edgeTile)
     end
     -- bottom edge tiles
@@ -36,6 +37,7 @@ function rm.build_room(room)
       edgeTile.ystart = rheight
       edgeTile.physical_properties.shape = ps.shapes.edge10hor
       edgeTile.roomEdge = "down"
+      edgeTile.oppositeDir = "up"
       o.addToWorld(edgeTile)
     end
     -- left edge tiles
@@ -45,6 +47,7 @@ function rm.build_room(room)
       edgeTile.ystart = tile_height * (i - 1)
       edgeTile.physical_properties.shape = ps.shapes.edge10ver
       edgeTile.roomEdge = "left"
+      edgeTile.oppositeDir = "right"
       o.addToWorld(edgeTile)
     end
     -- right edge tiles
@@ -54,6 +57,7 @@ function rm.build_room(room)
       edgeTile.ystart = tile_height * (i - 1)
       edgeTile.physical_properties.shape = ps.shapes.edge10ver
       edgeTile.roomEdge = "right"
+      edgeTile.oppositeDir = "left"
       o.addToWorld(edgeTile)
     end
   end

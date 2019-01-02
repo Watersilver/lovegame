@@ -10,7 +10,7 @@ local sh = require "GameObjects.shadow"
 local Knight = {}
 
 function Knight.initialize(instance)
-  instance.maxspeedcharge = 85
+  instance.maxspeedcharge = 222
   instance.sprite_info = { im.spriteSettings.testenemy }
   instance.hp = 4 --love.math.random(3)
   instance.shielded = true
@@ -33,7 +33,9 @@ Knight.functions = {
     if self.state == "wander" then
       if self.canSeePlayer then
         self.state = "notice"
-        self.noticeTimer = 1
+        self.noticeTimer = 0.1
+        local dx, dy = pl1.x - self.x, pl1.y - self.y
+        self.direction = math.atan2(dy, dx)
         -- figure out direction
       end
       -- Movement behaviour
@@ -49,12 +51,42 @@ Knight.functions = {
       end
       td.walk(self, dt)
     elseif self.state == "notice" then
+      self.noticeTimer = self.noticeTimer - dt
+      if self.noticeTimer < 0 then self.state = "charge" end
+      td.stand_still(self, dt)
+    elseif self.state == "charge" then
+      local wanderSpeed = self.maxspeed
+      self.maxspeed = self.maxspeedcharge
       td.analogueWalk(self, dt)
+      self.maxspeed = wanderSpeed
+    elseif self.state == "stunned" then
+      td.stand_still(self, dt)
+      if self.behaviourTimer < 0 then
+        self.shieldDown = false
+        self.shieldWall = true
+        self.state = "wander"
+        self.behaviourTimer = 0
+      end
     end
   end,
 
   hitBySword = function (self, other, myF, otherF)
     ebh.propelledByHit(self, other, myF, otherF, 3, 1, 1, 0.5)
+  end,
+
+  hitSolidStatic = function (self, other, myF, otherF)
+    if self.state == "charge" then
+      if other.pushback then
+        self.state = "stunned"
+        self.behaviourTimer = 2
+        self.shieldDown = true
+        self.shieldWall = false
+      else
+        self.state = "wander"
+        self.behaviourTimer = 0
+        self.moving = true
+      end
+    end
   end,
 
   draw = function (self)
@@ -74,6 +106,12 @@ Knight.functions = {
       fx = dist
     end
     love.graphics.circle("fill", self.x + fx, self.y + fy, 1)
+
+    -- exclamation mark
+    if self.state == "notice" then
+      love.graphics.circle("fill", self.x, self.y - 10, 1)
+      love.graphics.rectangle("fill", self.x - 1, self.y - 24, 2, 10)
+    end
   end
 }
 

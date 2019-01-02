@@ -57,6 +57,7 @@ function Missile.initialize(instance)
   instance.creator = nil -- Object that swings me
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
+  instance.immamissile = true
 end
 
 Missile.functions = {

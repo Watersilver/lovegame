@@ -36,6 +36,7 @@ function Thrown.initialize(instance)
     categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
   }
   instance.seeThrough = true
+  instance.immathrown = true
 end
 
 Thrown.functions = {

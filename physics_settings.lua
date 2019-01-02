@@ -94,6 +94,7 @@ function ps.shapes.edgeToTiles(instance, edgetable)
     local newf = love.physics.newFixture(instance.body, shape)
     u.push(instance.fixtures, newf)
     newf:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
+    newf:setUserData(side)
     -- instance.fixtures[i]:setUserData(instance)
     i = i + 1
   end

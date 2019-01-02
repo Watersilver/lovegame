@@ -43,12 +43,15 @@ function ebh.randomize4dir(object, setTimer)
   -- returns facing direction, if I want to.
   local myinp = object.input
   if object.moving then
-    myinp.left = 0; myinp.right = 0; myinp.up = 0; myinp.down = 0
     if setTimer then
       object.behaviourTimer = love.math.random(4)
     end
+    myinp.left = 0; myinp.right = 0; myinp.up = 0; myinp.down = 0
     object.moving = false
   else
+    if setTimer then
+      object.behaviourTimer = love.math.random(2)
+    end
     local dir = object.forcedDir or u.chooseKeyFromTable(myinp, object.avoidDir)
     myinp[dir] = 1
     object.avoidDir = nil
