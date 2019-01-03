@@ -13,7 +13,7 @@ function Wasp.initialize(instance)
   instance.maxspeed = 80
   instance.sprite_info = { im.spriteSettings.testenemy3 }
   instance.zo = - 2
-  instance.actAsGrounded = true
+  instance.actAszo0 = true
   instance.hp = 4 --love.math.random(3)
 end
 

@@ -13,6 +13,7 @@ function Knight.initialize(instance)
   instance.maxspeedcharge = 222
   instance.sprite_info = { im.spriteSettings.testenemy }
   instance.hp = 4 --love.math.random(3)
+  instance.pushback = true
   instance.shielded = true
   instance.shieldWall = true
   instance.facing = "down"
@@ -35,7 +36,8 @@ Knight.functions = {
         self.state = "notice"
         self.noticeTimer = 0.1
         local dx, dy = pl1.x - self.x, pl1.y - self.y
-        self.direction = math.atan2(dy, dx)
+        -- self.direction = math.atan2(dy, dx)
+        self._, self.direction = u.cartesianToPolar(dx, dy)
         -- figure out direction
       end
       -- Movement behaviour

@@ -34,6 +34,7 @@ im.spriteSettings = {
   testenemy = {'Enem', padding = 0, width = 16, height = 16},
   testenemy2 = {'Enem2', padding = 0, width = 15*0.5, height = 11*0.5},
   testenemy3 = {'Enem3', padding = 0, width = 18*0.5, height = 15*0.5},
+  testenemy4 = {'Enem4', 2, padding = 2, width = 16, height = 16},
   testsplosion = {'Testplosion', 5, padding = 2, width = 16, height = 16},
   testlift = {'LiftableTest', 1, width = 16, height = 16},
   mark = {'Inventory/UseMarkL1', 3, padding = 2, width = 16, height = 16},
@@ -95,7 +96,6 @@ im.spriteSettings = {
     {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
     {'health', 2, padding = 2, width = 8, height = 8},
     {'Test', 1, padding = 0},
-    {'Plrun_strip12', 12, padding = 0, width = 16, height = 16}
   },
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
   playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4}

@@ -12,6 +12,8 @@ local ebh = require "enemy_behaviours"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
+local floor = math.floor
+
 local hitShader = shdrs.playerHitShader
 
 local Enemy = {}
@@ -108,6 +110,9 @@ Enemy.functions = {
     end
     self.x, self.y = self.body:getPosition()
     self.vx, self.vy = self.body:getLinearVelocity()
+    if self.image_speed then
+      self.image_index = (self.image_index + dt*60*self.image_speed)
+    end
     -- Do specialised stuff
     self:enemyUpdate(dt)
   end,
@@ -121,7 +126,11 @@ Enemy.functions = {
     local xtotal, ytotal = self.x, self.y + zo
 
     local sprite = self.sprite
-    local frame = sprite[self.image_index]
+    local frames = self.sprite.frames
+    while self.image_index >= frames do
+      self.image_index = self.image_index - frames
+    end
+    local frame = sprite[floor(self.image_index)]
 
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.myShader)
@@ -139,7 +148,11 @@ Enemy.functions = {
 
   trans_draw = function (self)
     local sprite = self.sprite
-    local frame = sprite[self.image_index]
+    local frames = self.sprite.frames
+    while self.image_index >= frames do
+      self.image_index = self.image_index - frames
+    end
+    local frame = sprite[floor(self.image_index)]
 
     local zo = self.zo or 0
     local xtotal, ytotal = trans.moving_objects_coords(self)
@@ -229,11 +242,15 @@ Enemy.functions = {
       -- Find which fixture belongs to whom
       local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
       if other.floor then
-        if other.water and self.invulnerable and not self.shieldWall then
+        if self.levitating then
+          coll:setEnabled(false)
+        elseif other.water and self.invulnerable and not self.shieldWall then
           o.removeFromWorld(self)
           if not other.startSinking then other.startSinking = true end
         end
-        if other.gap and self.invulnerable and not self.shieldWall then
+        if self.levitating then
+          coll:setEnabled(false)
+        elseif other.gap and self.invulnerable and not self.shieldWall then
           o.removeFromWorld(self)
           if not other.startFalling then other.startFalling = true end
         end

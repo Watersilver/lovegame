@@ -5,6 +5,8 @@ local u = {}
 local random = love.math.random
 local remove = table.remove
 local sqrt = math.sqrt
+local cos, sin = math.cos, math.sin
+local atan2 = math.atan2
 
 -- A push operation that returns the new_index
 function u.push(array, thing)
@@ -40,6 +42,14 @@ function u.normalize2d(x, y)
   local invmagn = sqrt(x*x + y*y)
   invmagn = invmagn>0 and 1/invmagn or 1
   return x*invmagn, y*invmagn
+end
+
+function u.polarToCartesian(r, th)
+    return r * cos( th ), r * sin( th )
+end
+
+function u.cartesianToPolar(x, y)
+  return sqrt(x*x + y*y), atan2(y, x)
 end
 
 function u.distanceSqared2d(x0, y0, x1, y1)

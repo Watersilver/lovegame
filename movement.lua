@@ -129,7 +129,7 @@ local universalWalk = function(object, dt, inputForceFunc)
   inversemaxspeed = 1/(inversemaxspeed * normalisedSpeed) -- could be inf, don't worry
 
   -- if on ground check how floor affects movement
-  if object.zo == 0 or object.actAsGrounded then
+  if object.zo == 0 or object.actAszo0 then
     if floorFriction < 1 then
       mobility = mobility * floorFriction
       brakes = brakes * floorFriction
