@@ -11,6 +11,7 @@ function tch.playerDieDrownPlummet(instance, trig, myside)
     instance.animation_state:change_state(instance, dt, "downdrown")
     return true
   elseif trig.damaged then
+    if not myside then myside = "down" end
     instance.animation_state:change_state(instance, dt, myside .. "damaged")
     return true
   end

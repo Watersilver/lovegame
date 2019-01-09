@@ -235,6 +235,28 @@ room_part.init.layer = 20
 table.insert(room.room_parts, room_part)
 ---
 local room_part = {
+'ptl'
+}
+room_part.x_that_I_start = 200
+room_part.y_that_I_start = 288
+room_part.row_length = 3
+room_part.col_length = 4
+room_part.tile_width = 16
+room_part.init = {
+  destination = "Rooms/TestRoomBoss.lua",
+  desx = 55,
+  desy = 85,
+  grounded = true
+}
+room_part.init.layer = 11
+room_part.tileset = im.spriteSettings.basicFriendlyInterior
+room_part.tileset_index_table = {
+4+11*3
+}
+
+table.insert(room.room_parts, room_part)
+---
+local room_part = {
 blueprint = "enemyTest"
 }
 room_part.x_that_I_start = 372

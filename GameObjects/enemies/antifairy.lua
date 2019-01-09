@@ -10,7 +10,7 @@ local u = require "utilities"
 local Antifairy = {}
 
 function Antifairy.initialize(instance)
-  instance.levitating = true -- can go through walls
+  instance.levitating = true -- can go through over hazardous floor
   instance.maxspeed = 80
   instance.direction = math.random()*2*math.pi
   instance.sprite_info = { im.spriteSettings.testenemy4 }
@@ -27,18 +27,7 @@ Antifairy.functions = {
     self.body:setLinearVelocity(u.polarToCartesian(self.maxspeed, self.direction))
   end,
 
-  enemyUpdate = function (self, dt)
-    -- Movement behaviour
-    -- ebh.bounceOffScreenEdge(self)
-    -- if self.behaviourTimer < 0 then
-    --   ebh.beehaviour(self)
-    --   self.behaviourTimer = love.math.random(2)
-    -- end
-    -- if self.invulnerable then
-    --   self.direction = nil
-    -- end
-    -- td.analogueWalk(self, dt)
-  end,
+  enemyUpdate = u.emptyFunc,
 
   hitBySword = function (self, other, myF, otherF)
     ebh.propelledByHit(self, other, myF, otherF, 3, 1, 1, 0.5)

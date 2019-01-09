@@ -47,6 +47,11 @@ im.spriteSettings = {
   npcTest3Sprites = {
     {'NPCs/NpcTest3/down', 2, padding = 2, width = 16, height = 16}
   },
+  boss1TestSprites = {
+    {'arevcyeq', padding = 0, width = 37*0.5, height = 61*0.5},
+    {'arevcyeqLH', padding = 0, width = 15*0.5, height = 26*0.5},
+    {'arevcyeqRH', padding = 0, width = 23*0.5, height = 24*0.5},
+  },
   playerSprites = {
     -- {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},

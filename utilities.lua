@@ -8,6 +8,9 @@ local sqrt = math.sqrt
 local cos, sin = math.cos, math.sin
 local atan2 = math.atan2
 
+function u.emptyFunc()
+end
+
 -- A push operation that returns the new_index
 function u.push(array, thing)
   local new_index = #array + 1
@@ -38,6 +41,24 @@ function u.clamp(low, n, high)
   return math.min(math.max(n, low), high)
 end
 
+function u.middle2d(x0, y0, x1, y1)
+  return (x0 + x1)*0.5, (y0 + y1)*0.5
+end
+
+function u.gradualAdjust(dt, xcurrent, xtarget, as)
+  -- adjustment speed can't be more than 30
+  local as = as or 15
+  if as > 30 then as = 30 end
+  local as = as * dt
+  local dx = (xtarget - xcurrent)
+  dx = dx * as
+  return xcurrent + dx
+end
+
+function u.gradualAdjust2d(dt, xcurrent, ycurrent, xtarget, ytarget, as)
+  return u.gradualAdjust(dt, xcurrent, xtarget, as), u.gradualAdjust(dt, ycurrent, ytarget, as)
+end
+
 function u.normalize2d(x, y)
   local invmagn = sqrt(x*x + y*y)
   invmagn = invmagn>0 and 1/invmagn or 1
@@ -61,8 +82,9 @@ function u.sign(x)
   return x>0 and 1 or x<0 and -1 or 0
 end
 
-function u.choose(x, y)
-  return random()>0.5 and x or y
+function u.choose(x, y, chanceToPickX)
+  chanceToPickX = chanceToPickX or 0.5
+  return random()<chanceToPickX and x or y
 end
 
 -- ... is keys to avoid

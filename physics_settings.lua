@@ -51,7 +51,14 @@ ps.shapes = {
   edgeDown = love.physics.newEdgeShape(-7, 1, 7, 1),
   missile = love.physics.newCircleShape(2),
   thrown = love.physics.newRectangleShape(0, 5, 7, 6),
-  portal = love.physics.newRectangleShape(4,4)
+  portal = love.physics.newRectangleShape(4,4),
+  bosses = {
+    boss1 = {
+      sprite = love.physics.newRectangleShape(0, 0, 37*0.5, 61*0.5),
+      body = love.physics.newRectangleShape(0, 5, 10, 20),
+      laser = love.physics.newRectangleShape(0, 80, 20, 160),
+    }
+  }
 }
 -- Make player shapes
 -- zelda sprite dimensions 9.5, 7.6 -- (10, 8) x 0.95

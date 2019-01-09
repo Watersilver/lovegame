@@ -21,6 +21,7 @@ function Portal.initialize(instance)
   instance.desx = 55
   instance.desy = 55
   instance.unpushable = true
+  -- instance.grounded = true -- can be jumped over
 end
 
 Portal.functions = {
@@ -57,14 +58,17 @@ Portal.functions = {
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     if other.player then
-      game.transition{
-        type = "whiteScreen",
-        progress = 0,
-        roomTarget = self.destination,
-        playa = other,
-        desx = self.desx,
-        desy = self.desy
-      }
+      -- allow player to jump over ground portal
+      if not (self.grounded and other.zo < 0) then
+        game.transition{
+          type = "whiteScreen",
+          progress = 0,
+          roomTarget = self.destination,
+          playa = other,
+          desx = self.desx,
+          desy = self.desy
+        }
+      end
     end
 
   end
