@@ -2139,7 +2139,7 @@ Playa.functions = {
       if other.grounded then
         if self.zo < 0 then coll:setEnabled(false); return end
       end
-      if other.damager and not self.invulnerable then
+      if other.damager and not self.invulnerable and not other.harmless then
         self.triggers.damaged = true
         local mybod = self.body
         local mymass = mybod:getMass()

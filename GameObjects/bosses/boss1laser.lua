@@ -12,7 +12,7 @@ local proj = require "GameObjects.enemies.projectile"
 local Laser = {}
 
 function Laser.initialize(instance)
-  instance.levitating = true
+  instance.grounded = false
   instance.maxspeed = 0
   instance.physical_properties.shape = ps.shapes.bosses.boss1.laser
   instance.direction = 0
@@ -22,6 +22,7 @@ end
 
 Laser.functions = {
   load = function (self)
+    et.functions.load(self)
   end,
 
   draw = function (self)
