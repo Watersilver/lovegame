@@ -13,6 +13,7 @@ local Laser = {}
 
 function Laser.initialize(instance)
   instance.grounded = false
+  instance.levitating = true
   instance.maxspeed = 0
   instance.physical_properties.shape = ps.shapes.bosses.boss1.laser
   instance.direction = 0

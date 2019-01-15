@@ -42,6 +42,7 @@ function Enemy.initialize(instance)
   instance.damager = 1 -- how much damage I cause
   instance.grounded = true -- can be jumped over
   instance.flying = false -- can go through walls
+  instance.levitating = false -- can go through over hazardous floor
   instance.hp = love.math.random(3)
   instance.maxspeed = 20
   instance.behaviourTimer = 0
@@ -49,6 +50,7 @@ function Enemy.initialize(instance)
   instance.ballbreaker = true
   instance.ignoreFloorMovementModifiers = true
   instance.lookFor = si.lookFor
+  instance.layer = 20
   -- instance.side = "up"
 end
 
@@ -172,8 +174,21 @@ Enemy.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-    self.edgeSide = other.roomEdge
-    self.avoidDir = other.roomEdge
+    -- Determine if I'm at the room edge. If not and I'm flying, skip.
+    if other.roomEdge then
+      self.edgeSide = other.roomEdge
+      self.avoidDir = other.roomEdge
+    else
+      self.edgeSide = nil
+      self.avoidDir = nil
+    end
+
+    -- If I'm levitating, skip if appropriate
+    if other.floor then
+      if self.levitating or self.flying then
+        return
+      end
+    end
 
     -- Check if touched player
     if other.player then
