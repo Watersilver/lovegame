@@ -50,7 +50,8 @@ ps.shapes = {
   -- EdgeBrick16.u:setNextVertex(24, -8)
   edgeDown = love.physics.newEdgeShape(-7, 1, 7, 1),
   missile = love.physics.newCircleShape(2),
-  thrown = love.physics.newRectangleShape(0, 5, 7, 6),
+  -- thrown = love.physics.newRectangleShape(0, 5, 7, 6), -- old plshape
+  thrown = love.physics.newRectangleShape(0, 3, 6, 5),
   portal = love.physics.newRectangleShape(4,4),
   bosses = {
     boss1 = {

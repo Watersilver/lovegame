@@ -95,8 +95,8 @@ Thrown.functions = {
     -- Debug
     -- love.graphics.polygon("line",
     -- self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
-    -- love.graphics.polygon("line",
-    -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+    love.graphics.polygon("line",
+    self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,
 
   trans_draw = function(self)

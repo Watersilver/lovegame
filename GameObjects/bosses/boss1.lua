@@ -9,9 +9,12 @@ local sh = require "GameObjects.shadow"
 local o = require "GameObjects.objects"
 local sm = require "state_machine"
 local game = require "game"
+local shdrs = require "Shaders.shaders"
 
 local b1l = require "GameObjects.bosses.boss1laser"
 local b1fo = require "GameObjects.bosses.boss1fallorb"
+
+local hitShader = shdrs.playerHitShader
 
 local states = {
   -- WARNING STARTING STATE IN INITIALIZE!!!
@@ -36,12 +39,16 @@ local states = {
   start_state = function(instance, dt)
   end,
   check_state = function(instance, dt)
-    if instance.haveHitWall then
+    if instance.gotHit then
+      instance.state:change_state(instance, dt, "hurt")
+    elseif instance.haveHitWall then
       instance.haveHitWall = false
       instance.state:change_state(instance, dt, "changingDir")
     end
   end,
   end_state = function(instance, dt)
+    instance.resting = false
+    instance.hasCorneredPlayer = false
   end
   },
 
@@ -50,11 +57,16 @@ local states = {
     instance.changingDirCounter = instance.changingDirCounter - dt
   end,
   start_state = function(instance, dt)
-    -- if instance.hasCorneredPlayer then
-      instance.changeDirNextState = "orbsAttack"
-    -- else
-    --   instance.changeDirNextState = "prepareLaser"
-    -- end
+    instance.patrolDir = -instance.patrolDir
+    if instance.resting then
+      instance.changeDirNextState = "patrol"
+    else
+      if instance.hasCorneredPlayer then
+        instance.changeDirNextState = "orbsAttack"
+      else
+        instance.changeDirNextState = "prepareLaser"
+      end
+    end
     -- instance.changeDirNextState = u.choose("patrol", "prepareLaser", 0.007)
     if instance.changeDirNextState ~= "patrol" then
       instance.changingDirCounter = -1
@@ -63,8 +75,9 @@ local states = {
     end
   end,
   check_state = function(instance, dt)
-    if instance.changingDirCounter < 0 then
-      instance.patrolDir = -instance.patrolDir
+    if instance.gotHit then
+      instance.state:change_state(instance, dt, "hurt")
+    elseif instance.changingDirCounter < 0 then
       instance.state:change_state(instance, dt, instance.changeDirNextState)
     end
   end,
@@ -140,22 +153,82 @@ local states = {
 
   orbsAttack = {
   run_state = function(instance, dt)
+    -- staff position
+    instance.sxtarget, instance.sytarget = instance.x+instance.sox * 0.7, instance.y+instance.soy + 3
+    instance.staffTargetAngle = u.gradualAdjust(dt, instance.staffAngle, -90, 23)
+    -- hand position
+    instance.hxtarget, instance.hytarget = instance.x+instance.hox * 0.7, instance.y-5 + math.sin(instance.hth)
+    -- decrease counter
+    instance.orbsAttackCounter = instance.orbsAttackCounter - dt
   end,
   start_state = function(instance, dt)
-    local rw, rh
+    instance.orbsAttackCounter = 2
+    -- create orbs
+    local rr, rc -- room rows, room collumns
+    local tw = 16
     if game.room then
-      rw, rh = game.room.width, game.room.height
-    else
-      rw, rh = 150, 50
+      rr, rc = game.room.width, game.room.height
     end
-    local yomama = b1fo:new{xstart = rw * 0.5, ystart = rh * 0.5}
-    o.addToWorld(yomama)
+    if not rr or not rc then
+      rr, rc = 16, 6
+    else
+      -- Convert width and height to rows and collumns and take terrain into account
+      rr = (rr - tw * 2)/tw -- because of left and right walls
+      rc = (rc - tw * 4)/tw -- because of upper and lower walls and gaps
+    end
+    local isOrbRow = love.math.random(0, 1)
+    for i = 1, rr do
+      -- - tw * 0.5 to center
+      o.addToWorld(b1fo:new{xstart = i * tw + tw - tw * 0.5, ystart = tw + tw * 3 - tw * 0.5})
+      local freeSpot = love.math.random(2, rc)
+      if isOrbRow == 1 then
+        for j = 2, rc do
+          if j ~= freeSpot then
+            o.addToWorld(b1fo:new{xstart = i * tw + tw - tw * 0.5, ystart = j * tw + tw * 3 - tw * 0.5})
+          end
+        end
+      end
+      -- instance.patrolDir == 1 means I am preparing to move right
+      -- wihch means I was moving LEFT. The opposite for -1
+      if (i == rr and instance.patrolDir == 1) or (i == 1 and instance.patrolDir == -1) then
+        -- create liftable orb
+        o.addToWorld(b1fo:new{
+          xstart = i * tw + tw - tw * 0.5,
+          ystart = freeSpot * tw + tw * 3 - tw * 0.5,
+          liftable = true
+        })
+      end
+      isOrbRow = 1 - isOrbRow
+    end
   end,
   check_state = function(instance, dt)
+    if instance.orbsAttackCounter < 0 then
+      instance.state:change_state(instance, dt, "prepareLaser")
+    end
   end,
   end_state = function(instance, dt)
+    instance.resting = true
   end
   },
+
+  hurt = {
+  run_state = function(instance, dt)
+    instance.hurtCounter = instance.hurtCounter - dt
+  end,
+  start_state = function(instance, dt)
+    instance.hurtCounter = 2
+    instance.invulnerable = instance.hurtCounter
+    instance.hp = instance.hp - 1
+  end,
+  check_state = function(instance, dt)
+    if instance.hurtCounter < 0 then
+      instance.state:change_state(instance, dt, "patrol")
+    end
+  end,
+  end_state = function(instance, dt)
+    instance.hasCorneredPlayer = false
+  end
+  }
 }
 
 local Boss1 = {}
@@ -164,7 +237,7 @@ function Boss1.initialize(instance)
   instance.grounded = false
   instance.levitating = true
   instance.sprite_info = im.spriteSettings.boss1TestSprites
-  instance.hp = 4 --love.math.random(3)
+  instance.hp = 3
   instance.pushback = true
   instance.shielded = true
   instance.shieldWall = true
@@ -182,7 +255,8 @@ Boss1.functions = {
     self.x, self.y = self.body:getPosition()
     self.vx, self.vy = self.body:getLinearVelocity()
     self.handx, self.handy = self.x, self.y
-    self.patrolSpeed = 55--25
+    self.patrolSpeed = 55
+    self.laserSpeedWhenOrbsExist = 25
     -- hand stuff
     self.hox, self.hoy = 15, 2 -- offsets
     self.handx, self.handy = self.handx+self.hox, self.handy+self.hoy -- position
@@ -207,7 +281,7 @@ Boss1.functions = {
 
     -- start determining hand target position
     self.hth = self.hth + dt * 2
-    self.hxtarget, self.hytarget = self.x+self.hox, self.y+self.hoy + math.sin(self.hth) * 2
+    self.hxtarget, self.hytarget = self.x+self.hox, self.y + self.hoy + math.sin(self.hth) * 2
     -- start determining staff target position
     self.sth = self.sth + dt
     self.sxtarget, self.sytarget = self.x+self.sox, self.y+self.soy
@@ -225,6 +299,15 @@ Boss1.functions = {
     -- staff position:
     self.staffx, self.staffy = u.gradualAdjust2d(dt, self.staffx, self.staffy, self.sxtarget, self.sytarget, 20)
     self.staffAngle = self.staffTargetAngle
+
+    -- Special boss shader handling
+    if self.invulnerable then
+      self.myShader = hitShader
+    else
+      self.myShader = nil
+    end
+
+    self.gotHit = false
   end,
 
   hitBySword = function (self, other, myF, otherF)
@@ -234,6 +317,7 @@ Boss1.functions = {
   end,
 
   hitByThrown = function (self, other, myF, otherF)
+    self.gotHit = true
   end,
 
   hitSolidStatic = function (self, other, myF, otherF)
@@ -257,6 +341,21 @@ Boss1.functions = {
     sprite.cx, sprite.cy)
 
     love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+  end,
+
+  delete = function (self)
+    local ptl = require "GameObjects.portal"
+    o.addToWorld(ptl:new{
+      destination = "Rooms/newTilesTestRoom.lua",
+      desx = 217,
+      desy = 282,
+      grounded = true,
+      xstart = 32+8,
+      ystart = 80+8,
+      layer = 11,
+      sprite_info = {im.spriteSettings.basicFriendlyInterior},
+      image_index = 3+11*3
+    })
   end
 }
 

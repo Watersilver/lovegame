@@ -5,14 +5,35 @@ local et = require "GameObjects.enemyTest"
 local ebh = require "enemy_behaviours"
 local td = require "movement"; td = td.top_down
 local sh = require "GameObjects.shadow"
+local o = require "GameObjects.objects"
 local u = require "utilities"
+local expl = require "GameObjects.explode"
+local snd = require "sound"
+local shdrs = require "Shaders.shaders"
+
+local dc = require "GameObjects.Helpers.determine_colliders"
+
+local liftableShader = shdrs.playerHitShader
+
+local function throw_collision(self)
+  local explOb = expl:new{
+    x = self.x or self.xstart, y = self.y or self.ystart,
+    layer = self.layer,
+    explosionNumber = self.explosionNumber,
+    sprite_info = self.explosionSprite,
+    image_speed = self.explosionSpeed,
+    sounds = snd.load_sounds({explode = self.explosionSound})
+  }
+  o.addToWorld(explOb)
+end
 
 local Orb = {}
 
 function Orb.initialize(instance)
   instance.sprite_info = { im.spriteSettings.testlift }
   instance.physical_properties.bodyType = "static"
-  instance.physical_properties.shape = ps.shapes.rect1x1
+  -- instance.physical_properties.shape = ps.shapes.rect1x1
+  instance.physical_properties.shape = ps.shapes.circle1
   instance.image_speed = 0
   instance.hp = 4 --love.math.random(3)
   instance.shielded = true
@@ -21,7 +42,10 @@ function Orb.initialize(instance)
   instance.harmless = true
   instance.gravity = 300
   instance.zvel = 0
-  instance.zo = - 111
+  instance.zo = - 150
+  instance.grounded = false
+  instance.explosionSound = {"Testplosion"}
+  instance.throw_collision = throw_collision
 end
 
 Orb.functions = {
@@ -36,8 +60,12 @@ Orb.functions = {
       self.harmless = false
     else
       self.harmless = true
-      if self.zo == 0 then self.unpushable = false end
+      if self.zo == 0 then
+        self.unpushable = false
+        self.pushback = true
+      end
     end
+    if self.liftable then self.myShader = liftableShader end
   end,
 
   hitBySword = function (self, other, myF, otherF)
@@ -52,8 +80,18 @@ Orb.functions = {
   beginContact = u.emptyFunc,
 
   preSolve = function (self, a, b, coll, aob, bob)
+    -- Find which fixture belongs to whom
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
     if self.zo < 0 then coll:setEnabled(false) end
-  end
+    if other.boss1laser then o.removeFromWorld(self) end
+  end,
+
+  -- draw = function (self)
+  --   local worldShader = love.graphics.getShader()
+  --   love.graphics.setShader(self.myShader)
+  --   et.functions.draw(self)
+  --   love.graphics.setShader(worldShader)
+  -- end
 }
 
 function Orb:new(init)

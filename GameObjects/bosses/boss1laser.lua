@@ -19,6 +19,7 @@ function Laser.initialize(instance)
   instance.direction = 0
   instance.sprite_info = { im.spriteSettings.testenemy4 }
   instance.hp = 1
+  instance.boss1laser = true
 end
 
 Laser.functions = {
