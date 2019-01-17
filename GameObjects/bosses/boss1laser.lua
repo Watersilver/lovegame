@@ -17,19 +17,41 @@ function Laser.initialize(instance)
   instance.maxspeed = 0
   instance.physical_properties.shape = ps.shapes.bosses.boss1.laser
   instance.direction = 0
-  instance.sprite_info = { im.spriteSettings.testenemy4 }
+  instance.sprite_info = im.spriteSettings.boss1TestSprites
   instance.hp = 1
   instance.boss1laser = true
+  instance.image_index = 1
 end
 
 Laser.functions = {
   load = function (self)
     et.functions.load(self)
+    self.sprite = im.sprites["arevcyeqLaser1"]
   end,
 
   draw = function (self)
-    proj.functions.draw(self)
-    love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+    if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
+    self.spritebody:setPosition(self.x, self.y)
+    self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+
+    local zo = self.zo or 0
+    local xtotal, ytotal = self.x, self.y + zo
+
+    local sprite = self.sprite
+    local frames = self.sprite.frames
+    while self.image_index >= frames do
+      self.image_index = self.image_index - frames
+    end
+    self.image_index = 1 - self.image_index
+    local frame = sprite[self.image_index]
+
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
+    love.graphics.draw(
+    sprite.img, frame, xtotal, ytotal, 0,
+    self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
+    sprite.cx, 0)
+    -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,
 }
 

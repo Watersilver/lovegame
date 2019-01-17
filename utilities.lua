@@ -109,6 +109,14 @@ function u.chooseKeyFromTable(tbl, ...)
   return returnKey
 end
 
+function u.shuffle(tbl)
+  for i = #tbl, 2, -1 do
+    local j = math.random(i)
+    tbl[i], tbl[j] = tbl[j], tbl[i]
+  end
+  return tbl
+end
+
 -- Delete "chars" characters from the end of the string. UTF-8 friendly
 function u.utf8_backspace(t, chars)
     -- get the byte offset to the last UTF-8 character in the string.

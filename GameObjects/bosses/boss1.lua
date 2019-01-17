@@ -14,7 +14,7 @@ local shdrs = require "Shaders.shaders"
 local b1l = require "GameObjects.bosses.boss1laser"
 local b1fo = require "GameObjects.bosses.boss1fallorb"
 
-local hitShader = shdrs.playerHitShader
+local hitShader = shdrs.enemyHitShader
 
 local states = {
   -- WARNING STARTING STATE IN INITIALIZE!!!
@@ -162,7 +162,11 @@ local states = {
     instance.orbsAttackCounter = instance.orbsAttackCounter - dt
   end,
   start_state = function(instance, dt)
-    instance.orbsAttackCounter = 2
+    -- instance.orbsAttackCounter = 2
+    instance.orbsAttackCounter = instance.hp - 0.5
+    if not instance.orbAttacksNumber then
+      instance.orbAttacksNumber = 4 - instance.hp
+    end
     -- create orbs
     local rr, rc -- room rows, room collumns
     local tw = 16
@@ -177,26 +181,49 @@ local states = {
       rc = (rc - tw * 4)/tw -- because of upper and lower walls and gaps
     end
     local isOrbRow = love.math.random(0, 1)
+    -- Many free spots. (Commented out is old one free spot)
+    local possibleRows = {}
+    for row = 2, rc do
+      table.insert(possibleRows, row)
+    end
+
     for i = 1, rr do
+      -- Many free spots. (Commented out is old one free spot)
+      u.shuffle(possibleRows)
+
       -- - tw * 0.5 to center
       o.addToWorld(b1fo:new{xstart = i * tw + tw - tw * 0.5, ystart = tw + tw * 3 - tw * 0.5})
-      local freeSpot = love.math.random(2, rc)
+      -- Many free spots. (Commented out is old one free spot)
+      -- local freeSpot = love.math.random(2, rc)
+      local numberOfFreeSpots = love.math.random(instance.hp)
+      local freeSpots = {}
+      for freeSpotNumber = 1, numberOfFreeSpots do
+        freeSpots[possibleRows[freeSpotNumber]] = true
+      end
+
       if isOrbRow == 1 then
         for j = 2, rc do
-          if j ~= freeSpot then
+          -- Many free spots. (Commented out is old one free spot)
+          -- if j ~= freeSpot then
+          if not freeSpots[j] then
+            -- local orb = b1fo:new{xstart = i * tw + tw - tw * 0.5, ystart = j * tw + tw * 3 - tw * 0.5}
             o.addToWorld(b1fo:new{xstart = i * tw + tw - tw * 0.5, ystart = j * tw + tw * 3 - tw * 0.5})
           end
         end
       end
       -- instance.patrolDir == 1 means I am preparing to move right
       -- wihch means I was moving LEFT. The opposite for -1
-      if (i == rr and instance.patrolDir == 1) or (i == 1 and instance.patrolDir == -1) then
+      if instance.orbAttacksNumber == 1 and ((i == rr and instance.patrolDir == 1) or (i == 1 and instance.patrolDir == -1)) then
         -- create liftable orb
-        o.addToWorld(b1fo:new{
+        liftableOrb = b1fo:new{
           xstart = i * tw + tw - tw * 0.5,
-          ystart = freeSpot * tw + tw * 3 - tw * 0.5,
+          -- Many free spots. (Commented out is old one free spot)
+          -- ystart = freeSpot * tw + tw * 3 - tw * 0.5,
+          ystart = u.chooseKeyFromTable(freeSpots) * tw + tw * 3 - tw * 0.5,
           liftable = true
-        })
+        }
+        liftableOrb.sprite_info = {im.spriteSettings.boss1LiftableOrb}
+        o.addToWorld(liftableOrb)
       end
       isOrbRow = 1 - isOrbRow
     end
@@ -207,7 +234,12 @@ local states = {
     end
   end,
   end_state = function(instance, dt)
-    instance.resting = true
+    if instance.orbAttacksNumber == 1 then
+      instance.resting = true
+      instance.orbAttacksNumber = nil
+    else
+      instance.orbAttacksNumber = instance.orbAttacksNumber - 1
+    end
   end
   },
 
@@ -302,7 +334,10 @@ Boss1.functions = {
 
     -- Special boss shader handling
     if self.invulnerable then
-      self.myShader = hitShader
+      self.myShader = nil
+      if math.floor(7 * self.invulnerable % 2) == 1 then
+        self.myShader = hitShader
+      end
     else
       self.myShader = nil
     end
@@ -340,7 +375,7 @@ Boss1.functions = {
     self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
     sprite.cx, sprite.cy)
 
-    love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+    -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,
 
   delete = function (self)

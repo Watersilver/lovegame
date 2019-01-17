@@ -28,6 +28,7 @@ local dialogue = require "dialogue"
 local game = require "game"
 local inv = require "inventory"
 local trans = require "transitions"
+local gsh = require "gamera_shake"
 local rm = require("Rooms.room_manager")
 
 local gamera = require "gamera.gamera"
@@ -60,6 +61,8 @@ mainCamera = gamera.new(0,0,800,450)
 local cam = mainCamera
 cam.xt = 0
 cam.yt = 0
+cam.noisel = 0
+cam.noiset = 0
 
 Hud = gamera.new(0,0,400,225)
 local hud = Hud
@@ -464,6 +467,9 @@ function love.update(dt)
   -- Update music
   snd.bgm:update(dt)
 
+  -- Shake camera
+  gsh.shake(cam, dt)
+
 end
 
 
@@ -549,6 +555,8 @@ end
 function love.draw()
 
   cam:setScale(sh.get_total_scale())
+  local l, t, w, h = cam:getWindow()
+  cam:setWindow(cam.noisel,cam.noiset,w,h)
   cam:setPosition(cam.xt, cam.yt)
   cam:draw(mainCameraDraw)
 

@@ -10,10 +10,11 @@ local u = require "utilities"
 local expl = require "GameObjects.explode"
 local snd = require "sound"
 local shdrs = require "Shaders.shaders"
+local gsh = require "gamera_shake"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
-local liftableShader = shdrs.playerHitShader
+-- local liftableShader = shdrs.playerHitShader
 
 local function throw_collision(self)
   local explOb = expl:new{
@@ -27,10 +28,14 @@ local function throw_collision(self)
   o.addToWorld(explOb)
 end
 
+local sprite_info = {im.spriteSettings.boss1Orb}
+local shadowsprite = {im.spriteSettings.boss1OrbShadow}
+
 local Orb = {}
 
 function Orb.initialize(instance)
-  instance.sprite_info = { im.spriteSettings.testlift }
+  instance.sprite_info = sprite_info
+  instance.shadowsprite = shadowsprite
   instance.physical_properties.bodyType = "static"
   -- instance.physical_properties.shape = ps.shapes.rect1x1
   instance.physical_properties.shape = ps.shapes.circle1
@@ -41,7 +46,7 @@ function Orb.initialize(instance)
   instance.unpushable = true
   instance.harmless = true
   instance.gravity = 300
-  instance.zvel = 0
+  instance.zvel = 0-- 55
   instance.zo = - 150
   instance.grounded = false
   instance.explosionSound = {"Testplosion"}
@@ -61,11 +66,15 @@ Orb.functions = {
     else
       self.harmless = true
       if self.zo == 0 then
-        self.unpushable = false
-        self.pushback = true
+        if not self.touchedGround then
+          gsh.newShake(mainCamera, "displacement")
+          self.unpushable = false
+          self.pushback = true
+          self.touchedGround = true
+        end
       end
     end
-    if self.liftable then self.myShader = liftableShader end
+    -- if self.liftable then self.myShader = liftableShader end
   end,
 
   hitBySword = function (self, other, myF, otherF)

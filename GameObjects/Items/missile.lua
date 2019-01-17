@@ -194,6 +194,11 @@ Missile.functions = {
           if self.x > other.xstart + 8 then self.broken = true end
         end
       end
+      if other.zo then
+        if other.zo < -5 then
+          self.broken = nil
+        end
+      end
     end
 
     -- Check if propelled by sword

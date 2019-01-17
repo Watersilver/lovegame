@@ -14,7 +14,7 @@ local dc = require "GameObjects.Helpers.determine_colliders"
 
 local floor = math.floor
 
-local hitShader = shdrs.playerHitShader
+local hitShader = shdrs.enemyHitShader
 
 local Enemy = {}
 
@@ -99,11 +99,16 @@ Enemy.functions = {
     self.invulnerableEnd = nil
     if self.invulnerable then
       self.invulnerable = self.invulnerable - dt
+      if not self.shielded or self.shieldDown then
+        self.myShader = nil
+        if floor(7 * self.invulnerable % 2) == 1 then
+          self.myShader = hitShader
+        end
+      end
       if self.invulnerable < 0 then
         self.invulnerable = nil
         self.invulnerableEnd = true
       end
-      if not self.shielded or self.shieldDown then self.myShader = hitShader end
     else
       self.myShader = nil
       if self.hp <= 0 then

@@ -71,6 +71,9 @@ function Shadow.handleShadow(object, plshadow)
         caster = object, layer = shlayer,
         xstart = x, ystart = y, playershadow = plshadow
       }
+      if object.shadowsprite then
+        object.shadow.sprite_info = object.shadowsprite
+      end
       o.addToWorld(object.shadow)
     end
   else

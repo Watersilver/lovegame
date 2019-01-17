@@ -51,7 +51,11 @@ im.spriteSettings = {
     {'arevcyeq', padding = 0, width = 37*0.5, height = 61*0.5},
     {'arevcyeqLH', padding = 0, width = 15*0.5, height = 26*0.5},
     {'arevcyeqRH', padding = 0, width = 23*0.5, height = 24*0.5},
+    {'arevcyeqLaser1', 2, padding = 0, width = 26, height = 107}
   },
+  boss1Orb = {'boss1/arevcyeqOrb', padding = 0, width = 32*0.5, height = 29*0.5},
+  boss1LiftableOrb = {'boss1/arevcyeqLiftableOrb', padding = 0, width = 32*0.5, height = 29*0.5},
+  boss1OrbShadow = {'boss1/arevcyeqOrbShadow', padding = 0, width = 32*0.5, height = 32*0.5},
   playerSprites = {
     -- {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
