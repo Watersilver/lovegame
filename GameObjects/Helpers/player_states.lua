@@ -217,12 +217,17 @@ player_states.start_jump = function(instance, dt, side)
 end
 
 player_states.run_fall = function(instance, dt, side)
-  if instance.zvel > 40 then -- 40 H 10
-    instance.image_index = 0
-  elseif instance.zvel < -40 then -- -40 H -10
-    instance.image_index = 2
-  else
-    instance.image_index = 1
+  -- old fall
+  -- if instance.zvel > 40 then -- 40 H 10
+  --   instance.image_index = 0
+  -- elseif instance.zvel < -40 then -- -40 H -10
+  --   instance.image_index = 2
+  -- else
+  --   instance.image_index = 1
+  -- end
+  if instance.triggers.animation_end then
+    instance.image_speed = 0
+    instance.image_index = instance.sprite.frames - 1
   end
 end
 
@@ -237,8 +242,9 @@ player_states.check_fall = function(instance, dt, side)
 end
 
 player_states.start_fall = function(instance, dt, side)
+  instance.triggers.animation_end = false
   instance.image_index = 0
-  instance.image_speed = 0
+  instance.image_speed = 0.11
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/jump_" .. side]
   else

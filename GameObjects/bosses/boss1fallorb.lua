@@ -46,6 +46,7 @@ function Orb.initialize(instance)
   instance.unpushable = true
   instance.harmless = true
   instance.gravity = 300
+  instance.attackDodger = true
   instance.zvel = 0-- 55
   instance.zo = - 150
   instance.grounded = false
@@ -70,6 +71,7 @@ Orb.functions = {
           gsh.newShake(mainCamera, "displacement")
           self.unpushable = false
           self.pushback = true
+          self.attackDodger = false
           self.touchedGround = true
         end
       end

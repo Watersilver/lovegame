@@ -247,7 +247,7 @@ Sword.functions = {
       if ec.swordBelowEdge(other, cr) then pushback = true else return end
     end
 
-    if (pushback) and not self.hitWall then
+    if (pushback) and not self.hitWall and not other.attackDodger then
       local lvx, lvy = cr.body:getLinearVelocity()
       local crmass = cr.body:getMass()
       local crbrakes = clamp(0, cr.brakes, cr.brakesLim)

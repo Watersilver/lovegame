@@ -30,6 +30,7 @@ local drawSymbols = false
 local camscale = 1
 
 local tilesets = {
+  im.spriteSettings.zeldarip,
   im.spriteSettings.floorOutside,
   im.spriteSettings.solidsOutside,
   im.spriteSettings.basicFriendlyInterior,
@@ -79,6 +80,79 @@ tilesets_to_symbols['Tiles/BasicFriendlyInterior'] = {
   'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
   'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
   'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
+}
+tilesets_to_symbols['Tiles/zeldarip'] = {
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'ld', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'ld', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f',
+  'w', 'w', 'w', 'w', 'st', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f',
+  'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f',
+  'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f',
+  'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'b', 'b', 'b', 'b', 'f', 'f', 'b', 'b',
+  'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'b', 'b', 'b', 'b', 'f', 'f', 'b', 'b',
+  'w', 'w', 'w', 'b', 'b', 'b', 'f', 'f', 'w', 'f', 'f', 'w', 'f', 'f', 'w', 'f',
+  'w', 'ptl', 'w', 'w', 'ptl', 'w', 'f', 'f', 'w', 'f', 'w', 'f', 'f', 'f', 'f', 'f',
+  'w', 'eD', 'w', 'w', 'eD', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'ptl', 'b', 'b', 'ga',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'sL', 'b', 'b', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  'eD', 'b', 'b', 'b', 'b', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'ptl', 'w', 'w', 'w',
+  'eD', 'b', 'b', 'b', 'b', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'w', 'w', 'w', 'w',
+  'f', 'w', 'w', 'w', 'w', 'f', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w',
+  'f', 'f', 'w', 'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w',
+  'w', 'eD', 'w', 'w', 'eD', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'ptl', 'f', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'pl', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w',
+  'w', 'eD', 'w', 'w', 'eD', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'ptl', 'f', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'eL', 'eR',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'w', 'f', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'ptl',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'b', 'ptl', 'b', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'f', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'f', 'w',
+  'w', 'w', 'w', 'f', 'f', 'w', 'w', 'w', 'n', 'n', 'w', 'w', 'f', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'f', 'w', 'w', 'f', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w', 'w', 'eD', 'w', 'w', 'eD', 'w',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'ld',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'ptl', 'ga', 'w', 'w', 'w', 'w', 'w', 'ld',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w', 'ptl', 'w', 'w', 'w', 'w', 'w', 'ld',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w', 'f', 'w', 'f', 'ga', 'w', 'f', 'w',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'w', 'f', 'f', 'w',
+  'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'w', 'w', 'n', 'f', 'f', 'f', 'f',
+  'w', 'w', 'w', 'w', 'f', 'f', 'f', 'w', 'f', 'f', 'f', 'n', 'f', 'f', 'f', 'f',
+  'f', 'w', 'w', 'w', 'f', 'f', 'f', 'ptl', 'w', 'w', 'ptl', 'w', 'f', 'f', 'f', 'f',
+  'w', 'eD', 'w', 'w', 'eD', 'w', 'b', 'b', 'w', 'w', 'w', 'f', 'f', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'eD', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'ptl', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'st', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'f', 'f', 'f', 'f', 'ptl', 'w', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  'w', 'w', 'f', 'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'ga', 'f', 'f', 'f', 'f',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'f', 'f', 'f', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'ld',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'ld',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'f', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'ptl', 'ptl',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'ga', 'f', 'ptl', 'ptl',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f', 'f', 'ptl', 'ptl',
+  'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'w', 'w', 'w', 'w', 'w', 'ptl', 'sL', 'w',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'ptl', 'ptl', 'w', 'f', 'w', 'f', 'w',
+  'f', 'f', 'f', 'w', 'w', 'b', 'b', 'b', 'sL', 'pl', 'n', 'n', 'n', 'n', 'n', 'n',
+  'f', 'f', 'f', 'w', 'w', 'w', 'ptl', 'w', 'pl', 'pl', 'n', 'n', 'n', 'n', 'n', 'n',
+  'f', 'f', 'f', 'w', 'w', 'w', 'w', 'ptl', 'g', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
+  'wa', 'n', 'n', 'wa', 'n', 'n', 'wa', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
+  'aF2', 'n', 'n', 'n', 'aF2', 'n', 'n', 'n', 'aF2', 'n', 'n', 'n', 'aF2', 'n', 'n', 'n',
 }
 
 -- Functions always below vars, so they can recognise them
@@ -548,14 +622,9 @@ Re.functions = {
   end,
 
   noCamDraw = function (self)
-    -- Show the tileset. If not same as roompart tile set, make transparent
-    local pr, pg, pb, pa = love.graphics.getColor()
-    local alpha
-    if tilesetUsable then alpha = 1 else alpha = 0.2 end
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST * alpha)
-    love.graphics.draw(self.tileset.img)
-    love.graphics.setColor(pr, pg, pb, pa)
     -- Show the selected tile
+    local selectyOffset = 0
+    local twidth = tileset.width
     if tileset.name then
       local selectx, selecty = 0, 0
       local tsize, tindex, twidth = tileset.size, tileset.index, tileset.width
@@ -564,6 +633,10 @@ Re.functions = {
         selectx = selectx - twidth
         selecty = selecty + tsize
       end
+      while selecty - selectyOffset > love.graphics.getHeight() * 0.5 do
+        selectyOffset = selectyOffset + love.graphics.getHeight() * 0.25
+      end
+      selecty = selecty - selectyOffset
       local pr, pg, pb, pa = love.graphics.getColor()
       love.graphics.setColor(COLORCONST, 0, 0, COLORCONST)
       love.graphics.rectangle(
@@ -574,24 +647,31 @@ Re.functions = {
       tsize)
       love.graphics.setColor(pr, pg, pb, pa)
     end
+    -- Show the tileset. If not same as roompart tile set, make transparent
+    local pr, pg, pb, pa = love.graphics.getColor()
+    local alpha
+    if tilesetUsable then alpha = 1 else alpha = 0.2 end
+    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST * alpha)
+    love.graphics.draw(self.tileset.img, 0, - selectyOffset)
+    love.graphics.setColor(pr, pg, pb, pa)
     love.graphics.print(worldMouseX, love.graphics.getWidth()-100)
     love.graphics.print(worldMouseY, love.graphics.getWidth()-100, 50)
     love.graphics.print(mouseIndex, love.graphics.getWidth()-100, 100)
     love.graphics.print(tileMouseX, love.graphics.getWidth()-100, 150)
     love.graphics.print(tileMouseY, love.graphics.getWidth()-100, 200)
     if currentRoomPart then
-      love.graphics.print("rpx:" .. currentRoomPart.x_that_I_start, 5, 175)
-      love.graphics.print("rpy:" .. currentRoomPart.y_that_I_start, 5, 200)
-      love.graphics.print("rpr:" .. currentRoomPart.row_length, 5, 225)
-      love.graphics.print("rpc:" .. currentRoomPart.col_length, 5, 250)
-      love.graphics.print("rptile:" .. currentRoomPart.tileset[1], 5, 275)
-      love.graphics.print("camscale:" .. camscale, 5, 325)
+      love.graphics.print("rpx:" .. currentRoomPart.x_that_I_start, twidth, 0)
+      love.graphics.print("rpy:" .. currentRoomPart.y_that_I_start, twidth, 25)
+      love.graphics.print("rpr:" .. currentRoomPart.row_length, twidth, 50)
+      love.graphics.print("rpc:" .. currentRoomPart.col_length, twidth, 75)
+      love.graphics.print("rptile:" .. currentRoomPart.tileset[1], twidth, 100)
+      love.graphics.print("camscale:" .. camscale, twidth, 150)
     end
     -- Show layer. If not same as roompart tile set, make transparent
     if layerUsable then alpha = 1 else alpha = 0.2 end
     local pr, pg, pb, pa = love.graphics.getColor()
     love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST * alpha)
-    love.graphics.print("Layer:" .. layer, 5, 350)
+    love.graphics.print("Layer:" .. layer, twidth, 350)
     love.graphics.setColor(pr, pg, pb, pa)
 
     if states[self.state].noCamDraw then states[self.state].noCamDraw(self, dt) end

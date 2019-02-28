@@ -5,9 +5,8 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
     // if (c.g == 1) {
     //   // then I'm on a white pixel
     //   return vec4(0,0,0,c.a);
-    // }
-    // else
-    if (c.r == 1) {
+    // }else
+    if (c.r > 0.9) {
       // then I'm on a red pixel (or white if above is commented out)
       return vec4(0,0,0,c.a);
     }

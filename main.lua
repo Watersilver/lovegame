@@ -88,12 +88,12 @@ local screenEdgeThreshold = 0.1
 function love.load()
   ps.pw:setCallbacks(beginContact, endContact, preSolve, postSolve)
   pam.init()
-  --dofile("Rooms/room1.lua")
+  -- dofile("Rooms/room1.lua")
   -- game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
-  game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
-  rm.build_room(game.room)
-  snd.bgm:load(game.room.music_info)
-  -- game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
+  -- game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
+  -- rm.build_room(game.room)
+  -- snd.bgm:load(game.room.music_info)
+  game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
   sh.calculate_total_scale{game_scale=game.room.game_scale}
 end
 
@@ -578,7 +578,7 @@ function love.draw()
     end
   end
 
-  love.graphics.print("FPS: " .. love.timer.getFPS(),0,120)
+  love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-44)
   if fuck then love.graphics.print(fuck, 0, 177+120) end
   local debiter = 0
   if triggersdebug then

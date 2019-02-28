@@ -63,7 +63,8 @@ ps.shapes = {
 }
 -- Make player shapes
 -- zelda sprite dimensions 9.5, 7.6 -- (10, 8) x 0.95
-local width, height = 6.5, 6.8
+-- mochi dimentions local width, height = 6.5, 6.8
+local width, height = 9.5, 7.6
 ps.shapes.plshapeWidth = width
 ps.shapes.plshapeHeight = height
 -- Main collision shape

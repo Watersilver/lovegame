@@ -168,6 +168,9 @@ HeldSword.functions = {
     -- If other is grass, do nothing
     if other.grass then return end
 
+    -- If other is attackDodger, do nothing
+    if other.attackDodger then return end
+
     -- If below edge, treat as wall
     if other.edge then
       if not ec.swordBelowEdge(other, cr) then return end

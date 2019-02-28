@@ -27,6 +27,7 @@ end
 
 im.spriteSettings = {
   testtiles = {'Tiles/TestTiles', 4, 7},
+  zeldarip = {'Tiles/zeldarip', 16, 71, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.zeldarip"},
   floorOutside = {'Tiles/FloorOutside', 10, 10, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floorOutside"},
   solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},
   basicFriendlyInterior = {'Tiles/BasicFriendlyInterior', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.basicFriendlyInterior"},
@@ -57,14 +58,13 @@ im.spriteSettings = {
   boss1LiftableOrb = {'boss1/arevcyeqLiftableOrb', padding = 0, width = 32*0.5, height = 29*0.5},
   boss1OrbShadow = {'boss1/arevcyeqOrbShadow', padding = 0, width = 32*0.5, height = 32*0.5},
   playerSprites = {
-    -- {'Witch/walk_left', 4, padding = 2, width = 16, height = 16},
-    {'Witch/walk_up', 4, padding = 2, width = 16, height = 16},
-    {'Witch/walk_left', 8, padding = 0, width = 16, height = 16},
-    {'Witch/walk_down', 4, padding = 2, width = 16, height = 16},
-    {'Witch/push_up', 4, padding = 2, width = 16, height = 16},
+    {'Witch/walk_left', 2, padding = 2, width = 16, height = 16},
+    {'Witch/walk_up', 2, padding = 2, width = 16, height = 16},
+    {'Witch/walk_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/push_up', 2, padding = 2, width = 16, height = 16},
     {'Witch/push_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/push_down', 2, padding = 2, width = 16, height = 16},
-    {'Witch/grip_up', 4, padding = 2, width = 16, height = 16},
+    {'Witch/grip_up', 2, padding = 2, width = 16, height = 16},
     {'Witch/grip_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/grip_down', 2, padding = 2, width = 16, height = 16},
     {'Witch/lifting_up', 1, padding = 2, width = 16, height = 16},
@@ -85,15 +85,15 @@ im.spriteSettings = {
     {'Witch/swing_up', 2, padding = 2, width = 16, height = 16},
     {'Witch/swing_left', 2, padding = 2, width = 16, height = 16},
     {'Witch/swing_down', 2, padding = 2, width = 16, height = 16},
-    {'Witch/hold_up', 4, padding = 2, width = 16, height = 16},
-    {'Witch/hold_left', 4, padding = 2, width = 16, height = 16},
-    {'Witch/hold_down', 4, padding = 2, width = 16, height = 16},
-    {'Witch/shoot_up', 4, padding = 2, width = 16, height = 16},
-    {'Witch/shoot_left', 4, padding = 2, width = 16, height = 16},
-    {'Witch/shoot_down', 4, padding = 2, width = 16, height = 16},
-    {'Witch/jump_down', 3, padding = 2, width = 16, height = 16},
-    {'Witch/jump_left', 3, padding = 2, width = 16, height = 16},
-    {'Witch/jump_up', 3, padding = 2, width = 16, height = 16},
+    {'Witch/hold_up', 2, padding = 2, width = 16, height = 16},
+    {'Witch/hold_left', 2, padding = 2, width = 16, height = 16},
+    {'Witch/hold_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/shoot_up', 2, padding = 2, width = 16, height = 16},
+    {'Witch/shoot_left', 2, padding = 2, width = 16, height = 16},
+    {'Witch/shoot_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/jump_down', 4, padding = 2, width = 16, height = 16},
+    {'Witch/jump_left', 4, padding = 2, width = 16, height = 16},
+    {'Witch/jump_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/mark_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/recall_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/drown_down', 2, padding = 2, width = 16, height = 16},
@@ -190,6 +190,7 @@ for _, plSprite in ipairs(im.spriteSettings.playerSprites) do
 end
 im.load_sprite(im.spriteSettings.floorOutside)
 im.load_sprite(im.spriteSettings.solidsOutside)
+im.load_sprite(im.spriteSettings.zeldarip)
 im.load_sprite(im.spriteSettings.basicFriendlyInterior)
 im.load_sprite(im.spriteSettings.playerSword)
 im.load_sprite(im.spriteSettings.playerMissile)

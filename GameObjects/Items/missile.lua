@@ -181,6 +181,11 @@ Missile.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    -- Check if other is dodger
+    if other.attackDodger then
+      return
+    end
+
     -- Check if I will be broken
     if other.ballbreaker == true then
       if not other.edge then

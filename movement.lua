@@ -245,8 +245,8 @@ local mo = {}
       local floorFriction = object.floorFriction or 1
       local image_speed = 0.13 * object.speed/80--100 looks alright too.
       -- take into account different number of frames (assume there are four frames)
-      local framemod = speedMod or (object.sprite.frames)*0.25
-      image_speed = image_speed * framemod
+      -- local framemod = speedMod or (object.sprite.frames)*0.25
+      -- image_speed = image_speed * framemod
       if floorFriction < 1 then
         image_speed = image_speed * 1/floorFriction
       end
@@ -257,6 +257,7 @@ local mo = {}
 
     zAxisPlayer = function(object, dt)
       -- different from zAxis because player also has jo (jump offset) for cam purposes
+      object.jo = object.jo - object.zvel * dt
       if object.jo >= 0 then
         object.jo = 0
         object.fo = object.fo - object.zvel * dt

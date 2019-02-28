@@ -37,6 +37,7 @@ local symbols_to_objects_default = {
   w = Wall,
   sL = softLiftable,
   f = floorTile,
+  pl = floorTile, --placeholder
   shW = shallowWater,
   wa = water,
   ga = gap,
