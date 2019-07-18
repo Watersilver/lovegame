@@ -107,7 +107,21 @@ im.spriteSettings = {
     {'Test', 1, padding = 0},
   },
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
-  playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4}
+  playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4},
+  -- Enemy sprites
+  bullKnight = {
+    {'Enemies/BullKnight/walk_left', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/BullKnight/walk_up', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/BullKnight/walk_down', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/BullKnight/stun_down', 2, padding = 2, width = 16, height = 16},
+    {'surprize', 2, padding = 2, width = 16, height = 16},
+  },
+  slime = {
+    {'Enemies/Slime/slime', 2, padding = 2, width = 16, height = 16}
+  },
+  wasp = {
+    {'Enemies/Wasp/wasp', 2, padding = 2, width = 16, height = 16}
+  }
 }
 
 im.sprites = {}

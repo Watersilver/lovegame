@@ -257,7 +257,7 @@ room_part.tileset_index_table = {
 table.insert(room.room_parts, room_part)
 ---
 local room_part = {
-blueprint = "enemyTest"
+blueprint = "enemies.slime"
 }
 room_part.x_that_I_start = 372
 room_part.y_that_I_start = 222

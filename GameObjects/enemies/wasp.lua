@@ -11,10 +11,11 @@ local Wasp = {}
 function Wasp.initialize(instance)
   instance.flying = true -- can go through walls
   instance.maxspeed = 80
-  instance.sprite_info = { im.spriteSettings.testenemy3 }
+  instance.sprite_info = im.spriteSettings.wasp
   instance.zo = - 2
   instance.actAszo0 = true
   instance.hp = 4 --love.math.random(3)
+  instance.image_speed = 0.6
 end
 
 Wasp.functions = {
@@ -29,6 +30,13 @@ Wasp.functions = {
       self.direction = nil
     end
     td.analogueWalk(self, dt)
+    if self.direction then
+      if math.cos(self.direction) > 0 then
+        self.x_scale = -1
+      else
+        self.x_scale = 1
+      end
+    end
 
     sh.handleShadow(self)
   end,

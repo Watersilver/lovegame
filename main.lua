@@ -33,8 +33,6 @@ local rm = require("Rooms.room_manager")
 
 local gamera = require "gamera.gamera"
 
-if gs.fullscreen then love.window.setFullscreen(true) end
-
 -- Create table to save temporary stuff for current session
 session = {
   save = {
@@ -64,6 +62,10 @@ cam.yt = 0
 cam.noisel = 0
 cam.noiset = 0
 
+if gs.fullscreen then
+  love.window.setFullscreen(true)
+end
+
 Hud = gamera.new(0,0,400,225)
 local hud = Hud
 hud.xt = 0
@@ -90,10 +92,14 @@ function love.load()
   pam.init()
   -- dofile("Rooms/room1.lua")
   -- game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
-  -- game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
-  -- rm.build_room(game.room)
-  -- snd.bgm:load(game.room.music_info)
-  game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
+
+  -- Normal game
+  game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
+  rm.build_room(game.room)
+  snd.bgm:load(game.room.music_info)
+
+  -- Room Creator
+  -- game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
   sh.calculate_total_scale{game_scale=game.room.game_scale}
 end
 
@@ -555,8 +561,10 @@ end
 function love.draw()
 
   cam:setScale(sh.get_total_scale())
-  local l, t, w, h = cam:getWindow()
-  cam:setWindow(cam.noisel,cam.noiset,w,h)
+  -- local l, t, w, h = cam:getWindow()
+  -- cam:setWindow(cam.noisel,cam.noiset,w,h)
+  local l, t, w, h = sh.get_current_window()
+  cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
   cam:setPosition(cam.xt, cam.yt)
   cam:draw(mainCameraDraw)
 

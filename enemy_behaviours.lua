@@ -83,11 +83,6 @@ function ebh.bounceOffScreenEdge(object)
       object.edgeSide = nil
       object.behaviourTimer = object.behaviourTimer + 1
     end
-    if math.cos(object.direction) > 0 then
-      object.x_scale = 1
-    else
-      object.x_scale = -1
-    end
   end
 end
 

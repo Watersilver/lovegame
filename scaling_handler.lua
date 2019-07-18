@@ -5,6 +5,8 @@ local sh = {}
 -- Set dimensions
 local initial_w = love.graphics.getWidth()
 local initial_h = love.graphics.getHeight()
+real_w = initial_w
+real_h = initial_h
 local current_w = initial_w
 local current_h = initial_h
 local previous_w = current_w
@@ -60,6 +62,9 @@ function sh.calculate_resized_window( w, h )
     new_w = new_h * (current_w / current_h)
   end
 
+  real_w = w
+  real_h = h
+
   -- Determine unused screen area to find display window offset,
   -- so that what's displayed is always in the middle of the window
   local dead_space_w = w - new_w
@@ -108,6 +113,10 @@ function sh.get_resized_choice_window( w, h )
     current_w * 0.5,
     -- height
     current_h * 0.2
+end
+
+function sh.get_current_window()
+  return (real_w - current_w) * 0.5, (real_h - current_h) * 0.5, current_w, current_h
 end
 
 function sh.calculate_initial_window(cam)
