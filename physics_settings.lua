@@ -20,11 +20,13 @@ ps.pw = love.physics.newWorld(0, 280)--280)
 -- Make shapes
 ps.shapes = {
   rect1x1 = love.physics.newRectangleShape(16, 16),
+  rectHalfxHalf = love.physics.newRectangleShape(8, 8),
   edge10hor = love.physics.newEdgeShape(0, 0, 160, 0),
   edge10ver = love.physics.newEdgeShape(0, 0, 0, 160),
   -- edge10x10 = love.physics.newRectangleShape(160, 160),
     rect1x1minusinfinitesimal = love.physics.newRectangleShape(15, 15),
   circle1 = love.physics.newCircleShape(8),
+  circleAlmost1 = love.physics.newCircleShape(7),
   edgeRect1x1 = {
     u = love.physics.newEdgeShape(-8, -8, 8, -8), -- upper side
     l = love.physics.newEdgeShape(-8, -8, -8, 8), -- left side

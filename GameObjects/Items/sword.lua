@@ -5,6 +5,7 @@ local trans = require "transitions"
 local game = require "game"
 local u = require "utilities"
 local im = require "image"
+local snd = require "sound"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -263,7 +264,7 @@ Sword.functions = {
       end
       cr.body:applyLinearImpulse(px, py)
       self.hitWall = true
-
+      if other.static then snd.play(cr.sounds.swordTap1) end
     end
   end,
 

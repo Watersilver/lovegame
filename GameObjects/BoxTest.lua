@@ -11,11 +11,14 @@ function bt.initialize(instance)
   instance.physical_properties = {
     bodyType = "dynamic",
     density = 40,
+    gravityScaleFactor = 0,
     shape = ps.shapes.rect1x1,
-    restitution = 0
+    restitution = 0,
+    linearDamping = 40,
+    fixedRotation = true,
   }
   instance.layer = 15
-  instance.liftable = true
+  -- instance.liftable = true
 end
 
 bt.functions = {

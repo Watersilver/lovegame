@@ -109,7 +109,7 @@ Thrown.functions = {
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     if other.grass then return end
-    
+
     if other.attackDodger then return end
 
     if self.shadow then o.removeFromWorld(self.shadow) end

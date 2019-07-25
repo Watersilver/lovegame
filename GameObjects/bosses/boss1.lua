@@ -162,6 +162,7 @@ local states = {
     instance.orbsAttackCounter = instance.orbsAttackCounter - dt
   end,
   start_state = function(instance, dt)
+    instance.handFrame = 1
     -- instance.orbsAttackCounter = 2
     instance.orbsAttackCounter = instance.hp - 0.5
     if not instance.orbAttacksNumber then
@@ -234,6 +235,7 @@ local states = {
     end
   end,
   end_state = function(instance, dt)
+    instance.handFrame = 0
     if instance.orbAttacksNumber == 1 then
       instance.resting = true
       instance.orbAttacksNumber = nil
@@ -251,6 +253,7 @@ local states = {
     instance.hurtCounter = 2
     instance.invulnerable = instance.hurtCounter
     instance.hp = instance.hp - 1
+    instance.image_index = instance.hp == 0 and 3 or 1
   end,
   check_state = function(instance, dt)
     if instance.hurtCounter < 0 then
@@ -259,6 +262,7 @@ local states = {
   end,
   end_state = function(instance, dt)
     instance.hasCorneredPlayer = false
+    instance.image_index = instance.hp == 0 and 3 or 0
   end
   }
 }
@@ -277,6 +281,8 @@ function Boss1.initialize(instance)
   instance.patrolDir = 1
   instance.physical_properties.shape = ps.shapes.bosses.boss1.body
   instance.spritefixture_properties.shape = ps.shapes.bosses.boss1.sprite
+  instance.handFrame = 0
+  instance.image_index = 0
 
   instance.state = sm.new_state_machine(states)
   instance.state.state = "start"
@@ -294,7 +300,7 @@ Boss1.functions = {
     self.handx, self.handy = self.handx+self.hox, self.handy+self.hoy -- position
     self.hxtarget, self.hytarget = self.handx, self.handy -- target position
     self.hth = 0 -- theta angle for hand sinoid offset
-    self.handSpr = im.sprites["arevcyeqLH"]
+    self.handSpr = im.sprites["boss1/arevcyeqLH"]
     -- staff stuff (hahahahahahahahaaaaaaa)
     self.staffx, self.staffy = self.x, self.y
     self.sox, self.soy = -15, 2 -- offsets
@@ -302,7 +308,7 @@ Boss1.functions = {
     self.sxtarget, self.sytarget = self.staffx, self.staffy -- target position
     self.sth = 0 -- theta angle for staff spinning
     self.staffAngle = 0
-    self.staffSpr = im.sprites["arevcyeqRH"]
+    self.staffSpr = im.sprites["boss1/arevcyeqRH"]
   end,
 
   enemyUpdate = function (self, dt)
@@ -371,7 +377,7 @@ Boss1.functions = {
     sprite.cx, sprite.cy)
     local sprite = self.handSpr
     love.graphics.draw(
-    sprite.img, sprite[0], self.handx, self.handy, 0,
+    sprite.img, sprite[self.handFrame], self.handx, self.handy, 0,
     self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
     sprite.cx, sprite.cy)
 

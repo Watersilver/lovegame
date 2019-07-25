@@ -50,7 +50,7 @@ function Orb.initialize(instance)
   instance.zvel = 0-- 55
   instance.zo = - 150
   instance.grounded = false
-  instance.explosionSound = {"Testplosion"}
+  instance.explosionSound = {"Effects/Oracle_Rock_Shatter"}
   instance.throw_collision = throw_collision
 end
 

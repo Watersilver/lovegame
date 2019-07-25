@@ -13,10 +13,21 @@ local lft = require "GameObjects.Items.lifted"
 local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDrownPlummet
 
 local floor = math.floor
+local random = math.random
 
 local emptyfunc = function() end
 
 local player_states = {}
+
+player_states.img_speed_and_footstep_sound = function(instance, dt)
+  td.image_speed(instance, dt)
+  if instance.inShallowWater and instance.image_index % 2 >= 1 and instance.image_index_prev % 2 < 1 then
+    snd.play(instance.sounds.water)
+    fuck = 1 + fuck
+  end
+end
+
+local img_speed_and_footstep_sound = player_states.img_speed_and_footstep_sound
 
 player_states.check_walk = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
@@ -102,7 +113,14 @@ player_states.check_swing = function(instance, dt, side)
 end
 
 player_states.start_swing = function(instance, dt, side)
-  snd.play(instance.sounds.swordSwing)
+  local randomizeSwing = random()
+  if randomizeSwing < 0.34 then
+    snd.play(instance.sounds.swordSlash1)
+  elseif randomizeSwing < 0.67 then
+    snd.play(instance.sounds.swordSlash2)
+  else
+    snd.play(instance.sounds.swordSlash3)
+  end
   instance.image_index = 0
   instance.image_speed = 0.20
   instance.triggers.animation_end = false
@@ -214,6 +232,7 @@ end
 player_states.start_jump = function(instance, dt, side)
   instance.zvel = 110
   instance.animation_state:change_state(instance, dt, side .. "fall")
+  snd.play(instance.sounds.jump)
 end
 
 player_states.run_fall = function(instance, dt, side)
@@ -261,7 +280,7 @@ end
 
 player_states.run_missile = function(instance, dt, side)
   instance.missile_cooldown = instance.missile_cooldown + dt
-  td.image_speed(instance, dt)
+  img_speed_and_footstep_sound(instance, dt)
   if instance.speed < 5 then
     if floor(instance.image_index) ~= 3 then
       instance.image_index = 1
@@ -301,6 +320,7 @@ player_states.start_missile = function(instance, dt, side)
     layer = misslayer
   }
   o.addToWorld(instance.missile)
+  snd.play(instance.sounds.magicMissile)
 end
 
 player_states.end_missile = function(instance, dt, side)
@@ -341,7 +361,7 @@ player_states.end_missile = function(instance, dt, side)
 end
 
 player_states.run_gripping = function(instance, dt, side)
-  td.image_speed(instance, dt)
+  img_speed_and_footstep_sound(instance, dt)
   if instance.speed < 5 then
     instance.image_index = 0
   end
@@ -429,6 +449,7 @@ player_states.check_lifting = function(instance, dt, side)
 end
 
 player_states.start_lifting = function(instance, dt, side)
+  snd.play(instance.sounds.pickUp)
   instance.liftingStage = 1
   instance.invGripTime = 1 / inv.grip.time
   instance.image_index = 0
@@ -450,13 +471,14 @@ player_states.end_lifting = function(instance, dt, side)
     instance.liftedOb:get_thrown()
     o.removeFromWorld(instance.liftedOb)
     instance.liftedOb = nil
+    snd.play(instance.sounds.throw)
   end
   instance.liftingStage = nil
   instance.liftState = false
 end
 
 player_states.run_lifted = function(instance, dt, side)
-  td.image_speed(instance, dt)
+  img_speed_and_footstep_sound(instance, dt)
   if instance.speed < 5 then
     instance.image_index = 0
   end
@@ -497,6 +519,7 @@ player_states.end_lifted = function(instance, dt, side)
     instance.liftedOb:get_thrown()
     o.removeFromWorld(instance.liftedOb)
     instance.liftedOb = nil
+    snd.play(instance.sounds.throw)
   end
   instance.liftState = false
 end
@@ -529,6 +552,7 @@ player_states.start_damaged = function(instance, dt, side)
   inp.controllers[instance.player].disabled = true
   instance.invulnerable = 1
   instance.damCounter = 0.5
+  snd.play(instance.sounds.hurt)
 end
 
 player_states.end_damaged = function(instance, dt, side)

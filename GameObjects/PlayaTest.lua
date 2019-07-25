@@ -21,7 +21,6 @@ local sg = require "GameObjects.Helpers.set_ghost"
 local asp = require "GameObjects.Helpers.add_spell"
 local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDrownPlummet
 
-
 local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
 local mark = require "GameObjects.Items.mark"
@@ -89,6 +88,7 @@ local run_climbing = hps.run_climbing
 local check_climbing = hps.check_climbing
 local start_climbing = hps.start_climbing
 local end_climbing = hps.end_climbing
+local img_speed_and_footstep_sound = hps.img_speed_and_footstep_sound
 
 local Playa = {}
 
@@ -120,11 +120,14 @@ function Playa.initialize(instance)
   instance.iox = 0 -- drawing offsets due to item use (eg sword swing)
   instance.ioy = 0
   instance.zo = 0 -- drawing offsets due to z axis
+  instance.zoPrev = instance.zo
   instance.fo = 0 -- drawing offsets due to falling
   instance.jo = 0 -- drawing offsets due to jumping
   instance.zvel = 0 -- z axis velocity
   instance.gravity = 350
   instance.image_speed = 0
+  instance.image_index = 0
+  instance.image_index_prev = 0
   instance.brakesLim = 10
   instance.health = instance.maxHealth or 3
   instance.input = {}
@@ -152,7 +155,24 @@ function Playa.initialize(instance)
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.sprite_info = im.spriteSettings.playerSprites
   instance.sounds = snd.load_sounds({
-    swordSwing = {"WitchSwordSwing"}
+    swordSlash1 = {"Effects/Oracle_Sword_Slash1"},
+    swordSlash2 = {"Effects/Oracle_Sword_Slash2"},
+    swordSlash3 = {"Effects/Oracle_Sword_Slash3"},
+    swordTap1 = {"Effects/Oracle_Sword_Tap"},
+    jump = {"Effects/Oracle_Link_Jump"},
+    land = {"Effects/Oracle_Link_LandRun"},
+    magicMissile = {"Effects/Magic_Missile"},
+    pickUp = {"Effects/Oracle_Link_PickUp"},
+    throw = {"Effects/Oracle_Link_Throw"},
+    hurt = {"Effects/Oracle_Link_Hurt"},
+    mark = {"Effects/Oracle_MysterySeed"},
+    recall = {"Effects/OOA_SwitchHook_Switch"},
+    markStart = {"Effects/OOA_SeedShooter"},
+    recallStart = {"Effects/Oracle_Link_GoronDance1"},
+    water = {"Effects/Oracle_Link_Wade"},
+    plummet = {"Effects/Oracle_Link_Fall"},
+    dying = {"Effects/Oracle_Link_Dying"},
+    die = {"Effects/Oracle_ScentSeed"},
   })
   instance.floorTiles = {role = "playerFloorTilesIndex"} -- Tracks what kind of floortiles I'm on
   instance.player = "player1"
@@ -306,7 +326,7 @@ function Playa.initialize(instance)
 
     downwalk = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
     end,
 
     check_state = function(instance, dt)
@@ -324,7 +344,7 @@ function Playa.initialize(instance)
 
     rightwalk = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
     end,
 
     check_state = function(instance, dt)
@@ -344,7 +364,7 @@ function Playa.initialize(instance)
 
     leftwalk = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
     end,
 
     check_state = function(instance, dt)
@@ -362,7 +382,7 @@ function Playa.initialize(instance)
 
     upwalk = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
     end,
 
     check_state = function(instance, dt)
@@ -388,6 +408,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
+      if instance.inShallowWater then snd.play(instance.sounds.water) end
       instance.sprite = im.sprites["Witch/halt_down"]
     end,
 
@@ -406,6 +427,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
+      if instance.inShallowWater then snd.play(instance.sounds.water) end
       instance.sprite = im.sprites["Witch/halt_left"]
       instance.x_scale = -1
     end,
@@ -426,6 +448,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
+      if instance.inShallowWater then snd.play(instance.sounds.water) end
       instance.sprite = im.sprites["Witch/halt_left"]
     end,
 
@@ -444,6 +467,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
+      if instance.inShallowWater then snd.play(instance.sounds.water) end
       instance.sprite = im.sprites["Witch/halt_up"]
     end,
 
@@ -528,7 +552,7 @@ function Playa.initialize(instance)
 
     downpush = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
       instance.image_speed = max(0.02, instance.image_speed)
     end,
 
@@ -547,7 +571,7 @@ function Playa.initialize(instance)
 
     rightpush = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
       instance.image_speed = max(0.01, instance.image_speed)
     end,
 
@@ -568,7 +592,7 @@ function Playa.initialize(instance)
 
     leftpush = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
       instance.image_speed = max(0.01, instance.image_speed)
     end,
 
@@ -587,7 +611,7 @@ function Playa.initialize(instance)
 
     uppush = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
       instance.image_speed = max(0.01, instance.image_speed)
     end,
 
@@ -758,7 +782,7 @@ function Playa.initialize(instance)
 
     downhold = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
       if instance.speed < 5 then instance.image_index = 0 end
     end,
 
@@ -780,7 +804,7 @@ function Playa.initialize(instance)
 
     righthold = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
       if instance.speed < 5 then instance.image_index = 0 end
     end,
 
@@ -803,7 +827,7 @@ function Playa.initialize(instance)
 
     lefthold = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
       if instance.speed < 5 then instance.image_index = 0 end
     end,
 
@@ -825,7 +849,7 @@ function Playa.initialize(instance)
 
     uphold = {
     run_state = function(instance, dt)
-      td.image_speed(instance, dt)
+      img_speed_and_footstep_sound(instance, dt)
       if instance.speed < 5 then instance.image_index = 0 end
     end,
 
@@ -1401,12 +1425,15 @@ function Playa.initialize(instance)
     start_state = function(instance, dt)
       instance.markanim = inv.mark.time
       instance.sprite = im.sprites["Witch/mark_down"]
+      snd.play(instance.sounds.markStart)
     end,
 
     end_state = function(instance, dt)
       if instance.markanim <= 0 and not instance.onEdge then
         -- make mark
         if instance.mark then o.removeFromWorld(instance.mark) end
+        instance.sounds.markStart:stop()
+        snd.play(instance.sounds.mark)
         instance.mark = mark:new{xstart = instance.x, ystart = instance.y, creator = instance, layer = instance.layer - 1}
         o.addToWorld(instance.mark)
       end
@@ -1448,13 +1475,17 @@ function Playa.initialize(instance)
     start_state = function(instance, dt)
       instance.recallanim = inv.recall.time
       instance.sprite = im.sprites["Witch/recall_down"]
+      snd.play(instance.sounds.recallStart)
     end,
 
     end_state = function(instance, dt)
       if instance.recallanim <= 0 and not instance.onEdge then
         if instance.mark then
+          instance.sounds.recallStart:stop()
+          snd.play(instance.sounds.recall)
           instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
         else
+          -- fail
         end
       else
         -- fail
@@ -1505,6 +1536,7 @@ function Playa.initialize(instance)
       instance.zvel = 0
       instance.sprite = im.sprites["Witch/drown_down"]
       inp.controllers[instance.player].disabled = true
+      snd.play(instance.sounds.water)
       instance:setGhost(true)
     end,
 
@@ -1536,6 +1568,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
+      snd.play(instance.sounds.plummet)
       instance.sprite = im.sprites["Witch/plummet"]
       instance.xPlummetStart = instance.x
       instance.yPlummetStart = instance.y
@@ -1628,6 +1661,7 @@ function Playa.initialize(instance)
             instance.image_speed = 0
             instance.image_index = 0
             instance.x_scale = 1
+            snd.play(instance.sounds.die)
           end
         end
       elseif instance.deathPhase == 3 then
@@ -1652,13 +1686,14 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
+      snd.play(instance.sounds.dying)
       instance.sprite = im.sprites["Witch/die"]
       inp.controllers[instance.player].disabled = true
       instance.deathPhase = 1
       instance.image_index = 0
       instance.image_speed = 0.1
       instance.deathDizzinesCounter = 0
-      instance.deathDizzinesRepeats = 10
+      instance.deathDizzinesRepeats = 6
       instance.deathDizzinesFastRepeats = 4
       instance.deathFallCounter = 0
       instance.ioyDeathStart = instance.ioy
@@ -1713,11 +1748,15 @@ Playa.functions = {
     --         xSquare = " .. floor(x/16)*16 .. ", ySquare = " .. floor(y/16)*16 .. "\n\z
     --         xCenter = " .. floor(x/16)*16+8 .. ", yCenter = " .. floor(y/16)*16+8
 
+    -- Determine previous movement modifiers due to floor
+    self.inShallowWaterPrev = self.inShallowWater
     -- Determine movement modifiers due to floor
     self.ongrass = nil
     self.inShallowWater = nil
     self.inDeepWater = nil
     self.overGap = nil
+    self.closestTile = nil
+    self.landedTileSound = "land"
     if self.floorTiles[1] then
       -- I could be stepping on up to four tiles. Find closest to determine mods
       local closestTile
@@ -1744,18 +1783,22 @@ Playa.functions = {
       elseif closestTile.shallowWater then
         if self.zo == 0 then
           self.inShallowWater = im.sprites[closestTile.shallowWater]
+          self.landedTileSound = "water"
         end
       elseif closestTile.water then
         if self.zo == 0 then
           if self.walkOnWater then
             self.inShallowWater = im.sprites[closestTile.water]
+            self.landedTileSound = "water"
           else
             self.inDeepWater = true
+            self.landedTileSound = "none"
           end
         end
       elseif closestTile.gap then
         if self.zo == 0 then
           self.overGap = true
+          self.landedTileSound = "none"
         end
       end
       if closestTile.climbable and self.zo == 0 then self.climbing = true else self.climbing = nil end
@@ -1764,10 +1807,15 @@ Playa.functions = {
         self.xLastSteppable = closestTile.xstart
         self.yLastSteppable = closestTile.ystart - 2
       end
+      self.closestTile = closestTile
     else
       self.floorFriction = 1
       self.floorViscosity = nil
       self.climbing = nil
+    end
+
+    if self.zo == 0 and self.inShallowWater and not self.inShallowWaterPrev then
+      snd.play(self.sounds.water)
     end
 
     -- Return movement table based on the long term action you want to take (Npcs)
@@ -1826,6 +1874,7 @@ Playa.functions = {
       self.angle = self.angle - pi
       trig.full_rotation = true
     end
+    self.image_index_prev = self.image_index
     self.image_index = (self.image_index + dt*60*self.image_speed)
     local frames = self.sprite.frames
     while self.image_index >= frames do
@@ -1847,6 +1896,8 @@ Playa.functions = {
         end
       end
     end
+    trig.land = (self.zo ~= self.zoPrev) and (self.zo == 0)
+    self.zoPrev = self.zo
     td.determine_animation_triggers(self, dt)
     inv.determine_equipment_triggers(self, dt)
 
@@ -1866,6 +1917,11 @@ Playa.functions = {
     as[as.state].check_state(self, dt)
     -- Run animation state
     as[as.state].run_state(self, dt)
+
+    -- Check if landing sound should be played
+    if trig.land and self.landedTileSound ~= "none" then
+      snd.play(self.sounds[self.landedTileSound])
+    end
 
     self.db.downcol = 255
     self.db.upcol = 255

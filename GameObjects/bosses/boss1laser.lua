@@ -6,6 +6,7 @@ local ebh = require "enemy_behaviours"
 local td = require "movement"; td = td.top_down
 local sh = require "GameObjects.shadow"
 local u = require "utilities"
+local gsh = require "gamera_shake"
 
 local proj = require "GameObjects.enemies.projectile"
 
@@ -26,10 +27,11 @@ end
 Laser.functions = {
   load = function (self)
     et.functions.load(self)
-    self.sprite = im.sprites["arevcyeqLaser1"]
+    self.sprite = im.sprites["boss1/arevcyeqLaser1"]
   end,
 
   draw = function (self)
+    gsh.newShake(mainCamera, "displacement", 0.2, 0.05, 0.5)
     if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
     self.spritebody:setPosition(self.x, self.y)
     self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)

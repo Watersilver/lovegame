@@ -38,6 +38,8 @@ im.spriteSettings = {
   testenemy4 = {'Enem4', 2, padding = 2, width = 16, height = 16},
   testsplosion = {'Testplosion', 5, padding = 2, width = 16, height = 16},
   testlift = {'LiftableTest', 1, width = 16, height = 16},
+  liftableRock = {'LiftableRock', padding = 0, width = 15, height = 15},
+  rockDestruction = {'RockDestruction', 4, padding = 2, width = 30, height = 22},
   mark = {'Inventory/UseMarkL1', 3, padding = 2, width = 16, height = 16},
   npcTestSprites = {
     {'NPCs/NpcTest/down', 2, padding = 2, width = 16, height = 16}
@@ -49,14 +51,16 @@ im.spriteSettings = {
     {'NPCs/NpcTest3/down', 2, padding = 2, width = 16, height = 16}
   },
   boss1TestSprites = {
-    {'arevcyeq', padding = 0, width = 37*0.5, height = 61*0.5},
-    {'arevcyeqLH', padding = 0, width = 15*0.5, height = 26*0.5},
-    {'arevcyeqRH', padding = 0, width = 23*0.5, height = 24*0.5},
-    {'arevcyeqLaser1', 2, padding = 0, width = 26, height = 107}
+    -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
+    {'boss1/arevcyeq', 4, padding = 2, width = 24, height = 28},
+    -- {'boss1/arevcyeqLH', 2, padding = 2, width = 8, height = 9},
+    {'boss1/arevcyeqLH', 2, padding = 2, width = 19, height = 14},
+    {'boss1/arevcyeqRH', padding = 0, width = 12, height = 12},
+    {'boss1/arevcyeqLaser1', 2, padding = 0, width = 26, height = 107}
   },
   boss1Orb = {'boss1/arevcyeqOrb', padding = 0, width = 32*0.5, height = 29*0.5},
   boss1LiftableOrb = {'boss1/arevcyeqLiftableOrb', padding = 0, width = 32*0.5, height = 29*0.5},
-  boss1OrbShadow = {'boss1/arevcyeqOrbShadow', padding = 0, width = 32*0.5, height = 32*0.5},
+  boss1OrbShadow = {'boss1/arevcyeqOrbShadow', 1, padding = 2, width = 16, height = 16},
   playerSprites = {
     {'Witch/walk_left', 2, padding = 2, width = 16, height = 16},
     {'Witch/walk_up', 2, padding = 2, width = 16, height = 16},

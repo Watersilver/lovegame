@@ -16,6 +16,7 @@ function Wasp.initialize(instance)
   instance.actAszo0 = true
   instance.hp = 4 --love.math.random(3)
   instance.image_speed = 0.6
+  instance.physical_properties.shape = ps.shapes.rectHalfxHalf
 end
 
 Wasp.functions = {
@@ -43,7 +44,7 @@ Wasp.functions = {
 
   hitBySword = function (self, other, myF, otherF)
     ebh.propelledByHit(self, other, myF, otherF, 3, 1, 1, 0.5)
-  end
+  end,
 }
 
 function Wasp:new(init)

@@ -607,12 +607,12 @@ end
 
 
 function love.mousepressed(x, y, button, isTouch)
-  -- x, y = cam:toWorld(x, y)
-  -- if button == 2 then
-  --   o.removeFromWorld(o.updaters[2])
-  --   return
-  -- end
-  -- u.push(o.to_be_added, p:new{xstart=x, ystart=y})
+  x, y = cam:toWorld(x, y)
+  if button == 2 then
+    o.removeFromWorld(o.updaters[2])
+    return
+  end
+  u.push(o.to_be_added, p:new{xstart=x, ystart=y})
   moub[button] = true
 end
 
