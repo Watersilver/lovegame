@@ -19,7 +19,7 @@ draw = function (self)
   local sprite = self.sprite
   local frame = sprite[self.image_index]
   love.graphics.draw(
-  sprite.img, frame, self.xstart, self.ystart, 0,
+  sprite.img, frame, self.x or self.xstart, self.y or self.ystart, 0,
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
 end,

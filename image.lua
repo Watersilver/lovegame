@@ -40,6 +40,7 @@ im.spriteSettings = {
   testlift = {'LiftableTest', 1, width = 16, height = 16},
   liftableRock = {'LiftableRock', padding = 0, width = 15, height = 15},
   rockDestruction = {'RockDestruction', 4, padding = 2, width = 30, height = 22},
+  rockPlummet = {'RockPlummet', 3, padding = 2, width = 10, height = 10},
   mark = {'Inventory/UseMarkL1', 3, padding = 2, width = 16, height = 16},
   npcTestSprites = {
     {'NPCs/NpcTest/down', 2, padding = 2, width = 16, height = 16}

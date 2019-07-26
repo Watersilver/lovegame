@@ -1,6 +1,10 @@
 local o = require "GameObjects.objects"
 local game = require "game"
 local ps = require "physics_settings"
+local u = require "utilities"
+
+
+local emptyFunc = u.emptyFunc
 
 
 local trans = {}
@@ -102,6 +106,8 @@ end
 function trans.still_objects_coords(instance)
   local xtotal, ytotal
 
+  instance.destroy = instance.trans_destroy or emptyFunc
+
   if instance.onPreviousRoom then
     xtotal = instance.xstart + trans.xtransform
     ytotal = instance.ystart + trans.ytransform
@@ -117,6 +123,8 @@ end
 
 function trans.moving_objects_coords(instance)
   local xtotal, ytotal
+
+  instance.destroy = instance.trans_destroy or emptyFunc
 
   if instance.onPreviousRoom then
     xtotal = instance.x + trans.xtransform

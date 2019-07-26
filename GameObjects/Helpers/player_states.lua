@@ -23,7 +23,6 @@ player_states.img_speed_and_footstep_sound = function(instance, dt)
   td.image_speed(instance, dt)
   if instance.inShallowWater and instance.image_index % 2 >= 1 and instance.image_index_prev % 2 < 1 then
     snd.play(instance.sounds.water)
-    fuck = 1 + fuck
   end
 end
 
@@ -393,7 +392,7 @@ player_states.start_gripping = function(instance, dt, side)
     else
       instance.animation_state:change_state(instance, dt, side .. "lifting")
       o.removeFromWorld(other)
-      other.delete = other.lift_delete
+      other.destroy = other.on_replaced_by_lifted
       instance.liftedOb = lft:new{
         creator = instance,
         side = side,

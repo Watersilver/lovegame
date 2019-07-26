@@ -15,7 +15,7 @@ local Explode = {}
 
 local default_explosion_sprite = im.spriteSettings.rockDestruction
 local default_explosion_sound = {"Effects/Oracle_Rock_Shatter"}
-function Explode.commonExplosion(instance, explosion_sprite, explosion_sound)
+function Explode.commonExplosion(instance, explosion_sprite, explosion_sound, xdest, ydest)
   local explOb = Explode:new{
     x = instance.x or instance.xstart, y = instance.y or instance.ystart,
     layer = instance.layer,
@@ -24,6 +24,8 @@ function Explode.commonExplosion(instance, explosion_sprite, explosion_sound)
     image_speed = instance.explosionSpeed,
     sounds = snd.load_sounds({explode = explosion_sound or default_explosion_sound})
   }
+  explOb.xdest = xdest
+  explOb.ydest = ydest
   o.addToWorld(explOb)
 end
 
@@ -44,6 +46,7 @@ Explode.functions = {
     self.xexplode = self.xexplode or self.xstart
     self.yexplode = self.yexplode or self.ystart
     self.explodeDistance = self.explodeDistance or 8
+    self.explosionTimer = 0
     snd.play(self.sounds.explode)
     if self.explosion_sprite then
       im.load_sprite(self.explosion_sprite)
@@ -58,6 +61,7 @@ Explode.functions = {
   end,
 
   update = function (self, dt)
+    self.explosionTimer = self.explosionTimer + dt
     self.image_indexfloat = (self.image_indexfloat + dt*60*self.image_speed)
     local frames = self.sprite.frames
     while self.image_indexfloat >= frames do
@@ -80,6 +84,12 @@ Explode.functions = {
       self.image_speed = 0
     end
     self.image_index = floor(self.image_indexfloat)
+    if self.xdest and self.ydest then
+      local pmod = self.explosionTimer * 10
+      if pmod > 1 then pmod = 1 end
+      self.x = self.xstart + pmod * (self.xdest - self.xstart)
+      self.y = self.ystart + pmod * (self.ydest - self.ystart)
+    end
   end
 }
 

@@ -136,7 +136,7 @@ function Playa.initialize(instance)
   instance.sensors = {downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={}}
   instance.missile_cooldown_limit = 0.3
   instance.item_use_counter = 0 -- Counts how long you're still while using item
-  instance.currentMasks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
+  instance.currentMasks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
   instance.physical_properties = {
     bodyType = "dynamic",
     fixedRotation = true,
@@ -1552,7 +1552,7 @@ function Playa.initialize(instance)
 
     plummet = {
     run_state = function(instance, dt)
-      pmod = instance.image_index
+      local pmod = instance.image_index
       if pmod > 1 then pmod = 1 end
       instance.body:setPosition(
         instance.xPlummetStart + pmod * (instance.xClosestTile - instance.xPlummetStart),

@@ -3,6 +3,9 @@ local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local trans = require "transitions"
 local game = require "game"
+local u = require "utilities"
+local expl = require "GameObjects.explode"
+local im = require "image"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -19,6 +22,21 @@ local function destroyself(self)
   o.removeFromWorld(self)
 end
 
+local sink_sprite = im.spriteSettings.testsplosion
+local sink_sound = {"Effects/Oracle_Link_Wade"}
+local function sink(self)
+  expl.commonExplosion(self, sink_sprite, sink_sound)
+  o.removeFromWorld(self)
+end
+
+local plummet_sprite = im.spriteSettings.rockPlummet
+local plummet_sound = {"Effects/Oracle_Block_Fall"}
+local function plummet(self)
+  self.explosionSpeed = 0.2
+  expl.commonExplosion(self, plummet_sprite, plummet_sound, self.xClosestTile, self.yClosestTile)
+  o.removeFromWorld(self)
+end
+
 function Thrown.initialize(instance)
 
   instance.x_scale = 1
@@ -26,6 +44,7 @@ function Thrown.initialize(instance)
   instance.image_speed = 0
   instance.gravity = 350
   instance.zvel = 0
+  instance.floorTiles = {role = "thrownFloorTilesIndex"} -- Tracks what kind of floortiles I'm over
   -- instance.sprite_info will be handled by creator
   instance.physical_properties = {
     bodyType = "dynamic",
@@ -33,7 +52,7 @@ function Thrown.initialize(instance)
     shape = instance.shape or ps.shapes.thrown,
     sensor = true,
     gravityScaleFactor = 0,
-    categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
+    categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
   }
   instance.seeThrough = true
   instance.immathrown = true
@@ -56,7 +75,32 @@ Thrown.functions = {
       -- self.zvel = 0
       if self.shadow then o.removeFromWorld(self.shadow) end
       self.shadow = nil
-      destroyself(self)
+      if self.floorTiles[1] then
+        local x, y = self.body:getPosition()
+        -- I could be stepping on up to four tiles. Find closest to determine mods
+        local closestTile
+        local closestDistance = math.huge
+        local previousClosestDistance
+        for _, floorTile in ipairs(self.floorTiles) do
+          previousClosestDistance = closestDistance
+          -- Magic number to account for player height
+          closestDistance = math.min(u.distanceSqared2d(x, y+3, floorTile.xstart, floorTile.ystart), closestDistance)
+          if closestDistance < previousClosestDistance then
+            closestTile = floorTile
+          end
+        end
+        self.xClosestTile = closestTile.xstart
+        self.yClosestTile = closestTile.ystart
+        if closestTile.water then
+          sink(self)
+        elseif closestTile.gap then
+          plummet(self)
+        else
+          destroyself(self)
+        end
+      else
+        destroyself(self)
+      end
     else
       self.zvel = self.zvel - self.gravity * dt
       if not self.shadow then
@@ -108,19 +152,36 @@ Thrown.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    -- remember tiles
+    if other.floor then
+      other.thrownFloorTilesIndex = u.push(self.floorTiles, other)
+      return
+    end
+
     if other.grass then return end
 
     if other.attackDodger then return end
 
+    -- destroy
     if self.shadow then o.removeFromWorld(self.shadow) end
     self.shadow = nil
     destroyself(self)
-
-
   end,
 
-  preSolve = function(self, a, b, coll, aob, bob)
+  endContact = function(self, a, b, coll, aob, bob)
+
+    -- Find which fixture belongs to whom
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+    -- Forget Floor tiles
+    if other.floor then
+      u.free(self.floorTiles, other.thrownFloorTilesIndex)
+      other.thrownFloorTilesIndex = nil
+    end
   end
+
+  -- preSolve = function(self, a, b, coll, aob, bob)
+  -- end
 }
 
 function Thrown:new(init)

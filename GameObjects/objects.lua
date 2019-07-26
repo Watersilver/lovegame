@@ -74,7 +74,10 @@ function o.to_be_deleted:remove_all()
       end
       object.identifiable = nil
     end
+    -- Runs no matter what way I was destroyed
     if object.delete then object:delete(); object.delete = nil end
+    -- Runs if I get destroyed (ie not lifted or on screen change)
+    if object.destroy then object:destroy(); object.destroy = nil end
 
     -- Nilify. EXPERIMENTAL
     for key, _ in pairs(object) do

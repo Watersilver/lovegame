@@ -51,7 +51,7 @@ Orb.functions = {
     et.functions.load(self)
   end,
 
-  delete = function (self)
+  destroy = function (self)
     expl.commonExplosion(self)
   end,
 
