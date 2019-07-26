@@ -110,7 +110,7 @@ p.functions = {
     for i = 1, sinum do
       im.load_sprite(si[i])
     end
-    self.sprite = im.sprites[si[1][1] or si[1][img_name]]
+    self.sprite = im.sprites[si[1][1] or si[1].img_name]
   end,
 
   unload_sprites = function(self)
@@ -118,7 +118,7 @@ p.functions = {
     if not si or not self.drawable then return end
     local sinum = #si
     for i = 1, sinum do
-      im.unload_sprite(si[i][1] or si[i][img_name])
+      im.unload_sprite(si[i][1] or si[i].img_name)
     end
   end,
 

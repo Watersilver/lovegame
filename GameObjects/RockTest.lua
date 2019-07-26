@@ -16,15 +16,7 @@ local explosion_sprite = im.spriteSettings.rockDestruction
 local explosion_sound = {"Effects/Oracle_Rock_Shatter"}
 
 local function throw_collision(self)
-  local explOb = expl:new{
-    x = self.x or self.xstart, y = self.y or self.ystart,
-    layer = self.layer,
-    explosionNumber = 1,
-    explosion_sprite = explosion_sprite,
-    image_speed = self.explosionSpeed,
-    sounds = snd.load_sounds({explode = explosion_sound})
-  }
-  o.addToWorld(explOb)
+  expl.commonExplosion(self)
 end
 
 function rt.initialize(instance)

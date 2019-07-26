@@ -17,15 +17,7 @@ local dc = require "GameObjects.Helpers.determine_colliders"
 -- local liftableShader = shdrs.playerHitShader
 
 local function throw_collision(self)
-  local explOb = expl:new{
-    x = self.x or self.xstart, y = self.y or self.ystart,
-    layer = self.layer,
-    explosionNumber = self.explosionNumber,
-    sprite_info = self.explosionSprite,
-    image_speed = self.explosionSpeed,
-    sounds = snd.load_sounds({explode = self.explosionSound})
-  }
-  o.addToWorld(explOb)
+  expl.commonExplosion(self)
 end
 
 local sprite_info = {im.spriteSettings.boss1Orb}
@@ -57,6 +49,10 @@ end
 Orb.functions = {
   load = function (self)
     et.functions.load(self)
+  end,
+
+  delete = function (self)
+    expl.commonExplosion(self)
   end,
 
   enemyUpdate = function (self, dt)

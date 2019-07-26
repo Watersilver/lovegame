@@ -13,6 +13,20 @@ local floor = math.floor
 
 local Explode = {}
 
+local default_explosion_sprite = im.spriteSettings.rockDestruction
+local default_explosion_sound = {"Effects/Oracle_Rock_Shatter"}
+function Explode.commonExplosion(instance, explosion_sprite, explosion_sound)
+  local explOb = Explode:new{
+    x = instance.x or instance.xstart, y = instance.y or instance.ystart,
+    layer = instance.layer,
+    explosionNumber = 1,
+    explosion_sprite = explosion_sprite or default_explosion_sprite,
+    image_speed = instance.explosionSpeed,
+    sounds = snd.load_sounds({explode = explosion_sound or default_explosion_sound})
+  }
+  o.addToWorld(explOb)
+end
+
 function Explode.initialize(instance)
   instance.sprite_info = {im.spriteSettings.testsplosion}
   instance.image_speed = 0.5
