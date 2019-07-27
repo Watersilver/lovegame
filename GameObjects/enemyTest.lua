@@ -6,6 +6,7 @@ local game = require "game"
 local u = require "utilities"
 local im = require "image"
 local shdrs = require "Shaders.shaders"
+local snd = require "sound"
 local td = require "movement"; td = td.top_down
 local si = require "sight"
 local ebh = require "enemy_behaviours"
@@ -15,6 +16,9 @@ local dc = require "GameObjects.Helpers.determine_colliders"
 local floor = math.floor
 
 local hitShader = shdrs.enemyHitShader
+
+local hitSound = {"Effects/Oracle_Enemy_Hit"}
+local deathSound = {"Effects/Oracle_Enemy_Die"}
 
 local Enemy = {}
 
@@ -51,6 +55,10 @@ function Enemy.initialize(instance)
   instance.ignoreFloorMovementModifiers = true
   instance.lookFor = si.lookFor
   instance.layer = 20
+  instance.sounds = snd.load_sounds({
+    hitSound = hitSound
+  })
+  instance.deathSound = deathSound
   -- instance.side = "up"
 end
 

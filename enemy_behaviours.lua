@@ -1,6 +1,7 @@
 local expl = require "GameObjects.explode"
 local snd = require "sound"
 local im = require "image"
+local snd = require "sound"
 local u = require "utilities"
 local o = require "GameObjects.objects"
 
@@ -18,7 +19,7 @@ function ebh.die(object)
     explosionNumber = object.explosionNumber or 1,
     sprite_info = object.explosionSprite or defaultDeathSprite,
     image_speed = object.explosionSpeed or 0.5,
-    sounds = snd.load_sounds({explode = object.explosionSound or defaultDeathSound})
+    sounds = snd.load_sounds({explode = object.deathSound})
   }
   o.addToWorld(explOb)
   o.removeFromWorld(object)
@@ -96,6 +97,7 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
   if (not object.shielded) or object.shieldDown then
     if object.hp then object.hp = object.hp - damage end
     if resetBehaviour then object.behaviourTimer = resetBehaviour end
+    snd.play(object.sounds.hitSound)
   end
 
   -- Physics

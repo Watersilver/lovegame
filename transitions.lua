@@ -18,6 +18,8 @@ function trans.remove_from_world_previous_room()
     for _, object in ipairs(layer) do
       o.transRemoveFromWorld(object)
       object.onPreviousRoom = true
+      -- if replacing object.destroy here is not enough, also replace it in the trans coords funcs
+      object.destroy = object.trans_destroy or emptyFunc
     end
   end
 
@@ -106,8 +108,6 @@ end
 function trans.still_objects_coords(instance)
   local xtotal, ytotal
 
-  instance.destroy = instance.trans_destroy or emptyFunc
-
   if instance.onPreviousRoom then
     xtotal = instance.xstart + trans.xtransform
     ytotal = instance.ystart + trans.ytransform
@@ -123,8 +123,6 @@ end
 
 function trans.moving_objects_coords(instance)
   local xtotal, ytotal
-
-  instance.destroy = instance.trans_destroy or emptyFunc
 
   if instance.onPreviousRoom then
     xtotal = instance.x + trans.xtransform

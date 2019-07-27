@@ -384,7 +384,7 @@ Boss1.functions = {
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,
 
-  delete = function (self)
+  destroy = function (self)
     local ptl = require "GameObjects.portal"
     o.addToWorld(ptl:new{
       destination = "Rooms/newTilesTestRoom.lua",
