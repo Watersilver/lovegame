@@ -60,6 +60,7 @@ function HeldSword.initialize(instance)
   instance.creator = nil -- Object that swings me
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
+  instance.minZo = - ps.shapes.plshapeHeight * 0.9
 end
 
 HeldSword.functions = {
@@ -101,8 +102,10 @@ HeldSword.functions = {
     -- Check if I'm on the air
     if cr.zo ~= 0 then
       self.onAir = true
+      self.zo = cr.zo + self.minZo
     else
       self.onAir = false
+      self.zo = self.minZo
     end
 
     if self.onAir then

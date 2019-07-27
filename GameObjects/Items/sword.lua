@@ -95,11 +95,13 @@ function Sword.initialize(instance)
   instance.physical_properties = {
     bodyType = "dynamic",
     gravityScaleFactor = 0,
-    -- masks = {FLOORCAT}
+    -- DONT SET MASKS HERE BECAUSE IT HAS NO INITIAL SHAPE,
+    -- SO NO INITIAL FIXTURE. SET IN UPDATE
   }
   instance.creator = nil -- Object that swings me
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
+  instance.minZo = - ps.shapes.plshapeHeight * 0.9
 end
 
 Sword.functions = {
@@ -120,8 +122,10 @@ Sword.functions = {
     -- Check if I'm on the air
     if cr.zo ~= 0 then
       self.onAir = true
+      self.zo = cr.zo + self.minZo
     else
       self.onAir = false
+      self.zo = self.minZo
     end
 
     if self.weld and (not self.weld:isDestroyed()) then self.weld:destroy() end
@@ -153,6 +157,7 @@ Sword.functions = {
       elseif phase == 2 then
         self.fixture = love.physics.newFixture(self.body, ps.shapes.swordStill, 0)
       end
+      self.fixture:setMask(SPRITECAT)
       self.fixture:setSensor(true)
 
     end
@@ -238,7 +243,7 @@ Sword.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-    -- If other is grass, at most play a sound (not yet implemented)
+    -- If other is grass, at most play a sound (implemented via grass explosion)
     if other.grass then return end
 
     local pushback = other.pushback

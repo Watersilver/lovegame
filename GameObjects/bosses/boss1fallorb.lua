@@ -31,6 +31,7 @@ function Orb.initialize(instance)
   instance.physical_properties.bodyType = "static"
   -- instance.physical_properties.shape = ps.shapes.rect1x1
   instance.physical_properties.shape = ps.shapes.circle1
+  instance.physical_properties.masks = {PLAYERJUMPATTACKCAT}
   instance.image_speed = 0
   instance.hp = 4 --love.math.random(3)
   instance.shielded = true
@@ -56,6 +57,7 @@ Orb.functions = {
   end,
 
   enemyUpdate = function (self, dt)
+
     td.zAxis(self, dt)
     sh.handleShadow(self)
     if self.zo < 0 and self.zo > -15 then

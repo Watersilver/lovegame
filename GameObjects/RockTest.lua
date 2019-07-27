@@ -24,6 +24,7 @@ function rt.initialize(instance)
   instance.contacts = 0
   instance.physical_properties = {
     shape = ps.shapes.circleAlmost1,
+    masks = {PLAYERJUMPATTACKCAT}
   }
   instance.layer = 15
   instance.liftable = true
