@@ -1,6 +1,8 @@
 local u = require "utilities"
 local ps = require "physics_settings"
 local im = require "image"
+local shdrs = require "Shaders.shaders"
+local snd = require "sound"
 local p = require "GameObjects.prototype"
 local et = require "GameObjects.enemyTest"
 local ebh = require "enemy_behaviours"
@@ -9,12 +11,13 @@ local sh = require "GameObjects.shadow"
 local o = require "GameObjects.objects"
 local sm = require "state_machine"
 local game = require "game"
-local shdrs = require "Shaders.shaders"
+local expl = require "GameObjects.explode"
 
 local b1l = require "GameObjects.bosses.boss1laser"
 local b1fo = require "GameObjects.bosses.boss1fallorb"
 
 local hitShader = shdrs.enemyHitShader
+local deathShader = shdrs.bossDeathShader
 
 local states = {
   -- WARNING STARTING STATE IN INITIALIZE!!!
@@ -253,7 +256,15 @@ local states = {
     instance.hurtCounter = 2
     instance.invulnerable = instance.hurtCounter
     instance.hp = instance.hp - 1
-    instance.image_index = instance.hp == 0 and 3 or 1
+    if instance.hp == 0 then
+      instance.image_index = 3
+      snd.play(instance.sounds.fatalHit)
+      instance.dying = true
+      instance.body:setLinearVelocity(0, 0)
+    else
+      instance.image_index = 1
+      snd.play(instance.sounds.hit)
+    end
   end,
   check_state = function(instance, dt)
     if instance.hurtCounter < 0 then
@@ -283,6 +294,10 @@ function Boss1.initialize(instance)
   instance.spritefixture_properties.shape = ps.shapes.bosses.boss1.sprite
   instance.handFrame = 0
   instance.image_index = 0
+  instance.sounds = snd.load_sounds({
+    hit = {"Effects/Oracle_Boss_Hit"},
+    fatalHit = {"Effects/Oracle_Boss_Die"}
+  })
 
   instance.state = sm.new_state_machine(states)
   instance.state.state = "start"
@@ -339,7 +354,9 @@ Boss1.functions = {
     self.staffAngle = self.staffTargetAngle
 
     -- Special boss shader handling
-    if self.invulnerable then
+    if self.dying then
+      self.myShader = deathShader
+    elseif self.invulnerable then
       self.myShader = nil
       if math.floor(7 * self.invulnerable % 2) == 1 then
         self.myShader = hitShader
@@ -367,7 +384,21 @@ Boss1.functions = {
     self.haveHitWall = true
   end,
 
+  die = function (self)
+    local explOb = expl:new{
+      x = self.x or self.xstart, y = self.y or self.ystart,
+      layer = self.layer,
+      explosionNumber = self.explosionNumber or 1,
+      sprite_info = self.explosionSprite or {im.spriteSettings.testsplosion},
+      image_speed = self.explosionSpeed or 0.5,
+      sounds = snd.load_sounds({explode = {"Effects/Oracle_Boss_Explode"}})
+    }
+    o.addToWorld(explOb)
+    o.removeFromWorld(self)
+  end,
+
   draw = function (self)
+
     et.functions.draw(self)
 
     local sprite = self.staffSpr

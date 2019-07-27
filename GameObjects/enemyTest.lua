@@ -101,6 +101,10 @@ Enemy.functions = {
   hitSolidStatic = function (self, other, myF, otherF)
   end,
 
+  die = function (self)
+    ebh.die(self)
+  end,
+
   update = function (self, dt)
     -- Do necessary stuff
     self.behaviourTimer = self.behaviourTimer - dt
@@ -120,7 +124,7 @@ Enemy.functions = {
     else
       self.myShader = nil
       if self.hp <= 0 then
-        ebh.die(self)
+        self.die(self)
       end
     end
     self.x, self.y = self.body:getPosition()
