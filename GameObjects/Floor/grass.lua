@@ -18,8 +18,9 @@ function Tile.initialize(instance)
   instance.floorViscosity = "grass"
   instance.grass = 'Witch/defaultGrass'
   instance.physical_properties.masks = {1,2,3,4,5,6,7,8,9,10,11,12,14,16}
-  instance.explosionSprite = {im.spriteSettings.testsplosion}
-  instance.explosionSound = {"Testplosion"}
+  instance.explosionSprite = {im.spriteSettings.grassDestruction}
+  instance.explosionSound = {"Effects/Oracle_Bush_Cut"}
+  instance.explosionSpeed = 0.3
   -- FLOORCOLLIDECAT = 13, PLAYERATTACKCAT = 15
 end
 
@@ -41,7 +42,7 @@ Tile.functions = {
           layer = self.layer+1,
           explosionNumber = 1,
           sprite_info = self.explosionSprite,
-          image_speed = 0.4,
+          image_speed = self.explosionSpeed,
           sounds = snd.load_sounds({explode = self.explosionSound})
         }
         o.addToWorld(explOb)

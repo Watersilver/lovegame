@@ -22,9 +22,10 @@ local function destroyself(self)
   o.removeFromWorld(self)
 end
 
-local sink_sprite = im.spriteSettings.testsplosion
+local sink_sprite = im.spriteSettings.rockSink
 local sink_sound = {"Effects/Oracle_Link_Wade"}
 local function sink(self)
+  self.explosionSpeed = 0.4
   expl.commonExplosion(self, sink_sprite, sink_sound)
   o.removeFromWorld(self)
 end

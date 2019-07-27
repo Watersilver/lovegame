@@ -30,10 +30,10 @@ function Brick.initialize(instance)
   instance.sprite_info = {
     {'Brick', 2, 2}
   }
-  instance.explosionSprite = {im.spriteSettings.testsplosion}
+  instance.explosionSprite = {im.spriteSettings.bushDestruction}
   instance.explosionNumber = 1
-  instance.explosionSpeed = 0.5
-  instance.explosionSound = {"Testplosion"}
+  instance.explosionSpeed = 0.3
+  instance.explosionSound = {"Effects/Oracle_Bush_Cut"}
   instance.allsides = true
   instance.ballbreaker = true
   instance.liftable = true
