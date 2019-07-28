@@ -58,7 +58,7 @@ im.spriteSettings = {
     -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
     {'boss1/arevcyeq', 4, padding = 2, width = 24, height = 28},
     -- {'boss1/arevcyeqLH', 2, padding = 2, width = 8, height = 9},
-    {'boss1/arevcyeqLH', 2, padding = 2, width = 19, height = 14},
+    {'boss1/arevcyeqLH', 2, padding = 2, width = 15, height = 10},
     {'boss1/arevcyeqRH', padding = 0, width = 12, height = 12},
     {'boss1/arevcyeqLaser1', 2, padding = 0, width = 26, height = 107}
   },
