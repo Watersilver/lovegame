@@ -40,11 +40,14 @@ function Orb.initialize(instance)
   instance.harmless = true
   instance.gravity = 300
   instance.attackDodger = true
-  instance.zvel = 0-- 55
+  instance.zvel = 0 -- 55
   instance.zo = - 150
   instance.grounded = false
   instance.explosionSound = {"Effects/Oracle_Rock_Shatter"}
   instance.throw_collision = throw_collision
+  instance.sounds = snd.load_sounds({
+    land = {"Effects/Oracle_Boss_BigBoom"}
+  })
 end
 
 Orb.functions = {
@@ -67,6 +70,7 @@ Orb.functions = {
       if self.zo == 0 then
         if not self.touchedGround then
           gsh.newShake(mainCamera, "displacement")
+          snd.play(self.sounds.land)
           self.unpushable = false
           self.pushback = true
           self.attackDodger = false

@@ -1,5 +1,6 @@
 local ps = require "physics_settings"
 local im = require "image"
+local snd = require "sound"
 local p = require "GameObjects.prototype"
 local et = require "GameObjects.enemyTest"
 local ebh = require "enemy_behaviours"
@@ -22,12 +23,25 @@ function Laser.initialize(instance)
   instance.hp = 1
   instance.boss1laser = true
   instance.image_index = 1
+  instance.sounds = snd.load_sounds({
+    laserSound = {"Effects/OOA_Boss_Shoot"}
+  })
 end
 
 Laser.functions = {
   load = function (self)
     et.functions.load(self)
     self.sprite = im.sprites["boss1/arevcyeqLaser1"]
+    self.laserSoundInterval = 0.15
+    self.laserTimer = 0
+  end,
+
+  early_update = function (self, dt)
+    self.laserTimer = self.laserTimer + dt
+    if self.laserTimer > self.laserSoundInterval then
+      snd.play(self.sounds.laserSound)
+      self.laserTimer = 0
+    end
   end,
 
   draw = function (self)

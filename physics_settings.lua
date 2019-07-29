@@ -21,6 +21,7 @@ ps.pw = love.physics.newWorld(0, 280)--280)
 ps.shapes = {
   rect1x1 = love.physics.newRectangleShape(16, 16),
   rectHalfxHalf = love.physics.newRectangleShape(8, 8),
+  rectThreeFourths = love.physics.newRectangleShape(12, 12),
   edge10hor = love.physics.newEdgeShape(0, 0, 160, 0),
   edge10ver = love.physics.newEdgeShape(0, 0, 0, 160),
   -- edge10x10 = love.physics.newRectangleShape(160, 160),

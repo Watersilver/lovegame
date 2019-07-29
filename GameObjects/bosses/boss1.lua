@@ -231,6 +231,8 @@ local states = {
       end
       isOrbRow = 1 - isOrbRow
     end
+    snd.play(instance.sounds.crumble)
+    snd.play(instance.sounds.spell)
   end,
   check_state = function(instance, dt)
     if instance.orbsAttackCounter < 0 then
@@ -296,7 +298,9 @@ function Boss1.initialize(instance)
   instance.image_index = 0
   instance.sounds = snd.load_sounds({
     hit = {"Effects/Oracle_Boss_Hit"},
-    fatalHit = {"Effects/Oracle_Boss_Die"}
+    fatalHit = {"Effects/Oracle_Boss_Die"},
+    crumble = {"Effects/Oracle_FloorCrumble"},
+    spell = {"Effects/OOA_Veran_Shapeshift"}
   })
 
   instance.state = sm.new_state_machine(states)
@@ -388,9 +392,10 @@ Boss1.functions = {
     local explOb = expl:new{
       x = self.x or self.xstart, y = self.y or self.ystart,
       layer = self.layer,
-      explosionNumber = self.explosionNumber or 1,
-      sprite_info = self.explosionSprite or {im.spriteSettings.testsplosion},
+      explosionNumber = self.explosionNumber or 9,
+      explosion_sprite = self.explosionSprite or im.spriteSettings.testsplosion,
       image_speed = self.explosionSpeed or 0.5,
+      onlySoundOnce = true,
       sounds = snd.load_sounds({explode = {"Effects/Oracle_Boss_Explode"}})
     }
     o.addToWorld(explOb)

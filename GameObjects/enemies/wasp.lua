@@ -16,7 +16,7 @@ function Wasp.initialize(instance)
   instance.actAszo0 = true
   instance.hp = 4 --love.math.random(3)
   instance.image_speed = 0.6
-  instance.physical_properties.shape = ps.shapes.rectHalfxHalf
+  instance.physical_properties.shape = ps.shapes.rectThreeFourths
 end
 
 Wasp.functions = {

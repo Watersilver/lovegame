@@ -47,7 +47,7 @@ Explode.functions = {
     self.yexplode = self.yexplode or self.ystart
     self.explodeDistance = self.explodeDistance or 8
     self.explosionTimer = 0
-    snd.play(self.sounds.explode)
+    if not self.nosound then snd.play(self.sounds.explode) end
     if self.explosion_sprite then
       im.load_sprite(self.explosion_sprite)
       self.sprite = im.sprites[self.explosion_sprite[1] or self.explosion_sprite[img_name]]
@@ -68,6 +68,7 @@ Explode.functions = {
       o.removeFromWorld(self)
       if self.explosionNumber and self.explosionNumber > 1 then
         self.explosionNumber = self.explosionNumber - 1
+        if self.onlySoundOnce then self.nosound = true end
         local nextplosion = Explode:new{
           xexplode = self.xexplode,
           yexplode = self.yexplode,
@@ -77,6 +78,7 @@ Explode.functions = {
           explosionNumber = self.explosionNumber,
           image_speed = self.image_speed,
           sprite_info = self.sprite_info,
+          nosound = self.nosound
         }
         o.addToWorld(nextplosion)
       end
