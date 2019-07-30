@@ -44,6 +44,8 @@ im.spriteSettings = {
   rockSink = {'RockSink', 3, padding = 2, width = 24, height = 16},
   bushDestruction = {'BushDestruction', 8, padding = 2, width = 30, height = 34},
   grassDestruction = {'GrassDestruction', 8, padding = 2, width = 30, height = 34},
+  swordHitWall = {'SwordHitWall', 2, padding = 2, width = 16, height = 16},
+  enemyExplosion = {'EnemyExplosion', 4, padding = 2, width = 30, height = 30},
   mark = {'Inventory/UseMarkL1', 3, padding = 2, width = 16, height = 16},
   npcTestSprites = {
     {'NPCs/NpcTest/down', 2, padding = 2, width = 16, height = 16}

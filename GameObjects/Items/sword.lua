@@ -6,6 +6,7 @@ local game = require "game"
 local u = require "utilities"
 local im = require "image"
 local snd = require "sound"
+local expl = require "GameObjects.explode"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -79,6 +80,37 @@ local function calculate_offset(side, phase)
   return xoff, yoff, aoff
 end
 
+-- sword hit spark position offset table
+local shso1 = 12
+local shso2 = 11
+local shso3 = 20
+local shspot = {
+  down = {
+    [0] = {xoff = -shso1, yoff = 0},
+    -- [1] = {xoff = -shso2, yoff = shso2},
+    [1] = {xoff = 0, yoff = shso3},
+    [2] = {xoff = 0, yoff = shso3}
+  },
+  right = {
+    [0] = {xoff = 0, yoff = -shso1},
+    -- [1] = {xoff = shso2, yoff = -shso2},
+    [1] = {xoff = shso3, yoff = 0},
+    [2] = {xoff = shso3, yoff = 0}
+  },
+  left = {
+    [0] = {xoff = 0, yoff = -shso1},
+    -- [1] = {xoff = -shso2, yoff = -shso2},
+    [1] = {xoff = -shso3, yoff = 0},
+    [2] = {xoff = -shso3, yoff = 0}
+  },
+  up = {
+    [0] = {xoff = shso1, yoff = 0},
+    -- [1] = {xoff = shso2, yoff = shso2},
+    [1] = {xoff = 0, yoff = -shso3},
+    [2] = {xoff = 0, yoff = -shso3}
+  }
+}
+
 function Sword.initialize(instance)
 
   instance.transPersistent = true
@@ -139,6 +171,7 @@ Sword.functions = {
       self.image_index = 2
       phase = self.image_index
     end
+    self.phase = phase
     local prevphase = self.previous_image_index
 
     -- -- Calculate offset due to sword swinging
@@ -269,7 +302,19 @@ Sword.functions = {
       end
       cr.body:applyLinearImpulse(px, py)
       self.hitWall = true
-      if other.static then snd.play(cr.sounds.swordTap1) end
+      if other.static then
+        local explOffset = shspot[self.side][self.phase]
+        local explOb = expl:new{
+          x = cr.x + explOffset.xoff, y = cr.y + cr.zo + explOffset.yoff,
+          layer = self.layer,
+          explosionNumber = self.explosionNumber or 1,
+          explosion_sprite = self.hitWallSprite or im.spriteSettings.swordHitWall,
+          image_speed = self.hitWallImageSpeed or 0.5,
+          nosound = true
+        }
+        o.addToWorld(explOb)
+        snd.play(cr.sounds.swordTap1)
+      end
     end
   end,
 

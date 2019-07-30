@@ -1,6 +1,7 @@
 local u = require "utilities"
 local ps = require "physics_settings"
 local im = require "image"
+local snd = require "sound"
 local p = require "GameObjects.prototype"
 local et = require "GameObjects.enemyTest"
 local ebh = require "enemy_behaviours"
@@ -21,6 +22,9 @@ function Knight.initialize(instance)
   instance.facing = "down"
   instance.sightWidth = 16
   instance.state = "wander"
+  instance.noticeSound = snd.load_sound({"Effects/Oracle_Sword_Tap"})
+  instance.hitWallSound = snd.load_sound({"Effects/Oracle_ScentSeed"})
+  instance.chargeSound = snd.load_sound({"Effects/Oracle_Link_LandRun"})
 end
 
 Knight.functions = {
@@ -36,6 +40,7 @@ Knight.functions = {
     if self.state == "wander" then
       if self.canSeePlayer then
         self.state = "notice"
+        snd.play(self.noticeSound)
         self.noticeTimer = 0.1
         local dx, dy = pl1.x - self.x, pl1.y - self.y
         -- self.direction = math.atan2(dy, dx)
@@ -75,13 +80,21 @@ Knight.functions = {
     elseif self.state == "notice" then
       self.image_speed = 0.13 * 1.5
       self.noticeTimer = self.noticeTimer - dt
-      if self.noticeTimer < 0 then self.state = "charge" end
+      if self.noticeTimer < 0 then
+        self.state = "charge"
+        self.chargeSoundTimer = 999
+      end
       td.stand_still(self, dt)
     elseif self.state == "charge" then
       local wanderSpeed = self.maxspeed
       self.maxspeed = self.maxspeedcharge
       td.analogueWalk(self, dt)
       self.maxspeed = wanderSpeed
+      if self.chargeSoundTimer >= 0.1 then
+        self.chargeSoundTimer = 0
+        snd.play(self.chargeSound)
+      end
+      self.chargeSoundTimer = self.chargeSoundTimer + dt
     elseif self.state == "stunned" then
       self.sprite = im.sprites["Enemies/BullKnight/stun_down"]
       self.image_speed = 0.13 * 0.5
@@ -107,6 +120,7 @@ Knight.functions = {
         self.behaviourTimer = 2
         self.shieldDown = true
         self.shieldWall = false
+        snd.play(self.hitWallSound)
       else
         self.state = "wander"
         self.behaviourTimer = 0

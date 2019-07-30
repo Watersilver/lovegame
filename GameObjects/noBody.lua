@@ -18,10 +18,13 @@ NoBody.functions = {
 draw = function (self)
   local sprite = self.sprite
   local frame = sprite[self.image_index]
+  local worldShader = love.graphics.getShader()
+  love.graphics.setShader(self.myShader)
   love.graphics.draw(
   sprite.img, frame, self.x or self.xstart, self.y or self.ystart, 0,
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
+  love.graphics.setShader(worldShader)
 end,
 
 trans_draw = function (self)
@@ -30,11 +33,14 @@ trans_draw = function (self)
 
   local xtotal, ytotal = trans.still_objects_coords(self)
 
+  local worldShader = love.graphics.getShader()
+  love.graphics.setShader(self.myShader)
   love.graphics.draw(
   sprite.img, frame,
   xtotal, ytotal, 0,
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
+  love.graphics.setShader(worldShader)
 end
 }
 

@@ -18,8 +18,10 @@ function ebh.die(object)
     layer = object.layer,
     explosionNumber = object.explosionNumber or 1,
     sprite_info = object.explosionSprite or defaultDeathSprite,
-    image_speed = object.explosionSpeed or 0.5,
-    sounds = snd.load_sounds({explode = object.deathSound})
+    image_speed = object.explosionSpeed or 0.2,
+    sounds = snd.load_sounds({explode = object.deathSound}),
+    enexploshaders = true,
+    onlySoundOnce = true
   }
   o.addToWorld(explOb)
   o.removeFromWorld(object)

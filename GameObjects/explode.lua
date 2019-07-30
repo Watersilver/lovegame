@@ -5,11 +5,14 @@ local game = require "game"
 local u = require "utilities"
 local o = require "GameObjects.objects"
 local im = require "image"
+local shdrs = require "Shaders.shaders"
 local snd = require "sound"
 
 local noBody = require "GameObjects.noBody"
 
 local floor = math.floor
+
+enexploshaders = {shdrs.enemyExplodeShader1, shdrs.enemyExplodeShader2}
 
 local Explode = {}
 
@@ -91,6 +94,13 @@ Explode.functions = {
       if pmod > 1 then pmod = 1 end
       self.x = self.xstart + pmod * (self.xdest - self.xstart)
       self.y = self.ystart + pmod * (self.ydest - self.ystart)
+    end
+
+    --shaders
+    if self.enexploshaders then
+      local shdrIndex = love.math.random( 2 )
+      self.myShader = enexploshaders[shdrIndex]
+      fuck = fuck + 1
     end
   end
 }
