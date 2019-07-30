@@ -59,7 +59,7 @@ function Enemy.initialize(instance)
     hitSound = hitSound
   })
   instance.deathSound = deathSound
-  instance.explosionSprite = {im.spriteSettings.enemyExplosion}
+  instance.explosionSprite = im.spriteSettings.enemyExplosion
   -- instance.side = "up"
 end
 

@@ -17,7 +17,7 @@ function ebh.die(object)
     x = object.x or object.xstart, y = object.y or object.ystart,
     layer = object.layer,
     explosionNumber = object.explosionNumber or 1,
-    sprite_info = object.explosionSprite or defaultDeathSprite,
+    explosion_sprite = object.explosionSprite or defaultDeathSprite,
     image_speed = object.explosionSpeed or 0.2,
     sounds = snd.load_sounds({explode = object.deathSound}),
     enexploshaders = true,
