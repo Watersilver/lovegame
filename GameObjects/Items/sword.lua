@@ -5,6 +5,7 @@ local trans = require "transitions"
 local game = require "game"
 local u = require "utilities"
 local im = require "image"
+local shdrs = require "Shaders.shaders"
 local snd = require "sound"
 local expl = require "GameObjects.explode"
 
@@ -134,6 +135,7 @@ function Sword.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.minZo = - ps.shapes.plshapeHeight * 0.9
+  instance.myShader = shdrs[session.save.swordShader]
 end
 
 Sword.functions = {
@@ -249,10 +251,13 @@ Sword.functions = {
       self.image_index = self.image_index - sprite.frames
     end
     local frame = sprite[self.image_index]
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
     love.graphics.draw(
     sprite.img, frame, x, y, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
 
     -- Debug
     -- love.graphics.polygon("line",
@@ -314,6 +319,18 @@ Sword.functions = {
         }
         o.addToWorld(explOb)
         snd.play(cr.sounds.swordTap1)
+      elseif other.shieldWall and other.shielded then
+        local explOffset = shspot[self.side][self.phase]
+        local explOb = expl:new{
+          x = cr.x + explOffset.xoff, y = cr.y + cr.zo + explOffset.yoff,
+          layer = self.layer,
+          explosionNumber = self.explosionNumber or 1,
+          explosion_sprite = self.hitWallSprite or im.spriteSettings.swordHitWall,
+          image_speed = self.hitWallImageSpeed or 0.5,
+          nosound = true
+        }
+        o.addToWorld(explOb)
+        snd.play(cr.sounds.swordTap2)
       end
     end
   end,

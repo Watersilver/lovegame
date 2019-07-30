@@ -41,7 +41,10 @@ session = {
     room = nil,
     playerX = nil,
     playerY = nil,
-    walkOnWater = nil
+    walkOnWater = nil,
+    swordShader = nil,
+    missileShader = nil,
+    markShader = nil,
   },
   mslQueue = u.newQueue()
 }

@@ -159,6 +159,7 @@ function Playa.initialize(instance)
     swordSlash2 = {"Effects/Oracle_Sword_Slash2"},
     swordSlash3 = {"Effects/Oracle_Sword_Slash3"},
     swordTap1 = {"Effects/Oracle_Sword_Tap"},
+    swordTap2 = {"Effects/Oracle_Shield_Deflect"},
     jump = {"Effects/Oracle_Link_Jump"},
     land = {"Effects/Oracle_Link_LandRun"},
     magicMissile = {"Effects/Magic_Missile"},

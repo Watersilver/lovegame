@@ -2,6 +2,7 @@ local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local game = require "game"
 local im = require "image"
+local shdrs = require "Shaders.shaders"
 
 local Mark = {}
 
@@ -16,6 +17,7 @@ function Mark.initialize(instance)
   image_indexProgressDirection = 1
   instance.image_index = image_indexProgress
   instance.seeThrough = true
+  instance.myShader = shdrs[session.save.markShader]
 end
 
 Mark.functions = {
@@ -38,10 +40,13 @@ Mark.functions = {
   draw = function (self)
     local sprite = self.sprite
     local frame = sprite[self.image_index]
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
     love.graphics.draw(
     sprite.img, frame, self.xstart, self.ystart+2, 0,
     sprite.res_x_scale, sprite.res_y_scale,
     sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
     if self.body then
       -- draw
     end
@@ -53,11 +58,14 @@ Mark.functions = {
 
     local xtotal, ytotal = trans.still_objects_coords(self)
 
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
     love.graphics.draw(
     sprite.img, frame,
     xtotal, ytotal+2, 0,
     sprite.res_x_scale, sprite.res_y_scale,
     sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
     if self.body then
       -- draw
     end

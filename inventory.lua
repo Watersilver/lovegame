@@ -1,8 +1,11 @@
 local inp = require "input"
+local shdrs = require "Shaders.shaders"
 
 local inv = {}
 
 inv.sword = {
+  name = "sword",
+  shaderName = "sword",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgSwordL1.png"),
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
@@ -26,6 +29,8 @@ inv.sword = {
 }
 
 inv.jump = {
+  name = "jump",
+  shaderName = "jump",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgJumpL1.png"),
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
@@ -37,6 +42,8 @@ inv.jump = {
 }
 
 inv.missile = {
+  name = "missile",
+  shaderName = "missile",
   invImage = love.graphics.newImage("Sprites/Inventory/InvMissileL1.png"),
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
@@ -48,6 +55,8 @@ inv.missile = {
 }
 
 inv.grip = {
+  name = "grip",
+  shaderName = "grip",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgGripL1.png"),
   time = 0.25,
   check_trigger = function(object, keyheld)
@@ -60,6 +69,8 @@ inv.grip = {
 }
 
 inv.mark = {
+  name = "mark",
+  shaderName = "mark",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgMarkL1.png"),
   time = 0.3,
   check_trigger = function(object, keyheld)
@@ -72,6 +83,8 @@ inv.mark = {
 }
 
 inv.recall = {
+  name = "recall",
+  shaderName = "mark",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgRecallL1.png"),
   time = 0.3,
   check_trigger = function(object, keyheld)
@@ -209,7 +222,12 @@ function inv.draw()
     else
       love.graphics.rectangle("line", x, y, 18, 18)
     end
-    if contents.item then love.graphics.draw(contents.item.invImage, x+1, y+1) end
+    if contents.item then
+      local worldShader = love.graphics.getShader()
+      love.graphics.setShader(shdrs[session.save[contents.item.shaderName .. "Shader"]])
+      love.graphics.draw(contents.item.invImage, x+1, y+1)
+      love.graphics.setShader(worldShader)
+    end
     love.graphics.print(contents.key, x+1, y, 0, 0.2, 0.2)
     x = x + 19
     if index % 3 == 0 then

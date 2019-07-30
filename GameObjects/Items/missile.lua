@@ -5,6 +5,7 @@ local o = require "GameObjects.objects"
 local trans = require "transitions"
 local game = require "game"
 local im = require "image"
+local shdrs = require "Shaders.shaders"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -58,6 +59,7 @@ function Missile.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.immamissile = true
+  instance.myShader = shdrs[session.save.missileShader]
 end
 
 Missile.functions = {
@@ -156,10 +158,13 @@ Missile.functions = {
       self.image_index = self.image_index - sprite.frames
     end
     local frame = sprite[floor(self.image_index)]
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
     love.graphics.draw(
     sprite.img, frame, x, y, 0,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
 
     -- Debug
     -- love.graphics.polygon("line",

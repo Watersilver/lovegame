@@ -81,6 +81,7 @@ Explode.functions = {
           explosionNumber = self.explosionNumber,
           image_speed = self.image_speed,
           sprite_info = self.sprite_info,
+          explosion_sprite = self.explosion_sprite,
           nosound = self.nosound
         }
         o.addToWorld(nextplosion)
@@ -100,7 +101,6 @@ Explode.functions = {
     if self.enexploshaders then
       local shdrIndex = love.math.random( 2 )
       self.myShader = enexploshaders[shdrIndex]
-      fuck = fuck + 1
     end
   end
 }
