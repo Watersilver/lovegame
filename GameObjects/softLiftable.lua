@@ -11,7 +11,7 @@ local snd = require "sound"
 local function throw_collision(self)
   local explOb = expl:new{
     x = self.x or self.xstart, y = self.y or self.ystart,
-    layer = self.layer,
+    layer = self.explLayer or self.layer,
     explosionNumber = self.explosionNumber,
     sprite_info = self.explosionSprite,
     image_speed = self.explosionSpeed,
@@ -38,6 +38,7 @@ function Brick.initialize(instance)
   instance.ballbreaker = true
   instance.liftable = true
   instance.throw_collision = throw_collision
+  instance.explLayer = 25
 end
 
 Brick.functions = {

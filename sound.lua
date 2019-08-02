@@ -60,6 +60,7 @@ function snd.bgm:load(music_info, force_replay, just_load)
   self.nextName = next_folder .. next_name .. next_extension
   self.next = love.audio.newSource( self.nextName, "stream" )
   self.next:setLooping(true)
+  snd.bgm:setFadeState(music_info.fadeType, self.next)
   self.onTransitionEnd = music_info.onTransitionEnd or false
   if self.current and not just_load then
     if force_replay or (self.currentName ~= self.nextName) then
@@ -87,6 +88,36 @@ function snd.bgm:update(dt)
       self.next = self.current
       self.current = nil
     end
+  end
+  snd.bgm:handleFade(dt)
+end
+
+function snd.bgm:setFadeState(newFadeState, source)
+  source = source or self.current
+  self.fadeState = {}
+  if source then
+    if newFadeState == "fadeout" then
+      self.fadeState.fading = true
+      self.fadeState.targetVolume = 0
+      self.fadeState.timer = 0
+      self.fadeState.duration = 2
+      self.fadeState.startingVolume = source:getVolume()
+    end
+  end
+end
+
+function snd.bgm:handleFade(dt)
+  if self.fadeState.fading and self.current then
+    self.fadeState.timer = self.fadeState.timer + dt
+    if self.fadeState.timer > self.fadeState.duration then
+      self.fadeState.timer = self.fadeState.duration
+      self.fadeState.fading = nil
+      self.current:setVolume(self.fadeState.targetVolume)
+      return
+    end
+    local volMod = self.fadeState.timer / self.fadeState.duration
+    local newVol = self.fadeState.startingVolume + (self.fadeState.targetVolume - self.fadeState.startingVolume) * volMod
+    self.current:setVolume(newVol)
   end
 end
 

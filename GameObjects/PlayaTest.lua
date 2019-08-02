@@ -1687,6 +1687,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
+      snd.bgm:setFadeState("fadeout")
       snd.play(instance.sounds.dying)
       instance.sprite = im.sprites["Witch/die"]
       inp.controllers[instance.player].disabled = true

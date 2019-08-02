@@ -39,7 +39,8 @@ Tile.functions = {
         self.image_index = self.image_index + 1
         local explOb = expl:new{
           x = self.x or self.xstart, y = self.y or self.ystart,
-          layer = self.layer+1,
+          -- layer = self.layer+1,
+          layer = 25,
           explosionNumber = 1,
           sprite_info = self.explosionSprite,
           image_speed = self.explosionSpeed,
