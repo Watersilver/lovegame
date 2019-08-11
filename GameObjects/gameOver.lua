@@ -10,7 +10,7 @@ local snd = require "sound" -- to play game over music
 local Go = {}
 
 function Go.initialize(instance)
-  instance.layer = 21
+  instance.layer = 31
   instance.text = love.graphics.newText(font.prstart)
   instance.text:set("Game Over")
   instance.text2 = love.graphics.newText(font.prstart)

@@ -14,7 +14,7 @@ local Projectile = {}
 function Projectile.initialize(instance)
   instance.levitating = true
   instance.maxspeed = 80
-  instance.physical_properties.shape = ps.shapes.bosses.boss1.laser
+  -- instance.physical_properties.shape = ps.shapes.bosses.boss1.laser
   instance.direction = math.random()*2*math.pi
   instance.sprite_info = { im.spriteSettings.testenemy4 }
   instance.hp = 1

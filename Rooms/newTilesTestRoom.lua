@@ -1,6 +1,7 @@
 local rm = require("Rooms.room_manager")
 local sh = require "scaling_handler"
 local im = require "image"
+local u = require "utilities"
 
 local room = {}
 
@@ -259,8 +260,12 @@ table.insert(room.room_parts, room_part)
 local room_part = {
 blueprint = "enemies.slime"
 }
-room_part.x_that_I_start = 372
-room_part.y_that_I_start = 222
+-- room_part.x_that_I_start = 372
+-- room_part.y_that_I_start = 222
+local possibleCoords = {{368, 224}, {96, 176}, {208, 80}, {176, 368}}
+local chosenKey = u.chooseKeyFromTable(possibleCoords)
+room_part.x_that_I_start = possibleCoords[chosenKey][1]
+room_part.y_that_I_start = possibleCoords[chosenKey][2]
 room_part.row_length = 1
 room_part.col_length = 1
 room_part.tile_width = 16
