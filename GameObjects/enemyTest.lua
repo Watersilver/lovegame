@@ -38,6 +38,7 @@ function Enemy.initialize(instance)
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.input = {left = 0, right = 0, up = 0, down = 0}
   instance.zo = 0
+  instance.actAszo0 = false -- move in regards to floor friction etc as if grounded
   instance.x_scale = 1
   instance.y_scale = 1
   instance.image_speed = 0
@@ -47,6 +48,7 @@ function Enemy.initialize(instance)
   instance.grounded = true -- can be jumped over
   instance.flying = false -- can go through walls
   instance.levitating = false -- can go through over hazardous floor
+  instance.canSeeThroughWalls = false -- what it says on the tin
   instance.hp = love.math.random(3)
   instance.maxspeed = 20
   instance.behaviourTimer = 0
@@ -251,17 +253,17 @@ Enemy.functions = {
     end
 
     -- Check if hit by sword
-    if other.immasword == true and not self.invulnerable then
+    if other.immasword == true and not self.invulnerable and not self.undamageable then
       self:hitBySword(other, myF, otherF)
     end
 
     -- Check if hit by missile
-    if other.immamissile == true and not self.invulnerable then
+    if other.immamissile == true and not self.invulnerable and not self.undamageable then
       self:hitByMissile(other, myF, otherF)
     end
 
     -- Check if hit by thrown object
-    if other.immathrown == true and not self.invulnerable then
+    if other.immathrown == true and not self.invulnerable and not self.undamageable then
       self:hitByThrown(other, myF, otherF)
     end
   end,
@@ -277,15 +279,15 @@ Enemy.functions = {
       if other.floor then
         if self.levitating then
           coll:setEnabled(false)
-        elseif other.water and self.invulnerable and not self.shieldWall then
-          o.removeFromWorld(self)
-          if not other.startSinking then other.startSinking = true end
-        end
-        if self.levitating then
-          coll:setEnabled(false)
-        elseif other.gap and self.invulnerable and not self.shieldWall then
-          o.removeFromWorld(self)
-          if not other.startFalling then other.startFalling = true end
+        -- elseif other.water and self.invulnerable and not self.shieldWall then
+        --   o.removeFromWorld(self)
+        --   if not other.startSinking then other.startSinking = true end
+        -- end
+        -- if self.levitating then
+        --   coll:setEnabled(false)
+        -- elseif other.gap and self.invulnerable and not self.shieldWall then
+        --   o.removeFromWorld(self)
+        --   if not other.startFalling then other.startFalling = true end
         end
       end
     end

@@ -131,6 +131,9 @@ im.spriteSettings = {
   },
   wasp = {
     {'Enemies/Wasp/wasp', 2, padding = 2, width = 16, height = 16}
+  },
+  crow = {
+    {'Enemies/Crow/crow', 2, padding = 2, width = 16, height = 16}
   }
 }
 

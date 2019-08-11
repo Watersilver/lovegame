@@ -22,6 +22,8 @@ function Knight.initialize(instance)
   instance.facing = "down"
   instance.sightWidth = 16
   instance.state = "wander"
+  instance.maxChargeTime = 5
+  instance.chargeTime = 0
   instance.noticeSound = snd.load_sound({"Effects/Oracle_Sword_Tap"})
   instance.hitWallSound = snd.load_sound({"Effects/Oracle_ScentSeed"})
   instance.chargeSound = snd.load_sound({"Effects/Oracle_Link_LandRun"})
@@ -83,9 +85,17 @@ Knight.functions = {
       if self.noticeTimer < 0 then
         self.state = "charge"
         self.chargeSoundTimer = 999
+        self.chargeTime = 0
       end
       td.stand_still(self, dt)
     elseif self.state == "charge" then
+      if self.chargeTime > self.maxChargeTime then
+        self.shieldDown = false
+        self.shieldWall = true
+        self.state = "wander"
+        self.behaviourTimer = 0
+      end
+      self.chargeTime = self.chargeTime + dt
       local wanderSpeed = self.maxspeed
       self.maxspeed = self.maxspeedcharge
       td.analogueWalk(self, dt)

@@ -2119,7 +2119,7 @@ Playa.functions = {
 
       if sensorID then
         local sensors = self.sensors
-        if not other.unpushable == true then
+        if not other.unpushable then
           local onEdge
           if other.edge then
             other.onEdge = ec.isOnEdge(other, self)
