@@ -28,6 +28,8 @@ local states = {
     end,
     start_state = function(instance, dt)
       instance.sightDistance = 64
+      instance.image_speed = 0
+      instance.image_index = 0
     end,
     check_state = function(instance, dt)
       if instance.lookFor and instance:lookFor(pl1) then
@@ -40,9 +42,12 @@ local states = {
 
   rising = {
     run_state = function(instance, dt)
-      instance.zo = instance.zo + dt * instance.riseSpeed
+      instance.zo = instance.maxHeight * instance.risePrecentage
+      instance.risePrecentage = instance.risePrecentage + dt
     end,
     start_state = function(instance, dt)
+      instance.image_speed = 0.1
+      instance.risePrecentage = 0
     end,
     check_state = function(instance, dt)
       if instance.zo <= instance.maxHeight then
@@ -72,8 +77,7 @@ local Crow = {}
 function Crow.initialize(instance)
   instance.flying = true -- can go through walls
   instance.sprite_info = im.spriteSettings.crow
-  instance.riseSpeed = -44
-  instance.maxHeight = -10
+  instance.maxHeight = -64
   instance.zo = 0
   instance.actAszo0 = true
   instance.harmless = true
@@ -83,7 +87,8 @@ function Crow.initialize(instance)
   instance.unpushable = true
   instance.canSeeThroughWalls = true -- what it says on the tin
   instance.hp = 4 --love.math.random(3)
-  instance.layer = 27
+  instance.layer = 25
+  instance.spritefixture_properties = false
   instance.physical_properties.shape = ps.shapes.rectThreeFourths
   instance.state = sm.new_state_machine(states)
   instance.state.state = "start"

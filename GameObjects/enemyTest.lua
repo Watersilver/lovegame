@@ -140,9 +140,11 @@ Enemy.functions = {
   end,
 
   draw = function (self)
-    if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
-    self.spritebody:setPosition(self.x, self.y)
-    self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    if self.spritebody then
+      if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
+      self.spritebody:setPosition(self.x, self.y)
+      self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    end
 
     local zo = self.zo or 0
     local xtotal, ytotal = self.x, self.y + zo

@@ -214,9 +214,9 @@ function love.update(dt)
   moup.x, moup.y = love.mouse.getX(), love.mouse.getY()
 
   -- display mouse position
-  local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  local wmrx, wmry = math.floor(wmx / 16) * 16, math.floor(wmy / 16) * 16
-  fuck = tostring(wmrx) .. "/" .. tostring(wmry)
+  -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
+  -- local wmrx, wmry = math.floor(wmx / 16) * 16, math.floor(wmy / 16) * 16
+  -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
 
   if o.to_be_added[1] then
     o.to_be_added:add_all()
@@ -294,7 +294,8 @@ function love.update(dt)
 
       snd.bgm:load(newRoom.music_info)
 
-      for _, layer in ipairs(o.draw_layers) do
+      fuck = ""
+      for __, layer in ipairs(o.draw_layers) do
         for _, object in ipairs(layer) do
           -- turn off onPreviousRoom because the transition is over
           -- It needs to be false for the next trans to function correctly

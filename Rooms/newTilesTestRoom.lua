@@ -284,7 +284,6 @@ room_part.row_length = 1
 room_part.col_length = 1
 room_part.tile_width = 16
 room_part.init = {}
-room_part.init.layer = 20
 
 table.insert(room.room_parts, room_part)
 ---
