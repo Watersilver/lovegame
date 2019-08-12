@@ -7,6 +7,9 @@ local td = require "movement"; td = td.top_down
 local sh = require "GameObjects.shadow"
 local sm = require "state_machine"
 
+local cos = math.cos
+local pi = math.pi
+
 local states = {
   -- WARNING STARTING STATE IN INITIALIZE!!!
   start = {
@@ -30,6 +33,7 @@ local states = {
       instance.sightDistance = 64
       instance.image_speed = 0
       instance.image_index = 0
+      instance.zo = 0
     end,
     check_state = function(instance, dt)
       if instance.lookFor and instance:lookFor(pl1) then
@@ -60,12 +64,77 @@ local states = {
 
   risen = {
     run_state = function(instance, dt)
+      instance.risenTimer = instance.risenTimer + dt
     end,
     start_state = function(instance, dt)
       instance.zo = instance.maxHeight
-      instance.sightDistance = 96
+      instance.sightDistance = 112
+      instance.image_speed = 0.1
+      instance.body:setLinearVelocity(0, 0)
+      instance.risenTimer = 0
     end,
     check_state = function(instance, dt)
+      if instance.lookFor and instance:lookFor(pl1) then
+        instance.state:change_state(instance, dt, "diving")
+      elseif instance.risenTimer > instance.risenMaxDuration then
+        instance.state:change_state(instance, dt, "landing")
+      end
+    end,
+    end_state = function(instance, dt)
+    end
+  },
+
+  landing = {
+    run_state = function(instance, dt)
+      instance.zo = instance.maxHeight * math.cos(instance.descendPhase)
+      instance.descendPhase = instance.descendPhase + dt
+    end,
+    start_state = function(instance, dt)
+      instance.image_speed = 0.1
+      instance.descendPhase = 0
+    end,
+    check_state = function(instance, dt)
+      if instance.zo >= 0 then
+        instance.state:change_state(instance, dt, "grounded")
+      end
+    end,
+    end_state = function(instance, dt)
+    end
+  },
+
+  diving = {
+    run_state = function(instance, dt)
+      instance.divingPhase = instance.divingPhase + instance.divingSpeed * dt
+      local divCos = cos(instance.divingPhase)
+      local vertMoveMod = divCos * divCos
+      instance.zo = instance.maxHeight * vertMoveMod
+    end,
+    start_state = function(instance, dt)
+      instance.image_speed = 0.2
+      -- in seconds
+      local halftime = 0.7
+      local oneDivHT = 1 / halftime
+      -- will be fed in a cos ^ 2 function
+      instance.divingPhase = 0
+      -- will be multiplied with the dt that gets added to phase
+      instance.divingSpeed = oneDivHT * pi / 2
+      if pl1 then
+        local speedDependency = love.math.random(0, 1) * halftime
+        local newVx = pl1.vx * speedDependency + pl1.x - instance.x -- distance per second
+        -- + 0.5 * ps.shapes.plshapeHeight
+        local newVy = pl1.vy * speedDependency + pl1.y - instance.y -- distance per second
+        instance.body:setLinearVelocity(oneDivHT * newVx, oneDivHT * newVy)
+        if newVx > 0 then
+          instance.x_scale = -1
+        else
+          instance.x_scale = 1
+        end
+      end
+    end,
+    check_state = function(instance, dt)
+      if instance.divingPhase > pi then
+        instance.state:change_state(instance, dt, "risen")
+      end
     end,
     end_state = function(instance, dt)
     end
@@ -78,6 +147,7 @@ function Crow.initialize(instance)
   instance.flying = true -- can go through walls
   instance.sprite_info = im.spriteSettings.crow
   instance.maxHeight = -64
+  instance.risenMaxDuration = 4
   instance.zo = 0
   instance.actAszo0 = true
   instance.harmless = true
@@ -105,7 +175,17 @@ Crow.functions = {
     state[state.state].run_state(self, dt)
 
     -- check if on player level
-
+    if pl1 then
+      if self.zo > -ps.shapes.plshapeHeight then
+        self.harmless = false
+        self.attackDodger = false
+        self.undamageable = false
+      else
+        self.harmless = true
+        self.attackDodger = true
+        self.undamageable = true
+      end
+    end
 
     sh.handleShadow(self)
   end,

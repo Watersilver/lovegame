@@ -294,7 +294,6 @@ function love.update(dt)
 
       snd.bgm:load(newRoom.music_info)
 
-      fuck = ""
       for __, layer in ipairs(o.draw_layers) do
         for _, object in ipairs(layer) do
           -- turn off onPreviousRoom because the transition is over
