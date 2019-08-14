@@ -91,6 +91,8 @@ end
 
 function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invframesMod, resetBehaviour)
 
+  object.attacked = true
+
   -- invulnerability
   invframesMod = invframesMod or 1
   object.invulnerable = invframesMod * 0.25

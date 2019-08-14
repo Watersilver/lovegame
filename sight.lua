@@ -22,9 +22,12 @@ local function control(fixture, x, y, xn, yn, fraction)
   return 1
 end
 
-function si.lookFor(seer, target)
+function si.lookFor(seer, target, seeDead)
   -- Return if I don't have to cast ray
   if not target then return false end
+  if not seeDead then
+    if target.deathState then return false end
+  end
   local sd = seer.sightDistance or dsg
   local sw = seer.sightWidth or dsw
   local sx, sy, tx, ty = seer.x, seer.y, target.x, target.y + 0.5 * ps.shapes.plshapeHeight

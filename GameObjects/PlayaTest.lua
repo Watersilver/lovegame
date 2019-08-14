@@ -1677,6 +1677,7 @@ function Playa.initialize(instance)
         if instance.deathFallCounter > 0.4 then
           instance.deathFallCounter = 0
           instance.deathPhase = 5
+          instance.deathState = "dead"
           o.addToWorld(go:new{player = instance})
         end
         instance.ioy = instance.ioyDeathStart + math.sin(instance.deathFallCounter * 10)
@@ -1700,6 +1701,7 @@ function Playa.initialize(instance)
       instance.deathFallCounter = 0
       instance.ioyDeathStart = instance.ioy
       instance:setGhost(true)
+      instance.deathState = "dying"
     end,
 
     end_state = function(instance, dt)

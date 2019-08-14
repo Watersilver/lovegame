@@ -34,9 +34,10 @@ local states = {
       instance.image_speed = 0
       instance.image_index = 0
       instance.zo = 0
+      instance.body:setLinearVelocity(0, 0)
     end,
     check_state = function(instance, dt)
-      if instance.lookFor and instance:lookFor(pl1) then
+      if (instance.lookFor and instance:lookFor(pl1)) or instance.attacked then
         instance.state:change_state(instance, dt, "rising")
       end
     end,
@@ -52,6 +53,7 @@ local states = {
     start_state = function(instance, dt)
       instance.image_speed = 0.1
       instance.risePrecentage = 0
+      instance.body:setLinearVelocity(0, 0)
     end,
     check_state = function(instance, dt)
       if instance.zo <= instance.maxHeight then
@@ -70,8 +72,9 @@ local states = {
       instance.zo = instance.maxHeight
       instance.sightDistance = 112
       instance.image_speed = 0.1
-      instance.body:setLinearVelocity(0, 0)
       instance.risenTimer = 0
+      instance.risenMaxDuration = (instance.hp and instance.hp < 2) and 15 or 4
+      instance.body:setLinearVelocity(0, 0)
     end,
     check_state = function(instance, dt)
       if instance.lookFor and instance:lookFor(pl1) then
@@ -112,13 +115,14 @@ local states = {
     start_state = function(instance, dt)
       instance.image_speed = 0.2
       -- in seconds
-      local halftime = 0.7
+      -- local halftime = 0.7 -- fastish
+      local halftime = 0.9
       local oneDivHT = 1 / halftime
       -- will be fed in a cos ^ 2 function
       instance.divingPhase = 0
       -- will be multiplied with the dt that gets added to phase
       instance.divingSpeed = oneDivHT * pi / 2
-      if pl1 then
+      if pl1 and not pl1.deathState then
         local speedDependency = love.math.random(0, 1) * halftime
         local newVx = pl1.vx * speedDependency + pl1.x - instance.x -- distance per second
         -- + 0.5 * ps.shapes.plshapeHeight
@@ -147,7 +151,6 @@ function Crow.initialize(instance)
   instance.flying = true -- can go through walls
   instance.sprite_info = im.spriteSettings.crow
   instance.maxHeight = -64
-  instance.risenMaxDuration = 4
   instance.zo = 0
   instance.actAszo0 = true
   instance.harmless = true

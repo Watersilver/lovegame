@@ -95,7 +95,7 @@ Enemy.functions = {
   end,
 
   hitByThrown = function (self, other, myF, otherF)
-    ebh.propelledByHit(self, other, myF, otherF, 3)
+    ebh.propelledByHit(self, other, myF, otherF, 4)
   end,
 
   hitPlayer = function (self, other, myF, otherF)
@@ -137,6 +137,8 @@ Enemy.functions = {
     end
     -- Do specialised stuff
     self:enemyUpdate(dt)
+
+    self.attacked = false
   end,
 
   draw = function (self)
