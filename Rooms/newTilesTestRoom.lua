@@ -276,7 +276,7 @@ table.insert(room.room_parts, room_part)
 ---
 ---
 local room_part = {
-blueprint = "enemies.crow"
+blueprint = "enemies.raven"
 }
 room_part.x_that_I_start = 30
 room_part.y_that_I_start = 368

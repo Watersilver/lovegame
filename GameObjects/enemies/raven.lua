@@ -145,11 +145,11 @@ local states = {
   },
 }
 
-local Crow = {}
+local Raven = {}
 
-function Crow.initialize(instance)
+function Raven.initialize(instance)
   instance.flying = true -- can go through walls
-  instance.sprite_info = im.spriteSettings.crow
+  instance.sprite_info = im.spriteSettings.raven
   instance.maxHeight = -64
   instance.zo = 0
   instance.actAszo0 = true
@@ -167,7 +167,7 @@ function Crow.initialize(instance)
   instance.state.state = "start"
 end
 
-Crow.functions = {
+Raven.functions = {
   enemyUpdate = function (self, dt)
 
     -- do stuff depending on state
@@ -198,11 +198,11 @@ Crow.functions = {
   end,
 }
 
-function Crow:new(init)
+function Raven:new(init)
   local instance = p:new() -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields
-  p.new(Crow, instance, init) -- add own functions and fields
+  p.new(Raven, instance, init) -- add own functions and fields
   return instance
 end
 
-return Crow
+return Raven
