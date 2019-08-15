@@ -65,6 +65,22 @@ function u.normalize2d(x, y)
   return x*invmagn, y*invmagn
 end
 
+function u.magnitude2d(x, y)
+  return sqrt(x*x + y*y)
+end
+
+function u.perpendicularRightTurn2d(x, y)
+  return y, -x
+end
+
+function u.projection2d(x, y, xdir, ydir)
+  -- local projectionMagnitude = (x*xdir + y*ydir) / u.magnitude2d(xdir, ydir)
+  -- local uvx, uvy = u.normalize2d(xdir, ydir)
+  local uvx, uvy = u.normalize2d(xdir, ydir)
+  local projectionMagnitude = (x*uvx + y*uvy)
+  return projectionMagnitude * uvx, projectionMagnitude * uvy
+end
+
 function u.polarToCartesian(r, th)
     return r * cos( th ), r * sin( th )
 end

@@ -56,6 +56,11 @@ local moub = mouseB
 mouseP = {x = 0, y = 0}
 local moup = mouseP
 
+-- global sounds
+glsounds = snd.load_sounds{
+  wingFlap = {"Effects/Oracle_Sword_Slash3"},
+}
+
 
 -- Set up cameras
 mainCamera = gamera.new(0,0,800,450)

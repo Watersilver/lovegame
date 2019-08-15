@@ -1,12 +1,15 @@
 local ps = require "physics_settings"
 local im = require "image"
+local snd = require "sound"
 local p = require "GameObjects.prototype"
 local et = require "GameObjects.enemyTest"
 local ebh = require "enemy_behaviours"
 local td = require "movement"; td = td.top_down
 local sh = require "GameObjects.shadow"
 local sm = require "state_machine"
-local snd = require "sound"
+local u = require "utilities"
+local game = require "game"
+local o = require "GameObjects.objects"
 
 local cos = math.cos
 local abs = math.abs
@@ -51,7 +54,7 @@ local states = {
   rising = {
     run_state = function(instance, dt)
       instance.zo = instance.maxHeight * instance.risePrecentage
-      instance.risePrecentage = instance.risePrecentage + dt
+      instance.risePrecentage = instance.risePrecentage + dt * 2
     end,
     start_state = function(instance, dt)
       instance.image_speed = 0.1
@@ -60,119 +63,96 @@ local states = {
     end,
     check_state = function(instance, dt)
       if instance.zo <= instance.maxHeight then
-        instance.state:change_state(instance, dt, "risen")
+        instance.state:change_state(instance, dt, "chase")
       end
     end,
     end_state = function(instance, dt)
     end
   },
 
-  risen = {
+  chase = {
     run_state = function(instance, dt)
-      instance.risenTimer = instance.risenTimer + dt
+      instance.chargeTimer = instance.chargeTimer + dt
+      if pl1 and not pl1.deathState then
+        -- if just done getting damaged, reset speed
+        if not instance.invulnerableEnd then
+          -- get vector perpendicular to velocity
+          local perpx, perpy = u.perpendicularRightTurn2d(instance.body:getLinearVelocity())
+          local nprojx, nprojy = u.normalize2d(u.projection2d(pl1.x - instance.x, pl1.y - instance.y, perpx, perpy))
+          local mass = instance.body:getMass()
+          instance.body:applyForce(nprojx * mass * 222, nprojy * mass * 222)
+        else
+          local nvcx, nvcy = u.normalize2d(pl1.x - instance.x, pl1.y - instance.y)
+          instance.body:setLinearVelocity(nvcx * instance.maxSpeed, nvcy * instance.maxSpeed)
+        end
+      end
     end,
     start_state = function(instance, dt)
       instance.zo = instance.maxHeight
       instance.sightDistance = 112
-      instance.image_speed = 0.1
-      instance.risenTimer = 0
-      instance.risenMaxDuration = (instance.hp and instance.hp < 2) and 15 or 4
-      instance.body:setLinearVelocity(0, 0)
+      instance.image_speed = 0.12
+      instance.chargeTimer = 0
+      instance.chargeDuration = 3
+      if pl1 then
+        -- normal vector components
+        local nvcx, nvcy = u.normalize2d(pl1.x - instance.x, pl1.y - instance.y)
+        instance.body:setLinearVelocity(nvcx * instance.maxSpeed, nvcy * instance.maxSpeed)
+      end
     end,
     check_state = function(instance, dt)
-      if instance.lookFor and instance:lookFor(pl1) then
-        instance.state:change_state(instance, dt, "diving")
-      elseif instance.risenTimer > instance.risenMaxDuration then
-        instance.state:change_state(instance, dt, "landing")
+      if instance.chargeTimer > instance.chargeDuration then
+        instance.state:change_state(instance, dt, "fly_away")
       end
     end,
     end_state = function(instance, dt)
     end
   },
 
-  landing = {
+  fly_away = {
     run_state = function(instance, dt)
-      instance.zo = instance.maxHeight * math.cos(instance.descendPhase)
-      instance.descendPhase = instance.descendPhase + dt
+      instance.body:setLinearVelocity(instance.uvx * instance.maxSpeed, instance.uvy * instance.maxSpeed)
     end,
     start_state = function(instance, dt)
-      instance.image_speed = 0.1
-      instance.descendPhase = 0
+      instance.zo = instance.maxHeight
+      instance.uvx, instance.uvy = u.normalize2d(instance.body:getLinearVelocity())
     end,
     check_state = function(instance, dt)
-      if instance.zo >= 0 then
-        instance.state:change_state(instance, dt, "grounded")
-      end
-    end,
-    end_state = function(instance, dt)
-    end
-  },
-
-  diving = {
-    run_state = function(instance, dt)
-      instance.divingPhase = instance.divingPhase + instance.divingSpeed * dt
-      local divCos = cos(instance.divingPhase)
-      local vertMoveMod = divCos * divCos
-      instance.zo = instance.maxHeight * vertMoveMod
-    end,
-    start_state = function(instance, dt)
-      instance.image_speed = 0.2
-      -- in seconds
-      -- local halftime = 0.7 -- fastish
-      local halftime = 0.9
-      local oneDivHT = 1 / halftime
-      -- will be fed in a cos ^ 2 function
-      instance.divingPhase = 0
-      -- will be multiplied with the dt that gets added to phase
-      instance.divingSpeed = oneDivHT * pi / 2
-      if pl1 and not pl1.deathState then
-        local speedDependency = love.math.random(0, 1) * halftime
-        local newVx = pl1.vx * speedDependency + pl1.x - instance.x -- distance per second
-        -- + 0.5 * ps.shapes.plshapeHeight
-        local newVy = pl1.vy * speedDependency + pl1.y - instance.y -- distance per second
-        instance.body:setLinearVelocity(oneDivHT * newVx, oneDivHT * newVy)
-        if newVx > 0 then
-          instance.x_scale = -1
-        else
-          instance.x_scale = 1
-        end
-      end
-    end,
-    check_state = function(instance, dt)
-      if instance.divingPhase > pi then
-        instance.state:change_state(instance, dt, "risen")
-      end
     end,
     end_state = function(instance, dt)
     end
   },
 }
 
-local Raven = {}
+local Crow = {}
 
-function Raven.initialize(instance)
+function Crow.initialize(instance)
   instance.flying = true -- can go through walls
-  instance.sprite_info = im.spriteSettings.raven
-  instance.maxHeight = -64
+  instance.sprite_info = im.spriteSettings.crow
+  instance.maxHeight = -5
   instance.zo = 0
   instance.ballbreakerEvenIfHigh = true
   instance.actAszo0 = true
-  instance.harmless = true
-  instance.attackDodger = true
-  instance.undamageable = true
   instance.grounded = false
   instance.unpushable = true
+  instance.canLeaveRoom = true
   instance.canSeeThroughWalls = true -- what it says on the tin
-  instance.hp = 4 --love.math.random(3)
-  instance.layer = 25
-  instance.spritefixture_properties = false
+  instance.hp = 2 --love.math.random(3)
+  instance.maxSpeed = 111
+  instance.layer = 20
   instance.physical_properties.shape = ps.shapes.rectThreeFourths
   instance.state = sm.new_state_machine(states)
   instance.state.state = "start"
 end
 
-Raven.functions = {
+Crow.functions = {
   enemyUpdate = function (self, dt)
+    if not self.outOfBounds then
+      if self.x + 8 < 0 or self.x - 8 > game.room.width then
+        o.removeFromWorld(self)
+      elseif self.y < -8 or self.y > game.room.height + (8 + abs(self.maxHeight)) then
+        o.removeFromWorld(self)
+      end
+    end
 
     -- do stuff depending on state
     local state = self.state
@@ -180,19 +160,6 @@ Raven.functions = {
     state[state.state].check_state(self, dt)
     -- Run animation state
     state[state.state].run_state(self, dt)
-
-    -- check if on player level
-    if pl1 then
-      if self.zo > -ps.shapes.plshapeHeight then
-        self.harmless = false
-        self.attackDodger = false
-        self.undamageable = false
-      else
-        self.harmless = true
-        self.attackDodger = true
-        self.undamageable = true
-      end
-    end
 
     -- Check when to make wing sound
     if self.image_index_prev < 1 and self.image_index > 1 then
@@ -210,11 +177,11 @@ Raven.functions = {
   end,
 }
 
-function Raven:new(init)
+function Crow:new(init)
   local instance = p:new() -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields
-  p.new(Raven, instance, init) -- add own functions and fields
+  p.new(Crow, instance, init) -- add own functions and fields
   return instance
 end
 
-return Raven
+return Crow

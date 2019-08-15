@@ -66,7 +66,9 @@ function Shadow.handleShadow(object, plshadow)
     -- Create shadow
     if not object.shadow then
       local shlayer = object.layer-1
-      if shlayer < 1 then shlayer = 1 end
+      if shlayer < 1 then shlayer = 1
+      elseif shlayer > 19 then shlayer = 19
+      end
       object.shadow = Shadow:new{
         caster = object, layer = shlayer,
         xstart = x, ystart = y, playershadow = plshadow

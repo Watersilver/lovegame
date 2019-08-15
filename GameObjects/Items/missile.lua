@@ -221,7 +221,7 @@ Missile.functions = {
         end
       end
       if other.zo then
-        if other.zo < -5 then
+        if other.zo < -5 and (not other.ballbreakerEvenIfHigh) then
           self.broken = nil
         end
       end

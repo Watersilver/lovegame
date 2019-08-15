@@ -200,6 +200,8 @@ Enemy.functions = {
 
     -- Determine if I'm at the room edge. If not and I'm flying, skip.
     if other.roomEdge then
+      -- return if I don't collide with room edge
+      if self.canLeaveRoom then return end
       self.edgeSide = other.roomEdge
       self.avoidDir = other.roomEdge
     else
@@ -276,10 +278,12 @@ Enemy.functions = {
     if self.flying then
       -- Find which fixture belongs to whom
       local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+      if self.canLeaveRoom and other.roomEdge then coll:setEnabled(false) end
       if not other.roomEdge then coll:setEnabled(false) end
     else
       -- Find which fixture belongs to whom
       local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+      if self.canLeaveRoom and other.roomEdge then coll:setEnabled(false) end
       if other.floor then
         if self.levitating then
           coll:setEnabled(false)
