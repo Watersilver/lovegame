@@ -118,6 +118,7 @@ im.spriteSettings = {
   },
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
   playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4},
+  playerMissileOutline = {'Inventory/UseMissileOutlineL1', 1, padding = 2, width = 6, height = 6},
   -- Enemy sprites
   bullKnight = {
     {'Enemies/BullKnight/walk_left', 2, padding = 2, width = 16, height = 16},

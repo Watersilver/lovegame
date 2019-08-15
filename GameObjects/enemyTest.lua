@@ -91,7 +91,7 @@ Enemy.functions = {
   end,
 
   hitByMissile = function (self, other, myF, otherF)
-    ebh.propelledByHit(self, other, myF, otherF, 1, 0.5)
+    ebh.propelledByHit(self, other, myF, otherF, other.hitBySword and 2 or 1, other.hitBySword and 1 or 0.5)
   end,
 
   hitByThrown = function (self, other, myF, otherF)

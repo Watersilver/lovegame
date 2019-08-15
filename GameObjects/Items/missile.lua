@@ -6,6 +6,7 @@ local trans = require "transitions"
 local game = require "game"
 local im = require "image"
 local shdrs = require "Shaders.shaders"
+local snd = require "sound"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -44,7 +45,10 @@ function Missile.initialize(instance)
   instance.y_scale = 1
   instance.image_speed = 0
   instance.triggers = {}
-  instance.sprite_info = {im.spriteSettings.playerMissile}
+  instance.sprite_info = {
+    im.spriteSettings.playerMissile,
+    im.spriteSettings.playerMissileOutline
+  }
   -- instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",
@@ -67,6 +71,7 @@ Missile.functions = {
     self.sox, self.soy = calculate_offset(self.side)
     self.x, self.y = 0, 0
     session.mslQueue:add(self)
+    self.outlineSprite = im.sprites["Inventory/UseMissileOutlineL1"]
   end,
 
   early_update = function(self, dt)
@@ -159,11 +164,22 @@ Missile.functions = {
     end
     local frame = sprite[floor(self.image_index)]
     local worldShader = love.graphics.getShader()
+
     love.graphics.setShader(self.myShader)
     love.graphics.draw(
     sprite.img, frame, x, y, 0,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
+
+    if self.hitBySword and self.image_index >= 4 then
+      local outlineSprite = self.outlineSprite
+      love.graphics.draw(
+      outlineSprite.img, outlineSprite[0], x, y, 0,
+      outlineSprite.res_x_scale*self.x_scale,
+      outlineSprite.res_y_scale*self.y_scale,
+      outlineSprite.cx, outlineSprite.cy)
+    end
+
     love.graphics.setShader(worldShader)
 
     -- Debug
@@ -214,7 +230,10 @@ Missile.functions = {
     -- Check if propelled by sword
     if other.sword == true then
       local speed = 200
-      local prevvx, prevvy = self.body:getLinearVelocity()
+      -- local prevvx, prevvy = self.body:getLinearVelocity()
+      self.hitBySword = true
+
+      if cr and cr.exists then snd.play(cr.sounds.swordShoot) end
 
       local xadjust, yadjust
       local side = other.side
