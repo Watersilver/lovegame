@@ -74,17 +74,17 @@ local states = {
     run_state = function(instance, dt)
       instance.chargeTimer = instance.chargeTimer + dt
       if pl1 and not pl1.deathState then
-        -- if just done getting damaged, reset speed
-        if not instance.invulnerableEnd then
-          -- get vector perpendicular to velocity
-          local perpx, perpy = u.perpendicularRightTurn2d(instance.body:getLinearVelocity())
-          local nprojx, nprojy = u.normalize2d(u.projection2d(pl1.x - instance.x, pl1.y - instance.y, perpx, perpy))
-          local mass = instance.body:getMass()
-          instance.body:applyForce(nprojx * mass * 222, nprojy * mass * 222)
-        else
-          local nvcx, nvcy = u.normalize2d(pl1.x - instance.x, pl1.y - instance.y)
-          instance.body:setLinearVelocity(nvcx * instance.maxSpeed, nvcy * instance.maxSpeed)
-        end
+        -- get vector perpendicular to velocity
+        local perpx, perpy = u.perpendicularRightTurn2d(instance.body:getLinearVelocity())
+        local nprojx, nprojy = u.normalize2d(u.projection2d(pl1.x - instance.x, pl1.y - instance.y, perpx, perpy))
+        local mass = instance.body:getMass()
+        instance.body:applyForce(nprojx * mass * 222, nprojy * mass * 222)
+      end
+      local vx, vy = instance.body:getLinearVelocity()
+      if vx > 0 then
+        instance.x_scale = -1
+      else
+        instance.x_scale = 1
       end
     end,
     start_state = function(instance, dt)
