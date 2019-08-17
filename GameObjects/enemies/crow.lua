@@ -86,6 +86,10 @@ local states = {
       else
         instance.x_scale = 1
       end
+      if u.magnitude2d(vx, vy) > instance.maxSpeed then
+        uvx, uvy = u.normalize2d(vx, vy)
+        instance.body:setLinearVelocity(uvx * instance.maxSpeed, uvy * instance.maxSpeed)
+      end
     end,
     start_state = function(instance, dt)
       instance.zo = instance.maxHeight
@@ -96,7 +100,9 @@ local states = {
       if pl1 then
         -- normal vector components
         local nvcx, nvcy = u.normalize2d(pl1.x - instance.x, pl1.y - instance.y)
-        instance.body:setLinearVelocity(nvcx * instance.maxSpeed, nvcy * instance.maxSpeed)
+        -- instance.body:setLinearVelocity(nvcx * instance.maxSpeed, nvcy * instance.maxSpeed)
+        local mymass = instance.body:getMass()
+        instance.body:applyLinearImpulse(nvcx * instance.maxSpeed * mymass, nvcy * instance.maxSpeed * mymass)
       end
     end,
     check_state = function(instance, dt)
@@ -110,11 +116,17 @@ local states = {
 
   fly_away = {
     run_state = function(instance, dt)
-      instance.body:setLinearVelocity(instance.uvx * instance.maxSpeed, instance.uvy * instance.maxSpeed)
+      local vx, vy = instance.body:getLinearVelocity()
+      if u.magnitude2d(vx, vy) > instance.maxSpeed then
+        uvx, uvy = u.normalize2d(vx, vy)
+        instance.body:setLinearVelocity(uvx * instance.maxSpeed, uvy * instance.maxSpeed)
+      end
     end,
     start_state = function(instance, dt)
       instance.zo = instance.maxHeight
       instance.uvx, instance.uvy = u.normalize2d(instance.body:getLinearVelocity())
+      local mymass = instance.body:getMass()
+      instance.body:applyLinearImpulse(instance.uvx * instance.maxSpeed * mymass, instance.uvy * instance.maxSpeed * mymass)
     end,
     check_state = function(instance, dt)
     end,
@@ -137,7 +149,7 @@ function Crow.initialize(instance)
   instance.canLeaveRoom = true
   instance.canSeeThroughWalls = true -- what it says on the tin
   instance.hp = 2 --love.math.random(3)
-  instance.maxSpeed = 111
+  instance.maxSpeed = 102
   instance.layer = 20
   instance.physical_properties.shape = ps.shapes.rectThreeFourths
   instance.state = sm.new_state_machine(states)

@@ -112,6 +112,8 @@ player_states.check_swing = function(instance, dt, side)
 end
 
 player_states.start_swing = function(instance, dt, side)
+  instance.swingingSword = true
+  -- random swing sound
   local randomizeSwing = random()
   if randomizeSwing < 0.34 then
     snd.play(instance.sounds.swordSlash1)
@@ -139,6 +141,7 @@ player_states.start_swing = function(instance, dt, side)
 end
 
 player_states.end_swing = function(instance, dt, side)
+  instance.swingingSword = false
   instance.ioy, instance.iox = 0, 0
   instance.image_index = 0
   instance.image_speed = 0
@@ -303,7 +306,7 @@ end
 
 player_states.start_missile = function(instance, dt, side)
   instance.missile_cooldown = 0
-  instance.missile_cooldown_limit = instance.missile_cooldown_limit
+  -- instance.missile_cooldown_limit = instance.missile_cooldown_limit
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/shoot_" .. side]
   else

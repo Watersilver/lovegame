@@ -134,7 +134,7 @@ function Playa.initialize(instance)
   instance.previnput = {}
   instance.triggers = {}
   instance.sensors = {downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={}}
-  instance.missile_cooldown_limit = 0.3
+  instance.missile_cooldown_limit = session.save.missile_cooldown_limit or 0.4 -- 0.3 was default
   instance.item_use_counter = 0 -- Counts how long you're still while using item
   instance.currentMasks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
   instance.physical_properties = {
@@ -246,7 +246,7 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      instance.item_use_duration = 0.5
+      instance.item_use_duration = session.save.swordSpeed or inv.sword.time
     end
     },
 

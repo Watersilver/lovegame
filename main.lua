@@ -45,6 +45,7 @@ session = {
     swordShader = nil,
     missileShader = nil,
     markShader = nil,
+    swordSpeed = nil
   },
   mslQueue = u.newQueue()
 }

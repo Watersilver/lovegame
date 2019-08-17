@@ -7,6 +7,7 @@ inv.sword = {
   name = "sword",
   shaderName = "sword",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgSwordL1.png"),
+  time = 0.5, -- normal zelda games 0.3 me 0.35
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
       return "swing_sword"
@@ -15,7 +16,17 @@ inv.sword = {
     end
   end,
   image_offset = function(object, dt, side)
-    local offset = object.image_index * 3 * 0.5
+    local offset
+    -- if object.swingingSword and (object.swingTimer > object.swingDuration) then
+    --   offset = 0
+    -- else
+    --   offset = object.image_index * 3 * 0.5
+    -- end
+    if object.swingingSword and (object.item_use_duration - object.item_use_counter < 0.07) then
+      offset = 0
+    else
+      offset = object.image_index * 3 * 0.5
+    end
     if side == "down" then
       object.ioy = (offset)
     elseif side == "right" then
