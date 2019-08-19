@@ -135,7 +135,8 @@ function Sword.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.minZo = - ps.shapes.plshapeHeight * 0.9
-  instance.myShader = shdrs[session.save.swordShader]
+  -- instance.myShader = shdrs[session.save.swordShader]
+  if session.save.dinsPower then instance.myShader = shdrs["itemRedShader"] end
 end
 
 Sword.functions = {

@@ -1,11 +1,17 @@
 local inp = require "input"
 local shdrs = require "Shaders.shaders"
 
+powToShad = {
+  dinsPower = "itemRedShader",
+  nayrusWisdom = "itemBlueShader",
+  faroresCourage = "itemGreenShader",
+}
+
 local inv = {}
 
 inv.sword = {
   name = "sword",
-  shaderName = "sword",
+  powerUp = "dinsPower",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgSwordL1.png"),
   time = 0.5, -- normal zelda games 0.3 me 0.35
   check_trigger = function(object, keyheld)
@@ -41,7 +47,7 @@ inv.sword = {
 
 inv.jump = {
   name = "jump",
-  shaderName = "jump",
+  powerUp = "nayrusWisdom",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgJumpL1.png"),
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
@@ -54,7 +60,7 @@ inv.jump = {
 
 inv.missile = {
   name = "missile",
-  shaderName = "missile",
+  powerUp = "nayrusWisdom",
   invImage = love.graphics.newImage("Sprites/Inventory/InvMissileL1.png"),
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
@@ -67,7 +73,7 @@ inv.missile = {
 
 inv.grip = {
   name = "grip",
-  shaderName = "grip",
+  powerUp = "dinsPower",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgGripL1.png"),
   time = 0.25,
   check_trigger = function(object, keyheld)
@@ -81,7 +87,7 @@ inv.grip = {
 
 inv.mark = {
   name = "mark",
-  shaderName = "mark",
+  powerUp = "faroresCourage",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgMarkL1.png"),
   time = 0.3,
   check_trigger = function(object, keyheld)
@@ -95,7 +101,7 @@ inv.mark = {
 
 inv.recall = {
   name = "recall",
-  shaderName = "mark",
+  powerUp = "faroresCourage",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgRecallL1.png"),
   time = 0.3,
   check_trigger = function(object, keyheld)
@@ -235,7 +241,12 @@ function inv.draw()
     end
     if contents.item then
       local worldShader = love.graphics.getShader()
-      love.graphics.setShader(shdrs[session.save[contents.item.shaderName .. "Shader"]])
+      local itemShader
+      local powUp = contents.item.powerUp
+      if session.save[powUp] then
+        itemShader = shdrs[powToShad[powUp]]
+      end
+      love.graphics.setShader(itemShader)
       love.graphics.draw(contents.item.invImage, x+1, y+1)
       love.graphics.setShader(worldShader)
     end

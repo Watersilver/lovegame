@@ -17,7 +17,8 @@ function Mark.initialize(instance)
   image_indexProgressDirection = 1
   instance.image_index = image_indexProgress
   instance.seeThrough = true
-  instance.myShader = shdrs[session.save.markShader]
+  -- instance.myShader = shdrs[session.save.markShader]
+  if session.save.faroresCourage then instance.myShader = shdrs["itemGreenShader"] end
 end
 
 Mark.functions = {
