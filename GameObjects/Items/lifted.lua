@@ -144,14 +144,20 @@ Lifted.functions = {
     local side = self.side
     local prevx, prevy = cr.body:getLinearVelocity()
     prevx, prevy = 1.5 * prevx, 1.5 * prevy
-    if side == "up" then
-      vx, vy = prevx, prevy - 100
-    elseif side == "left" then
-      vx, vy = prevx - 100, prevy
-    elseif side == "down" then
-      vx, vy = prevx, prevy + 100
+    local power
+    if session.save.dinsPower then
+      power = 250
     else
-      vx, vy = prevx + 100, prevy
+      power = 100
+    end
+    if side == "up" then
+      vx, vy = prevx, prevy - power
+    elseif side == "left" then
+      vx, vy = prevx - power, prevy
+    elseif side == "down" then
+      vx, vy = prevx, prevy + power
+    else
+      vx, vy = prevx + power, prevy
     end
 
     local thrownOb = thr:new{

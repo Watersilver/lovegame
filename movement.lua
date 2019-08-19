@@ -139,6 +139,7 @@ local universalWalk = function(object, dt, inputForceFunc)
     end
   else
     brakes = 0
+    if object.player and not session.save.nayrusWisdom then mobility = mobility / 3 end
     if object.floorViscosity then
       -- When on the air certain viscocities still affect movement
       -- (The ones that exist because of height differences)

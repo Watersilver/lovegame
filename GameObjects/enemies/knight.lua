@@ -119,7 +119,9 @@ Knight.functions = {
   end,
 
   hitBySword = function (self, other, myF, otherF)
-    ebh.propelledByHit(self, other, myF, otherF, 3, 1, 1, 0.5)
+    local damage
+    if session.save.dinsPower then damage = 4 else damage = 3 end
+    ebh.propelledByHit(self, other, myF, otherF, damage, 1, 1, 0.5)
   end,
 
   hitSolidStatic = function (self, other, myF, otherF)

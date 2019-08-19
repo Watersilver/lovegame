@@ -453,7 +453,13 @@ end
 player_states.start_lifting = function(instance, dt, side)
   snd.play(instance.sounds.pickUp)
   instance.liftingStage = 1
-  instance.invGripTime = 1 / inv.grip.time
+  local gripTime
+  if session.save.dinsPower then
+    gripTime = inv.grip.time
+  else
+    gripTime = inv.grip.time * 1.5
+  end
+  instance.invGripTime = 1 / gripTime
   instance.image_index = 0
   instance.image_speed = 0
   if side ~= "right" then

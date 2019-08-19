@@ -257,7 +257,11 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      instance.item_use_duration = inv.mark.time
+      if session.save.faroresCourage then
+        instance.item_use_duration = inv.mark.time
+      else
+        instance.item_use_duration = inv.mark.time * 2
+      end
     end
     },
 
@@ -268,7 +272,11 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      instance.item_use_duration = inv.recall.time
+      if session.save.faroresCourage then
+        instance.item_use_duration = inv.recall.time
+      else
+        instance.item_use_duration = inv.recall.time * 2
+      end
     end
     },
 
@@ -279,7 +287,13 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      instance.item_use_duration = inv.grip.time
+      local gripTime
+      if session.save.dinsPower then
+        gripTime = inv.grip.time
+      else
+        gripTime = inv.grip.time * 1.5
+      end
+      instance.item_use_duration = gripTime
     end
     },
 
@@ -1425,7 +1439,11 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
-      instance.markanim = inv.mark.time
+      if session.save.faroresCourage then
+        instance.markanim = inv.mark.time
+      else
+        instance.markanim = inv.mark.time * 2
+      end
       instance.sprite = im.sprites["Witch/mark_down"]
       snd.play(instance.sounds.markStart)
     end,
@@ -1475,7 +1493,11 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
-      instance.recallanim = inv.recall.time
+      if session.save.faroresCourage then
+        instance.recallanim = inv.recall.time
+      else
+        instance.recallanim = inv.recall.time * 2
+      end
       instance.sprite = im.sprites["Witch/recall_down"]
       snd.play(instance.sounds.recallStart)
     end,
