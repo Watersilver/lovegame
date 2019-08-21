@@ -4,6 +4,7 @@ local fsc = {}
 function fsc.determine_colliders(self, aob, bob, a, b)
   local myF
   local otherF
+  local other
   if self == aob then
     myF = a
     otherF = b

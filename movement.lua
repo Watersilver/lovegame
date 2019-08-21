@@ -137,6 +137,9 @@ local universalWalk = function(object, dt, inputForceFunc)
     if object.floorViscosity then
       brakes, inversemaxspeed = viscosityTable[object.floorViscosity](object, brakes, inversemaxspeed)
     end
+    if not session.save.dinsPower and object.liftedOb and object.liftedOb.lifterSpeedMod then
+      inversemaxspeed = inversemaxspeed / object.liftedOb.lifterSpeedMod
+    end
   else
     brakes = 0
     if object.player and not session.save.nayrusWisdom then mobility = mobility / 3 end

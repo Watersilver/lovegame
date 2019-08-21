@@ -39,6 +39,7 @@ function Brick.initialize(instance)
   instance.liftable = true
   instance.throw_collision = throw_collision
   instance.explLayer = 25
+  instance.lifterSpeedMod = 0.8
 end
 
 Brick.functions = {

@@ -6,6 +6,9 @@ local expl = require "GameObjects.explode"
 local o = require "GameObjects.objects"
 local snd = require "sound"
 
+local dc = require "GameObjects.Helpers.determine_colliders"
+
+
 local lp = love.physics
 
 local rt = {}
@@ -31,6 +34,7 @@ function rt.initialize(instance)
   instance.pushback = true
   instance.ballbreaker = true
   instance.image_index = 0
+  instance.breakableByUpgradedSword = true
   instance.throw_collision = throw_collision
 end
 
@@ -62,8 +66,12 @@ rt.functions = {
     self.image_speed = 0
   end,
 
-  beginContact = function(self, a, b, coll)
+  beginContact = function(self, a, b, coll, aob, bob)
     self.contacts = self.contacts + 1
+    if session.save.dinsPower and (aob.immasword or bob.immasword) then
+      throw_collision(self)
+      o.removeFromWorld(self)
+    end
   end,
 
   endContact = function(self, a, b, coll)

@@ -135,8 +135,11 @@ function Sword.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.minZo = - ps.shapes.plshapeHeight * 0.9
-  -- instance.myShader = shdrs[session.save.swordShader]
-  if session.save.dinsPower then instance.myShader = shdrs["itemRedShader"] end
+  if session.save.swordShader then
+    instance.myShader = shdrs[session.save.swordShader]
+  else
+    if session.save.dinsPower then instance.myShader = shdrs["itemRedShader"] end
+  end
 end
 
 Sword.functions = {
@@ -308,7 +311,7 @@ Sword.functions = {
       end
       cr.body:applyLinearImpulse(px, py)
       self.hitWall = true
-      if other.static then
+      if other.static and not (other.breakableByUpgradedSword and session.save.dinsPower) then
         local explOffset = shspot[self.side][self.phase]
         local explOb = expl:new{
           x = cr.x + explOffset.xoff, y = cr.y + cr.zo + explOffset.yoff,

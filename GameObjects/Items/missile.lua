@@ -63,8 +63,11 @@ function Missile.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.immamissile = true
-  -- instance.myShader = shdrs[session.save.missileShader]
-  if session.save.nayrusWisdom then instance.myShader = shdrs["itemBlueShader"] end
+  if session.save.missileShader then
+    instance.myShader = shdrs[session.save.missileShader]
+  else
+    if session.save.nayrusWisdom then instance.myShader = shdrs["itemBlueShader"] end
+  end
 end
 
 Missile.functions = {
