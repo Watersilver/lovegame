@@ -60,6 +60,8 @@ local moup = mouseP
 -- global sounds
 glsounds = snd.load_sounds{
   wingFlap = {"Effects/Oracle_Sword_Slash3"},
+  pauseOpen = {"Effects/Oracle_PauseMenu_Open"},
+  pauseClose = {"Effects/Oracle_PauseMenu_Close"}
 }
 
 

@@ -16,7 +16,7 @@ function Antifairy.initialize(instance)
   instance.sprite_info = { im.spriteSettings.testenemy4 }
   instance.physical_properties.restitution = 1
   instance.image_speed = 0.3
-  instance.hp = 4 --love.math.random(3)
+  instance.hp = 1 --love.math.random(3)
   instance.shielded = true
   instance.shieldWall = true
 end
@@ -30,7 +30,7 @@ Antifairy.functions = {
   enemyUpdate = u.emptyFunc,
 
   hitBySword = function (self, other, myF, otherF)
-    ebh.propelledByHit(self, other, myF, otherF, 3, 1, 1, 0.5)
+    ebh.propelledByHit(self, other, myF, otherF, 1)
   end,
 
   endContact = function(self, a, b, coll, aob, bob)

@@ -88,8 +88,14 @@ Enemy.functions = {
 
   hitBySword = function (self, other, myF, otherF)
     local damage
-    if session.save.dinsPower then damage = 4 else damage = 3 end
-    ebh.propelledByHit(self, other, myF, otherF, damage)
+    local forceMod
+    if session.save.dinsPower then
+      damage = 4
+      forceMod = 2
+    else
+      damage = 3
+    end
+    ebh.propelledByHit(self, other, myF, otherF, damage, forceMod)
   end,
 
   hitByMissile = function (self, other, myF, otherF)
@@ -270,16 +276,19 @@ Enemy.functions = {
 
     -- Check if hit by sword
     if other.immasword == true and not self.invulnerable and not self.undamageable then
+      self.lastHit = "sword"
       self:hitBySword(other, myF, otherF)
     end
 
     -- Check if hit by missile
     if other.immamissile == true and not self.invulnerable and not self.undamageable then
+      self.lastHit = "missile"
       self:hitByMissile(other, myF, otherF)
     end
 
     -- Check if hit by thrown object
     if other.immathrown == true and not self.invulnerable and not self.undamageable then
+      self.lastHit = "thrown"
       self:hitByThrown(other, myF, otherF)
     end
   end,

@@ -89,7 +89,7 @@ function ebh.bounceOffScreenEdge(object)
   end
 end
 
-function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invframesMod, resetBehaviour)
+function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invframesMod)
 
   object.attacked = true
 
@@ -100,7 +100,8 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
   -- Damage
   if (not object.shielded) or object.shieldDown then
     if object.hp then object.hp = object.hp - damage end
-    if resetBehaviour then object.behaviourTimer = resetBehaviour end
+    if object.hp <= 0 then object.harmless = true end
+    if object.resetBehaviour then object.behaviourTimer = object.resetBehaviour end
     snd.play(object.sounds.hitSound)
   end
 

@@ -1,4 +1,5 @@
 local u = require "utilities"
+local snd = require "sound"
 
 local game = {}
 
@@ -9,6 +10,7 @@ game.paused = false --{player = "player1"}
 function game.pause(pauser)
   if not game.unpausable or not pauser then
     game.paused = pauser
+    snd.play(pauser and glsounds.pauseOpen or glsounds.pauseClose)
   end
 end
 

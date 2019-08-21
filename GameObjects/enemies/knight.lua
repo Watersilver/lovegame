@@ -24,6 +24,7 @@ function Knight.initialize(instance)
   instance.state = "wander"
   instance.maxChargeTime = 5
   instance.chargeTime = 0
+  instance.resetBehaviour = 0.5
   instance.noticeSound = snd.load_sound({"Effects/Oracle_Sword_Tap"})
   instance.hitWallSound = snd.load_sound({"Effects/Oracle_ScentSeed"})
   instance.chargeSound = snd.load_sound({"Effects/Oracle_Link_LandRun"})
@@ -116,12 +117,6 @@ Knight.functions = {
         self.behaviourTimer = 0
       end
     end
-  end,
-
-  hitBySword = function (self, other, myF, otherF)
-    local damage
-    if session.save.dinsPower then damage = 4 else damage = 3 end
-    ebh.propelledByHit(self, other, myF, otherF, damage, 1, 1, 0.5)
   end,
 
   hitSolidStatic = function (self, other, myF, otherF)

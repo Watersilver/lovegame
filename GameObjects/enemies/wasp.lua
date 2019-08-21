@@ -16,6 +16,7 @@ function Wasp.initialize(instance)
   instance.actAszo0 = true
   instance.hp = 4 --love.math.random(3)
   instance.image_speed = 0.6
+  instance.resetBehaviour = 0.5
   instance.physical_properties.shape = ps.shapes.rectThreeFourths
 end
 
@@ -40,12 +41,6 @@ Wasp.functions = {
     end
 
     sh.handleShadow(self)
-  end,
-
-  hitBySword = function (self, other, myF, otherF)
-    local damage
-    if session.save.dinsPower then damage = 4 else damage = 3 end
-    ebh.propelledByHit(self, other, myF, otherF, damage, 1, 1, 0.5)
   end,
 }
 
