@@ -183,6 +183,9 @@ HeldSword.functions = {
     -- If other is attackDodger, do nothing
     if other.attackDodger then return end
 
+    -- If other is dungeonEdge, do nothing
+    if other.dungeonEdge then return end
+
     -- If below edge, treat as wall
     if other.edge then
       if not ec.swordBelowEdge(other, cr) then return end

@@ -34,6 +34,12 @@ ps.shapes = {
     r = love.physics.newEdgeShape(8, -8, 8, 8), -- right side
     d = love.physics.newEdgeShape(-8, 8, 8, 8) -- down side
   },
+  edgeRectHalfxHalf = {
+    u = love.physics.newEdgeShape(-4, -8, 4, -8), -- upper side
+    l = love.physics.newEdgeShape(-8, -4, -8, 4), -- left side
+    r = love.physics.newEdgeShape(8, -4, 8, 4), -- right side
+    d = love.physics.newEdgeShape(-4, 8, 4, 8) -- down side
+  },
   thickWallInner = {
     u = love.physics.newEdgeShape(-8, -1, 8, -1), -- upper side
     l = love.physics.newEdgeShape(-1, -8, -1, 8), -- left side

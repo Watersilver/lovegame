@@ -1841,8 +1841,24 @@ Playa.functions = {
       self.climbing = nil
     end
 
-    if self.zo == 0 and self.inShallowWater and not self.inShallowWaterPrev then
-      snd.play(self.sounds.water)
+    if self.zo == 0 then
+      -- watersound
+      if self.inShallowWater and not self.inShallowWaterPrev then
+        snd.play(self.sounds.water)
+      end
+      -- dungeonJumpingLand
+      if self.dungeonJumping and self.zvel == 0 then
+        self.dungeonJumping = nil
+        inp.controllers[self.player].disabled = nil
+        self:setGhost(false)
+      end
+    else
+      -- dungeonJumping
+      if self.dungeonJumping then
+        self:setGhost(true)
+        inp.controllers[self.player].disabled = true
+        self.body:setLinearVelocity(self.dungeonJumping[1], self.dungeonJumping[2])
+      end
     end
 
     -- Return movement table based on the long term action you want to take (Npcs)

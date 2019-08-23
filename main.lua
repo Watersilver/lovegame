@@ -111,7 +111,7 @@ function love.load()
 
   -- Room Creator
   -- game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
-  sh.calculate_total_scale{game_scale=game.room.game_scale}
+  -- sh.calculate_total_scale{game_scale=game.room.game_scale}
 end
 
 function love.textinput(t)
