@@ -82,7 +82,7 @@ NPC.functions = {
   activate = function (self, dt)
     if self.activated then
       -- Only play when there's no selection involved
-      if type(self.next) ~= "table" then snd.play(glsounds.letter) end
+      if (type(self.next) ~= "table") or self.counter == 1 then snd.play(glsounds.letter) end
       self.activateFuncs[self.counter](self, dt, self.counter)
     elseif self.active then
     else
