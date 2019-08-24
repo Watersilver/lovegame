@@ -1,5 +1,6 @@
 local Wall = require("GameObjects.BrickTest")
 local softLiftable = require("GameObjects.softLiftable")
+local rockTest = require("GameObjects.RockTest")
 local floorTile = require("GameObjects.floorTile")
 local animatedFloorTile1213 = require("GameObjects.Floor.animatedFloorTile1213")
 local animatedFloorTile1234 = require("GameObjects.Floor.animatedFloorTile1234")
@@ -40,6 +41,7 @@ local itemGiver = require "GameObjects.GlobalNpcs.itemGiver"
 local symbols_to_objects_default = {
   w = Wall,
   sL = softLiftable,
+  rT = rockTest,
   f = floorTile,
   pl = floorTile, --placeholder
   shW = shallowWater,

@@ -60,6 +60,9 @@ im.spriteSettings = {
   owlStatue = {
     {'NPCs/owlStatue/down', 2, padding = 2, width = 24, height = 16}
   },
+  chest = {
+    {'NPCs/Chest/down', 2, padding = 2, width = 16, height = 16}
+  },
 
   boss1TestSprites = {
     -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
@@ -118,7 +121,7 @@ im.spriteSettings = {
     {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
     {'Witch/defaultGrass', 2, padding = 2, width = 16, height = 16},
     {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
-    {'health', 2, padding = 2, width = 8, height = 8},
+    {'health', 2, padding = 2, width = 7, height = 7},
     {'Test', 1, padding = 0},
   },
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},

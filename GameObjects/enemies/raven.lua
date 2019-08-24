@@ -183,7 +183,7 @@ Raven.functions = {
 
     -- check if on player level
     if pl1 then
-      if self.zo > -ps.shapes.plshapeHeight then
+      if (self.zo > -ps.shapes.plshapeHeight) and self.hp > 0 then
         self.harmless = false
         self.attackDodger = false
         self.undamageable = false

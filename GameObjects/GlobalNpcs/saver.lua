@@ -68,7 +68,7 @@ activateFuncs[2] = function (self, dt, textIndex)
     if slot.item then
       -- love.filesystem.append(saveName, "\nsave." .. "has" .. u.capitalise(slot.item.name) .. " = " .. slot.item.name)
       -- love.filesystem.append(saveName, "\nsave." .. slot.item.name .. "Key = " .. '"' .. slot.key .. '"')
-      saveContent = saveContent .. "\nsave." .. "has" .. u.capitalise(slot.item.name) .. " = " .. slot.item.name
+      saveContent = saveContent .. "\nsave." .. "has" .. u.capitalise(slot.item.name) .. " = " .. '"' .. slot.item.name .. '"'
       saveContent = saveContent .. "\nsave." .. slot.item.name .. "Key = " .. '"' .. slot.key .. '"'
     end
   end
