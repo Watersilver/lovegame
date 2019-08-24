@@ -23,26 +23,26 @@ end
 
 -- "fallFrom*Edge" functions check if "other" will fall
 function ec.wentOverDownEdge(edge, other)
--- local sx, sy = edge.playerContactX, edge.playerContactY
--- local ex, ey = other.body:getPosition()
--- if abs(sy - ey) > 1 then return true end
--- return false
-if other.y > edge.ystart then return true end
-return false
+  -- local sx, sy = edge.playerContactX, edge.playerContactY
+  -- local ex, ey = other.body:getPosition()
+  -- if abs(sy - ey) > 1 then return true end
+  -- return false
+  if other.y > edge.ystart then return true end
+  return false
 end
 
 function ec.wentOverRightEdge(edge, other)
-local sx = edge.playerContactX
-local ex = other.body:getPosition()
-if abs(sx - ex) > 1 then return true end
-return false
+  local sx = edge.playerContactX
+  local ex = other.body:getPosition()
+  if abs(sx - ex) > 1 then return true end
+  return false
 end
 
 function ec.wentOverLeftEdge(edge, other)
-local sx = edge.playerContactX
-local ex = other.body:getPosition()
-if abs(sx - ex) > 1 then return true end
-return false
+  local sx = edge.playerContactX
+  local ex = other.body:getPosition()
+  if abs(sx - ex) > 1 then return true end
+  return false
 end
 
 
@@ -66,5 +66,19 @@ function ec.swordBelowEdge(edge, other)
   end
   return false
 end
+
+
+function ec.belowDungeonEdge(edge, object)
+  if edge.side == "up" then
+    if object.y > edge.ystart then return false else return true end
+  elseif edge.side == "left" then
+    if object.x > edge.xstart then return false else return true end
+  elseif edge.side == "down" then
+    if object.y < edge.ystart then return false else return true end
+  else
+    if object.x < edge.xstart then return false else return true end
+  end
+end
+
 
 return ec

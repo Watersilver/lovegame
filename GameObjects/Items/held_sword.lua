@@ -183,12 +183,11 @@ HeldSword.functions = {
     -- If other is attackDodger, do nothing
     if other.attackDodger then return end
 
-    -- If other is dungeonEdge, do nothing
-    if other.dungeonEdge then return end
-
     -- If below edge, treat as wall
     if other.edge then
       if not ec.swordBelowEdge(other, cr) then return end
+    elseif other.dungeonEdge then
+      if not ec.belowDungeonEdge(other, cr) then return end
     end
 
     -- This will destroy held sword and create a sword that is stabbing

@@ -100,45 +100,50 @@ DungeonEdge.functions = {
     self.image_speed = 0
     if self.side == "left" then
       self.topFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.r)
-      self.topFixture:setMask(SPRITECAT)
+      self.topFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       local otherFixture
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.u)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.d)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.l)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
     elseif self.side == "right" then
       self.topFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.l)
-      self.topFixture:setMask(SPRITECAT)
+      self.topFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       local otherFixture
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.u)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.d)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.r)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
     elseif self.side == "up" then
       self.topFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.d)
-      self.topFixture:setMask(SPRITECAT)--, PLAYERATTACKCAT)
+      self.topFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)--, PLAYERATTACKCAT)
       local otherFixture
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.u)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.l)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.r)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
     else
       self.topFixture = love.physics.newFixture(self.body, ps.shapes.edgeRectHalfxHalf.u)
-      self.topFixture:setMask(SPRITECAT)
+      self.topFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       local otherFixture
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.d)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.l)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
       otherFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.r)
-      otherFixture:setMask(SPRITECAT)
+      otherFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
     end
+    -- WARNING: This is here so that walls aren't paper thin. Might want to find better way
+    -- WARNING: HATCHET JOB
+    local newf = love.physics.newFixture(self.body, ps.shapes.rect1x1minusinfinitesimal)
+    newf:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
+    -- WARNING: HATCHET JOB
   end
 }
 

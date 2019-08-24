@@ -293,6 +293,8 @@ Sword.functions = {
     -- If below edge, treat as wall
     if other.edge then
       if ec.swordBelowEdge(other, cr) then pushback = true else return end
+    elseif other.dungeonEdge then
+      pushback = ec.belowDungeonEdge(other, cr)
     end
 
     if (pushback) and not self.hitWall and not other.attackDodger then
