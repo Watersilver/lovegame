@@ -3,6 +3,7 @@ local font = text.font
 local inp = require "input"
 local sh = require "scaling_handler"
 local u = require "utilities"
+local snd = require "sound"
 
 local max = math.max
 local sin = math.sin
@@ -147,9 +148,11 @@ dialogue.simpleWallOfText ={
 
 dialogue.simpleBinaryChoice = {
   logic = function(dt)
+    local prevCursor = dialogue.cursor
     if inp.leftPressed then dialogue.cursor = dialogue.cursor - 1 end
     if inp.rightPressed then dialogue.cursor = dialogue.cursor + 1 end
     dialogue.cursor = u.clamp(0, dialogue.cursor, 1)
+    if prevCursor ~= dialogue.cursor then snd.play(glsounds.cursor) end
   end,
 
   draw = function(l,t,w,h)

@@ -47,6 +47,7 @@ im.spriteSettings = {
   swordHitWall = {'SwordHitWall', 2, padding = 2, width = 16, height = 16},
   enemyExplosion = {'EnemyExplosion', 4, padding = 2, width = 30, height = 30},
   mark = {'Inventory/UseMarkL1', 3, padding = 2, width = 16, height = 16},
+  -- NPCS
   npcTestSprites = {
     {'NPCs/NpcTest/down', 2, padding = 2, width = 16, height = 16}
   },
@@ -56,6 +57,10 @@ im.spriteSettings = {
   npcTest3Sprites = {
     {'NPCs/NpcTest3/down', 2, padding = 2, width = 16, height = 16}
   },
+  owlStatue = {
+    {'NPCs/owlStatue/down', 2, padding = 2, width = 24, height = 16}
+  },
+
   boss1TestSprites = {
     -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
     {'boss1/arevcyeq', 4, padding = 2, width = 24, height = 28},

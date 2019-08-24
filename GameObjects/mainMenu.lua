@@ -45,7 +45,8 @@ local tipboxX, tipboxY, tipboxRepeats, tipboxRepeatsH, tipboxTip =
 local function start_game(saveName)
   -- Disable menu music
   snd.bgm:load(snd.silence)
-  local readSave = require ("Saves/" .. saveName)
+  -- assert(love.filesystem.load instead of require to detect file changes
+  local readSave = assert(love.filesystem.load("Saves/" .. saveName .. ".lua"))()
   -- Nilify session (Only values!!!)
   for key, value in pairs(session) do
     if type(value) ~= "table" then session[key] = nil end

@@ -12,6 +12,11 @@ function u.emptyFunc()
 end
 
 -- A push operation that returns the new_index
+function u.capitalise(s)
+  return s:sub(1,1):upper()..s:sub(2)
+end
+
+-- A push operation that returns the new_index
 function u.push(array, thing)
   local new_index = #array + 1
   array[new_index] = thing

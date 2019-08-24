@@ -129,7 +129,6 @@ function Playa.initialize(instance)
   instance.image_index = 0
   instance.image_index_prev = 0
   instance.brakesLim = 10
-  instance.health = instance.maxHealth or 3
   instance.input = {}
   instance.previnput = {}
   instance.triggers = {}
@@ -1449,7 +1448,7 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      if instance.markanim <= 0 and not instance.onEdge then
+      if instance.markanim <= 0 and not instance.onEdge and instance.zo == 0 then
         -- make mark
         if instance.mark then o.removeFromWorld(instance.mark) end
         instance.sounds.markStart:stop()

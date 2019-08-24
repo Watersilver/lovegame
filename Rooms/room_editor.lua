@@ -151,7 +151,7 @@ tilesets_to_symbols['Tiles/zeldarip'] = {
   'f', 'f', 'f', 'w', 'w', 'b', 'b', 'b', 'sL', 'pl', 'n', 'n', 'n', 'n', 'n', 'n',
   'f', 'f', 'f', 'w', 'w', 'w', 'ptl', 'w', 'pl', 'pl', 'n', 'n', 'n', 'n', 'n', 'n',
   'f', 'f', 'f', 'w', 'w', 'w', 'w', 'ptl', 'g', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
-  'wa', 'n', 'n', 'wa', 'n', 'n', 'wa', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
+  'wa', 'n', 'n', 'wa', 'n', 'n', 'wa', 'n', 'n', 'shW', 'n', 'n', 'n', 'n', 'n', 'n',
   'aF2', 'n', 'n', 'n', 'aF2', 'n', 'n', 'n', 'aF2', 'n', 'n', 'n', 'aF2', 'n', 'n', 'n',
 }
 
