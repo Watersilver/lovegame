@@ -1,5 +1,5 @@
 local p = require "GameObjects.prototype"
-local DungeonEdgeD = require "GameObjects.DungeonEdgeD"
+local DungeonEdgeD = require "GameObjects.dungeonEdgeD"
 
 local DungeonEdge = {}
 
