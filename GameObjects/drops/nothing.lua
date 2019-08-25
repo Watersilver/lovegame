@@ -48,12 +48,12 @@ end,
 
 update = function (self, dt)
   zAxis(self, dt)
-  if self.zo == 0 and self.bounceOnce then
+  if self.bounceOnce and self.zo == 0 then
     self.zvel = 50
     self.zo = -0.0001
     self.bounceOnce = nil
-    o.change_layer(self, 19)
   end
+  if self.zo == 0 then o.change_layer(self, 19) end
 
   sh.handleShadow(self)
 end,

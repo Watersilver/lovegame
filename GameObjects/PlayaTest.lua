@@ -2249,6 +2249,11 @@ Playa.functions = {
         local ipct = other.impact or 10
         mybod:applyLinearImpulse(impdirx*ipct*clbrakes*mymass, impdiry*ipct*clbrakes*mymass)
       end
+      if other.fairy then
+        o.removeFromWorld(other)
+        self.health = math.min(self.health + 8, self.maxHealth)
+        snd.play(glsounds.getHeart)
+      end
     end
   end,
 

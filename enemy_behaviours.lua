@@ -1,4 +1,3 @@
-local expl = require "GameObjects.explode"
 local snd = require "sound"
 local im = require "image"
 local snd = require "sound"
@@ -13,7 +12,8 @@ local defaultDeathSound = {"Testplosion"}
 local defaultDeathSprite = {im.spriteSettings.testsplosion}
 
 function ebh.die(object)
-  local explOb = expl:new{
+  -- require to avoid circular dependency
+  local explOb = (require "GameObjects.explode"):new{
     x = object.x or object.xstart, y = object.y or object.ystart,
     layer = object.layer,
     explosionNumber = object.explosionNumber or 1,
