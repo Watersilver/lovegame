@@ -20,9 +20,10 @@ draw = function (self)
   local sprite = self.sprite
   local frame = sprite[self.image_index]
   local ca = self.caster
-  if ca.exists then self.x, self.y = ca.x, ca.y else o.removeFromWorld(self) end
+  local shm = ca.shadowHeightMod or 0
+  if ca.exists then self.x, self.y = ca.x, ca.y + shm else o.removeFromWorld(self) end
   love.graphics.draw(
-  sprite.img, frame, ca.x, ca.y, 0,
+  sprite.img, frame, self.x, self.y, 0,
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
 end,
@@ -69,9 +70,14 @@ function Shadow.handleShadow(object, plshadow)
       if shlayer < 1 then shlayer = 1
       elseif shlayer > 19 then shlayer = 19
       end
+      local shm = object.shadowHeightMod or 0
+      local ytotal = object.y or object.ystart
+      if ytotal then ytotal = ytotal + shm end
       object.shadow = Shadow:new{
         caster = object, layer = shlayer,
-        xstart = x, ystart = y, playershadow = plshadow
+        xstart = object.x or object.xstart,
+        ystart = ytotal,
+        playershadow = plshadow
       }
       if object.shadowsprite then
         object.shadow.sprite_info = object.shadowsprite

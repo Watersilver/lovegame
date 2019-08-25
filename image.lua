@@ -64,6 +64,14 @@ im.spriteSettings = {
     {'NPCs/Chest/down', 2, padding = 2, width = 16, height = 16}
   },
 
+  -- drops
+  dropHeart = {
+    {'Drops/heart', 1, padding = 0, width = 7, height = 7}
+  },
+  dropRupee = {
+    {'Drops/rupee', 1, padding = 0, width = 5, height = 11}
+  },
+
   boss1TestSprites = {
     -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
     {'boss1/arevcyeq', 4, padding = 2, width = 24, height = 28},
@@ -122,6 +130,7 @@ im.spriteSettings = {
     {'Witch/defaultGrass', 2, padding = 2, width = 16, height = 16},
     {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
     {'health', 2, padding = 2, width = 7, height = 7},
+    {'rupees', 1, padding = 0, width = 7, height = 7},
     {'Test', 1, padding = 0},
   },
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},

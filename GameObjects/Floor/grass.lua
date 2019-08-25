@@ -7,6 +7,7 @@ local im = require "image"
 local snd = require "sound"
 local expl = require "GameObjects.explode"
 local o = require "GameObjects.objects"
+local drops = require "Gameobjects.drops.drops"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
@@ -47,6 +48,7 @@ Tile.functions = {
           sounds = snd.load_sounds({explode = self.explosionSound})
         }
         o.addToWorld(explOb)
+        drops.cheapest(self.xstart, self.ystart)
         self.beginContact = nil
       end
     end

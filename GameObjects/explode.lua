@@ -7,6 +7,7 @@ local o = require "GameObjects.objects"
 local im = require "image"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
+local drops = require "Gameobjects.drops.drops"
 
 local noBody = require "GameObjects.noBody"
 
@@ -82,9 +83,14 @@ Explode.functions = {
           image_speed = self.image_speed,
           sprite_info = self.sprite_info,
           explosion_sprite = self.explosion_sprite,
-          nosound = self.nosound
+          nosound = self.nosound,
+          normalDrop = self.normalDrop
         }
         o.addToWorld(nextplosion)
+      else
+        if self.normalDrop then
+          drops.normal(self.xexplode or self.xstart, self.yexplode or self.ystart)
+        end
       end
       self.image_indexfloat = frames - 1
       self.image_speed = 0

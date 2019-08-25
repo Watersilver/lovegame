@@ -7,6 +7,8 @@ local expl = require "GameObjects.explode"
 local o = require "GameObjects.objects"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local snd = require "sound"
+local drops = require "Gameobjects.drops.drops"
+
 
 local function throw_collision(self)
   local explOb = expl:new{
@@ -18,6 +20,7 @@ local function throw_collision(self)
     sounds = snd.load_sounds({explode = self.explosionSound})
   }
   o.addToWorld(explOb)
+  drops.cheap(self.x, self.y)
 end
 
 local Brick = {}
@@ -89,6 +92,7 @@ beginContact = function(self, a, b, coll, aob, bob)
   if other.immasword then
     self:throw_collision()
     o.removeFromWorld(self)
+    self.beginContact = nil
   end
 end
 }

@@ -5,8 +5,10 @@ local trans = require "transitions"
 local expl = require "GameObjects.explode"
 local o = require "GameObjects.objects"
 local snd = require "sound"
+local drops = require "Gameobjects.drops.drops"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
+
 
 
 local lp = love.physics
@@ -20,6 +22,7 @@ local explosion_sound = {"Effects/Oracle_Rock_Shatter"}
 
 local function throw_collision(self)
   expl.commonExplosion(self)
+  drops.normal(self.x, self.y)
 end
 
 function rt.initialize(instance)

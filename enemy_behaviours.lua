@@ -21,7 +21,8 @@ function ebh.die(object)
     image_speed = object.explosionSpeed or 0.2,
     sounds = snd.load_sounds({explode = object.deathSound}),
     enexploshaders = true,
-    onlySoundOnce = true
+    onlySoundOnce = true,
+    normalDrop = true
   }
   o.addToWorld(explOb)
   o.removeFromWorld(object)

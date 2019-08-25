@@ -65,7 +65,9 @@ glsounds = snd.load_sounds{
   select = {"Effects/Oracle_Menu_Select"},
   letter = {"Effects/Oracle_Text_Letter"},
   textDone = {"Effects/Oracle_Text_Done"},
-  cursor = {"Effects/Oracle_Menu_Cursor"}
+  cursor = {"Effects/Oracle_Menu_Cursor"},
+  getHeart = {"Effects/Oracle_Get_Heart"},
+  getRupee = {"Effects/Oracle_Get_Rupee"}
 }
 
 
@@ -101,6 +103,9 @@ if not fuck then fuck = 0 end
 
 -- Threshold before screen transitions are triggered
 local screenEdgeThreshold = 0.1
+
+-- rupee number outline
+local rno = 0.6
 
 function love.load()
   ps.pw:setCallbacks(beginContact, endContact, preSolve, postSolve)
@@ -568,8 +573,23 @@ local function hudDraw(l,t,w,h)
       love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5)
     end
 
+    -- Draw rupees
+    local rupees = string.format("%04d", (session.save.rupees or 0))
+    local rspr = im.sprites["rupees"]
+    local wl, lt = hud:toWorld(0, 0)
+    local ww, wh = hud:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
+    love.graphics.draw(rspr.img, rspr[0], ww-16, 5)
+    local pr, pg, pb, pa = love.graphics.getColor()
+    love.graphics.setColor(0, 0, 0, COLORCONST)
+    love.graphics.print(rupees, ww - 42 + rno, 6.5, 0, 0.255)
+    love.graphics.print(rupees, ww - 42 - rno, 6.5, 0, 0.255)
+    love.graphics.print(rupees, ww - 42, 6.5 + rno, 0, 0.255)
+    love.graphics.print(rupees, ww - 42, 6.5 - rno, 0, 0.255)
+    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    love.graphics.print(rupees, ww - 42, 6.5, 0, 0.255)
+
     if game.paused and not game.transitioning then
-      local pr, pg, pb, pa = love.graphics.getColor()
+      -- local pr, pg, pb, pa = love.graphics.getColor()
       love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
       love.graphics.rectangle("fill", l, t, w, h)
       love.graphics.setColor(pr, pg, pb, pa)

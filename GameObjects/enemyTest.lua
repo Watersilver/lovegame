@@ -238,7 +238,7 @@ Enemy.functions = {
     end
 
     -- Check if hit static
-    if otherF:getBody():getType() == "static" and not otherF:isSensor() then
+    if otherF:getBody():getType() == "static" and not otherF:isSensor() and not other.notSolidStatic then
       self:hitSolidStatic(other, myF, otherF)
     end
 
