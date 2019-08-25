@@ -30,13 +30,14 @@ function Drop.initialize(instance)
   instance.onPlayerTouch = onPlayerTouch
   instance.image_speed = 0
   instance.seeThrough = true
-  instance.layer = 19
+  instance.layer = 21
   instance.unpushable = true
   instance.zo = 0
   instance.zvel = 0
   instance.gravity = 400
   instance.shadowHeightMod = -3
   instance.notSolidStatic = true
+  instance.bounceOnce = true
 end
 
 Drop.functions = {
@@ -47,6 +48,12 @@ end,
 
 update = function (self, dt)
   zAxis(self, dt)
+  if self.zo == 0 and self.bounceOnce then
+    self.zvel = 50
+    self.zo = -0.0001
+    self.bounceOnce = nil
+    o.change_layer(self, 19)
+  end
 
   sh.handleShadow(self)
 end,

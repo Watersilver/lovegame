@@ -71,6 +71,9 @@ im.spriteSettings = {
   dropRupee = {
     {'Drops/rupee', 1, padding = 0, width = 5, height = 11}
   },
+  dropRupee5 = {
+    {'Drops/rupee5', 1, padding = 0, width = 7, height = 14}
+  },
 
   boss1TestSprites = {
     -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},

@@ -8,16 +8,16 @@ local o = require "GameObjects.objects"
 local Drop = {}
 
 local function onPlayerTouch()
-  snd.play(glsounds.getRupee)
+  snd.play(glsounds.getRupee5)
   local rupees = session.save.rupees or 0
-  rupees = math.min(rupees + 1, 9999)
+  rupees = math.min(rupees + 5, 9999)
   session.save.rupees = rupees
 end
 
 function Drop.initialize(instance)
-  instance.sprite_info = im.spriteSettings.dropRupee
+  instance.sprite_info = im.spriteSettings.dropRupee5
   instance.onPlayerTouch = onPlayerTouch
-  instance.shadowHeightMod = -2
+  instance.shadowHeightMod = -1
 end
 
 Drop.functions = {}

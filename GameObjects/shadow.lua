@@ -21,11 +21,15 @@ draw = function (self)
   local frame = sprite[self.image_index]
   local ca = self.caster
   local shm = ca.shadowHeightMod or 0
-  if ca.exists then self.x, self.y = ca.x, ca.y + shm else o.removeFromWorld(self) end
-  love.graphics.draw(
-  sprite.img, frame, self.x, self.y, 0,
-  sprite.res_x_scale, sprite.res_y_scale,
-  sprite.cx, sprite.cy)
+  if ca.exists then
+    self.x, self.y = ca.x, ca.y + shm
+    love.graphics.draw(
+    sprite.img, frame, self.x, self.y, 0,
+    sprite.res_x_scale, sprite.res_y_scale,
+    sprite.cx, sprite.cy)
+  else
+    o.removeFromWorld(self)
+  end
 end,
 
 trans_draw = function (self)

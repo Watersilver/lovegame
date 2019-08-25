@@ -67,7 +67,8 @@ glsounds = snd.load_sounds{
   textDone = {"Effects/Oracle_Text_Done"},
   cursor = {"Effects/Oracle_Menu_Cursor"},
   getHeart = {"Effects/Oracle_Get_Heart"},
-  getRupee = {"Effects/Oracle_Get_Rupee"}
+  getRupee = {"Effects/Oracle_Get_Rupee"},
+  getRupee5 = {"Effects/Oracle_Get_Rupee5"}
 }
 
 
