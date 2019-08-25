@@ -88,8 +88,8 @@ Explode.functions = {
         }
         o.addToWorld(nextplosion)
       else
-        if self.normalDrop then
-          drops.normal(self.xexplode or self.xstart, self.yexplode or self.ystart)
+        if self.drop then
+          drops[self.drop](self.xexplode or self.xstart, self.yexplode or self.ystart)
         end
       end
       self.image_indexfloat = frames - 1

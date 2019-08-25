@@ -22,7 +22,7 @@ function ebh.die(object)
     sounds = snd.load_sounds({explode = object.deathSound}),
     enexploshaders = true,
     onlySoundOnce = true,
-    normalDrop = true
+    drop = object.drop or "normal"
   }
   o.addToWorld(explOb)
   o.removeFromWorld(object)
