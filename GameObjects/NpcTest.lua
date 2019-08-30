@@ -52,20 +52,24 @@ NPC.functions = {
         function() self.counter = 5 end
       )
       dlg.enable = true
-      self.activator.body:setType("static")
-      inp.disable_controller(self.activator.player)
+      if self.activator then
+        if self.activator.body then self.activator.body:setType("static") end
+        if self.activator.player then inp.disable_controller(self.activator.player) end
+      end
       self.counter = 0
     elseif self.active then
       -- self.counter = self.counter + dt
       if self.counter > 3 then self.active = false end
     else
-      self.activator.body:setType("dynamic")
-      inp.enable_controller(self.activator.player)
+      if self.activator then
+        if self.activator.body then self.activator.body:setType("dynamic") end
+        if self.activator.player then inp.enable_controller(self.activator.player) end
+      end
     end
     -- fuck = self.counter
   end,
 
-  early_update = function (self, dt)
+  unpausable_update = function (self, dt)
     if self.activated then
       self:activate(dt)
       self.activated = false

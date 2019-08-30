@@ -23,8 +23,10 @@ local function typical_activate(self, dt, textIndex)
     self.onDialogueEnd
   )
   dlg.enable = true
-  self.activator.body:setType("static")
-  inp.disable_controller(self.activator.player)
+  if self.activator then
+    if self.activator.body then self.activator.body:setType("static") end
+    if self.activator.player then inp.disable_controller(self.activator.player) end
+  end
 end
 
 local myText = {
@@ -80,8 +82,10 @@ NPC.functions = {
     elseif self.active then
     else
       self.counter = 1
-      self.activator.body:setType("dynamic")
-      inp.enable_controller(self.activator.player)
+      if self.activator then
+        if self.activator.body then self.activator.body:setType("dynamic") end
+        if self.activator.player then inp.enable_controller(self.activator.player) end
+      end
       session.save.instructionsDialogueRead = true
       o.removeFromWorld(self)
     end

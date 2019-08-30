@@ -21,8 +21,10 @@ local function typical_activate(self, dt, textIndex)
     self.onDialogueEnd
   )
   dlg.enable = true
-  self.activator.body:setType("static")
-  inp.disable_controller(self.activator.player)
+  if self.activator then
+    if self.activator.body then self.activator.body:setType("static") end
+    if self.activator.player then inp.disable_controller(self.activator.player) end
+  end
 end
 
 local myText = {
@@ -46,7 +48,7 @@ activateFuncs[3] = function (self, dt, textIndex)
   typical_activate(self, dt, textIndex)
   session.save.playerMobility = 600
   session.save.playerBrakes = 9
-  self.activator:readSave()
+  if self.activator then self.activator:readSave() end
   self.next = "end"
 end
 activateFuncs[4] = function (self, dt, textIndex)
@@ -80,8 +82,10 @@ NPC.functions = {
     elseif self.active then
     else
       self.counter = 1
-      self.activator.body:setType("dynamic")
-      inp.enable_controller(self.activator.player)
+      if self.activator then
+        if self.activator.body then self.activator.body:setType("dynamic") end
+        if self.activator.player then inp.enable_controller(self.activator.player) end
+      end
     end
   end
 }

@@ -19,6 +19,11 @@ function game.transition(trans)
   game.transitioning = trans
 end
 
+function game.cutscenePause(pause)
+  game.paused = pause
+  game.cutscene = pause
+end
+
 function game.change_room(roomTarget)
   -- local roomTarget = u.utf8_backspace(roomTarget, 4)
   -- return require(roomTarget)

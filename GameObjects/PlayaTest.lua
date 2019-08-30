@@ -12,6 +12,7 @@ local u = require "utilities"
 local game = require "game"
 local o = require "GameObjects.objects"
 local trans = require "transitions"
+local dlg = require "dialogue"
 
 local hps = require "GameObjects.Helpers.player_states"
 local ors = require "GameObjects.Helpers.object_read_save"
@@ -1886,7 +1887,8 @@ Playa.functions = {
       for _, other in ipairs(self.sensors[touchSide]) do
         if not activatedSomething then
           -- Check if activatable and if yes activate
-          if other.activate and not other.unactivatable then
+          if other.activate and not other.unactivatable and not dlg.enable and not dlg.enabled then
+            fuck = 1
             other.activated = true
             other.unactivatable = true
             other.activator = self

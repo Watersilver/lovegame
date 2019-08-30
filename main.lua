@@ -327,6 +327,16 @@ function love.update(dt)
 
   end
 
+  if not game.transitioning then
+    -- Run unpausable_update methods
+    -- (note they don't run on transitions so name is a bit misleading)
+    local uUpnum = #o.unpausableUpdaters
+    if uUpnum > 0 then
+      for i = 1, uUpnum do
+        o.unpausableUpdaters[i]:unpausable_update(dt)
+      end
+    end
+  end
 
   if not game.paused then
     -- Make sure missiles don't exceed mslLim game setting
@@ -338,6 +348,7 @@ function love.update(dt)
     -- Image indexes for background animations
     im.updateGlobalImageIndexes(dt)
 
+    -- Run early_update methods
     local eUpnum = #o.earlyUpdaters
     if eUpnum > 0 then
       for i = 1, eUpnum do
@@ -347,6 +358,7 @@ function love.update(dt)
 
     ps.pw:update(dt)
 
+    -- Run update methods
     local upnum = #o.updaters
     if upnum > 0 then
       for i = 1, upnum do
@@ -354,6 +366,7 @@ function love.update(dt)
       end
     end
 
+    -- Run late_update methods
     local lUpnum = #o.lateUpdaters
     if lUpnum > 0 then
       for i = 1, lUpnum do
@@ -361,7 +374,7 @@ function love.update(dt)
       end
     end
 
-  elseif not game.transitioning then -- not game.paused
+  elseif not game.transitioning and not game.cutscene then -- not game.paused
 
     inv.manage(game.paused)
     if inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0 then
@@ -590,7 +603,7 @@ local function hudDraw(l,t,w,h)
     love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
     love.graphics.print(rupees, ww - 42, 6.5, 0, 0.255)
 
-    if game.paused and not game.transitioning then
+    if game.paused and not game.transitioning and not game.cutscene then
       -- local pr, pg, pb, pa = love.graphics.getColor()
       love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
       love.graphics.rectangle("fill", l, t, w, h)
