@@ -77,6 +77,12 @@ im.spriteSettings = {
   dropRupee20 = {
     {'Drops/rupee20', 1, padding = 0, width = 7, height = 14}
   },
+  dropRupee100 = {
+    {'Drops/rupee100', 1, padding = 0, width = 11, height = 16}
+  },
+  dropRupee200 = {
+    {'Drops/rupee200', 1, padding = 0, width = 11, height = 16}
+  },
   dropFairy = {
     {'Drops/fairy', 1, padding = 0, width = 8, height = 11}
   },
@@ -131,6 +137,7 @@ im.spriteSettings = {
     {'Witch/jump_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/mark_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/recall_down', 1, padding = 2, width = 16, height = 16},
+    {'Witch/display_down', 2, padding = 2, width = 16, height = 16},
     {'Witch/drown_down', 2, padding = 2, width = 16, height = 16},
     {'Witch/climb_up', 2, padding = 2, width = 16, height = 16},
     {'Witch/plummet', 3, padding = 2, width = 16, height = 16},
@@ -206,6 +213,8 @@ function im.load_sprite(args)
       sprite.res_x_scale = 1
       sprite.res_y_scale = 1
     end
+
+    sprite.width, sprite.height = args.width, args.height
 
     -- Determine center
     sprite.cx = width * 0.5 + dw -- sprite.cx = width * 0.5

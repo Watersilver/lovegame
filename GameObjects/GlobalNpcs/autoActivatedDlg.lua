@@ -27,7 +27,6 @@ local myText = {
 -- do the funcs
 local activateFuncs = {}
 activateFuncs[1] = function (self, dt, textIndex)
-  -- game.cutscenePause(true)
   self.typical_activate(self, dt, textIndex)
   self.next = 2
 end
@@ -36,15 +35,10 @@ activateFuncs[2] = function (self, dt, textIndex)
   self.next = "end"
 end
 
-local function onDialogueRealEnd(instance)
-  instance.image_index = 0
-  -- game.cutscenePause(false)
-end
-
 function NPC.initialize(instance)
   instance.myText = myText
   instance.activateFuncs = activateFuncs
-  instance.onDialogueRealEnd = onDialogueRealEnd
+  instance.onDialogueRealEnd = nil
   instance.spritefixture_properties = nil
   instance.sprite_info = nil
   instance.physical_properties = nil

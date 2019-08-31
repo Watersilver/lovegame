@@ -56,6 +56,7 @@ end
 function NPC.initialize(instance)
   instance.sprite_info = im.spriteSettings.npcTest2Sprites
   instance.counter = 1
+  instance.noLetterSound = {}
   instance.myText = myText
   instance.activateFuncs = activateFuncs
   instance.onDialogueEnd = function()
@@ -67,9 +68,6 @@ function NPC.initialize(instance)
     end
     if instance.counter == "end" then
       instance.active = false
-      if instance.onDialogueRealEnd then
-        instance:onDialogueRealEnd()
-      end
       -- Only play when there's no selection involved
       if type(instance.next) ~= "table" then snd.play(glsounds.textDone) end
     else
@@ -84,7 +82,7 @@ NPC.functions = {
   activate = function (self, dt)
     if self.activated then
       -- Only play when there's no selection involved and at dialogue start
-      if (type(self.next) ~= "table") or self.counter == 1 then snd.play(glsounds.letter) end
+      if not self.noLetterSound[self.counter] and ((type(self.next) ~= "table") or self.counter == 1) then snd.play(glsounds.letter) end
       self.activateFuncs[self.counter](self, dt, self.counter)
     elseif self.active then
     else
@@ -92,6 +90,9 @@ NPC.functions = {
       if self.activator then
         if self.activator.body then self.activator.body:setType("dynamic") end
         if self.activator.player then inp.enable_controller(self.activator.player) end
+        if self.onDialogueRealEnd then
+          self:onDialogueRealEnd()
+        end
       end
     end
   end

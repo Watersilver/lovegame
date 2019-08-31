@@ -54,13 +54,13 @@ Explode.functions = {
     if not self.nosound then snd.play(self.sounds.explode) end
     if self.explosion_sprite then
       im.load_sprite(self.explosion_sprite)
-      self.sprite = im.sprites[self.explosion_sprite[1] or self.explosion_sprite[img_name]]
+      self.sprite = im.sprites[self.explosion_sprite[1] or self.explosion_sprite["img_name"]]
     end
   end,
 
   delete = function (self)
     if self.explosion_sprite then
-      im.unload_sprite(self.explosion_sprite[1] or self.explosion_sprite[img_name])
+      im.unload_sprite(self.explosion_sprite[1] or self.explosion_sprite["img_name"])
     end
   end,
 

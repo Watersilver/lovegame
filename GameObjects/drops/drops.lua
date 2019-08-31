@@ -3,6 +3,7 @@ local Heart = require "Gameobjects.drops.heart"
 local Rupee = require "Gameobjects.drops.rupee"
 local Rupee5 = require "Gameobjects.drops.rupee5"
 local Rupee20 = require "Gameobjects.drops.rupee20"
+local Rupee200 = require "Gameobjects.drops.rupee200"
 local Fairy = require "Gameobjects.drops.fairy"
 
 local drops = {}
@@ -14,16 +15,19 @@ function drops.cheapest(x, y)
   local rupeeChance = 0.02
   local fairyChance = 0.002
 
-  if dropNumber < heartChance then
-    local drop = Heart:new{xstart = x, ystart = y, zvel = 100}
+    local drop = Rupee200:new{xstart = x, ystart = y, zvel = 100}
     o.addToWorld(drop)
-  elseif dropNumber < rupeeChance + heartChance then
-    local drop = Rupee:new{xstart = x, ystart = y, zvel = 100}
-    o.addToWorld(drop)
-  elseif dropNumber < fairyChance + rupeeChance + heartChance then
-    local drop = Fairy:new{xstart = x, ystart = y, zvel = 100}
-    o.addToWorld(drop)
-  end
+
+  -- if dropNumber < heartChance then
+  --   local drop = Heart:new{xstart = x, ystart = y, zvel = 100}
+  --   o.addToWorld(drop)
+  -- elseif dropNumber < rupeeChance + heartChance then
+  --   local drop = Rupee:new{xstart = x, ystart = y, zvel = 100}
+  --   o.addToWorld(drop)
+  -- elseif dropNumber < fairyChance + rupeeChance + heartChance then
+  --   local drop = Fairy:new{xstart = x, ystart = y, zvel = 100}
+  --   o.addToWorld(drop)
+  -- end
 end
 
 function drops.cheap(x, y)

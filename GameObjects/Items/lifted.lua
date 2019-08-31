@@ -127,10 +127,12 @@ Lifted.functions = {
 
     local sprite = self.sprite
     local frame = sprite[self.image_index]
-    love.graphics.draw(
-    sprite.img, frame, x, y, self.angle,
-    sprite.res_x_scale, sprite.res_y_scale,
-    sprite.cx, sprite.cy)
+    if self.creator and not self.creator.invisible then
+      love.graphics.draw(
+      sprite.img, frame, x, y, self.angle,
+      sprite.res_x_scale, sprite.res_y_scale,
+      sprite.cx, sprite.cy)
+    end
   end,
 
   trans_draw = function (self)

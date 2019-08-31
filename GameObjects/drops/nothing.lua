@@ -62,8 +62,9 @@ preSolve = function(self, a, b, coll, aob, bob)
   local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
   coll:setEnabled(false)
   if not otherF:isSensor() then
-    if other.player and (self.zo ~= 0 or other.zo == 0) then
+    if other.player and not other.triggers.posingForItem and (self.zo ~= 0 or other.zo == 0) then
       o.removeFromWorld(self)
+      other.triggers.posingForItem = true
       self:onPlayerTouch()
       return
     end

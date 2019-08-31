@@ -257,10 +257,12 @@ Sword.functions = {
     local frame = sprite[self.image_index]
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.myShader)
-    love.graphics.draw(
-    sprite.img, frame, x, y, self.angle,
-    sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
-    sprite.cx, sprite.cy)
+    if self.creator and not self.creator.invisible then
+      love.graphics.draw(
+      sprite.img, frame, x, y, self.angle,
+      sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
+      sprite.cx, sprite.cy)
+    end
     love.graphics.setShader(worldShader)
 
     -- Debug
