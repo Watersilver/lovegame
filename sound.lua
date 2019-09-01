@@ -54,6 +54,7 @@ end
 
 function snd.bgm:load(music_info, force_replay, just_load)
   if not music_info then self.next = nil; return end
+  self.last_loaded_music_info = music_info
   local next_name = music_info.name or music_info[1]
   local next_extension = music_info.extension or ".ogg"
   local next_folder = music_info.folder or "Sounds/"

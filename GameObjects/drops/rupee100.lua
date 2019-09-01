@@ -9,16 +9,16 @@ local o = require "GameObjects.objects"
 
 local Drop = {}
 
-local sprite = im.spriteSettings.dropRupee200
+local sprite = im.spriteSettings.dropRupee100
 
 local function onPlayerTouch()
   local rupees200 = itemGetPoseAndDlg:new{
     itemSprite = sprite,
     noLetterSound = {[1] = true},
-    information = "You got 200 rupees!",
-    comment = "What a lucky fucker!",
+    information = "You got 100 rupees!",
+    comment = "Amazing!",
     itemGetEffect = function ()
-      session.save.rupees = math.min((session.save.rupees or 0) + 200, 9999)
+      session.save.rupees = math.min((session.save.rupees or 0) + 100, 9999)
     end
   }
   o.addToWorld(rupees200)

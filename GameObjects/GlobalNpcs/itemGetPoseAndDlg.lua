@@ -33,6 +33,13 @@ local activateFuncs = {}
 activateFuncs[1] = function (self, dt, textIndex)
   game.cutscenePause(true)
   self.activator.invisible = true
+  if self.itemGetEffect then
+    self.itemGetEffect()
+  end
+  snd.play(self.sounds.myFanfare or glsounds.fanfareItem)
+  self.music_info = snd.bgm.last_loaded_music_info
+  snd.bgm:load(snd.silence)
+
   self.typical_activate(self, dt, textIndex)
   self.next = 2
 end
@@ -45,6 +52,7 @@ local function onDialogueRealEnd(instance)
   instance.image_index = 0
   instance.activator.invisible = false
   game.cutscenePause(false)
+  snd.bgm:load(instance.music_info)
   o.removeFromWorld(instance)
 end
 
@@ -55,6 +63,7 @@ function NPC.initialize(instance)
   instance.activateFuncs = activateFuncs
   instance.onDialogueRealEnd = onDialogueRealEnd
   instance.layer = 21
+  instance.sounds = {}
   instance.itemSprite_info = instance.itemSprite or itemSprite
   instance.itemSprite_info = instance.itemSprite_info[1]
   instance.sprite_info = playerSprites

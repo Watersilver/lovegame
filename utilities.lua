@@ -130,6 +130,16 @@ function u.chooseKeyFromTable(tbl, ...)
   return returnKey
 end
 
+-- will work correctly only if sum of chances is <= 1
+function u.chooseFromChanceTable(cTbl)
+  local choiceNumber = random()
+  for key, valChanceTbl in pairs(cTbl) do
+    if choiceNumber < valChanceTbl.chance then return valChanceTbl.value end
+    choiceNumber = choiceNumber - valChanceTbl.chance
+  end
+  return
+end
+
 function u.shuffle(tbl)
   for i = #tbl, 2, -1 do
     local j = math.random(i)
