@@ -6,15 +6,18 @@ local Rupee5 = require "Gameobjects.drops.rupee5"
 local Rupee20 = require "Gameobjects.drops.rupee20"
 local Rupee100 = require "Gameobjects.drops.rupee100"
 local Rupee200 = require "Gameobjects.drops.rupee200"
+local pieceOfHeart = require "Gameobjects.drops.pieceOfHeart"
 local Fairy = require "Gameobjects.drops.fairy"
 
 local drops = {}
 
 function drops.cheapest(x, y)
+  local rpoh = (session.save.randomPiecesOfHeart or 0)
   local Drop = chooseFromChanceTable{
     {value = Heart, chance = 0.02},
     {value = Rupee, chance = 0.02},
     {value = Fairy, chance = 0.002},
+    {value = pieceOfHeart, chance = rpoh < 1 and 0.00001 or 0},
   }
   if Drop then
     o.addToWorld(Drop:new{xstart = x, ystart = y, zvel = 100})
@@ -22,6 +25,7 @@ function drops.cheapest(x, y)
 end
 
 function drops.cheap(x, y)
+  local rpoh = (session.save.randomPiecesOfHeart or 0)
   local Drop = chooseFromChanceTable{
     {value = Heart, chance = 0.03},
     {value = Rupee, chance = 0.05},
@@ -30,6 +34,7 @@ function drops.cheap(x, y)
     {value = Fairy, chance = 0.002},
     {value = Rupee100, chance = 0.0005},
     {value = Rupee200, chance = 0.0002},
+    {value = pieceOfHeart, chance = rpoh < 2 and 0.00003 or 0},
   }
   if Drop then
     o.addToWorld(Drop:new{xstart = x, ystart = y, zvel = 100})
@@ -37,6 +42,7 @@ function drops.cheap(x, y)
 end
 
 function drops.normal(x, y)
+  local rpoh = (session.save.randomPiecesOfHeart or 0)
   local Drop = chooseFromChanceTable{
     {value = Heart, chance = 0.06},
     {value = Rupee, chance = 0.12},
@@ -45,6 +51,7 @@ function drops.normal(x, y)
     {value = Fairy, chance = 0.002},
     {value = Rupee100, chance = 0.0005},
     {value = Rupee200, chance = 0.0002},
+    {value = pieceOfHeart, chance = rpoh < 4 and 0.00005 or 0},
   }
   if Drop then
     o.addToWorld(Drop:new{xstart = x, ystart = y, zvel = 100})
@@ -52,6 +59,7 @@ function drops.normal(x, y)
 end
 
 function drops.rich(x, y)
+  local rpoh = (session.save.randomPiecesOfHeart or 0)
   local Drop = chooseFromChanceTable{
     {value = Heart, chance = 0.06},
     {value = Rupee, chance = 0.05},
@@ -60,6 +68,7 @@ function drops.rich(x, y)
     {value = Fairy, chance = 0.003},
     {value = Rupee100, chance = 0.0006},
     {value = Rupee200, chance = 0.0003},
+    {value = pieceOfHeart, chance = rpoh < 4 and 0.0005 or 0},
   }
   if Drop then
     o.addToWorld(Drop:new{xstart = x, ystart = y, zvel = 100})

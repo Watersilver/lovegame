@@ -25,7 +25,7 @@ local function typical_activate(self, dt, textIndex)
   end
 end
 
--- write the text
+-- Write the text
 local myText = {
   {{{cc,cc,cc,cc},"Something something..."},-1, "left"},
   {{{cc,cc,cc,cc},"Yes or no?"},-1, "left"},
@@ -57,6 +57,7 @@ function NPC.initialize(instance)
   instance.sprite_info = im.spriteSettings.npcTest2Sprites
   instance.counter = 1
   instance.noLetterSound = {}
+  instance.altLetterSound = {}
   instance.myText = myText
   instance.activateFuncs = activateFuncs
   instance.onDialogueEnd = function()
@@ -82,7 +83,14 @@ NPC.functions = {
   activate = function (self, dt)
     if self.activated then
       -- Only play when there's no selection involved and at dialogue start
-      if not self.noLetterSound[self.counter] and ((type(self.next) ~= "table") or self.counter == 1) then snd.play(glsounds.letter) end
+      if not self.noLetterSound[self.counter] and not self.altLetterSound[self.counter] and ((type(self.next) ~= "table") or self.counter == 1) then snd.play(glsounds.letter) end
+      if self.altLetterSound[self.counter] then
+        if type(self.altLetterSound[self.counter] == "function") then
+          snd.play(self.altLetterSound[self.counter]())
+        else
+          snd.play(self.altLetterSound[self.counter])
+        end
+      end
       self.activateFuncs[self.counter](self, dt, self.counter)
     elseif self.active then
     else

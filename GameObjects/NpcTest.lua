@@ -94,9 +94,11 @@ NPC.functions = {
     local xtotal, ytotal = self.body:getPosition()
     self.x, self.y = xtotal, ytotal
 
-    if self.spritejoint then self.spritejoint:destroy() end
-    self.spritebody:setPosition(xtotal, ytotal)
-    self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    if self.spritebody then
+      if self.spritejoint then self.spritejoint:destroy() end
+      self.spritebody:setPosition(xtotal, ytotal)
+      self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    end
 
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames

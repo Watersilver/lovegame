@@ -87,6 +87,10 @@ im.spriteSettings = {
     {'Drops/fairy', 1, padding = 0, width = 8, height = 11}
   },
 
+  pieceOfHeart = {
+    {'pieceOfHeart', 1, padding = 0, width = 16, height = 15}
+  },
+
   boss1TestSprites = {
     -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
     {'boss1/arevcyeq', 4, padding = 2, width = 24, height = 28},

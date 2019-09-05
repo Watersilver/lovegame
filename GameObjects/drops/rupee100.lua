@@ -5,27 +5,19 @@ local im = require "image"
 local snd = require "sound"
 local ps = require "physics_settings"
 
+local itemInfo = (require "GameObjects.GlobalNpcs.fanfareGottenItems.rupee100").itemInfo
+
 local o = require "GameObjects.objects"
 
 local Drop = {}
 
-local sprite = im.spriteSettings.dropRupee100
-
 local function onPlayerTouch()
-  local rupees200 = itemGetPoseAndDlg:new{
-    itemSprite = sprite,
-    noLetterSound = {[1] = true},
-    information = "You got 100 rupees!",
-    comment = "Amazing!",
-    itemGetEffect = function ()
-      session.save.rupees = math.min((session.save.rupees or 0) + 100, 9999)
-    end
-  }
-  o.addToWorld(rupees200)
+  local rupees100 = itemGetPoseAndDlg:new(itemInfo)
+  o.addToWorld(rupees100)
 end
 
 function Drop.initialize(instance)
-  instance.sprite_info = sprite
+  instance.sprite_info = itemInfo.itemSprite
   instance.onPlayerTouch = onPlayerTouch
   instance.shadowHeightMod = 0
 end

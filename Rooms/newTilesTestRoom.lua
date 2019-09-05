@@ -233,6 +233,16 @@ room_part.init.layer = 20
 
 table.insert(room.room_parts, room_part)
 ---
+local room_part = {blueprint = 'GlobalNpcs.chest'}
+room_part.x_that_I_start = 281
+room_part.y_that_I_start = 313
+room_part.row_length = 1
+room_part.col_length = 1
+room_part.tile_width = 16
+room_part.init = {}
+
+table.insert(room.room_parts, room_part)
+---
 local room_part = {
 blueprint = "GlobalNpcs.instructionsDialogue"
 }

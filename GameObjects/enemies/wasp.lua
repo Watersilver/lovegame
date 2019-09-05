@@ -14,7 +14,7 @@ function Wasp.initialize(instance)
   instance.sprite_info = im.spriteSettings.wasp
   instance.zo = - 2
   instance.actAszo0 = true
-  instance.hp = 4 --love.math.random(3)
+  instance.hp = 3 --love.math.random(3)
   instance.image_speed = 0.6
   instance.resetBehaviour = 0.5
   instance.physical_properties.shape = ps.shapes.rectThreeFourths

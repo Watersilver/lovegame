@@ -70,7 +70,9 @@ glsounds = snd.load_sounds{
   getRupee = {"Effects/Oracle_Get_Rupee"},
   getRupee5 = {"Effects/Oracle_Get_Rupee5"},
   getRupee20 = {"Effects/Oracle_Get_Rupee20"},
-  fanfareItem = {"Effects/Oracle_Fanfare_Item"}
+  fanfareItem = {"Effects/Oracle_Fanfare_Item"},
+  open = {"Effects/Oracle_Chest"},
+  heartContainer = {"Effects/Oracle_HeartContainer"}
 }
 
 

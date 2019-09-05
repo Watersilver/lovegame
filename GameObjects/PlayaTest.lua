@@ -1888,7 +1888,6 @@ Playa.functions = {
         if not activatedSomething then
           -- Check if activatable and if yes activate
           if other.activate and not other.unactivatable and not dlg.enable and not dlg.enabled then
-            fuck = 1
             other.activated = true
             other.unactivatable = true
             other.activator = self
@@ -2054,6 +2053,7 @@ Playa.functions = {
       shwSprite.cx, shwSprite.cy)
     end
 
+    -- love.graphics.circle("fill", self.x, self.y, 1)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --

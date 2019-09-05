@@ -59,6 +59,7 @@ end
 function NPC.initialize(instance)
   instance.myText = myText
   instance.myText[1][1][2] = instance.information or "You got [ITEM]!"
+  if type(instance.comment) == "function" then instance.comment = instance.comment() end
   instance.myText[2][1][2] = instance.comment or "How nice!"
   instance.activateFuncs = activateFuncs
   instance.onDialogueRealEnd = onDialogueRealEnd
@@ -68,6 +69,7 @@ function NPC.initialize(instance)
   instance.itemSprite_info = instance.itemSprite_info[1]
   instance.sprite_info = playerSprites
   instance.playerFrame = instance.playerFrame or 0
+  instance.noLetterSound = {[1] = true}
 end
 
 NPC.functions = {

@@ -3,7 +3,9 @@ local ors = {}
 ors.player = function (instance)
   instance.mobility = session.save.playerMobility or 300 -- 600
   instance.brakes = session.save.playerBrakes or 6
-  instance.maxHealth = session.save.playerMaxHealth or 3
+  instance.maxHealth =
+    (session.save.playerMaxHealth or 3) +
+    math.floor((session.save.piecesOfHeart or 0) / 4)
   instance.health = session.save.playerHealth or instance.maxHealth or 3
   instance.maxspeed = session.save.playerMaxSpeed or 100
   instance.walkOnWater = session.save.walkOnWater
