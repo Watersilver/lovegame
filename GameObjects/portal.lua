@@ -2,6 +2,7 @@ local game = require "game"
 local p = require "GameObjects.prototype"
 local ps = require "physics_settings"
 local trans = require "transitions"
+local snd = require "sound"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
@@ -60,6 +61,7 @@ Portal.functions = {
     if other.player then
       -- allow player to jump over ground portal
       if not (self.grounded and other.zo < 0) then
+        snd.play(glsounds.stairs)
         game.transition{
           type = "whiteScreen",
           progress = 0,

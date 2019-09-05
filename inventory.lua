@@ -7,6 +7,25 @@ powToShad = {
   faroresCourage = "itemGreenShader",
 }
 
+-- set up piece of heart image
+local invPieceOfHeart = {
+  img = love.graphics.newImage("Sprites/Inventory/InvPieceOfHeart.png"),
+  smallImg = love.graphics.newImage("Sprites/pieceOfHeart.png"),
+  quads = {}
+}
+invPieceOfHeart.width = (invPieceOfHeart.img:getWidth() / 5) - 2
+invPieceOfHeart.height = invPieceOfHeart.img:getHeight() - 2
+invPieceOfHeart.cx = invPieceOfHeart.width * 0.5
+invPieceOfHeart.cy = invPieceOfHeart.height * 0.5
+for i = 0, 4 do
+  invPieceOfHeart.quads[i] = love.graphics.newQuad(
+    1 + i * (invPieceOfHeart.width + 2), -- x
+    1, -- y
+    invPieceOfHeart.width, invPieceOfHeart.height,
+    invPieceOfHeart.img:getDimensions()
+  )
+end
+
 local inv = {}
 
 inv.sword = {
@@ -228,17 +247,58 @@ end
 
 
 function inv.draw()
-  local x, y = 31, 132
+  local cc = COLORCONST
+
+  -- pieces of heart
+  local pocx, pocy = HudWidth - invPieceOfHeart.width * 2, HudHeight * 0.5
+  love.graphics.print("PIECES",
+  pocx - invPieceOfHeart.width * 0.9, pocy - invPieceOfHeart.height * 2,
+  0, 0.4, 0.4)
+  love.graphics.print("OF HEART",
+  pocx - invPieceOfHeart.width * 1.2, pocy - invPieceOfHeart.height * 1.5,
+  0, 0.4, 0.4)
+  local pohs = (session.save.piecesOfHeart or 0)
+  local ipocFrame = pohs % 4
+  local pohCounter = pohs
+  local pohColourMod = 1
+  if pohs >= GCON.maxPOHs then ipocFrame = 4; pohCounter = "MAX"; pohColourMod = 0.2 end
+  love.graphics.draw(
+    invPieceOfHeart.img,
+    invPieceOfHeart.quads[ipocFrame],
+    pocx,
+    pocy,
+    0, -- angle
+    2, -- scale
+    2,
+    invPieceOfHeart.cx,
+    invPieceOfHeart.cy
+  )
+  love.graphics.draw(
+    invPieceOfHeart.smallImg,
+    HudWidth - invPieceOfHeart.width * 2.6,
+    HudHeight * 0.5 + invPieceOfHeart.height + 3
+  )
+  local pr, pg, pb, pa = love.graphics.getColor()
+  love.graphics.setColor(cc, cc, cc*pohColourMod, cc)
+  love.graphics.print(
+    "x" .. pohCounter,
+    HudWidth - invPieceOfHeart.width * 2.6 + 16,
+    HudHeight * 0.5 + invPieceOfHeart.height + 8,
+    0,
+    0.3
+  )
+  love.graphics.setColor(pr, pg, pb, pa)
+
+  -- spells
+  -- local x, y = 31, 132
+  local itemBoxSide = 18
+  local itemBoxOffset = itemBoxSide + 1
+  local xInit = HudWidth * 0.5 - itemBoxOffset * 1.5
+  local x, y = xInit, HudHeight - itemBoxOffset * 3
+
+  love.graphics.print("SPELLS", x, y - itemBoxOffset * 0.6, 0, 0.4, 0.4)
   for index, contents in ipairs(inv.slots) do
 
-    if cursor.x + 3*cursor.y == index then
-      local pr, pg, pb, pa = love.graphics.getColor()
-      love.graphics.setColor(COLORCONST*0.5, COLORCONST, COLORCONST, COLORCONST)
-      love.graphics.rectangle("line", x, y, 18, 18)
-      love.graphics.setColor(pr, pg, pb, pa)
-    else
-      love.graphics.rectangle("line", x, y, 18, 18)
-    end
     if contents.item then
       local worldShader = love.graphics.getShader()
       local itemShader
@@ -250,11 +310,27 @@ function inv.draw()
       love.graphics.draw(contents.item.invImage, x+1, y+1)
       love.graphics.setShader(worldShader)
     end
+    local pr, pg, pb, pa = love.graphics.getColor()
+    local prevBm = love.graphics.getBlendMode()
+    if cursor.x + 3*cursor.y == index then
+      -- love.graphics.setColor(cc*0.5, cc, cc, cc)
+      love.graphics.setColor(cc * 0.1, cc * 0.1, cc * 0.1, cc * 0.5)
+      love.graphics.rectangle("line", x, y, itemBoxSide, itemBoxSide)
+      love.graphics.setColor(cc * 0.2, cc * 0.2, cc * 0.2, cc * 0.1)
+      love.graphics.rectangle("fill", x, y, itemBoxSide, itemBoxSide)
+    else
+      love.graphics.setColor(0, 0, 0, cc * 0.5)
+      love.graphics.rectangle("line", x, y, itemBoxSide, itemBoxSide)
+      love.graphics.setColor(0, 0, 0, cc * 0.3)
+      love.graphics.rectangle("fill", x, y, itemBoxSide, itemBoxSide)
+    end
+    love.graphics.setBlendMode(prevBm)
+    love.graphics.setColor(pr, pg, pb, pa)
     love.graphics.print(contents.key, x+1, y, 0, 0.2, 0.2)
-    x = x + 19
+    x = x + itemBoxOffset
     if index % 3 == 0 then
-      y = y + 19
-      x = 31
+      y = y + itemBoxOffset
+      x = xInit
     end
   end
 end

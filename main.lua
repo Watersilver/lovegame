@@ -10,6 +10,10 @@ end
 local success = love.filesystem.createDirectory("Saves")
 if not success then love.errhand("Failed to create save directory") end
 
+-- game constants
+GCON = {
+  maxPOHs = 1
+}
 -- Load stuff from save directory
 local gs = require "game_settings"
 
@@ -72,9 +76,9 @@ glsounds = snd.load_sounds{
   getRupee20 = {"Effects/Oracle_Get_Rupee20"},
   fanfareItem = {"Effects/Oracle_Fanfare_Item"},
   open = {"Effects/Oracle_Chest"},
-  heartContainer = {"Effects/Oracle_HeartContainer"}
+  heartContainer = {"Effects/Oracle_HeartContainer"},
+  stairs = {"Effects/Oracle_Stairs"}
 }
-
 
 -- Set up cameras
 mainCamera = gamera.new(0,0,800,450)
@@ -88,7 +92,9 @@ if gs.fullscreen then
   love.window.setFullscreen(true)
 end
 
-Hud = gamera.new(0,0,400,225)
+HudWidth = 400
+HudHeight = 225
+Hud = gamera.new(0,0,HudWidth,HudHeight)
 local hud = Hud
 hud.xt = 0
 hud.yt = 0
