@@ -213,7 +213,15 @@ function Playa.initialize(instance)
               instance.movement_state:change_state(instance, dt, "using_sword")
             elseif trig.swing_sword then
               instance.movement_state:change_state(instance, dt, "using_sword")
-            elseif instance.zo == 0 then
+            elseif instance.zo == 0 and (
+              otherstate:find("still") or
+              otherstate:find("walk") or
+              otherstate:find("halt") or
+              otherstate:find("push")
+            )
+            then
+              -- trigger these only grounded and during certain animations
+              -- WHY DID I SEPARATE MOVEMENT STATE AND ANIMATIO STATE?
               if trig.mark then
                 instance.movement_state:change_state(instance, dt, "using_mark")
               elseif trig.recall then
