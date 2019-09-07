@@ -70,7 +70,7 @@ NPC.functions = {
         snd.play(glsounds.letter)
         dlg.simpleWallOfText.setUp(
           {{{COLORCONST,COLORCONST,COLORCONST,COLORCONST},
-          "Can't open from that side..."},
+          "Can't open it from here..."},
           -1, "left"},
           self.y,
           function() self.sideDialogueEnd = true end

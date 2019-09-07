@@ -40,6 +40,7 @@ im.spriteSettings = {
   testlift = {'LiftableTest', 1, width = 16, height = 16},
   liftableRock = {'LiftableRock', padding = 0, width = 15, height = 15},
   rockDestruction = {'RockDestruction', 4, padding = 2, width = 30, height = 22},
+  woodDestruction = {'WoodDestruction', 4, padding = 2, width = 30, height = 22},
   rockPlummet = {'RockPlummet', 3, padding = 2, width = 10, height = 10},
   rockSink = {'RockSink', 3, padding = 2, width = 24, height = 16},
   bushDestruction = {'BushDestruction', 8, padding = 2, width = 30, height = 34},

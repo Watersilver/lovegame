@@ -3,12 +3,21 @@ local snd = require "sound"
 local p = require "GameObjects.prototype"
 local dlg = require "dialogue"
 local ps = require "physics_settings"
+local drops = require "Gameobjects.drops.drops"
+local expl = require "GameObjects.explode"
 local inp = require "input"
 local game = require "game"
+local dc = require "GameObjects.Helpers.determine_colliders"
 local itemGetPoseAndDlg = require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"
 local o = require "GameObjects.objects"
 
 local npcTest = require "GameObjects.NpcTest"
+
+
+local function throw_collision(self)
+  expl.commonExplosion(self, im.spriteSettings.woodDestruction)
+  drops.normal(self.x, self.y)
+end
 
 
 local floor = math.floor
@@ -20,7 +29,8 @@ function NPC.initialize(instance)
   instance.sprite_info = im.spriteSettings.sign
   instance.spritefixture_properties = nil
   instance.unpushable = false
-  instance.pushback = true
+  instance.pushback = not session.save.dinsPower
+  instance.liftable = true
   instance.ballbreaker = true
   instance.layer = 15
   instance.physical_properties = {
@@ -28,6 +38,7 @@ function NPC.initialize(instance)
     edgetable = ps.shapes.edgeRect1x1
   }
   instance.pauseWhenReading = true
+  instance.throw_collision = throw_collision
 end
 
 NPC.functions = {
@@ -64,7 +75,7 @@ NPC.functions = {
         snd.play(glsounds.letter)
         dlg.simpleWallOfText.setUp(
           {{{COLORCONST,COLORCONST,COLORCONST,COLORCONST},
-          "Can't read from that side..."},
+          "Can't read it from here..."},
           -1, "left"},
           self.y,
           function() self.dialogueEnd = true end
@@ -90,6 +101,17 @@ NPC.functions = {
         self.dialogueActive = nil
         self.dialogueEnd = nil
       end
+    end
+  end,
+
+  beginContact = function(self, a, b, coll, aob, bob)
+
+    -- Find which fixture belongs to whom
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+    if other.immasword and session.save.dinsPower then
+      self:throw_collision()
+      o.removeFromWorld(self)
+      self.beginContact = nil
     end
   end
 }

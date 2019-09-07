@@ -100,7 +100,7 @@ Enemy.functions = {
 
   hitByMissile = function (self, other, myF, otherF)
     local damage
-    if session.save.dinsPower then
+    if session.save.nayrusWisdom then
       damage = other.hitBySword and 3 or 2
     else
       damage = other.hitBySword and 2 or 1
