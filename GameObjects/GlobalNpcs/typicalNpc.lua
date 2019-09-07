@@ -13,9 +13,13 @@ local NPC = {}
 local cc = COLORCONST
 
 local function typical_activate(self, dt, textIndex)
+  local yToAvoid = self.y
+  if self.dontDrawOverPlayer and pl1 then
+    yToAvoid = pl1.y
+  end
   dlg.simpleWallOfText.setUp(
     self.myText[textIndex],
-    self.y,
+    yToAvoid,
     self.onDialogueEnd
   )
   dlg.enable = true

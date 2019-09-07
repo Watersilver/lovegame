@@ -63,6 +63,9 @@ im.spriteSettings = {
   chest = {
     {'NPCs/Chest/down', 2, padding = 2, width = 16, height = 16}
   },
+  sign = {
+    {'NPCs/Sign/down', 2, padding = 2, width = 16, height = 16}
+  },
 
   -- drops
   dropHeart = {

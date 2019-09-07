@@ -38,6 +38,7 @@ end
 function NPC.initialize(instance)
   instance.myText = myText
   instance.activateFuncs = activateFuncs
+  instance.dontDrawOverPlayer = true
   instance.onDialogueRealEnd = nil
   instance.spritefixture_properties = nil
   instance.sprite_info = nil

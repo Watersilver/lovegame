@@ -12,7 +12,9 @@ if not success then love.errhand("Failed to create save directory") end
 
 -- game constants
 GCON = {
-  maxPOHs = 1
+  -- pieces of heart in world:
+  -- 4 random
+  maxPOHs = 4
 }
 -- Load stuff from save directory
 local gs = require "game_settings"
