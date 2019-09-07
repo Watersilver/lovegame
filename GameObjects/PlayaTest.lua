@@ -46,50 +46,50 @@ local abs = math.abs
 local pi = math.pi
 local huge = math.huge
 
-local check_walk = hps.check_walk
-local check_halt = hps.check_halt
-local check_still = hps.check_still
-local check_push = hps.check_push
-local run_swing = hps.run_swing
-local check_swing = hps.check_swing
-local start_swing = hps.start_swing
-local end_swing = hps.end_swing
-local run_stab = hps.run_stab
-local check_stab = hps.check_stab
-local start_stab = hps.start_stab
-local end_stab = hps.end_stab
-local check_hold = hps.check_hold
-local start_hold = hps.start_hold
-local start_jump = hps.start_jump
-local run_fall = hps.run_fall
-local check_fall = hps.check_fall
-local start_fall = hps.start_fall
-local end_fall = hps.end_fall
-local run_missile = hps.run_missile
-local check_missile = hps.check_missile
-local start_missile = hps.start_missile
-local end_missile = hps.end_missile
-local run_gripping = hps.run_gripping
-local check_gripping = hps.check_gripping
-local start_gripping = hps.start_gripping
-local end_gripping = hps.end_gripping
-local run_lifting = hps.run_lifting
-local check_lifting = hps.check_lifting
-local start_lifting = hps.start_lifting
-local end_lifting = hps.end_lifting
-local run_lifted = hps.run_lifted
-local check_lifted = hps.check_lifted
-local start_lifted = hps.start_lifted
-local end_lifted = hps.end_lifted
-local run_damaged = hps.run_damaged
-local check_damaged = hps.check_damaged
-local start_damaged = hps.start_damaged
-local end_damaged = hps.end_damaged
-local run_climbing = hps.run_climbing
-local check_climbing = hps.check_climbing
-local start_climbing = hps.start_climbing
-local end_climbing = hps.end_climbing
-local img_speed_and_footstep_sound = hps.img_speed_and_footstep_sound
+-- local check_walk = hps.check_walk
+-- local check_halt = hps.check_halt
+-- local check_still = hps.check_still
+-- local check_push = hps.check_push
+-- local run_swing = hps.run_swing
+-- local check_swing = hps.check_swing
+-- local start_swing = hps.start_swing
+-- local end_swing = hps.end_swing
+-- local run_stab = hps.run_stab
+-- local check_stab = hps.check_stab
+-- local start_stab = hps.start_stab
+-- local end_stab = hps.end_stab
+-- local check_hold = hps.check_hold
+-- local start_hold = hps.start_hold
+-- local start_jump = hps.start_jump
+-- local run_fall = hps.run_fall
+-- local check_fall = hps.check_fall
+-- local start_fall = hps.start_fall
+-- local end_fall = hps.end_fall
+-- local run_missile = hps.run_missile
+-- local check_missile = hps.check_missile
+-- local start_missile = hps.start_missile
+-- local end_missile = hps.end_missile
+-- local run_gripping = hps.run_gripping
+-- local check_gripping = hps.check_gripping
+-- local start_gripping = hps.start_gripping
+-- local end_gripping = hps.end_gripping
+-- local run_lifting = hps.run_lifting
+-- local check_lifting = hps.check_lifting
+-- local start_lifting = hps.start_lifting
+-- local end_lifting = hps.end_lifting
+-- local run_lifted = hps.run_lifted
+-- local check_lifted = hps.check_lifted
+-- local start_lifted = hps.start_lifted
+-- local end_lifted = hps.end_lifted
+-- local run_damaged = hps.run_damaged
+-- local check_damaged = hps.check_damaged
+-- local start_damaged = hps.start_damaged
+-- local end_damaged = hps.end_damaged
+-- local run_climbing = hps.run_climbing
+-- local check_climbing = hps.check_climbing
+-- local start_climbing = hps.start_climbing
+-- local end_climbing = hps.end_climbing
+-- local img_speed_and_footstep_sound = hps.img_speed_and_footstep_sound
 
 local Playa = {}
 
@@ -342,11 +342,11 @@ function Playa.initialize(instance)
 
     downwalk = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
     end,
 
     check_state = function(instance, dt)
-      check_walk(instance, dt, "down")
+      hps.check_walk(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
@@ -360,11 +360,11 @@ function Playa.initialize(instance)
 
     rightwalk = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
     end,
 
     check_state = function(instance, dt)
-      check_walk(instance, dt, "right")
+      hps.check_walk(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
@@ -380,11 +380,11 @@ function Playa.initialize(instance)
 
     leftwalk = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
     end,
 
     check_state = function(instance, dt)
-      check_walk(instance, dt, "left")
+      hps.check_walk(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
@@ -398,11 +398,11 @@ function Playa.initialize(instance)
 
     upwalk = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
     end,
 
     check_state = function(instance, dt)
-      check_walk(instance, dt, "up")
+      hps.check_walk(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
@@ -420,7 +420,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      check_halt(instance, dt, "down")
+      hps.check_halt(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
@@ -439,7 +439,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      check_halt(instance, dt, "right")
+      hps.check_halt(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
@@ -460,7 +460,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      check_halt(instance, dt, "left")
+      hps.check_halt(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
@@ -479,7 +479,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      check_halt(instance, dt, "up")
+      hps.check_halt(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
@@ -498,7 +498,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      check_still(instance, dt, "down")
+      hps.check_still(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
@@ -516,7 +516,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      check_still(instance, dt, "right")
+      hps.check_still(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
@@ -536,7 +536,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      check_still(instance, dt, "left")
+      hps.check_still(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
@@ -554,7 +554,7 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      check_still(instance, dt, "up")
+      hps.check_still(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
@@ -568,12 +568,12 @@ function Playa.initialize(instance)
 
     downpush = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
       instance.image_speed = max(0.02, instance.image_speed)
     end,
 
     check_state = function(instance, dt)
-      check_push(instance, dt, "down")
+      hps.check_push(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
@@ -587,12 +587,12 @@ function Playa.initialize(instance)
 
     rightpush = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
       instance.image_speed = max(0.01, instance.image_speed)
     end,
 
     check_state = function(instance, dt)
-      check_push(instance, dt, "right")
+      hps.check_push(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
@@ -608,12 +608,12 @@ function Playa.initialize(instance)
 
     leftpush = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
       instance.image_speed = max(0.01, instance.image_speed)
     end,
 
     check_state = function(instance, dt)
-      check_push(instance, dt, "left")
+      hps.check_push(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
@@ -627,12 +627,12 @@ function Playa.initialize(instance)
 
     uppush = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
       instance.image_speed = max(0.01, instance.image_speed)
     end,
 
     check_state = function(instance, dt)
-      check_push(instance, dt, "up")
+      hps.check_push(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
@@ -646,168 +646,168 @@ function Playa.initialize(instance)
 
     downswing = {
     run_state = function(instance, dt)
-      run_swing(instance, dt, "down")
+      hps.run_swing(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
-      check_swing(instance, dt, "down")
+      hps.check_swing(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      start_swing(instance, dt, "down")
+      hps.start_swing(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
-      end_swing(instance, dt, "down")
+      hps.end_swing(instance, dt, "down")
     end
     },
 
 
     rightswing = {
     run_state = function(instance, dt)
-      run_swing(instance, dt, "right")
+      hps.run_swing(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
-      check_swing(instance, dt, "right")
+      hps.check_swing(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      start_swing(instance, dt, "right")
+      hps.start_swing(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      end_swing(instance, dt, "right")
+      hps.end_swing(instance, dt, "right")
     end
     },
 
 
     leftswing = {
     run_state = function(instance, dt)
-      run_swing(instance, dt, "left")
+      hps.run_swing(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
-      check_swing(instance, dt, "left")
+      hps.check_swing(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      start_swing(instance, dt, "left")
+      hps.start_swing(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
-      end_swing(instance, dt, "left")
+      hps.end_swing(instance, dt, "left")
     end
     },
 
 
     upswing = {
     run_state = function(instance, dt)
-      run_swing(instance, dt, "up")
+      hps.run_swing(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
-      check_swing(instance, dt, "up")
+      hps.check_swing(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_swing(instance, dt, "up")
+      hps.start_swing(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
-      end_swing(instance, dt, "up")
+      hps.end_swing(instance, dt, "up")
     end
     },
 
 
     downstab = {
     run_state = function(instance, dt)
-      run_stab(instance, dt, "down")
+      hps.run_stab(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
-      check_stab(instance, dt, "down")
+      hps.check_stab(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      start_stab(instance, dt, "down")
+      hps.start_stab(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
-      end_stab(instance, dt, "down")
+      hps.end_stab(instance, dt, "down")
     end
     },
 
 
     rightstab = {
     run_state = function(instance, dt)
-      run_stab(instance, dt, "right")
+      hps.run_stab(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
-      check_stab(instance, dt, "right")
+      hps.check_stab(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      start_stab(instance, dt, "right")
+      hps.start_stab(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      end_stab(instance, dt, "right")
+      hps.end_stab(instance, dt, "right")
     end
     },
 
 
     leftstab = {
     run_state = function(instance, dt)
-      run_stab(instance, dt, "left")
+      hps.run_stab(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
-      check_stab(instance, dt, "left")
+      hps.check_stab(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      start_stab(instance, dt, "left")
+      hps.start_stab(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
-      end_stab(instance, dt, "left")
+      hps.end_stab(instance, dt, "left")
     end
     },
 
 
     upstab = {
     run_state = function(instance, dt)
-      run_stab(instance, dt, "up")
+      hps.run_stab(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
-      check_stab(instance, dt, "up")
+      hps.check_stab(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_stab(instance, dt, "up")
+      hps.start_stab(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
-      end_stab(instance, dt, "up")
+      hps.end_stab(instance, dt, "up")
     end
     },
 
 
     downhold = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
       if instance.speed < 5 then instance.image_index = 0 end
     end,
 
     check_state = function(instance, dt)
-      check_hold(instance, dt, "down")
+      hps.check_hold(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      start_hold(instance, dt, "down")
+      hps.start_hold(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
@@ -820,16 +820,16 @@ function Playa.initialize(instance)
 
     righthold = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
       if instance.speed < 5 then instance.image_index = 0 end
     end,
 
     check_state = function(instance, dt)
-      check_hold(instance, dt, "right")
+      hps.check_hold(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      start_hold(instance, dt, "right")
+      hps.start_hold(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
@@ -843,16 +843,16 @@ function Playa.initialize(instance)
 
     lefthold = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
       if instance.speed < 5 then instance.image_index = 0 end
     end,
 
     check_state = function(instance, dt)
-      check_hold(instance, dt, "left")
+      hps.check_hold(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      start_hold(instance, dt, "left")
+      hps.start_hold(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
@@ -865,16 +865,16 @@ function Playa.initialize(instance)
 
     uphold = {
     run_state = function(instance, dt)
-      img_speed_and_footstep_sound(instance, dt)
+      hps.img_speed_and_footstep_sound(instance, dt)
       if instance.speed < 5 then instance.image_index = 0 end
     end,
 
     check_state = function(instance, dt)
-      check_hold(instance, dt, "up")
+      hps.check_hold(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_hold(instance, dt, "up")
+      hps.start_hold(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
@@ -893,7 +893,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
-      start_jump(instance, dt, "down")
+      hps.start_jump(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
@@ -909,7 +909,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
-      start_jump(instance, dt, "right")
+      hps.start_jump(instance, dt, "right")
       instance.x_scale = -1
     end,
 
@@ -927,7 +927,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
-      start_jump(instance, dt, "left")
+      hps.start_jump(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
@@ -943,7 +943,7 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
-      start_jump(instance, dt, "up")
+      hps.start_jump(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
@@ -953,456 +953,456 @@ function Playa.initialize(instance)
 
     downfall = {
     run_state = function(instance, dt)
-      run_fall(instance, dt, "down")
+      hps.run_fall(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
-      check_fall(instance, dt, "down")
+      hps.check_fall(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      start_fall(instance, dt, "down")
+      hps.start_fall(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
-      end_fall(instance, dt, "down")
+      hps.end_fall(instance, dt, "down")
     end
     },
 
 
     rightfall = {
     run_state = function(instance, dt)
-      run_fall(instance, dt, "right")
+      hps.run_fall(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
-      check_fall(instance, dt, "right")
+      hps.check_fall(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      start_fall(instance, dt, "right")
+      hps.start_fall(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      end_fall(instance, dt, "right")
+      hps.end_fall(instance, dt, "right")
     end
     },
 
 
     leftfall = {
     run_state = function(instance, dt)
-      run_fall(instance, dt, "left")
+      hps.run_fall(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
-      check_fall(instance, dt, "left")
+      hps.check_fall(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      start_fall(instance, dt, "left")
+      hps.start_fall(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
-      end_fall(instance, dt, "left")
+      hps.end_fall(instance, dt, "left")
     end
     },
 
 
     upfall = {
     run_state = function(instance, dt)
-      run_fall(instance, dt, "up")
+      hps.run_fall(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
-      check_fall(instance, dt, "up")
+      hps.check_fall(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_fall(instance, dt, "up")
+      hps.start_fall(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
-      end_fall(instance, dt, "up")
+      hps.end_fall(instance, dt, "up")
     end
     },
 
 
     downmissile = {
     run_state = function(instance, dt)
-      run_missile(instance, dt, "down")
+      hps.run_missile(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
-      check_missile(instance, dt, "down")
+      hps.check_missile(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      start_missile(instance, dt, "down")
+      hps.start_missile(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
-      end_missile(instance, dt, "down")
+      hps.end_missile(instance, dt, "down")
     end
     },
 
 
     rightmissile = {
     run_state = function(instance, dt)
-      run_missile(instance, dt, "right")
+      hps.run_missile(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
-      check_missile(instance, dt, "right")
+      hps.check_missile(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      start_missile(instance, dt, "right")
+      hps.start_missile(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      end_missile(instance, dt, "right")
+      hps.end_missile(instance, dt, "right")
     end
     },
 
 
     leftmissile = {
     run_state = function(instance, dt)
-      run_missile(instance, dt, "left")
+      hps.run_missile(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
-      check_missile(instance, dt, "left")
+      hps.check_missile(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      start_missile(instance, dt, "left")
+      hps.start_missile(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
-      end_missile(instance, dt, "left")
+      hps.end_missile(instance, dt, "left")
     end
     },
 
 
     upmissile = {
     run_state = function(instance, dt)
-      run_missile(instance, dt, "up")
+      hps.run_missile(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
-      check_missile(instance, dt, "up")
+      hps.check_missile(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_missile(instance, dt, "up")
+      hps.start_missile(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
-      end_missile(instance, dt, "up")
+      hps.end_missile(instance, dt, "up")
     end
     },
 
 
     downgripping = {
     run_state = function(instance, dt)
-      run_gripping(instance, dt, "down")
+      hps.run_gripping(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
-      check_gripping(instance, dt, "down")
+      hps.check_gripping(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      start_gripping(instance, dt, "down")
+      hps.start_gripping(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
-      end_gripping(instance, dt, "down")
+      hps.end_gripping(instance, dt, "down")
     end
     },
 
 
     rightgripping = {
     run_state = function(instance, dt)
-      run_gripping(instance, dt, "right")
+      hps.run_gripping(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
-      check_gripping(instance, dt, "right")
+      hps.check_gripping(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      start_gripping(instance, dt, "right")
+      hps.start_gripping(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      end_gripping(instance, dt, "right")
+      hps.end_gripping(instance, dt, "right")
     end
     },
 
 
     leftgripping = {
     run_state = function(instance, dt)
-      run_gripping(instance, dt, "left")
+      hps.run_gripping(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
-      check_gripping(instance, dt, "left")
+      hps.check_gripping(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      start_gripping(instance, dt, "left")
+      hps.start_gripping(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
-      end_gripping(instance, dt, "left")
+      hps.end_gripping(instance, dt, "left")
     end
     },
 
 
     upgripping = {
     run_state = function(instance, dt)
-      run_gripping(instance, dt, "up")
+      hps.run_gripping(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
-      check_gripping(instance, dt, "up")
+      hps.check_gripping(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_gripping(instance, dt, "up")
+      hps.start_gripping(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
-      end_gripping(instance, dt, "up")
+      hps.end_gripping(instance, dt, "up")
     end
     },
 
 
     downlifting = {
     run_state = function(instance, dt)
-      run_lifting(instance, dt, "down")
+      hps.run_lifting(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
-      check_lifting(instance, dt, "down")
+      hps.check_lifting(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      start_lifting(instance, dt, "down")
+      hps.start_lifting(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
-      end_lifting(instance, dt, "down")
+      hps.end_lifting(instance, dt, "down")
     end
     },
 
 
     rightlifting = {
     run_state = function(instance, dt)
-      run_lifting(instance, dt, "right")
+      hps.run_lifting(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
-      check_lifting(instance, dt, "right")
+      hps.check_lifting(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      start_lifting(instance, dt, "right")
+      hps.start_lifting(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      end_lifting(instance, dt, "right")
+      hps.end_lifting(instance, dt, "right")
     end
     },
 
 
     leftlifting = {
     run_state = function(instance, dt)
-      run_lifting(instance, dt, "left")
+      hps.run_lifting(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
-      check_lifting(instance, dt, "left")
+      hps.check_lifting(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      start_lifting(instance, dt, "left")
+      hps.start_lifting(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
-      end_lifting(instance, dt, "left")
+      hps.end_lifting(instance, dt, "left")
     end
     },
 
 
     uplifting = {
     run_state = function(instance, dt)
-      run_lifting(instance, dt, "up")
+      hps.run_lifting(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
-      check_lifting(instance, dt, "up")
+      hps.check_lifting(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_lifting(instance, dt, "up")
+      hps.start_lifting(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
-      end_lifting(instance, dt, "up")
+      hps.end_lifting(instance, dt, "up")
     end
     },
 
 
     downlifted = {
     run_state = function(instance, dt)
-      run_lifted(instance, dt, "down")
+      hps.run_lifted(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
-      check_lifted(instance, dt, "down")
+      hps.check_lifted(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      start_lifted(instance, dt, "down")
+      hps.start_lifted(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
-      end_lifted(instance, dt, "down")
+      hps.end_lifted(instance, dt, "down")
     end
     },
 
 
     rightlifted = {
     run_state = function(instance, dt)
-      run_lifted(instance, dt, "right")
+      hps.run_lifted(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
-      check_lifted(instance, dt, "right")
+      hps.check_lifted(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      start_lifted(instance, dt, "right")
+      hps.start_lifted(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      end_lifted(instance, dt, "right")
+      hps.end_lifted(instance, dt, "right")
     end
     },
 
 
     leftlifted = {
     run_state = function(instance, dt)
-      run_lifted(instance, dt, "left")
+      hps.run_lifted(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
-      check_lifted(instance, dt, "left")
+      hps.check_lifted(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      start_lifted(instance, dt, "left")
+      hps.start_lifted(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
-      end_lifted(instance, dt, "left")
+      hps.end_lifted(instance, dt, "left")
     end
     },
 
 
     uplifted = {
     run_state = function(instance, dt)
-      run_lifted(instance, dt, "up")
+      hps.run_lifted(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
-      check_lifted(instance, dt, "up")
+      hps.check_lifted(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_lifted(instance, dt, "up")
+      hps.start_lifted(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
-      end_lifted(instance, dt, "up")
+      hps.end_lifted(instance, dt, "up")
     end
     },
 
 
     downdamaged = {
     run_state = function(instance, dt)
-      run_damaged(instance, dt, "down")
+      hps.run_damaged(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
-      check_damaged(instance, dt, "down")
+      hps.check_damaged(instance, dt, "down")
     end,
 
     start_state = function(instance, dt)
-      start_damaged(instance, dt, "down")
+      hps.start_damaged(instance, dt, "down")
     end,
 
     end_state = function(instance, dt)
-      end_damaged(instance, dt, "down")
+      hps.end_damaged(instance, dt, "down")
     end
     },
 
 
     rightdamaged = {
     run_state = function(instance, dt)
-      run_damaged(instance, dt, "right")
+      hps.run_damaged(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
-      check_damaged(instance, dt, "right")
+      hps.check_damaged(instance, dt, "right")
     end,
 
     start_state = function(instance, dt)
-      start_damaged(instance, dt, "right")
+      hps.start_damaged(instance, dt, "right")
     end,
 
     end_state = function(instance, dt)
-      end_damaged(instance, dt, "right")
+      hps.end_damaged(instance, dt, "right")
     end
     },
 
 
     leftdamaged = {
     run_state = function(instance, dt)
-      run_damaged(instance, dt, "left")
+      hps.run_damaged(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
-      check_damaged(instance, dt, "left")
+      hps.check_damaged(instance, dt, "left")
     end,
 
     start_state = function(instance, dt)
-      start_damaged(instance, dt, "left")
+      hps.start_damaged(instance, dt, "left")
     end,
 
     end_state = function(instance, dt)
-      end_damaged(instance, dt, "left")
+      hps.end_damaged(instance, dt, "left")
     end
     },
 
 
     updamaged = {
     run_state = function(instance, dt)
-      run_damaged(instance, dt, "up")
+      hps.run_damaged(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
-      check_damaged(instance, dt, "up")
+      hps.check_damaged(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_damaged(instance, dt, "up")
+      hps.start_damaged(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
-      end_damaged(instance, dt, "up")
+      hps.end_damaged(instance, dt, "up")
     end
     },
 
@@ -1520,19 +1520,19 @@ function Playa.initialize(instance)
 
     upclimbing = {
     run_state = function(instance, dt)
-      run_climbing(instance, dt, "up")
+      hps.run_climbing(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
-      check_climbing(instance, dt, "up")
+      hps.check_climbing(instance, dt, "up")
     end,
 
     start_state = function(instance, dt)
-      start_climbing(instance, dt, "up")
+      hps.start_climbing(instance, dt, "up")
     end,
 
     end_state = function(instance, dt)
-      end_climbing(instance, dt, "up")
+      hps.end_climbing(instance, dt, "up")
     end
     },
 
@@ -1569,7 +1569,7 @@ function Playa.initialize(instance)
       instance.image_speed = 0
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
-      if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
+      if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
         instance.health = instance.health - 1
       end
     end
@@ -1610,7 +1610,7 @@ function Playa.initialize(instance)
       instance.yUnsteppable = instance.y
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
-      if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
+      if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
         instance.health = instance.health - 1
       end
     end

@@ -4,6 +4,7 @@ local im = require "image"
 local inp = require "input"
 local snd = require "sound"
 local ps = require "physics_settings"
+local dlg = require "dialogue"
 
 local o = require "GameObjects.objects"
 local sw = require "GameObjects.Items.sword"
@@ -557,7 +558,7 @@ player_states.start_damaged = function(instance, dt, side)
   end
   instance.image_index = 0
   instance.image_speed = 0
-  if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
+  if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
     instance.health = instance.health - 1
   end
   inp.controllers[instance.player].disabled = true
