@@ -37,14 +37,14 @@ function NPC.initialize(instance)
     tile = {"u", "d", "l", "r"},
     edgetable = ps.shapes.edgeRect1x1
   }
-  instance.pauseWhenReading = true
+  instance.pauseWhenReading = false
   instance.throw_collision = throw_collision
 end
 
 NPC.functions = {
   activate = function (self, dt)
     if self.activated then
-      game.cutscenePause(true)
+      if self.pauseWhenReading then game.cutscenePause(true) end
 
       if pl1 and pl1.y > self.ystart + self.sprite.height / 2 then -- Read sign
         local ssw = self.sprite.width * 0.4
@@ -65,7 +65,7 @@ NPC.functions = {
           dlg.enable = true
         else
           self.doNothing = true
-          game.cutscenePause(false)
+          if self.pauseWhenReading then game.cutscenePause(false) end
         end
       else -- cant read from that side
         if self.activator then
@@ -91,7 +91,7 @@ NPC.functions = {
       if self.dialogueEnd then self.active = false end
       end
     else
-      game.cutscenePause(false)
+      if self.pauseWhenReading then game.cutscenePause(false) end
       if self.activator then
         if self.activator.body then self.activator.body:setType("dynamic") end
         if self.activator.player then inp.enable_controller(self.activator.player) end

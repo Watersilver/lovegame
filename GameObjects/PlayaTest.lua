@@ -1569,7 +1569,9 @@ function Playa.initialize(instance)
       instance.image_speed = 0
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
-      instance.health = instance.health - 1
+      if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
+        instance.health = instance.health - 1
+      end
     end
     },
 
@@ -1608,7 +1610,9 @@ function Playa.initialize(instance)
       instance.yUnsteppable = instance.y
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
-      instance.health = instance.health - 1
+      if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
+        instance.health = instance.health - 1
+      end
     end
     },
 
@@ -2239,7 +2243,7 @@ Playa.functions = {
       if other.grounded then
         if self.zo < 0 then coll:setEnabled(false); return end
       end
-      if other.damager and not self.invulnerable and not other.harmless then
+      if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) and other.damager and not self.invulnerable and not other.harmless then
         self.triggers.damaged = true
         local mybod = self.body
         local mymass = mybod:getMass()
