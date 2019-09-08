@@ -67,6 +67,7 @@ function HeldSword.initialize(instance)
   else
     if session.save.dinsPower then instance.myShader = shdrs["itemRedShader"] end
   end
+  instance.chargedShader = shdrs.swordChargeShader
 end
 
 HeldSword.functions = {
@@ -148,12 +149,28 @@ HeldSword.functions = {
     end
     local frame = sprite[self.image_index]
     local worldShader = love.graphics.getShader()
-    love.graphics.setShader(self.myShader)
+    local pr, pg, pb, pa = love.graphics.getColor()
+    if self.creator and self.creator.spinCharged then
+      -- relative luminance: 0.2126 * R + 0.7152 * G + 0.0722 * B
+      -- maybe move the color picking logic to update
+      local randHue = COLORCONST * love.math.random()
+      local r1, g1, b1, a = HSL(randHue, 1 * COLORCONST, 0.5 * COLORCONST, COLORCONST)
+      local r2, g2, b2, a = HSL(randHue, 1 * COLORCONST, 0.75 * COLORCONST, COLORCONST)
+      local ccInv = 1 / COLORCONST
+      r1, g1, b1, r2, g2, b2 =
+      r1 * ccInv, g1 * ccInv, b1 * ccInv,
+      r2 * ccInv, g2 * ccInv, b2 * ccInv
+      self.chargedShader:send("rgb", r1, g1, b1, r2, g2, b2, a)
+      love.graphics.setShader(self.chargedShader)
+    else
+      love.graphics.setShader(self.myShader)
+    end
     love.graphics.draw(
     sprite.img, frame, x, y, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
     love.graphics.setShader(worldShader)
+    love.graphics.setColor(pr, pg, pb, pa)
 
     -- Debug
     -- love.graphics.polygon("line",

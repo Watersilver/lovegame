@@ -207,6 +207,18 @@ end
 
 player_states.end_stab = player_states.end_swing
 
+player_states.run_hold = function(instance, dt, side)
+  img_speed_and_footstep_sound(instance, dt)
+  -- Update spin attack counter
+  instance.spinAttackCounter = instance.spinAttackCounter + dt
+  if instance.spinCharged == false and instance.spinAttackCounter > (session.save.swordSpeed * 2.5 or 3) then
+    instance.spinCharged = true
+    snd.play(instance.sounds.swordCharge)
+  end
+
+  if instance.speed < 5 then instance.image_index = 0 end
+end
+
 player_states.check_hold = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if pddp(instance, trig, side) then
@@ -215,7 +227,11 @@ player_states.check_hold = function(instance, dt, side)
   elseif trig.stab then
     instance.animation_state:change_state(instance, dt, side .. "stab")
   elseif not trig.hold_sword or not instance.sword then
-    instance.animation_state:change_state(instance, dt, side .. "walk")
+    if instance.spinCharged then -- spin attack
+      instance.animation_state:change_state(instance, dt, "spinattack")
+    else
+      instance.animation_state:change_state(instance, dt, side .. "walk")
+    end
   end
 end
 
@@ -227,9 +243,19 @@ player_states.start_hold = function(instance, dt, side)
     instance.sprite = im.sprites["Witch/hold_left"]
     instance.x_scale = -1
   end
+  -- Start spin attack counter
+  instance.spinAttackCounter = 0
+  instance.spinCharged = false
   -- Create sword
   instance.sword = hsw:new{creator = instance, side = side, layer = instance.layer}
   o.addToWorld(instance.sword)
+end
+
+player_states.end_hold = function(instance, dt, side)
+  -- Delete sword
+  o.removeFromWorld(instance.sword)
+  instance.sword = nil
+  if side ~= "right" then instance.x_scale = 1 end
 end
 
 player_states.start_jump = function(instance, dt, side)

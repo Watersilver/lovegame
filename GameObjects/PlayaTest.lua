@@ -175,6 +175,8 @@ function Playa.initialize(instance)
     plummet = {"Effects/Oracle_Link_Fall"},
     dying = {"Effects/Oracle_Link_Dying"},
     die = {"Effects/Oracle_ScentSeed"},
+    swordCharge = {"Effects/Oracle_Sword_Charge"},
+    swordSpin = {"Effects/Oracle_Sword_Spin"}
   })
   instance.floorTiles = {role = "playerFloorTilesIndex"} -- Tracks what kind of floortiles I'm on
   instance.player = "player1"
@@ -211,7 +213,7 @@ function Playa.initialize(instance)
 
             if trig.stab then
               instance.movement_state:change_state(instance, dt, "using_sword")
-            elseif trig.swing_sword then
+            elseif trig.swing_sword and otherstate ~= "spinattack" then
               instance.movement_state:change_state(instance, dt, "using_sword")
             elseif instance.zo == 0 and (
               otherstate:find("still") or
@@ -806,8 +808,7 @@ function Playa.initialize(instance)
 
     downhold = {
     run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-      if instance.speed < 5 then instance.image_index = 0 end
+      hps.run_hold(instance, dt, "down")
     end,
 
     check_state = function(instance, dt)
@@ -819,17 +820,14 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      -- Delete sword
-      o.removeFromWorld(instance.sword)
-      instance.sword = nil
+      hps.end_hold(instance, dt, "down")
     end
     },
 
 
     righthold = {
     run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-      if instance.speed < 5 then instance.image_index = 0 end
+      hps.run_hold(instance, dt, "right")
     end,
 
     check_state = function(instance, dt)
@@ -841,18 +839,14 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      -- Delete sword
-      o.removeFromWorld(instance.sword)
-      instance.sword = nil
-      instance.x_scale = 1
+      hps.end_hold(instance, dt, "right")
     end
     },
 
 
     lefthold = {
     run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-      if instance.speed < 5 then instance.image_index = 0 end
+      hps.run_hold(instance, dt, "left")
     end,
 
     check_state = function(instance, dt)
@@ -864,17 +858,14 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      -- Delete sword
-      o.removeFromWorld(instance.sword)
-      instance.sword = nil
+      hps.end_hold(instance, dt, "left")
     end
     },
 
 
     uphold = {
     run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-      if instance.speed < 5 then instance.image_index = 0 end
+      hps.run_hold(instance, dt, "up")
     end,
 
     check_state = function(instance, dt)
@@ -886,9 +877,25 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      -- Delete sword
-      o.removeFromWorld(instance.sword)
-      instance.sword = nil
+      hps.end_hold(instance, dt, "up")
+    end
+    },
+
+    spinattack = {
+    run_state = function(instance, dt)
+
+    end,
+
+    check_state = function(instance, dt)
+
+    end,
+
+    start_state = function(instance, dt)
+      snd.play(instance.sounds.swordSpin)
+    end,
+
+    end_state = function(instance, dt)
+
     end
     },
 

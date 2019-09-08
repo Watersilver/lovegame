@@ -8,5 +8,7 @@ shdrs.enemyExplodeShader2 = love.graphics.newShader("Shaders/enemy_explode_shade
 shdrs.itemRedShader = love.graphics.newShader("Shaders/item_red_shader.fs")
 shdrs.itemBlueShader = love.graphics.newShader("Shaders/item_blue_shader.fs")
 shdrs.itemGreenShader = love.graphics.newShader("Shaders/item_green_shader.fs")
+shdrs.itemGreenShader = love.graphics.newShader("Shaders/item_green_shader.fs")
+shdrs.swordChargeShader = love.graphics.newShader("Shaders/charge_sword_shader.fs")
 
 return shdrs
