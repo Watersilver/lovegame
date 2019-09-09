@@ -211,7 +211,7 @@ player_states.run_hold = function(instance, dt, side)
   img_speed_and_footstep_sound(instance, dt)
   -- Update spin attack counter
   instance.spinAttackCounter = instance.spinAttackCounter + dt
-  if instance.spinCharged == false and instance.spinAttackCounter > (session.save.swordSpeed * 2.5 or 3) then
+  if instance.spinCharged == false and instance.spinAttackCounter > (session.save.swordSpeed or inv.sword.time) * 2.5 then
     instance.spinCharged = true
     snd.play(instance.sounds.swordCharge)
   end

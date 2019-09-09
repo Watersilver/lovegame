@@ -68,10 +68,11 @@ function HeldSword.initialize(instance)
     if session.save.dinsPower then instance.myShader = shdrs["itemRedShader"] end
   end
   instance.chargedShader = shdrs.swordChargeShader
+  instance.chargedShaderFreq = 1 / 10
+  instance.chargedShaderPhase = instance.chargedShaderFreq
 end
 
 HeldSword.functions = {
-
   -- This could also be a func called swing to be used in *swing animstate like so:
   -- -- Swing HeldSword
   -- if instance.HeldSword.exists then instance.HeldSword:swing(dt) end
@@ -83,6 +84,7 @@ HeldSword.functions = {
     -- Check if I have to be destroyed
     if not cr then
       o.removeFromWorld(self)
+      return
     end
     if self.weld and (not self.weld:isDestroyed()) then self.weld:destroy() end
 
@@ -121,6 +123,26 @@ HeldSword.functions = {
       self.fixture:setCategory(PLAYERATTACKCAT)
     end
 
+    -- determine shader
+    if cr.spinCharged then
+      -- relative luminance: 0.2126 * R + 0.7152 * G + 0.0722 * B
+      self.chargedShaderPhase = self.chargedShaderPhase + dt
+      if self.chargedShaderPhase > self.chargedShaderFreq then
+        self.chargedShaderPhase = self.chargedShaderPhase - self.chargedShaderFreq
+        local randHue = COLORCONST * love.math.random()
+        local r1, g1, b1, a = HSL(randHue, 1 * COLORCONST, 0.5 * COLORCONST, COLORCONST)
+        local r2, g2, b2, a = HSL(randHue, 1 * COLORCONST, 0.75 * COLORCONST, COLORCONST)
+        local ccInv = 1 / COLORCONST
+        r1, g1, b1, r2, g2, b2 =
+        r1 * ccInv, g1 * ccInv, b1 * ccInv,
+        r2 * ccInv, g2 * ccInv, b2 * ccInv
+        self.chargedShader:send("rgb", r1, g1, b1, r2, g2, b2, a)
+        self.currentShader = self.chargedShader
+      end
+    else
+      self.currentShader = self.myShader
+    end
+
     o.change_layer(self, cr.layer)
   end,
 
@@ -150,21 +172,7 @@ HeldSword.functions = {
     local frame = sprite[self.image_index]
     local worldShader = love.graphics.getShader()
     local pr, pg, pb, pa = love.graphics.getColor()
-    if self.creator and self.creator.spinCharged then
-      -- relative luminance: 0.2126 * R + 0.7152 * G + 0.0722 * B
-      -- maybe move the color picking logic to update
-      local randHue = COLORCONST * love.math.random()
-      local r1, g1, b1, a = HSL(randHue, 1 * COLORCONST, 0.5 * COLORCONST, COLORCONST)
-      local r2, g2, b2, a = HSL(randHue, 1 * COLORCONST, 0.75 * COLORCONST, COLORCONST)
-      local ccInv = 1 / COLORCONST
-      r1, g1, b1, r2, g2, b2 =
-      r1 * ccInv, g1 * ccInv, b1 * ccInv,
-      r2 * ccInv, g2 * ccInv, b2 * ccInv
-      self.chargedShader:send("rgb", r1, g1, b1, r2, g2, b2, a)
-      love.graphics.setShader(self.chargedShader)
-    else
-      love.graphics.setShader(self.myShader)
-    end
+    love.graphics.setShader(self.currentShader)
     love.graphics.draw(
     sprite.img, frame, x, y, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
