@@ -133,6 +133,7 @@ function Playa.initialize(instance)
   instance.input = {}
   instance.previnput = {}
   instance.triggers = {}
+  instance.sideTable = {"down", "right", "left", "up"}
   instance.sensors = {downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={}}
   instance.missile_cooldown_limit = session.save.missile_cooldown_limit or 0.4 -- 0.3 was default
   instance.item_use_counter = 0 -- Counts how long you're still while using item
@@ -883,19 +884,56 @@ function Playa.initialize(instance)
 
     spinattack = {
     run_state = function(instance, dt)
-
+      instance.spinAttackCounter = instance.spinAttackCounter + dt
+      instance.playerSpinPhase = instance.playerSpinPhase + dt
+      if instance.playerSpinPhase > instance.playerSpinFreq then
+        instance.playerSpinPhase = instance.playerSpinPhase - instance.playerSpinFreq
+        if instance.spinKey then
+          instance.spinKey = u.chooseKeyFromTable(instance.sideTable, instance.spinKey)
+        else
+          instance.spinKey = u.chooseKeyFromTable(instance.sideTable)
+        end
+        instance.spinSide = instance.sideTable[love.math.random(1,4)]
+        if instance.spinSide == "right" then
+          instance.sprite = im.sprites["Witch/swing_left"]
+          instance.x_scale = -1
+        else
+          instance.sprite = im.sprites["Witch/swing_" .. instance.spinSide]
+          instance.x_scale = 1
+        end
+      end
     end,
 
     check_state = function(instance, dt)
-
+      if instance.spinAttackCounter > 0.6 then
+        instance.animation_state:change_state(instance, dt, instance.spinSide .. "still")
+      end
     end,
 
     start_state = function(instance, dt)
       snd.play(instance.sounds.swordSpin)
+      instance.image_speed = 0
+      instance.image_index = 1
+      instance.spinAttackCounter = 0
+      instance.playerSpinFreq = 1 / 30
+      instance.playerSpinPhase = instance.playerSpinFreq
+      instance.spinKey = nil
+      -- Create sword
+      instance.sword = sw:new{
+        creator = instance,
+        spin = true,
+        layer = instance.layer
+      }
+      o.addToWorld(instance.sword)
     end,
 
     end_state = function(instance, dt)
-
+      if instance.spinSide == "right" then instance.x_scale = 1 end
+      instance.image_index = 0
+      instance.image_speed = 0
+      -- Delete sword
+      o.removeFromWorld(instance.sword)
+      instance.sword = nil
     end
     },
 

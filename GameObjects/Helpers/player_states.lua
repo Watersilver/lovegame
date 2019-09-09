@@ -255,7 +255,7 @@ player_states.end_hold = function(instance, dt, side)
   -- Delete sword
   o.removeFromWorld(instance.sword)
   instance.sword = nil
-  if side ~= "right" then instance.x_scale = 1 end
+  if side == "right" then instance.x_scale = 1 end
 end
 
 player_states.start_jump = function(instance, dt, side)

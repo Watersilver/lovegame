@@ -12,6 +12,8 @@ local expl = require "GameObjects.explode"
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
 
+local sideTable = {"down", "right", "left", "up"}
+
 local Sword = {}
 
 local floor = math.floor
@@ -184,6 +186,21 @@ Sword.functions = {
     -- local sox, soy, angle = calculate_offset(self.side, phase)
     -- local creatorx, creatory = cr.body:getPosition()
 
+    -- Handle spin attack stuff
+    if self.spin then
+      phase = u.chooseKeyFromTable({1, 2})
+      self.image_index = phase
+      -- image_index = 2 and make soy and sox and image angle right for that + frequency
+      prevphase = nil
+      self.prevSide = self.side
+      self.side = sideTable[u.chooseKeyFromTable(sideTable, self.prevSide)]
+      fuck = phase
+    end
+
+    -- Calculate offset due to sword swinging
+    local sox, soy, angle = calculate_offset(self.side, phase)
+    local creatorx, creatory = cr.body:getPosition()
+
     if phase ~= prevphase then
 
       if self.fixture then
@@ -206,10 +223,6 @@ Sword.functions = {
     else
       self.fixture:setCategory(PLAYERATTACKCAT)
     end
-
-    -- Calculate offset due to sword swinging
-    local sox, soy, angle = calculate_offset(self.side, phase)
-    local creatorx, creatory = cr.body:getPosition()
 
     -- Determine offset due to wielder's offset
     local wox, woy = cr.iox, cr.ioy

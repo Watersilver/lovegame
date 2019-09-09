@@ -68,7 +68,7 @@ function HeldSword.initialize(instance)
     if session.save.dinsPower then instance.myShader = shdrs["itemRedShader"] end
   end
   instance.chargedShader = shdrs.swordChargeShader
-  instance.chargedShaderFreq = 1 / 10
+  instance.chargedShaderFreq = 1 / 15
   instance.chargedShaderPhase = instance.chargedShaderFreq
 end
 
