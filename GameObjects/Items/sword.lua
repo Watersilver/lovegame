@@ -94,6 +94,13 @@ local spinPosition = {
   -- {xoff = 0, yoff = 15, aoff = pi * 0.75}, -- down
 }
 
+local spinPosition2 = {
+  {xoff = 17, yoff = 4.5, aoff = pi * 0.25}, -- left
+  {xoff = -17, yoff = 3.5, aoff = pi * 1.25}, -- right
+  {xoff = 0, yoff = -15, aoff = pi * 1.75}, -- up
+  {xoff = 0, yoff = 15, aoff = pi * 0.75}, -- down
+}
+
 -- sword hit spark position offset table
 local shso1 = 12
 local shso2 = 11
@@ -159,7 +166,7 @@ Sword.functions = {
   load = function (self)
     if self.spin then
       self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwingWide, 0)
-      self.spinFreq = 1 / 30
+      self.spinFreq = 1 / 60
       self.spinPhase = self.spinFreq
       self.spanPositionKeys = {} -- table to avoid same position
     end
@@ -222,19 +229,45 @@ Sword.functions = {
       if self.spinPhase >= self.spinFreq then
         self.spinPhase = self.spinPhase - self.spinFreq
         local a = self.spanPositionKeys
+
+        -- do the following if I want to use only spinPosition table
+        -- works well with freq 1/30
+        -- local spindex = u.chooseKeyFromTable(
+        --   spinPosition,
+        --   -- inelegant but I can't unpack
+        --   a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]
+        -- )
+        -- if #a == #spinPosition - 1 then
+        --   for i, v in ipairs(a) do
+        --     a[i] = nil
+        --   end
+        -- end
+        -- table.insert(a, spindex)
+        -- self.sox, self.soy, self.angle =
+        -- spinPosition[spindex].xoff, spinPosition[spindex].yoff, spinPosition[spindex].aoff
+
+        -- do the following if I want to use both spinPosition tables
+        -- works well with freq 1/60
+        if not self.sp then self.sp = spinPosition end
         local spindex = u.chooseKeyFromTable(
-          spinPosition,
+          self.sp,
           -- inelegant but I can't unpack
-          a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]
+          a[1], a[2], a[3], a[4]
+          --a[5], a[6], a[7], a[8]
         )
-        if #a == #spinPosition - 1 then
+        table.insert(a, spindex)
+        self.sox, self.soy, self.angle =
+        self.sp[spindex].xoff, self.sp[spindex].yoff, self.sp[spindex].aoff
+        if #a == #self.sp then
           for i, v in ipairs(a) do
             a[i] = nil
           end
+          if self.sp == spinPosition then
+            self.sp = spinPosition2
+          else
+            self.sp = spinPosition
+          end
         end
-        table.insert(a, spindex)
-        self.sox, self.soy, self.angle =
-        spinPosition[spindex].xoff, spinPosition[spindex].yoff, spinPosition[spindex].aoff
       end
       sox, soy, angle = self.sox, self.soy, self.angle
     else
