@@ -893,7 +893,20 @@ function Playa.initialize(instance)
         else
           instance.spinKey = u.chooseKeyFromTable(instance.sideTable)
         end
-        instance.spinSide = instance.sideTable[love.math.random(1,4)]
+        -- instance.spinSide = instance.sideTable[love.math.random(1,4)]
+        local a = instance.spanSideKeys
+        local spindex = u.chooseKeyFromTable(
+          instance.sideTable,
+          -- inelegant but I can't unpack
+          a[1], a[2], a[3], a[4]
+        )
+        if #a == #instance.sideTable - 1 then
+          for i, v in ipairs(a) do
+            a[i] = nil
+          end
+        end
+        table.insert(a, spindex)
+        instance.spinSide = instance.sideTable[spindex]
         if instance.spinSide == "right" then
           instance.sprite = im.sprites["Witch/swing_left"]
           instance.x_scale = -1
@@ -905,19 +918,22 @@ function Playa.initialize(instance)
     end,
 
     check_state = function(instance, dt)
-      if instance.spinAttackCounter > 0.6 then
+      if pddp(instance, instance.triggers, instance.spinSide) then
+      elseif instance.spinAttackCounter > 0.6 then
         instance.animation_state:change_state(instance, dt, instance.spinSide .. "still")
       end
     end,
 
     start_state = function(instance, dt)
       snd.play(instance.sounds.swordSpin)
+      instance.sounds.swordCharge:stop()
       instance.image_speed = 0
       instance.image_index = 1
       instance.spinAttackCounter = 0
       instance.playerSpinFreq = 1 / 30
       instance.playerSpinPhase = instance.playerSpinFreq
       instance.spinKey = nil
+      instance.spanSideKeys = {}
       -- Create sword
       instance.sword = sw:new{
         creator = instance,

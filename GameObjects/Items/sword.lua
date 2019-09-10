@@ -12,8 +12,6 @@ local expl = require "GameObjects.explode"
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
 
-local sideTable = {"down", "right", "left", "up"}
-
 local Sword = {}
 
 local floor = math.floor
@@ -83,6 +81,19 @@ local function calculate_offset(side, phase)
   return xoff, yoff, aoff
 end
 
+-- Position for spin attack
+local spinPosition = {
+  {xoff = 11, yoff = - 10, aoff = 0},
+  {xoff = 9, yoff = 14, aoff = pi * 0.5},
+  {xoff = - 9, yoff = 14, aoff = pi},
+  {xoff = - 10, yoff = - 11, aoff = pi * 1.5},
+
+  -- {xoff = 17, yoff = 4.5, aoff = pi * 0.25}, -- left
+  -- {xoff = -17, yoff = 3.5, aoff = pi * 1.25}, -- right
+  -- {xoff = 0, yoff = -15, aoff = pi * 1.75}, -- up
+  -- {xoff = 0, yoff = 15, aoff = pi * 0.75}, -- down
+}
+
 -- sword hit spark position offset table
 local shso1 = 12
 local shso2 = 11
@@ -145,6 +156,14 @@ function Sword.initialize(instance)
 end
 
 Sword.functions = {
+  load = function (self)
+    if self.spin then
+      self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwingWide, 0)
+      self.spinFreq = 1 / 30
+      self.spinPhase = self.spinFreq
+      self.spanPositionKeys = {} -- table to avoid same position
+    end
+  end,
 
   -- This could also be a func called swing to be used in *swing animstate like so:
   -- -- Swing sword
@@ -186,35 +205,59 @@ Sword.functions = {
     -- local sox, soy, angle = calculate_offset(self.side, phase)
     -- local creatorx, creatory = cr.body:getPosition()
 
+    local sox, soy, angle
+
     -- Handle spin attack stuff
     if self.spin then
-      phase = u.chooseKeyFromTable({1, 2})
-      self.image_index = phase
-      -- image_index = 2 and make soy and sox and image angle right for that + frequency
-      prevphase = nil
-      self.prevSide = self.side
-      self.side = sideTable[u.chooseKeyFromTable(sideTable, self.prevSide)]
-      fuck = phase
-    end
-
-    -- Calculate offset due to sword swinging
-    local sox, soy, angle = calculate_offset(self.side, phase)
-    local creatorx, creatory = cr.body:getPosition()
-
-    if phase ~= prevphase then
-
-      if self.fixture then
-        self.fixture:destroy()
+      if self.hitWall then
+        if not self.hitWallAgainCounter then self.hitWallAgainCounter = 0 end
+        self.hitWallAgainCounter = self.hitWallAgainCounter + dt
+        if self.hitWallAgainCounter > 0.4 then
+          self.hitWallAgainCounter = nil
+          self.hitWall = false
+        end
       end
-      if phase == 0 then
-        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordIgniting, 0)
-      elseif phase == 1 then
-        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwingWide, 0)
-      elseif phase == 2 then
-        self.fixture = love.physics.newFixture(self.body, ps.shapes.swordStill, 0)
+
+      self.spinPhase = self.spinPhase + dt
+      if self.spinPhase >= self.spinFreq then
+        self.spinPhase = self.spinPhase - self.spinFreq
+        local a = self.spanPositionKeys
+        local spindex = u.chooseKeyFromTable(
+          spinPosition,
+          -- inelegant but I can't unpack
+          a[1], a[2], a[3], a[4], a[5], a[6], a[7], a[8]
+        )
+        if #a == #spinPosition - 1 then
+          for i, v in ipairs(a) do
+            a[i] = nil
+          end
+        end
+        table.insert(a, spindex)
+        self.sox, self.soy, self.angle =
+        spinPosition[spindex].xoff, spinPosition[spindex].yoff, spinPosition[spindex].aoff
       end
-      self.fixture:setMask(SPRITECAT)
-      self.fixture:setSensor(true)
+      sox, soy, angle = self.sox, self.soy, self.angle
+    else
+
+      if phase ~= prevphase then
+
+        if self.fixture then
+          self.fixture:destroy()
+        end
+        if phase == 0 then
+          self.fixture = love.physics.newFixture(self.body, ps.shapes.swordIgniting, 0)
+        elseif phase == 1 then
+          self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwingWide, 0)
+        elseif phase == 2 then
+          self.fixture = love.physics.newFixture(self.body, ps.shapes.swordStill, 0)
+        end
+        self.fixture:setMask(SPRITECAT)
+        self.fixture:setSensor(true)
+
+      end
+
+      -- Calculate offset due to sword swinging
+      sox, soy, angle = calculate_offset(self.side, phase)
 
     end
 
@@ -223,6 +266,7 @@ Sword.functions = {
     else
       self.fixture:setCategory(PLAYERATTACKCAT)
     end
+
 
     -- Determine offset due to wielder's offset
     local wox, woy = cr.iox, cr.ioy
@@ -234,9 +278,11 @@ Sword.functions = {
     end
 
     -- Set position and angle
+    local creatorx, creatory = cr.body:getPosition()
     local x, y = creatorx + sox + wox, creatory + soy + woy + cr.zo + fy
     self.body:setPosition(x, y)
     self.body:setAngle(angle)
+    if not self.x then self.x, self.y = x, y end -- to avoid crashing because of nil
 
     if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
     self.spritebody:setPosition(x, y)
@@ -290,7 +336,6 @@ Sword.functions = {
   end,
 
   beginContact = function(self, a, b, coll, aob, bob)
-
     local cr = self.creator
     -- Check if I have to be destroyed
     if not cr then
@@ -317,21 +362,33 @@ Sword.functions = {
       local crmass = cr.body:getMass()
       local crbrakes = clamp(0, cr.brakes, cr.brakesLim)
       cr.body:applyLinearImpulse(-lvx * crmass, -lvy * crmass)
-      if self.side == "down" then
-        px, py = 0, -10 * crmass * crbrakes
-      elseif self.side == "right" then
-        px, py = -10 * crmass * crbrakes, 0
-      elseif self.side == "left" then
-        px, py = 10 * crmass * crbrakes, 0
-      elseif self.side == "up" then
-        px, py = 0, 10 * crmass * crbrakes
+      local px, py
+      if not self.spin then
+        if self.side == "down" then
+          px, py = 0, -10 * crmass * crbrakes
+        elseif self.side == "right" then
+          px, py = -10 * crmass * crbrakes, 0
+        elseif self.side == "left" then
+          px, py = 10 * crmass * crbrakes, 0
+        elseif self.side == "up" then
+          px, py = 0, 10 * crmass * crbrakes
+        end
+      else
+        px, py = u.normalize2d(cr.x - self.x, cr.y - self.y)
+        px, py = px * 22 * crmass * crbrakes, py * 22 * crmass * crbrakes
       end
       cr.body:applyLinearImpulse(px, py)
       self.hitWall = true
       if other.static and not (other.breakableByUpgradedSword and session.save.dinsPower) then
-        local explOffset = shspot[self.side][self.phase]
+        local exoff, eyoff
+        if self.spin then
+          exoff, eyoff = u.polarToCartesian(15, self.angle - pi * 0.25 + (love.math.random() * pi * 0.25 - pi * 0.125))
+        else
+          local explOffset = shspot[self.side][self.phase]
+          exoff, eyoff = explOffset.xoff, explOffset.yoff
+        end
         local explOb = expl:new{
-          x = cr.x + explOffset.xoff, y = cr.y + cr.zo + explOffset.yoff,
+          x = cr.x + exoff, y = cr.y + cr.zo + eyoff,
           layer = self.layer,
           explosionNumber = self.explosionNumber or 1,
           explosion_sprite = self.hitWallSprite or im.spriteSettings.swordHitWall,
@@ -341,9 +398,15 @@ Sword.functions = {
         o.addToWorld(explOb)
         snd.play(cr.sounds.swordTap1)
       elseif other.shieldWall and other.shielded then
-        local explOffset = shspot[self.side][self.phase]
+        local exoff, eyoff
+        if self.spin then
+          exoff, eyoff = u.polarToCartesian(15, self.angle - pi * 0.25 + (love.math.random() * pi * 0.25 - pi * 0.125))
+        else
+          local explOffset = shspot[self.side][self.phase]
+          exoff, eyoff = explOffset.xoff, explOffset.yoff
+        end
         local explOb = expl:new{
-          x = cr.x + explOffset.xoff, y = cr.y + cr.zo + explOffset.yoff,
+          x = cr.x + exoff, y = cr.y + cr.zo + eyoff,
           layer = self.layer,
           explosionNumber = self.explosionNumber or 1,
           explosion_sprite = self.hitWallSprite or im.spriteSettings.swordHitWall,
@@ -357,6 +420,10 @@ Sword.functions = {
   end,
 
   preSolve = function(self, a, b, coll, aob, bob)
+    -- to avoid glitches, especially during spin attack
+    -- it could make the player fall from
+    -- an edge from the wrong side
+    coll:setEnabled(false)
   end
 }
 
