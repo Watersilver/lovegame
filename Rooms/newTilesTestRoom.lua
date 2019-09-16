@@ -7,6 +7,8 @@ local room = {}
 
 room.music_info = {"Music/MusicTest2"}--{"Music/MusicTest"}
 
+room.timeScreenEffect = "default"
+
 room.width = 496
 room.height = 448
 room.downTrans = {

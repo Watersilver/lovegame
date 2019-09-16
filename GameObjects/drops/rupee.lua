@@ -9,9 +9,7 @@ local Drop = {}
 
 local function onPlayerTouch()
   snd.play(glsounds.getRupee)
-  local rupees = session.save.rupees or 0
-  rupees = math.min(rupees + 1, 9999)
-  session.save.rupees = rupees
+  session.addMoney(1)
 end
 
 function Drop.initialize(instance)

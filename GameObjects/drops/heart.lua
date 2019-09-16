@@ -9,9 +9,7 @@ local Drop = {}
 
 local function onPlayerTouch()
   snd.play(glsounds.getHeart)
-  if pl1 then
-    pl1.health = math.min(pl1.health + 1, pl1.maxHealth)
-  end
+  if pl1 then pl1:addHealth(1) end
 end
 
 function Drop.initialize(instance)

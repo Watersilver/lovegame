@@ -5,7 +5,7 @@ local gottenItem = {}
 local sprite = im.spriteSettings.dropRupee20
 
 local itemGetFunc = function ()
-  session.save.rupees = math.min((session.save.rupees or 0) + 20, 9999)
+  session.addMoney(20)
 end
 
 gottenItem.itemInfo = {

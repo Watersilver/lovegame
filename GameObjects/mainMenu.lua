@@ -49,7 +49,7 @@ local function start_game(saveName)
   local readSave = assert(love.filesystem.load("Saves/" .. saveName .. ".lua"))()
   -- Nilify session (Only values!!!)
   for key, value in pairs(session) do
-    if type(value) ~= "table" then session[key] = nil end
+    if type(value) ~= "table" and type(value) ~= "function" then session[key] = nil end
   end
   -- Nilify save
   for key, value in pairs(session.save) do
@@ -59,6 +59,11 @@ local function start_game(saveName)
   for key, value in pairs(readSave) do
     session.save[key] = value
   end
+  -- initialize certain values
+  session.save.time = session.save.time or 6
+  session.save.days = session.save.days or 0
+  session.save.rupees = session.save.rupees or 0
+  session.save.piecesOfHeart = session.save.piecesOfHeart or 0
   -- Remember which save I am
   session.save.saveName = saveName
 

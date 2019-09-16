@@ -27,6 +27,7 @@ local sh = require "scaling_handler"
 local pam = require "pause_menu"
 local inp = require "input"
 local im = require "image"
+local dtse = require "drawTimeScreenEffect"
 local snd = require "sound"
 local text = require "text"
 local font = text.font
@@ -53,7 +54,29 @@ session = {
     markShader = nil,
     swordSpeed = nil
   },
-  mslQueue = u.newQueue()
+  mslQueue = u.newQueue(),
+  updateTime = function(hoursPassed)
+    session.save.time = session.save.time + hoursPassed
+
+    -- assume that time only flows forward for now
+    while session.save.time >= 24 do
+      session.save.time = session.save.time - 24
+      session.save.days = session.save.days + 1
+    end
+  end,
+  addMoney = function(addedMoney)
+    local maxRupees
+    if session.save.wallet == 1 then -- wallet
+      maxRupees = 200
+    elseif session.save.wallet == 2 then -- magic wallet
+      maxRupees = 3000
+    elseif session.save.wallet == 3 then -- wallet of holding
+      maxRupees = 9999
+    else
+      maxRupees = 50
+    end
+    session.save.rupees = math.max(0, math.min(session.save.rupees + addedMoney, maxRupees))
+  end,
 }
 local session = session
 
@@ -243,6 +266,11 @@ function love.update(dt)
   moub["2prev"] = moub[2]
   moup.x, moup.y = love.mouse.getX(), love.mouse.getY()
 
+  -- Determine screen effect due to game time
+  if game.timeScreenEffect then
+    dtse.logic(game.timeScreenEffect, dt)
+  end
+
   -- display mouse position
   -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
   -- local wmrx, wmry = math.floor(wmx / 16) * 16, math.floor(wmy / 16) * 16
@@ -272,9 +300,17 @@ function love.update(dt)
 
     if not game.transitioning.startedTransition then
 
-      if pl1 and pl1.sword and game.transitioning.type == "whiteScreen" then
-        o.removeFromWorld(pl1.sword)
-        pl1.sword = nil
+      if game.transitioning.type == "whiteScreen" then
+
+        -- Don't draw a time screen effect over white screen
+        game.timeScreenEffect = nil
+
+        -- holster sword when changing rooms like this
+        if pl1 and pl1.sword then
+          o.removeFromWorld(pl1.sword)
+          pl1.sword = nil
+          pl1.spinCharged = nil
+        end
       end
       trans.remove_from_world_previous_room()
       local prevWidth = game.room.width
@@ -323,6 +359,7 @@ function love.update(dt)
       game.transitioning = false
 
       snd.bgm:load(newRoom.music_info)
+      game.timeScreenEffect = room.timeScreenEffect
 
       for __, layer in ipairs(o.draw_layers) do
         for _, object in ipairs(layer) do
@@ -359,6 +396,12 @@ function love.update(dt)
     -- Image indexes for background animations
     im.updateGlobalImageIndexes(dt)
 
+    -- Update time
+    if not game.room.timeDoesntPass then
+      -- dt * 0.0177
+      session.updateTime(dt * 1)
+    end
+
     -- Run early_update methods
     local eUpnum = #o.earlyUpdaters
     if eUpnum > 0 then
@@ -367,6 +410,7 @@ function love.update(dt)
       end
     end
 
+    -- update physical world
     ps.pw:update(dt)
 
     -- Run update methods
@@ -592,7 +636,7 @@ local function hudDraw(l,t,w,h)
     for i = 1, pl1.maxHealth do
       local healthFrame
       if pl1.health < i then
-        healthFrame = hpspr[1]
+        healthFrame = hpspr[4]
       else
         healthFrame = hpspr[0]
       end
@@ -633,6 +677,11 @@ function love.draw()
   cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
   cam:setPosition(cam.xt, cam.yt)
   cam:draw(mainCameraDraw)
+
+  -- Draw screen effect due to game time
+  if game.timeScreenEffect then
+    dtse.draw()
+  end
 
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)

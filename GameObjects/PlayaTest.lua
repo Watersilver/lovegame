@@ -1639,7 +1639,7 @@ function Playa.initialize(instance)
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
       if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
-        instance.health = instance.health - 1
+        instance:addHealth(-1)
       end
     end
     },
@@ -1680,7 +1680,7 @@ function Playa.initialize(instance)
       inp.controllers[instance.player].disabled = nil
       instance:setGhost(false)
       if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
-        instance.health = instance.health - 1
+        instance:addHealth(-1)
       end
     end
     },
@@ -1836,6 +1836,10 @@ function Playa.initialize(instance)
 end
 
 Playa.functions = {
+  addHealth = function (self, addedHealth)
+    self.health = math.min(self.health + addedHealth, self.maxHealth)
+  end,
+
   update = function(self, dt)
     -- Store usefull stuff
     local vx, vy = self.body:getLinearVelocity()
@@ -2326,7 +2330,7 @@ Playa.functions = {
       end
       if other.fairy then
         o.removeFromWorld(other)
-        self.health = math.min(self.health + 8, self.maxHealth)
+        self:addHealth(8)
         snd.play(glsounds.getHeart)
       end
     end

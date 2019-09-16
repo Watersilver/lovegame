@@ -222,6 +222,8 @@ local function SaveMap()
     local room = {}\n\z
     \n\z
     room.music_info ToBeADDED\n\z
+    room.timeDoesntPass ToBeADDED\n\z
+    room.timeScreenEffect ToBeADDED\n\z
     \n\z
     room.width = " .. room.width .. "\n\z
     room.height = " .. room.height .. "\n\z

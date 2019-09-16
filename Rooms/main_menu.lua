@@ -7,6 +7,8 @@ local room = {}
 
 room.music_info = {"Music/MusicTest"}
 
+room.timeDoesntPass = true
+
 room.width = 800
 room.height = 450
 

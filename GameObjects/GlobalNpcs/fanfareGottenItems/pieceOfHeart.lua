@@ -5,7 +5,7 @@ local gottenItem = {}
 local sprite = im.spriteSettings.pieceOfHeart
 
 local itemGetFunc = function ()
-  session.save.piecesOfHeart = math.min(session.save.piecesOfHeart and session.save.piecesOfHeart + 1 or 1, GCON.maxPOHs)
+  session.save.piecesOfHeart = math.min(session.save.piecesOfHeart + 1, GCON.maxPOHs)
   if pl1 then
     pl1:readSave()
     pl1.health = pl1.maxHealth
