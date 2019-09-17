@@ -39,7 +39,7 @@ function dtse.logic(funcName, dt)
   local tcm = (1 - math.cos( math.pi * (curTime / 12))) * 0.5
 
   -- debug
-  fuck = curTime .. " / " .. tcm
+  -- fuck = curTime .. " / " .. tcm
 
   seFuncs[funcName](tcm, dt, curTime)
 end

@@ -1,7 +1,8 @@
 local inp = require "input"
 local shdrs = require "Shaders.shaders"
+local snd = require "sound"
 
-powToShad = {
+local powToShad = {
   dinsPower = "itemRedShader",
   nayrusWisdom = "itemBlueShader",
   faroresCourage = "itemGreenShader",
@@ -141,12 +142,12 @@ inv.slots = {}
 -- inv.slots[2] = {key = "s", item = inv.recall}
 -- inv.slots[1] = {key = "a", item = inv.grip}
 
-inv.slots[6] = {key = "c"}
-inv.slots[5] = {key = "x"}
-inv.slots[4] = {key = "z"}
-inv.slots[3] = {key = "d"}
-inv.slots[2] = {key = "s"}
-inv.slots[1] = {key = "a"}
+inv.slots[6] = {key = "c", index=6}
+inv.slots[5] = {key = "x", index=5}
+inv.slots[4] = {key = "z", index=4}
+inv.slots[3] = {key = "d", index=3}
+inv.slots[2] = {key = "s", index=2}
+inv.slots[1] = {key = "a", index=1}
 
 for index, contents in ipairs(inv.slots) do
   inv.slots[inv.slots[index].key] = inv.slots[index]
@@ -172,6 +173,12 @@ local function single_inv_key_press(object, input, previnput)
   end
   return key, keys
 end
+
+
+function inv.closeInv()
+  inv.spellSelection = nil
+end
+inv.closeInv()
 
 
 function inv.check_use(instance, trig, side)
@@ -211,37 +218,37 @@ function inv.determine_equipment_triggers(object, dt)
 end
 
 
-local cursor = {x=1, y=0}
 function inv.manage(pauser)
 
   local myinput = inp.current[pauser.player]
   local previnput = inp.previous[pauser.player]
 
-  -- Check if cursor is being moved
-  local x, y = cursor.x, cursor.y
-  if myinput.right == 1 and previnput.right == 0 then
-    x = x + 1
-    if x > 3 then x = 1 end
-  end
-  if myinput.left == 1 and previnput.left == 0 then
-    x = x - 1
-    if x < 1 then x = 3 end
-  end
-  if myinput.up == 1 and previnput.up == 0 then
-    y = y + 1
-    if y > 1 then y = 0 end
-  end
-  if myinput.down == 1 and previnput.down == 0 then
-    y = y - 1
-    if y < 0 then y = 1 end
-  end
-  cursor.x, cursor.y = x, y
+  -- if myinput.right == 1 and previnput.right == 0 then
+  --   x = x + 1
+  --   if x > 3 then x = 1 end
+  -- end
 
-  -- Check if position of item changes
+  -- figure out which key was pressed (not held), and if only one
   local keypressed, keyspressed = single_inv_key_press(object, myinput, previnput)
-  if keypressed and keyspressed == 1 and inv.slots[cursor.x + 3*cursor.y].item then
-    inv.slots[cursor.x + 3*cursor.y].item, inv.slots[keypressed].item =
-      inv.slots[keypressed].item, inv.slots[cursor.x + 3*cursor.y].item
+  -- if one key was pressed proceed
+  if keypressed and keyspressed == 1 then
+    if inv.spellSelection then
+      -- if a spell was already selected, swap it with the one on the pressed key
+      -- only swap if necessary
+      if inv.spellSelection ~= inv.slots[keypressed].index then
+        inv.slots[inv.spellSelection].item, inv.slots[keypressed].item =
+          inv.slots[keypressed].item, inv.slots[inv.spellSelection].item
+          snd.play(glsounds.select)
+      else
+        snd.play(glsounds.deselect)
+      end
+      -- Operation complete. Disable selection.
+      inv.spellSelection = nil
+    else
+      -- if a spell isn't already selected, select the spell that corresponds to the pressed key
+      inv.spellSelection = inv.slots[keypressed].index
+      snd.play(glsounds.cursor)
+    end
   end
 end
 
@@ -312,7 +319,7 @@ function inv.draw()
     end
     local pr, pg, pb, pa = love.graphics.getColor()
     local prevBm = love.graphics.getBlendMode()
-    if cursor.x + 3*cursor.y == index then
+    if inv.spellSelection == index then
       -- love.graphics.setColor(cc*0.5, cc, cc, cc)
       love.graphics.setColor(cc * 0.1, cc * 0.1, cc * 0.1, cc * 0.5)
       love.graphics.rectangle("line", x, y, itemBoxSide, itemBoxSide)

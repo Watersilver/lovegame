@@ -92,6 +92,7 @@ glsounds = snd.load_sounds{
   pauseOpen = {"Effects/Oracle_PauseMenu_Open"},
   pauseClose = {"Effects/Oracle_PauseMenu_Close"},
   select = {"Effects/Oracle_Menu_Select"},
+  deselect = {"Effects/Oracle_Menu_Cursor_low_pitch"},
   letter = {"Effects/Oracle_Text_Letter"},
   textDone = {"Effects/Oracle_Text_Done"},
   cursor = {"Effects/Oracle_Menu_Cursor"},
@@ -434,6 +435,7 @@ function love.update(dt)
     inv.manage(game.paused)
     if inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0 then
       game.pause(false)
+      inv.closeInv()
     end
     pam.logic()
 
