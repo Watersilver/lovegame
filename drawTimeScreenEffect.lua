@@ -13,47 +13,119 @@ local function currentToTarget(dt)
   ca = ca + (ta - ca) * 0.5 * dt
 end
 
-local function connectDomains(prevDomain)
-  return {value = prevDomain.x2.value, closed = not prevDomain.x2.closed}
+local function connectDomains(position, prevDomain)
+  return {value = prevDomain[position].value, closed = not prevDomain[position].closed}
 end
 
+local function linearRGBChange(t, domain)
+  local r, g, b
+  local x = (t - domain.x1.value) / (domain.x2.value - domain.x1.value)
+  r = domain.subfunction.startVars[1] + x * (domain.subfunction.endVars[1] - domain.subfunction.startVars[1])
+  g = domain.subfunction.startVars[2] + x * (domain.subfunction.endVars[2] - domain.subfunction.startVars[2])
+  b = domain.subfunction.startVars[3] + x * (domain.subfunction.endVars[3] - domain.subfunction.startVars[3])
+  return r, g, b, cc -- a
+end
+
+local prevDomain
 local defaultScreenEffects = piwi.new()
+-- Day
+local dayVars = {cc, cc, cc, cc}
 defaultScreenEffects.newSubfunction(
-  {x1 = {value = 8, closed = false}, x2 = {value = 18, closed = false}},
-  function(tcm)
-    fuck = tcm .. "/ DAYum"
-    return cc, cc, cc, cc
+  {x1 = {value = 9, closed = false}, x2 = {value = 15, closed = false}},
+  function(curTime)
+    return dayVars[1], dayVars[2], dayVars[3], dayVars[4]
   end,
-  {name = "day"}
+  {startVars = dayVars, endVars = dayVars}
 )
-local defDay = defaultScreenEffects.namedDomains.day
+local firstDomain = defaultScreenEffects.domains[1]
+-- Late day
+local lateDayVars = {cc, cc * 0.9, cc * 0.9, cc}
+prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
 defaultScreenEffects.newSubfunction(
-  {x1 = connectDomains(defDay), x2 = {value = 24, closed = true}},
-  function(curTime)
-    -- time color modifier
-    local tcm = (1 - math.cos( math.pi * (curTime / 12))) * 0.5
-    local r, g, b, a
-    r = cc * (0.2 + 0.8 * tcm)
-    g = r
-    b = cc * (0.8 + 0.2 * tcm)
-    a = cc
-    fuck = "connected"
-    return r, g, b, a
-  end
+  {x1 = connectDomains("x2", prevDomain), x2 = {value = 18, closed = true}},
+  function(curTime, domain)
+    return linearRGBChange(curTime, domain)
+  end,
+  {startVars = prevDomain.subfunction.endVars, endVars = lateDayVars}
 )
+-- sunset
+local sunsetEndVars = {cc * 0.7, cc * 0.6, cc * 0.65, cc}
+prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
 defaultScreenEffects.newSubfunction(
-  {x1 = {value = 0, closed = true}, x2 = {value = defDay.x1.value, closed = not defDay.x1.closed}},
-  function(curTime)
-    -- time color modifier
-    local tcm = (1 - math.cos( math.pi * (curTime / 12))) * 0.5
-    local r, g, b, a
-    r = cc * (0.2 + 0.8 * tcm)
-    g = r
-    b = cc * (0.8 + 0.2 * tcm)
-    a = cc
-    fuck = r
-    return r, g, b, a
-  end
+  {x1 = connectDomains("x2", prevDomain), x2 = {value = 19, closed = true}},
+  function(curTime, domain)
+    return linearRGBChange(curTime, domain)
+  end,
+  {startVars = prevDomain.subfunction.endVars, endVars = sunsetEndVars}
+)
+-- Twilight start
+local twilightStartEndVars = {cc * 0.7, cc * 0.3, cc * 0.5, cc}
+prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
+defaultScreenEffects.newSubfunction(
+  {x1 = connectDomains("x2", prevDomain), x2 = {value = 20, closed = true}},
+  function(curTime, domain)
+    return linearRGBChange(curTime, domain)
+  end,
+  {startVars = prevDomain.subfunction.endVars, endVars = twilightStartEndVars}
+)
+-- Twilight end
+local twilightEndEndVars = {cc * 0.3, cc * 0.3, cc * 0.5, cc}
+prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
+defaultScreenEffects.newSubfunction(
+  {x1 = connectDomains("x2", prevDomain), x2 = {value = 21, closed = true}},
+  function(curTime, domain)
+    return linearRGBChange(curTime, domain)
+  end,
+  {startVars = prevDomain.subfunction.endVars, endVars = twilightEndEndVars}
+)
+-- Night 1
+local night1Vars = {cc * 0.2, cc * 0.3, cc * 0.5, cc}
+prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
+defaultScreenEffects.newSubfunction(
+  {x1 = connectDomains("x2", prevDomain), x2 = {value = 24, closed = true}},
+  function(curTime, domain)
+    return linearRGBChange(curTime, domain)
+  end,
+  {startVars = prevDomain.subfunction.endVars, endVars = night1Vars}
+)
+-- Night 2
+local night2Vars = {cc * 0.3, cc * 0.3, cc * 0.5, cc}
+prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
+defaultScreenEffects.newSubfunction(
+  {x1 = {value = 0, closed = true}, x2 = {value = 6, closed = true}},
+  function(curTime, domain)
+    return linearRGBChange(curTime, domain)
+  end,
+  {startVars = prevDomain.subfunction.endVars, endVars = night2Vars}
+)
+-- Dawn start
+local dawnStartEndVars = {cc * 0.7, cc * 0.4, cc * 0.5, cc}
+prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
+defaultScreenEffects.newSubfunction(
+  {x1 = connectDomains("x2", prevDomain), x2 = {value = 7, closed = true}},
+  function(curTime, domain)
+    return linearRGBChange(curTime, domain)
+  end,
+  {startVars = prevDomain.subfunction.endVars, endVars = dawnStartEndVars}
+)
+-- Dawn end
+local dawnEndEndVars = {cc * 0.7, cc * 0.7, cc * 0.7, cc}
+prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
+defaultScreenEffects.newSubfunction(
+  {x1 = connectDomains("x2", prevDomain), x2 = {value = 8, closed = true}},
+  function(curTime, domain)
+    return linearRGBChange(curTime, domain)
+  end,
+  {startVars = prevDomain.subfunction.endVars, endVars = dawnEndEndVars}
+)
+-- Sunrise
+prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
+defaultScreenEffects.newSubfunction(
+  {x1 = connectDomains("x2", prevDomain), x2 = {value = 9, closed = true}},
+  function(curTime, domain)
+    return linearRGBChange(curTime, domain)
+  end,
+  {startVars = prevDomain.subfunction.endVars, endVars = firstDomain.subfunction.startVars}
 )
 
 -- Screen effect funcs
@@ -64,13 +136,7 @@ local seFuncs = {
   end,
 
   default = function(curTime, dt)
-    -- test
-    -- tr = cc * (0.2 + 0.8 * tcm)
-    -- tg = tr
-    -- tb = cc * (0.8 + 0.2 * tcm)
-    -- ta = cc
     tr, tg, tb, ta = defaultScreenEffects.run(curTime)
-
     currentToTarget(dt)
   end,
 }

@@ -399,8 +399,9 @@ function love.update(dt)
 
     -- Update time
     if not game.room.timeDoesntPass then
-      -- dt * 0.0177
+      -- dt * 0.08333 = ocarina of time
       session.updateTime(dt * 0.08333)
+      -- fuck = session.save.time
     end
 
     -- Run early_update methods
