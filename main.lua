@@ -400,7 +400,7 @@ function love.update(dt)
     -- Update time
     if not game.room.timeDoesntPass then
       -- dt * 0.0177
-      session.updateTime(dt * 1)
+      session.updateTime(dt * 0.08333)
     end
 
     -- Run early_update methods
