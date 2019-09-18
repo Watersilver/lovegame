@@ -32,16 +32,31 @@ function ec.wentOverDownEdge(edge, other)
 end
 
 function ec.wentOverRightEdge(edge, other)
-  local sx = edge.playerContactX
-  local ex = other.body:getPosition()
-  if abs(sx - ex) > 1 then return true end
+  -- old code
+  -- local sx = edge.playerContactX
+  -- local ex = other.body:getPosition()
+  -- if abs(sx - ex) > 1 then
+  --   return true
+  -- end
+  local contactX = edge.playerContactX
+  local selfX = edge.body:getPosition()
+  local otherX = other.body:getPosition()
+  -- magic number is because otherX is slightly smaller than edge but I won't calculate how much
+  if otherX > selfX + 10 and contactX < selfX + 10 then
+    return true
+  end
+
   return false
 end
 
 function ec.wentOverLeftEdge(edge, other)
-  local sx = edge.playerContactX
-  local ex = other.body:getPosition()
-  if abs(sx - ex) > 1 then return true end
+  local contactX = edge.playerContactX
+  local selfX = edge.body:getPosition()
+  local otherX = other.body:getPosition()
+
+  if otherX < selfX - 10 and contactX > selfX - 10 then
+    return true
+  end
   return false
 end
 

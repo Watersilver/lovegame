@@ -25,7 +25,7 @@ beginContact = function(self, a, b, coll, aob, bob)
 
   if other.player and not otherF:isSensor() and self.side ~= "down" then
 
-    -- Will be used to check if player goes overr edge
+    -- Will be used to check if player goes over edge
     self.playerContactX = other.body:getPosition()
 
     -- Keep track of how many player fixtures touch me
