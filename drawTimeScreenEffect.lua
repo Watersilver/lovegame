@@ -1,4 +1,5 @@
 local sh = require "scaling_handler"
+local piwi = require "piecewise"
 
 local cc = COLORCONST
 
@@ -12,36 +13,72 @@ local function currentToTarget(dt)
   ca = ca + (ta - ca) * 0.5 * dt
 end
 
-local dtse = {}
+local function connectDomains(prevDomain)
+  return {value = prevDomain.x2.value, closed = not prevDomain.x2.closed}
+end
+
+local defaultScreenEffects = piwi.new()
+defaultScreenEffects.newSubfunction(
+  {x1 = {value = 8, closed = false}, x2 = {value = 18, closed = false}},
+  function(tcm)
+    fuck = tcm .. "/ DAYum"
+    return cc, cc, cc, cc
+  end,
+  {name = "day"}
+)
+local defDay = defaultScreenEffects.namedDomains.day
+defaultScreenEffects.newSubfunction(
+  {x1 = connectDomains(defDay), x2 = {value = 24, closed = true}},
+  function(curTime)
+    -- time color modifier
+    local tcm = (1 - math.cos( math.pi * (curTime / 12))) * 0.5
+    local r, g, b, a
+    r = cc * (0.2 + 0.8 * tcm)
+    g = r
+    b = cc * (0.8 + 0.2 * tcm)
+    a = cc
+    fuck = "connected"
+    return r, g, b, a
+  end
+)
+defaultScreenEffects.newSubfunction(
+  {x1 = {value = 0, closed = true}, x2 = {value = defDay.x1.value, closed = not defDay.x1.closed}},
+  function(curTime)
+    -- time color modifier
+    local tcm = (1 - math.cos( math.pi * (curTime / 12))) * 0.5
+    local r, g, b, a
+    r = cc * (0.2 + 0.8 * tcm)
+    g = r
+    b = cc * (0.8 + 0.2 * tcm)
+    a = cc
+    fuck = r
+    return r, g, b, a
+  end
+)
 
 -- Screen effect funcs
 local seFuncs = {
-  fullLight = function(tcm, dt)
+  fullLight = function(curTime, dt)
     tr, tg, tb, ta = cc, cc, cc, cc
     currentToTarget(dt)
   end,
 
-  default = function(tcm, dt)
+  default = function(curTime, dt)
     -- test
-    tr = cc * (0.2 + 0.8 * tcm)
-    tg = tr
-    tb = cc * (0.8 + 0.2 * tcm)
-    ta = cc
+    -- tr = cc * (0.2 + 0.8 * tcm)
+    -- tg = tr
+    -- tb = cc * (0.8 + 0.2 * tcm)
+    -- ta = cc
+    tr, tg, tb, ta = defaultScreenEffects.run(curTime)
 
     currentToTarget(dt)
   end,
 }
 
+local dtse = {}
+
 function dtse.logic(funcName, dt)
-
-  local curTime = session.save.time
-    -- time color modifier
-  local tcm = (1 - math.cos( math.pi * (curTime / 12))) * 0.5
-
-  -- debug
-  -- fuck = curTime .. " / " .. tcm
-
-  seFuncs[funcName](tcm, dt, curTime)
+  seFuncs[funcName](session.save.time, dt)
 end
 
 function dtse.draw()
