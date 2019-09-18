@@ -23,12 +23,17 @@ end
 
 -- "fallFrom*Edge" functions check if "other" will fall
 function ec.wentOverDownEdge(edge, other)
+  -- oldest
   -- local sx, sy = edge.playerContactX, edge.playerContactY
   -- local ex, ey = other.body:getPosition()
   -- if abs(sy - ey) > 1 then return true end
   -- return false
-  if other.y > edge.ystart then return true end
-  return false
+  
+  -- old
+  -- if other.y > edge.ystart then return true end
+  -- return false
+
+  return true
 end
 
 function ec.wentOverRightEdge(edge, other)
