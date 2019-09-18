@@ -71,7 +71,7 @@ function piwi.new()
 
   function newPiwi.run(t)
     local currentDomain = determineDomain(newPiwi.domains, t)
-    return currentDomain.subfunction.run(t, currentDomain.subfunction.startVars, currentDomain.subfunction.endVars)
+    return currentDomain.subfunction.run(t, currentDomain)
   end
 
   return newPiwi
