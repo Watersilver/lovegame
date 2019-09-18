@@ -64,18 +64,20 @@ session = {
       session.save.days = session.save.days + 1
     end
   end,
-  addMoney = function(addedMoney)
-    local maxRupees
+  maxMoney = function()
     if session.save.wallet == 1 then -- wallet
-      maxRupees = 200
+      return 200
     elseif session.save.wallet == 2 then -- magic wallet
-      maxRupees = 3000
+      return 3000
     elseif session.save.wallet == 3 then -- wallet of holding
-      maxRupees = 9999
+      return 9999
     else
-      maxRupees = 50
+      return 50
     end
-    session.save.rupees = math.max(0, math.min(session.save.rupees + addedMoney, maxRupees))
+  end,
+  addMoney = function(addedMoney)
+    local maxRupees = session.maxMoney()
+    session.save.rupees = u.clamp(0, session.save.rupees + addedMoney, maxRupees)
   end,
 }
 local session = session
@@ -88,7 +90,7 @@ local moup = mouseP
 
 -- global sounds
 glsounds = snd.load_sounds{
-  wingFlap = {"Effects/Oracle_Sword_Slash3"},
+  wingFlap = {"Effects/Wing_flap"},
   pauseOpen = {"Effects/Oracle_PauseMenu_Open"},
   pauseClose = {"Effects/Oracle_PauseMenu_Close"},
   select = {"Effects/Oracle_Menu_Select"},
@@ -647,19 +649,27 @@ local function hudDraw(l,t,w,h)
     end
 
     -- Draw rupees
-    local rupees = string.format("%04d", (session.save.rupees or 0))
+    local maxMoney = session.maxMoney()
+    local rupeeDigits = u.countIntDigits(maxMoney)
+    local rupees = string.format("%0"..rupeeDigits.."d", (session.save.rupees or 0))
     local rspr = im.sprites["rupees"]
     local wl, lt = hud:toWorld(0, 0)
     local ww, wh = hud:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
     love.graphics.draw(rspr.img, rspr[0], ww-16, 5)
     local pr, pg, pb, pa = love.graphics.getColor()
     love.graphics.setColor(0, 0, 0, COLORCONST)
-    love.graphics.print(rupees, ww - 42 + rno, 6.5, 0, 0.255)
-    love.graphics.print(rupees, ww - 42 - rno, 6.5, 0, 0.255)
-    love.graphics.print(rupees, ww - 42, 6.5 + rno, 0, 0.255)
-    love.graphics.print(rupees, ww - 42, 6.5 - rno, 0, 0.255)
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-    love.graphics.print(rupees, ww - 42, 6.5, 0, 0.255)
+    local rupeeOffset = rupeeDigits * 6.1 + 17.6 -- 42 with 4 digits
+    love.graphics.print(rupees, ww - rupeeOffset + rno, 6.5, 0, 0.255)
+    love.graphics.print(rupees, ww - rupeeOffset - rno, 6.5, 0, 0.255)
+    love.graphics.print(rupees, ww - rupeeOffset, 6.5 + rno, 0, 0.255)
+    love.graphics.print(rupees, ww - rupeeOffset, 6.5 - rno, 0, 0.255)
+    if maxMoney == session.save.rupees then
+      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST * 0.2, COLORCONST)
+    else
+      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    end
+    love.graphics.print(rupees, ww - rupeeOffset, 6.5, 0, 0.255)
+    love.graphics.setColor(pr, pg, pb, pa)
 
     if game.paused and not game.transitioning and not game.cutscene then
       -- local pr, pg, pb, pa = love.graphics.getColor()

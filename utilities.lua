@@ -42,6 +42,10 @@ function u.swap(otable, index1, index2)
   otable[index2][otable.role], otable[index1][otable.role]
 end
 
+function u.countIntDigits(num)
+  return math.max(math.floor(math.log10(math.abs(num))), 0) + 1;
+end
+
 function u.clamp(low, n, high)
   return math.min(math.max(n, low), high)
 end
@@ -52,9 +56,9 @@ end
 
 function u.gradualAdjust(dt, xcurrent, xtarget, as)
   -- adjustment speed can't be more than 30
-  local as = as or 15
+  as = as or 15
   if as > 30 then as = 30 end
-  local as = as * dt
+  as = as * dt
   local dx = (xtarget - xcurrent)
   dx = dx * as
   return xcurrent + dx
@@ -87,7 +91,7 @@ function u.projection2d(x, y, xdir, ydir)
 end
 
 function u.polarToCartesian(r, th)
-    return r * cos( th ), r * sin( th )
+  return r * cos( th ), r * sin( th )
 end
 
 function u.cartesianToPolar(x, y)
