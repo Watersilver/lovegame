@@ -11,4 +11,6 @@ shdrs.itemGreenShader = love.graphics.newShader("Shaders/item_green_shader.fs")
 shdrs.itemGreenShader = love.graphics.newShader("Shaders/item_green_shader.fs")
 shdrs.swordChargeShader = love.graphics.newShader("Shaders/charge_sword_shader.fs")
 
+shdrs.multiply = love.graphics.newShader("Shaders/multiply.fs")
+
 return shdrs

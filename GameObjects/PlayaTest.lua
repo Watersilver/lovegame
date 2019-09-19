@@ -1,6 +1,7 @@
 local gs = require "game_settings"
 local ps = require "physics_settings"
 local im = require "image"
+local ls = require "lightSources"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
 local inp = require "input"
@@ -155,6 +156,7 @@ function Playa.initialize(instance)
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.sprite_info = im.spriteSettings.playerSprites
+  instance.lightSource = {}
   instance.sounds = snd.load_sounds({
     swordSlash1 = {"Effects/Oracle_Sword_Slash1"},
     swordSlash2 = {"Effects/Oracle_Sword_Slash2"},
@@ -2082,6 +2084,14 @@ Playa.functions = {
     local x, y = self.x, self.y
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
 
+    -- After done with coords draw light source (gets drawn later, this just sets it up)
+    -- check during pause screen if session.save.playerGlowAvailable to enable and disable
+    self.lightSource.kind = session.save.playerGlow
+    if self.lightSource.kind then
+      self.lightSource.x, self.lightSource.y = xtotal, ytotal
+      ls.drawSource(self.lightSource)
+    end
+
     if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
     self.spritebody:setPosition(xtotal, ytotal)
     self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
@@ -2155,6 +2165,13 @@ Playa.functions = {
     y = y + trans.ytransform - game.transitioning.progress * trans.yadjust
 
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
+
+    -- After done with coords draw light source (gets drawn later, this just sets it up)
+    self.lightSource.kind = session.save.playerGlow
+    if self.lightSource.kind then
+      self.lightSource.x, self.lightSource.y = xtotal, ytotal
+      ls.drawSource(self.lightSource)
+    end
 
     -- destroy joint to avoid funkyness during transition
     if self.spritejoint then

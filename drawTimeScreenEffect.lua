@@ -1,10 +1,15 @@
 local sh = require "scaling_handler"
 local piwi = require "piecewise"
+local ls = require "lightSources"
 
 local cc = COLORCONST
 
 local tr, tg, tb, ta = cc, cc, cc, cc -- target
 local cr, cg, cb, ca = tr, tg, tb, ta -- current
+
+-- canvas
+local dtsCanvas = love.graphics.newCanvas ( 800, 450 )
+
 
 local function currentToTarget(dt)
   cr = cr + (tr - cr) * 0.5 * dt
@@ -149,14 +154,33 @@ end
 
 function dtse.draw()
 
+  -- no canvas
+  -- local pr, pg, pb, pa = love.graphics.getColor()
+  -- local mode, alphamode = love.graphics.getBlendMode()
+
+  -- love.graphics.setColor(cr, cg, cb, ca)
+  -- love.graphics.setBlendMode( "multiply" )
+
+  -- love.graphics.rectangle("fill", sh.get_current_window())
+
+  -- love.graphics.setColor(pr, pg, pb, pa)
+  -- love.graphics.setBlendMode( mode, alphamode )
+
+  -- canvas
+  dtsCanvas:renderTo(
+    function()
+      love.graphics.clear(cr, cg, cb, ca)
+      ls.drawSources()
+    end
+  )
+
+  local canvX, canvY = sh.get_current_window()
+
   local pr, pg, pb, pa = love.graphics.getColor()
   local mode, alphamode = love.graphics.getBlendMode()
-
-  love.graphics.setColor(cr, cg, cb, ca)
   love.graphics.setBlendMode( "multiply" )
-  -- love.graphics.rectangle("fill", 0, 0, love.graphics.getDimensions())
-  love.graphics.rectangle("fill", sh.get_current_window())
-
+  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  love.graphics.draw(dtsCanvas, canvX, canvY, 0, sh.get_window_scale())
   love.graphics.setColor(pr, pg, pb, pa)
   love.graphics.setBlendMode( mode, alphamode )
 

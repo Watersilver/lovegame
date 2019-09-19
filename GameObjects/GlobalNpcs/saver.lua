@@ -83,12 +83,19 @@ local function onDialogueRealEnd(instance)
   instance.image_index = 0
 end
 
+local enmptyTable = {}
 function NPC.initialize(instance)
   instance.myText = myText
   instance.activateFuncs = activateFuncs
   instance.onDialogueRealEnd = onDialogueRealEnd
   instance.image_speed = 0
   instance.sprite_info = im.spriteSettings.owlStatue
+  instance.lightSource = {kind = "owlStatue"}
+
+  instance.pushback = true
+  instance.ballbreaker = true
+  instance.unpushable = false
+  instance.physical_properties.masks = enmptyTable
 end
 
 NPC.functions = {}

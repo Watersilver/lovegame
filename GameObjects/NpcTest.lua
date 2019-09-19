@@ -5,6 +5,7 @@ local trans = require "transitions"
 local game = require "game"
 local inp = require "input"
 local dlg = require "dialogue"
+local ls = require "lightSources"
 
 local floor = math.floor
 
@@ -94,6 +95,12 @@ NPC.functions = {
     local xtotal, ytotal = self.body:getPosition()
     self.x, self.y = xtotal, ytotal
 
+    if self.lightSource then
+      -- After done with coords draw light source (gets drawn later, this just sets it up)
+      self.lightSource.x, self.lightSource.y = xtotal, ytotal
+      ls.drawSource(self.lightSource)
+    end
+
     if self.spritebody then
       if self.spritejoint then self.spritejoint:destroy() end
       self.spritebody:setPosition(xtotal, ytotal)
@@ -129,6 +136,12 @@ NPC.functions = {
     self.x, self.y = self.body:getPosition()
 
     local xtotal, ytotal = trans.moving_objects_coords(self)
+
+    if self.lightSource then
+      -- After done with coords draw light source (gets drawn later, this just sets it up)
+      self.lightSource.x, self.lightSource.y = xtotal, ytotal
+      ls.drawSource(self.lightSource)
+    end
 
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames
