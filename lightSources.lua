@@ -69,7 +69,9 @@ function ls.drawSources()
     -- Use shader to premultiply to be able to use lighten blend mode
     love.graphics.setShader(multiply)
     local sx, sy = mainCamera:toScreen(source.x, source.y)
-    sx, sy = sx * 0.5, sy * 0.5
+    local deadSpaceX, deadSpaceY = mainCamera:getWindow()
+    -- sx, sy = sx * 0.5, sy * 0.5
+    sx, sy = (sx - deadSpaceX) / sh.get_window_scale(), (sy - deadSpaceY) / sh.get_window_scale()
     local skind = lights[source.kind]
     local sc = sh.get_game_scale()
     if skind.img then
