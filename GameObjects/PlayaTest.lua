@@ -157,6 +157,8 @@ function Playa.initialize(instance)
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.sprite_info = im.spriteSettings.playerSprites
   instance.lightSource = {}
+  instance.flickerPeriod = 1 / 30 -- in secs
+  instance.flickerTick = 0
   instance.sounds = snd.load_sounds({
     swordSlash1 = {"Effects/Oracle_Sword_Slash1"},
     swordSlash2 = {"Effects/Oracle_Sword_Slash2"},
@@ -1853,6 +1855,12 @@ Playa.functions = {
     -- fuck = "x = " .. floor(x) .. ", y = " .. floor(y) .. "\n\z
     --         xSquare = " .. floor(x/16)*16 .. ", ySquare = " .. floor(y/16)*16 .. "\n\z
     --         xCenter = " .. floor(x/16)*16+8 .. ", yCenter = " .. floor(y/16)*16+8
+    self.flickerTick = self.flickerTick + dt
+    if self.flickerTick > self.flickerPeriod then
+      self.flickerTick = self.flickerTick - self.flickerPeriod
+      self.flickerIndex = love.math.random(0, 2)
+      if self.flickerIndex == 2 then self.flickerIndex = nil end
+    end
 
     -- Determine previous movement modifiers due to floor
     self.inShallowWaterPrev = self.inShallowWater
@@ -2089,6 +2097,7 @@ Playa.functions = {
     self.lightSource.kind = session.save.playerGlow
     if self.lightSource.kind then
       self.lightSource.x, self.lightSource.y = xtotal, ytotal
+      self.lightSource.image_index = self.flickerIndex
       ls.drawSource(self.lightSource)
     end
 
@@ -2170,6 +2179,7 @@ Playa.functions = {
     self.lightSource.kind = session.save.playerGlow
     if self.lightSource.kind then
       self.lightSource.x, self.lightSource.y = xtotal, ytotal
+      self.lightSource.image_index = self.flickerIndex
       ls.drawSource(self.lightSource)
     end
 

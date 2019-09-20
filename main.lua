@@ -37,6 +37,7 @@ local inv = require "inventory"
 local trans = require "transitions"
 local gsh = require "gamera_shake"
 local rm = require("Rooms.room_manager")
+local ls = require "lightSources"
 
 local gamera = require "gamera.gamera"
 
@@ -695,6 +696,8 @@ function love.draw()
   if game.timeScreenEffect then
     dtse.draw()
   end
+  -- clear sources for rooms without timeScreenEffects
+  ls.clearSources()
 
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)

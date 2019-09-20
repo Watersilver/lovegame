@@ -1,6 +1,7 @@
 local sh = require "scaling_handler"
 local piwi = require "piecewise"
 local ls = require "lightSources"
+local u = require "utilities"
 
 local cc = COLORCONST
 
@@ -12,10 +13,10 @@ local dtsCanvas = love.graphics.newCanvas ( 800, 450 )
 
 
 local function currentToTarget(dt)
-  cr = cr + (tr - cr) * 0.5 * dt
-  cg = cg + (tg - cg) * 0.5 * dt
-  cb = cb + (tb - cb) * 0.5 * dt
-  ca = ca + (ta - ca) * 0.5 * dt
+  cr = u.gradualAdjust(dt, cr, tr)
+  cg = u.gradualAdjust(dt, cg, tg)
+  cb = u.gradualAdjust(dt, cb, tb)
+  ca = u.gradualAdjust(dt, ca, ta)
 end
 
 local function connectDomains(position, prevDomain)
@@ -53,7 +54,7 @@ defaultScreenEffects.newSubfunction(
   end,
   {startVars = prevDomain.subfunction.endVars, endVars = lateDayVars}
 )
--- sunset
+-- Sunset
 local sunsetEndVars = {cc * 0.7, cc * 0.6, cc * 0.65, cc}
 prevDomain = defaultScreenEffects.domains[#defaultScreenEffects.domains]
 defaultScreenEffects.newSubfunction(
@@ -137,6 +138,11 @@ defaultScreenEffects.newSubfunction(
 local seFuncs = {
   fullLight = function(curTime, dt)
     tr, tg, tb, ta = cc, cc, cc, cc
+    currentToTarget(dt)
+  end,
+
+  midnight = function(curTime, dt)
+    tr, tg, tb, ta = cc * 0.2, cc * 0.3, cc * 0.5, cc
     currentToTarget(dt)
   end,
 

@@ -78,6 +78,10 @@ function u.magnitude2d(x, y)
   return sqrt(x*x + y*y)
 end
 
+function u.distance2d(x1, y1, x2, y2)
+  return u.magnitude2d(x2 - x1, y2 - y1)
+end
+
 function u.perpendicularRightTurn2d(x, y)
   return y, -x
 end

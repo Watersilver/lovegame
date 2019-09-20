@@ -8,6 +8,9 @@ local im = require "image"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
 
+-- missile light
+local ls = require "lightSources"
+
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
 
@@ -39,6 +42,8 @@ local function calculate_offset(side, phase)
 end
 
 function Missile.initialize(instance)
+  -- missile light
+  instance.lightSource = {kind = "missile"}
   instance.iox = 0
   instance.ioy = 0
   instance.x_scale = 1
@@ -142,11 +147,16 @@ Missile.functions = {
       end
     end
     if not self.outOfBounds then
-      if x < 0 or x > game.room.width then
+      local sprite = self.sprite
+      local sw2 = sprite.width*0.5
+      local sh2 = sprite.height*0.5
+      if x < -sw2 or x > game.room.width + sw2 then
         self.outOfBounds = true
+        self.broken = true
         self.trans_draw = emptyFunc
-      elseif y < 0 or y > game.room.height then
+      elseif y < -sh2 or y > game.room.height + sh2 then
         self.outOfBounds = true
+        self.broken = true
         self.trans_draw = emptyFunc
       end
     end
@@ -159,6 +169,10 @@ Missile.functions = {
       x = x + trans.xtransform
       y = y + trans.ytransform
     end
+
+    -- missile light
+    self.lightSource.x, self.lightSource.y = x, y
+    ls.drawSource(self.lightSource)
 
     self.x, self.y = x, y
     local sprite = self.sprite
