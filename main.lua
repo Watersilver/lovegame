@@ -648,14 +648,15 @@ local function hudDraw(l,t,w,h)
       end
       love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5)
     end
+    
+    local wl, lt = hud:toWorld(0, 0)
+    local ww, wh = hud:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
 
     -- Draw rupees
     local maxMoney = session.maxMoney()
     local rupeeDigits = u.countIntDigits(maxMoney)
     local rupees = string.format("%0"..rupeeDigits.."d", (session.save.rupees or 0))
     local rspr = im.sprites["rupees"]
-    local wl, lt = hud:toWorld(0, 0)
-    local ww, wh = hud:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
     love.graphics.draw(rspr.img, rspr[0], ww-16, 5)
     local pr, pg, pb, pa = love.graphics.getColor()
     love.graphics.setColor(0, 0, 0, COLORCONST)
@@ -672,6 +673,10 @@ local function hudDraw(l,t,w,h)
     love.graphics.print(rupees, ww - rupeeOffset, 6.5, 0, 0.255)
     love.graphics.setColor(pr, pg, pb, pa)
 
+    -- Draw clock
+
+
+    -- Draw pause menu
     if game.paused and not game.transitioning and not game.cutscene then
       -- local pr, pg, pb, pa = love.graphics.getColor()
       love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)

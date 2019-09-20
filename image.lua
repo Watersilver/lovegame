@@ -179,7 +179,11 @@ im.spriteSettings = {
   },
   crow = {
     {'Enemies/Crow/crow', 2, padding = 2, width = 16, height = 16}
-  }
+  },
+
+  -- HUD
+  clock = {"clock", 1, padding = 0, width = 17, height = 17},
+  clockHand = {"clockHand", 1, padding = 0, width = 6, height = 1},
 }
 
 im.sprites = {}
@@ -268,5 +272,7 @@ im.load_sprite(im.spriteSettings.zeldarip)
 im.load_sprite(im.spriteSettings.basicFriendlyInterior)
 im.load_sprite(im.spriteSettings.playerSword)
 im.load_sprite(im.spriteSettings.playerMissile)
+im.load_sprite(im.spriteSettings.clock)
+im.load_sprite(im.spriteSettings.clockHand)
 
 return im
