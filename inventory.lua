@@ -253,11 +253,11 @@ function inv.manage(pauser)
 end
 
 
-function inv.draw()
+function inv.draw(l,t,w,h)
   local cc = COLORCONST
 
   -- pieces of heart
-  local pocx, pocy = HudWidth - invPieceOfHeart.width * 2, HudHeight * 0.5
+  local pocx, pocy = w - invPieceOfHeart.width * 2, h * 0.5
   love.graphics.print("PIECES",
   pocx - invPieceOfHeart.width * 0.9, pocy - invPieceOfHeart.height * 2,
   0, 0.4, 0.4)
@@ -282,15 +282,15 @@ function inv.draw()
   )
   love.graphics.draw(
     invPieceOfHeart.smallImg,
-    HudWidth - invPieceOfHeart.width * 2.6,
-    HudHeight * 0.5 + invPieceOfHeart.height + 3
+    w - invPieceOfHeart.width * 2.6,
+    h * 0.5 + invPieceOfHeart.height + 3
   )
   local pr, pg, pb, pa = love.graphics.getColor()
   love.graphics.setColor(cc, cc, cc*pohColourMod, cc)
   love.graphics.print(
     "x" .. pohCounter,
-    HudWidth - invPieceOfHeart.width * 2.6 + 16,
-    HudHeight * 0.5 + invPieceOfHeart.height + 8,
+    w - invPieceOfHeart.width * 2.6 + 16,
+    h * 0.5 + invPieceOfHeart.height + 8,
     0,
     0.3
   )
@@ -300,8 +300,8 @@ function inv.draw()
   -- local x, y = 31, 132
   local itemBoxSide = 18
   local itemBoxOffset = itemBoxSide + 1
-  local xInit = HudWidth * 0.5 - itemBoxOffset * 1.5
-  local x, y = xInit, HudHeight - itemBoxOffset * 3
+  local xInit = w * 0.5 - itemBoxOffset * 1.5
+  local x, y = xInit, h - itemBoxOffset * 3
 
   love.graphics.print("SPELLS", x, y - itemBoxOffset * 0.6, 0, 0.4, 0.4)
   for index, contents in ipairs(inv.slots) do

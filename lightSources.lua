@@ -70,10 +70,8 @@ function ls.drawSources(dw, dh) -- size difference from main camera
     love.graphics.setShader(multiply)
     local sx, sy = mainCamera:toScreen(source.x, source.y)
     local deadSpaceX, deadSpaceY = mainCamera:getWindow()
-    deadSpaceX, deadSpaceY = deadSpaceX - dw, deadSpaceY - dh
-    -- sx, sy = sx * 0.5, sy * 0.5
     local ws = sh.get_window_scale()
-    sx, sy = (sx - deadSpaceX) / ws, (sy - deadSpaceY) / ws
+    sx, sy = (sx - (deadSpaceX - dw)) / ws, (sy - (deadSpaceY - dh)) / ws
     local skind = lights[source.kind]
     local sc = sh.get_game_scale()
     if skind.img then

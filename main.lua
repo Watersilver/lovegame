@@ -648,29 +648,26 @@ local function hudDraw(l,t,w,h)
       end
       love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5)
     end
-    
-    local wl, lt = hud:toWorld(0, 0)
-    local ww, wh = hud:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
 
     -- Draw rupees
     local maxMoney = session.maxMoney()
     local rupeeDigits = u.countIntDigits(maxMoney)
     local rupees = string.format("%0"..rupeeDigits.."d", (session.save.rupees or 0))
     local rspr = im.sprites["rupees"]
-    love.graphics.draw(rspr.img, rspr[0], ww-16, 5)
+    love.graphics.draw(rspr.img, rspr[0], w-16, 5)
     local pr, pg, pb, pa = love.graphics.getColor()
     love.graphics.setColor(0, 0, 0, COLORCONST)
     local rupeeOffset = rupeeDigits * 6.1 + 17.6 -- 42 with 4 digits
-    love.graphics.print(rupees, ww - rupeeOffset + rno, 6.5, 0, 0.255)
-    love.graphics.print(rupees, ww - rupeeOffset - rno, 6.5, 0, 0.255)
-    love.graphics.print(rupees, ww - rupeeOffset, 6.5 + rno, 0, 0.255)
-    love.graphics.print(rupees, ww - rupeeOffset, 6.5 - rno, 0, 0.255)
+    love.graphics.print(rupees, w - rupeeOffset + rno, 6.5, 0, 0.255)
+    love.graphics.print(rupees, w - rupeeOffset - rno, 6.5, 0, 0.255)
+    love.graphics.print(rupees, w - rupeeOffset, 6.5 + rno, 0, 0.255)
+    love.graphics.print(rupees, w - rupeeOffset, 6.5 - rno, 0, 0.255)
     if maxMoney == session.save.rupees then
       love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST * 0.2, COLORCONST)
     else
       love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
     end
-    love.graphics.print(rupees, ww - rupeeOffset, 6.5, 0, 0.255)
+    love.graphics.print(rupees, w - rupeeOffset, 6.5, 0, 0.255)
     love.graphics.setColor(pr, pg, pb, pa)
 
     -- Draw clock
@@ -682,8 +679,8 @@ local function hudDraw(l,t,w,h)
       love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
       love.graphics.rectangle("fill", l, t, w, h)
       love.graphics.setColor(pr, pg, pb, pa)
-      inv.draw()
-      pam.draw()
+      inv.draw(l,t,w,h)
+      pam.draw(l,t,w,h)
     end
   end
 end

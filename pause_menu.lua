@@ -65,7 +65,7 @@ function pam.logic()
   end
 end
 
-function pam.draw()
+function pam.draw(l,t,w,h)
   local pr, pg, pb, pa = love.graphics.getColor()
   local alpha = COLORCONST
   if not gs.musicOn then alpha = 0.5 * COLORCONST end
