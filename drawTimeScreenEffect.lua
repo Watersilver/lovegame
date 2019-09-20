@@ -9,7 +9,10 @@ local tr, tg, tb, ta = cc, cc, cc, cc -- target
 local cr, cg, cb, ca = tr, tg, tb, ta -- current
 
 -- canvas
-local dtsCanvas = love.graphics.newCanvas ( 800, 450 )
+local dw = 5
+local dh = dw
+local canvW, canvH = 800 + dw*2, 450 + dh*2
+local dtsCanvas = love.graphics.newCanvas ( canvW, canvH )
 
 
 local function currentToTarget(dt)
@@ -176,7 +179,7 @@ function dtse.draw()
   dtsCanvas:renderTo(
     function()
       love.graphics.clear(cr, cg, cb, ca)
-      ls.drawSources()
+      ls.drawSources(dw, dh)
     end
   )
 
@@ -186,7 +189,7 @@ function dtse.draw()
   local mode, alphamode = love.graphics.getBlendMode()
   love.graphics.setBlendMode( "multiply" )
   love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-  love.graphics.draw(dtsCanvas, canvX, canvY, 0, sh.get_window_scale())
+  love.graphics.draw(dtsCanvas, canvX - dw, canvY - dw, 0, sh.get_window_scale())
   love.graphics.setColor(pr, pg, pb, pa)
   love.graphics.setBlendMode( mode, alphamode )
 

@@ -61,7 +61,7 @@ function ls.clearSources()
 end
 
 -- draws light source then DELETES it!!!
-function ls.drawSources()
+function ls.drawSources(dw, dh) -- size difference from main camera
   local mode, alphamode = love.graphics.getBlendMode()
   love.graphics.setBlendMode( "lighten", "premultiplied" )
   local worldShader = love.graphics.getShader()
@@ -70,8 +70,10 @@ function ls.drawSources()
     love.graphics.setShader(multiply)
     local sx, sy = mainCamera:toScreen(source.x, source.y)
     local deadSpaceX, deadSpaceY = mainCamera:getWindow()
+    deadSpaceX, deadSpaceY = deadSpaceX - dw, deadSpaceY - dh
     -- sx, sy = sx * 0.5, sy * 0.5
-    sx, sy = (sx - deadSpaceX) / sh.get_window_scale(), (sy - deadSpaceY) / sh.get_window_scale()
+    local ws = sh.get_window_scale()
+    sx, sy = (sx - deadSpaceX) / ws, (sy - deadSpaceY) / ws
     local skind = lights[source.kind]
     local sc = sh.get_game_scale()
     if skind.img then
