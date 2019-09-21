@@ -83,7 +83,6 @@ local function onDialogueRealEnd(instance)
   instance.image_index = 0
 end
 
-local enmptyTable = {}
 function NPC.initialize(instance)
   instance.myText = myText
   instance.activateFuncs = activateFuncs
@@ -95,7 +94,7 @@ function NPC.initialize(instance)
   instance.pushback = true
   instance.ballbreaker = true
   instance.unpushable = false
-  instance.physical_properties.masks = enmptyTable
+  instance.physical_properties.masks = {PLAYERJUMPATTACKCAT}
 end
 
 NPC.functions = {}
