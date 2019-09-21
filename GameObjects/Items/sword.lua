@@ -166,6 +166,7 @@ Sword.functions = {
   load = function (self)
     if self.spin then
       self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwingWide, 0)
+      self.fixture:setMask(SPRITECAT)
       self.spinFreq = 1 / 60
       self.spinPhase = self.spinFreq
       self.spanPositionKeys = {} -- table to avoid same position

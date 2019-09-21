@@ -160,6 +160,7 @@ function love.load()
   game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
   rm.build_room(game.room)
   snd.bgm:load(game.room.music_info)
+  game.clockInactive = game.room.timeDoesntPass
 
   -- Room Creator
   -- game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
@@ -375,6 +376,7 @@ function love.update(dt)
 
       snd.bgm:load(newRoom.music_info)
       game.timeScreenEffect = room.timeScreenEffect
+      game.clockInactive = room.timeDoesntPass
 
       for __, layer in ipairs(o.draw_layers) do
         for _, object in ipairs(layer) do
@@ -414,7 +416,8 @@ function love.update(dt)
     -- Update time
     if not game.room.timeDoesntPass then
       -- dt * 0.08333 = ocarina of time
-      session.updateTime(dt * 0.08333)
+      -- session.updateTime(dt * 0.08333)
+      session.updateTime(dt * 0.5)
       -- fuck = session.save.time
     end
 
@@ -679,13 +682,18 @@ local function hudDraw(l,t,w,h)
       love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
     end
     love.graphics.print(rupees, w - rupeeOffset, 6.5, 0, 0.255)
-    love.graphics.setColor(pr, pg, pb, pa)
 
     -- Draw clock
+    if game.clockInactive then
+      love.graphics.setColor(COLORCONST, 0.3*COLORCONST, 0.3*COLORCONST, COLORCONST)
+    else
+      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    end
     local cspr = im.sprites["clock"]
-    love.graphics.draw(cspr.img, cspr[0], w * 0.5, h, session.clockAngle, cspr.res_x_scale, cspr.res_y_scale, cspr.cx, cspr.cy)
+    love.graphics.draw(cspr.img, cspr[0], w * 0.9, h, session.clockAngle, cspr.res_x_scale, cspr.res_y_scale, cspr.cx, cspr.cy)
     local chspr = im.sprites["clockHand"]
-    love.graphics.draw(chspr.img, chspr[session.clockAngle == 0 and 0 or 1], w * 0.5, h, -session.clockAngle + session.save.time * math.pi / 12, chspr.res_x_scale, chspr.res_y_scale, chspr.cx, chspr.cy)
+    love.graphics.draw(chspr.img, chspr[session.clockAngleTarget == 0 and 0 or 1], w * 0.9, h, -session.clockAngle + session.save.time * math.pi / 12, chspr.res_x_scale, chspr.res_y_scale, chspr.cx, chspr.cy)
+    love.graphics.setColor(pr, pg, pb, pa)
 
 
     -- Draw pause menu
@@ -734,7 +742,7 @@ function love.draw()
     end
   end
 
-  love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-44)
+  love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
   if fuck then love.graphics.print(fuck, 0, 177+120) end
   local debiter = 0
   if triggersdebug then

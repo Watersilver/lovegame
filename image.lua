@@ -182,7 +182,7 @@ im.spriteSettings = {
   },
 
   -- HUD
-  clock = {"clock", 1, padding = 0, width = 17, height = 17},
+  clock = {"clock", 1, padding = 0, width = 19, height = 19},
   clockHand = {"clockHand", 2, padding = 2, width = 7, height = 26},
 }
 

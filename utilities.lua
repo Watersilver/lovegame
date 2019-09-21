@@ -56,6 +56,7 @@ end
 
 function u.gradualAdjust(dt, xcurrent, xtarget, as)
   -- adjustment speed can't be more than 30
+  if math.abs(xcurrent - xtarget) < .0000000000000004 then return xtarget end
   as = as or 15
   if as > 30 then as = 30 end
   as = as * dt
