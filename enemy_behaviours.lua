@@ -94,16 +94,16 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
 
   object.attacked = true
 
-  -- invulnerability
-  invframesMod = invframesMod or 1
-  object.invulnerable = invframesMod * 0.25
-
   -- Damage
   if (not object.shielded) or object.shieldDown then
     if object.hp then object.hp = object.hp - damage end
     if object.hp <= 0 then object.harmless = true end
     if object.resetBehaviour then object.behaviourTimer = object.resetBehaviour end
     snd.play(object.sounds.hitSound)
+
+    -- invulnerability
+    invframesMod = invframesMod or 1
+    object.invulnerable = invframesMod * 0.25
   end
 
   -- Physics
