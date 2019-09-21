@@ -80,6 +80,9 @@ session = {
     local maxRupees = session.maxMoney()
     session.save.rupees = u.clamp(0, session.save.rupees + addedMoney, maxRupees)
   end,
+  getClockAngleTarget = function()
+    return (session.save.time > 6 and session.save.time < 18) and 0 or math.pi
+  end,
 }
 local session = session
 
@@ -273,6 +276,14 @@ function love.update(dt)
   -- Determine screen effect due to game time
   if game.timeScreenEffect then
     dtse.logic(game.timeScreenEffect, dt)
+  end
+
+  -- Calculate clock stuff
+  if session.clockAngleTarget then
+    session.clockAngleTarget = session.getClockAngleTarget()
+    if session.clockAngle ~= session.clockAngleTarget then
+      session.clockAngle = u.gradualAdjust(dt, session.clockAngle, session.clockAngleTarget)
+    end
   end
 
   -- display mouse position
@@ -646,7 +657,7 @@ local function hudDraw(l,t,w,h)
       else
         healthFrame = hpspr[0]
       end
-      love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5)
+      love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5, 0, hpspr.res_x_scale, hpspr.res_y_scale)
     end
 
     -- Draw rupees
@@ -654,7 +665,7 @@ local function hudDraw(l,t,w,h)
     local rupeeDigits = u.countIntDigits(maxMoney)
     local rupees = string.format("%0"..rupeeDigits.."d", (session.save.rupees or 0))
     local rspr = im.sprites["rupees"]
-    love.graphics.draw(rspr.img, rspr[0], w-16, 5)
+    love.graphics.draw(rspr.img, rspr[0], w-16, 5,  0, rspr.res_x_scale, rspr.res_y_scale)
     local pr, pg, pb, pa = love.graphics.getColor()
     love.graphics.setColor(0, 0, 0, COLORCONST)
     local rupeeOffset = rupeeDigits * 6.1 + 17.6 -- 42 with 4 digits
@@ -671,6 +682,10 @@ local function hudDraw(l,t,w,h)
     love.graphics.setColor(pr, pg, pb, pa)
 
     -- Draw clock
+    local cspr = im.sprites["clock"]
+    love.graphics.draw(cspr.img, cspr[0], w * 0.5, h, session.clockAngle, cspr.res_x_scale, cspr.res_y_scale, cspr.cx, cspr.cy)
+    local chspr = im.sprites["clockHand"]
+    love.graphics.draw(chspr.img, chspr[session.clockAngle == 0 and 0 or 1], w * 0.5, h, -session.clockAngle + session.save.time * math.pi / 12, chspr.res_x_scale, chspr.res_y_scale, chspr.cx, chspr.cy)
 
 
     -- Draw pause menu

@@ -60,10 +60,15 @@ local function start_game(saveName)
     session.save[key] = value
   end
   -- initialize certain values
+  -- save
   session.save.time = session.save.time or 6
   session.save.days = session.save.days or 0
   session.save.rupees = session.save.rupees or 0
   session.save.piecesOfHeart = session.save.piecesOfHeart or 0
+  -- session
+  session.clockAngleTarget = session.getClockAngleTarget()
+  session.clockAngle = session.clockAngleTarget
+  session.clockHandAngle = session.save.time
   -- Remember which save I am
   session.save.saveName = saveName
 
