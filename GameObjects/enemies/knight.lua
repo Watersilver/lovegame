@@ -18,6 +18,7 @@ function Knight.initialize(instance)
   instance.hp = 4 --love.math.random(3)
   instance.pushback = true
   instance.shielded = true
+  instance.weakShield = true
   instance.shieldWall = true
   instance.facing = "down"
   instance.sightWidth = 16

@@ -56,6 +56,17 @@ session = {
     swordSpeed = nil
   },
   mslQueue = u.newQueue(),
+  initialize = function()
+    -- save
+    session.save.time = session.save.time or 6
+    session.save.days = session.save.days or 1
+    session.save.rupees = session.save.rupees or 0
+    session.save.piecesOfHeart = session.save.piecesOfHeart or 0
+    -- session (depends on save, so do after save)
+    session.clockAngleTarget = session.getClockAngleTarget()
+    session.clockAngle = session.clockAngleTarget
+    session.clockHandAngle = session.save.time
+  end,
   updateTime = function(hoursPassed)
     session.save.time = session.save.time + hoursPassed
 
@@ -416,8 +427,7 @@ function love.update(dt)
     -- Update time
     if not game.room.timeDoesntPass then
       -- dt * 0.08333 = ocarina of time
-      -- session.updateTime(dt * 0.08333)
-      session.updateTime(dt * 0.5)
+      session.updateTime(dt * 0.08333)
       -- fuck = session.save.time
     end
 
@@ -668,31 +678,34 @@ local function hudDraw(l,t,w,h)
     local rupeeDigits = u.countIntDigits(maxMoney)
     local rupees = string.format("%0"..rupeeDigits.."d", (session.save.rupees or 0))
     local rspr = im.sprites["rupees"]
-    love.graphics.draw(rspr.img, rspr[0], w-16, 5,  0, rspr.res_x_scale, rspr.res_y_scale)
+    love.graphics.draw(rspr.img, rspr[0], w-9, h-9,  0, rspr.res_x_scale, rspr.res_y_scale)
     local pr, pg, pb, pa = love.graphics.getColor()
     love.graphics.setColor(0, 0, 0, COLORCONST)
-    local rupeeOffset = rupeeDigits * 6.1 + 17.6 -- 42 with 4 digits
-    love.graphics.print(rupees, w - rupeeOffset + rno, 6.5, 0, 0.255)
-    love.graphics.print(rupees, w - rupeeOffset - rno, 6.5, 0, 0.255)
-    love.graphics.print(rupees, w - rupeeOffset, 6.5 + rno, 0, 0.255)
-    love.graphics.print(rupees, w - rupeeOffset, 6.5 - rno, 0, 0.255)
+    local rupeeOffset = rupeeDigits * 6.1 + 10
+    local rupeeYBase = h-7.5
+    love.graphics.print(rupees, w - rupeeOffset + rno, rupeeYBase, 0, 0.255)
+    love.graphics.print(rupees, w - rupeeOffset - rno, rupeeYBase, 0, 0.255)
+    love.graphics.print(rupees, w - rupeeOffset, rupeeYBase + rno, 0, 0.255)
+    love.graphics.print(rupees, w - rupeeOffset, rupeeYBase - rno, 0, 0.255)
     if maxMoney == session.save.rupees then
       love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST * 0.2, COLORCONST)
     else
       love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
     end
-    love.graphics.print(rupees, w - rupeeOffset, 6.5, 0, 0.255)
+    love.graphics.print(rupees, w - rupeeOffset, rupeeYBase, 0, 0.255)
 
     -- Draw clock
     if game.clockInactive then
       love.graphics.setColor(COLORCONST, 0.3*COLORCONST, 0.3*COLORCONST, COLORCONST)
+      love.graphics.setColor(0.3*COLORCONST, COLORCONST, COLORCONST, COLORCONST)
     else
       love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
     end
     local cspr = im.sprites["clock"]
-    love.graphics.draw(cspr.img, cspr[0], w * 0.9, h, session.clockAngle, cspr.res_x_scale, cspr.res_y_scale, cspr.cx, cspr.cy)
+    local clockX = w * 0.9 - ((rupeeDigits < 4) and 0 or 6.1)
+    love.graphics.draw(cspr.img, cspr[0], clockX, h, session.clockAngle, cspr.res_x_scale, cspr.res_y_scale, cspr.cx, cspr.cy)
     local chspr = im.sprites["clockHand"]
-    love.graphics.draw(chspr.img, chspr[session.clockAngleTarget == 0 and 0 or 1], w * 0.9, h, -session.clockAngle + session.save.time * math.pi / 12, chspr.res_x_scale, chspr.res_y_scale, chspr.cx, chspr.cy)
+    love.graphics.draw(chspr.img, chspr[session.clockAngleTarget == 0 and 0 or 1], clockX, h, -session.clockAngle + session.save.time * math.pi / 12, chspr.res_x_scale, chspr.res_y_scale, chspr.cx, chspr.cy)
     love.graphics.setColor(pr, pg, pb, pa)
 
 
@@ -702,6 +715,7 @@ local function hudDraw(l,t,w,h)
       love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
       love.graphics.rectangle("fill", l, t, w, h)
       love.graphics.setColor(pr, pg, pb, pa)
+      love.graphics.print("Day " .. session.save.days, w*0.05, h*0.1, 0, 0.5)
       inv.draw(l,t,w,h)
       pam.draw(l,t,w,h)
     end

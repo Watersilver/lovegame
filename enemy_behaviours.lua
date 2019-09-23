@@ -94,8 +94,10 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
 
   object.attacked = true
 
+  local piercedShield = (object.weakShield and session.save.dinsPower and object.lastHit == "sword")
+
   -- Damage
-  if (not object.shielded) or object.shieldDown then
+  if (not object.shielded) or object.shieldDown or piercedShield then
     if object.hp then object.hp = object.hp - damage end
     if object.hp <= 0 then object.harmless = true end
     if object.resetBehaviour then object.behaviourTimer = object.resetBehaviour end
@@ -107,7 +109,7 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
   end
 
   -- Physics
-  if not object.shieldWall then
+  if not object.shieldWall or piercedShield then
     forceMod = forceMod or 1
     local speed = forceMod * 111 * object.body:getMass()
     local prevvx, prevvy = object.body:getLinearVelocity()
