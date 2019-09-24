@@ -28,10 +28,6 @@ Antifairy.functions = {
 
   enemyUpdate = u.emptyFunc,
 
-  hitBySword = function (self, other, myF, otherF)
-    ebh.propelledByHit(self, other, myF, otherF, 1)
-  end,
-
   endContact = function(self, a, b, coll, aob, bob)
     -- restitution doesn't result in a perfect elastic bounce, so fix here
     self._, self.direction = u.cartesianToPolar(self.body:getLinearVelocity())

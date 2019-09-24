@@ -87,31 +87,18 @@ Enemy.functions = {
   end,
 
   hitBySword = function (self, other, myF, otherF)
-    local damage
-    local forceMod
-    if session.save.dinsPower then
-      damage = 4
-      forceMod = 2
-    else
-      damage = 3
-    end
-    ebh.propelledByHit(self, other, myF, otherF, damage, forceMod)
+    ebh.damagedByHit(self, other, myF, otherF)
+    ebh.propelledByHit(self, other, myF, otherF)
   end,
 
   hitByMissile = function (self, other, myF, otherF)
-    local damage
-    if session.save.nayrusWisdom then
-      damage = other.hitBySword and 3 or 2
-    else
-      damage = other.hitBySword and 2 or 1
-    end
-    ebh.propelledByHit(self, other, myF, otherF, damage, other.hitBySword and 1 or 0.5)
+    ebh.damagedByHit(self, other, myF, otherF)
+    ebh.propelledByHit(self, other, myF, otherF)
   end,
 
   hitByThrown = function (self, other, myF, otherF)
-    local damage
-    if session.save.dinsPower then damage = 5 else damage = 4 end
-    ebh.propelledByHit(self, other, myF, otherF, damage)
+    ebh.damagedByHit(self, other, myF, otherF)
+    ebh.propelledByHit(self, other, myF, otherF)
   end,
 
   hitPlayer = function (self, other, myF, otherF)
@@ -277,18 +264,21 @@ Enemy.functions = {
     -- Check if hit by sword
     if other.immasword == true and not self.invulnerable and not self.undamageable then
       self.lastHit = "sword"
+      self.attacked = true
       self:hitBySword(other, myF, otherF)
     end
 
     -- Check if hit by missile
     if other.immamissile == true and not self.invulnerable and not self.undamageable then
       self.lastHit = "missile"
+      self.attacked = true
       self:hitByMissile(other, myF, otherF)
     end
 
     -- Check if hit by thrown object
     if other.immathrown == true and not self.invulnerable and not self.undamageable then
       self.lastHit = "thrown"
+      self.attacked = true
       self:hitByThrown(other, myF, otherF)
     end
   end,

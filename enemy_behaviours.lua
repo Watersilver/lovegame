@@ -90,23 +90,60 @@ function ebh.bounceOffScreenEdge(object)
   end
 end
 
-function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invframesMod)
+function ebh.damagedByHit(object, other, myF, otherF)
 
-  object.attacked = true
-
+  -- Determine if shield was pierced
   local piercedShield = (object.weakShield and session.save.dinsPower and object.lastHit == "sword")
 
-  -- Damage
   if (not object.shielded) or object.shieldDown or piercedShield then
+    -- Calculate damage received
+    local baseDamage
+    local damageMod
+    if object.lastHit == "sword" then
+      baseDamage = session.save.dinsPower and 4 or 3
+      damageMod = object.swordDamageMod or 1
+    elseif object.lastHit == "missile" then
+      -- if missile is hit by sword, raise damage
+      baseDamage = session.save.nayrusWisdom and (other.hitBySword and 3 or 2) or (other.hitBySword and 2 or 1)
+      damageMod = object.missileDamageMod or 1
+    elseif object.lastHit == "thrown" then
+      baseDamage = session.save.dinsPower and 5 or 4
+      damageMod = object.thrownDamageMod or 1
+    end
+    local damage = baseDamage * damageMod
+
+    -- Apply damage
     if object.hp then object.hp = object.hp - damage end
     if object.hp <= 0 then object.harmless = true end
     if object.resetBehaviour then object.behaviourTimer = object.resetBehaviour end
     snd.play(object.sounds.hitSound)
 
     -- invulnerability
-    invframesMod = invframesMod or 1
+    local invframesMod = object.invframesMod or 1
     object.invulnerable = invframesMod * 0.25
   end
+end
+
+function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invframesMod)
+
+  -- Determine if shield was pierced
+  local piercedShield = (object.weakShield and session.save.dinsPower and object.lastHit == "sword")
+
+  -- Calculate force
+  local baseForceMod
+  local attackForceMod
+  if object.lastHit == "sword" then
+    baseForceMod = session.save.dinsPower and (other.spin and 3 or (other.stab and 1 or 2)) or 1
+    attackForceMod = object.swordForceMod or 1
+  elseif object.lastHit == "missile" then
+    -- if missile is hit by sword, raise force
+    baseForceMod = session.save.nayrusWisdom and (other.hitBySword and 2 or 1) or (other.hitBySword and 1 or 0.5)
+    attackForceMod = object.missileForceMod or 1
+  elseif object.lastHit == "thrown" then
+    baseForceMod = session.save.dinsPower and 3 or 2
+    attackForceMod = object.thrownForceMod or 1
+  end
+  local forceMod = baseForceMod * attackForceMod
 
   -- Physics
   if not object.shieldWall or piercedShield then

@@ -37,10 +37,6 @@ Slime.functions = {
     td.analogueWalk(self, dt)
   end,
 
-  -- hitBySword = function (self, other, myF, otherF)
-  --   ebh.propelledByHit(self, other, myF, otherF, 3, 1, 1, 0.5)
-  -- end,
-
   -- draw = function (self)
   --   et.functions.draw(self)
   -- end
