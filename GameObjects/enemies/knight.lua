@@ -30,6 +30,7 @@ function Knight.initialize(instance)
   instance.hitWallSound = snd.load_sound({"Effects/Oracle_ScentSeed"})
   instance.chargeSound = snd.load_sound({"Effects/Oracle_Link_LandRun"})
   instance.drop = "rich"
+  instance.attackDmg = 2
 end
 
 Knight.functions = {

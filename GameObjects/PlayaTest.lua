@@ -2344,7 +2344,7 @@ Playa.functions = {
         if self.zo < 0 then coll:setEnabled(false); return end
       end
       if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) and other.damager and not self.invulnerable and not other.harmless then
-        self.triggers.damaged = true
+        self.triggers.damaged = (other.attackDmg or 1) * (0.5 + (session.save.nayrusWisdom and 0 or 0.25) + (0.25 - session.getArmorDamageReduction() * 0.25))
         local mybod = self.body
         local mymass = mybod:getMass()
         local lvx, lvy = mybod:getLinearVelocity()

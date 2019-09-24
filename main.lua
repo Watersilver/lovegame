@@ -62,6 +62,7 @@ session = {
     session.save.days = session.save.days or 1
     session.save.rupees = session.save.rupees or 0
     session.save.piecesOfHeart = session.save.piecesOfHeart or 0
+    session.save.armorLvl = session.save.armorLvl or 0
     -- session (depends on save, so do after save)
     session.clockAngleTarget = session.getClockAngleTarget()
     session.clockAngle = session.clockAngleTarget
@@ -93,6 +94,12 @@ session = {
   end,
   getClockAngleTarget = function()
     return (session.save.time > 6 and session.save.time < 18) and 0 or math.pi
+  end,
+  getArmorDamageReduction = function()
+    -- return currentArmor / maxArmor
+    if session.save.armorLvl == 0 then
+      return 0
+    end
   end,
 }
 local session = session

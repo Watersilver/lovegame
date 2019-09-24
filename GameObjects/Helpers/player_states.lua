@@ -585,7 +585,7 @@ player_states.start_damaged = function(instance, dt, side)
   instance.image_index = 0
   instance.image_speed = 0
   if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
-    instance:addHealth(-1)
+    instance:addHealth(-(instance.triggers.damaged or 1))
   end
   inp.controllers[instance.player].disabled = true
   instance.invulnerable = 1
