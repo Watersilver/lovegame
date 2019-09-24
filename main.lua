@@ -666,7 +666,15 @@ local function hudDraw(l,t,w,h)
     for i = 1, pl1.maxHealth do
       local healthFrame
       if pl1.health < i then
-        healthFrame = hpspr[4]
+        if pl1.health <= i - 1 then
+          healthFrame = hpspr[4]
+        elseif pl1.health <= i - 0.75 then
+          healthFrame = hpspr[3]
+        elseif pl1.health <= i - 0.5 then
+          healthFrame = hpspr[2]
+        elseif pl1.health <= i - 0.25 then
+          healthFrame = hpspr[1]
+        end
       else
         healthFrame = hpspr[0]
       end
