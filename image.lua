@@ -94,6 +94,9 @@ im.spriteSettings = {
   pieceOfHeart = {
     {'pieceOfHeart', 1, padding = 0, width = 16, height = 15}
   },
+  blueTunic = {
+    {'BlueTunic_LA', 1, padding = 0, width = 16, height = 13}
+  },
 
   boss1TestSprites = {
     -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},

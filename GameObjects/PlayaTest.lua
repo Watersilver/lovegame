@@ -2074,7 +2074,15 @@ Playa.functions = {
     if trig.enableHitShader then
       self.playerShader = hitShader
     else
-      self.playerShader = nil
+      if session.save.armorLvl == 1 then
+        self.playerShader = shdrs.blueTunic
+      elseif session.save.armorLvl == 2 then
+        self.playerShader = shdrs.redTunic
+      elseif session.save.armorLvl == 3 then
+        self.playerShader = shdrs.mauveTunic
+      else
+        self.playerShader = nil
+      end
     end
 
     -- Turn off triggers

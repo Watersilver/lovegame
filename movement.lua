@@ -150,12 +150,14 @@ local universalWalk = function(object, dt, inputForceFunc)
       if object.floorViscosity == "ladder" then
         if object.vy < 0 then
           inversemaxspeed = inversemaxspeed * 8
-          brakes = brakes * 100
+          -- Recalculate breaks, because they're zero!!
+          brakes = (object.brakes or 6) * 100
         end
       elseif object.floorViscosity == "stairs" then
         if object.vy < -0.1 then
           inversemaxspeed = inversemaxspeed * 3
-          brakes = brakes * 3
+          -- Recalculate breaks, because they're zero!!
+          brakes = (object.brakes or 6) * 3
         end
       end
     end

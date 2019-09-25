@@ -10,6 +10,9 @@ shdrs.itemBlueShader = love.graphics.newShader("Shaders/item_blue_shader.fs")
 shdrs.itemGreenShader = love.graphics.newShader("Shaders/item_green_shader.fs")
 shdrs.itemGreenShader = love.graphics.newShader("Shaders/item_green_shader.fs")
 shdrs.swordChargeShader = love.graphics.newShader("Shaders/charge_sword_shader.fs")
+shdrs.blueTunic = love.graphics.newShader("Shaders/blue_tunic.fs")
+shdrs.redTunic = love.graphics.newShader("Shaders/red_tunic.fs")
+shdrs.mauveTunic = love.graphics.newShader("Shaders/mauve_tunic.fs")
 
 shdrs.multiply = love.graphics.newShader("Shaders/multiply.fs")
 

@@ -97,7 +97,13 @@ session = {
   end,
   getArmorDamageReduction = function()
     -- return currentArmor / maxArmor
-    if session.save.armorLvl == 0 then
+    if session.save.armorLvl == 1 then
+      return 0.3333
+    elseif session.save.armorLvl == 2 then
+      return 0.6666
+    elseif session.save.armorLvl == 3 then
+      return 1
+    else
       return 0
     end
   end,

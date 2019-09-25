@@ -133,7 +133,7 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
   local baseForceMod
   local attackForceMod
   if object.lastHit == "sword" then
-    baseForceMod = session.save.dinsPower and (other.spin and 3 or (other.stab and 1 or 2)) or 1
+    baseForceMod = session.save.dinsPower and (other.spin and 3 or (other.stab and 1 or 2)) or (other.spin and 1.5 or (other.stab and 0.5 or 1))
     attackForceMod = object.swordForceMod or 1
   elseif object.lastHit == "missile" then
     -- if missile is hit by sword, raise force
