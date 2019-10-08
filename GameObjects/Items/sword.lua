@@ -394,7 +394,8 @@ Sword.functions = {
     if (pushback) and not self.hitWall and not other.attackDodger then
       local lvx, lvy = cr.body:getLinearVelocity()
       local crmass = cr.body:getMass()
-      local crbrakes = clamp(0, cr.brakes, cr.brakesLim)
+      local _, crbrakes = session.getAthlectics()
+      crbrakes = clamp(0, crbrakes, cr.brakesLim)
       cr.body:applyLinearImpulse(-lvx * crmass, -lvy * crmass)
       local px, py
       if not self.spin then

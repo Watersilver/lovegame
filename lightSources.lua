@@ -53,7 +53,7 @@ function ls.drawSource(source)
   table.insert(sources, source)
 end
 
--- clears sources array. Will be run once per main draw
+-- clears sources array.
 function ls.clearSources()
   for index in ipairs(sources) do
     sources[index] = nil

@@ -125,8 +125,14 @@ local universalWalk = function(object, dt, inputForceFunc)
   local brakesLim = object.brakesLim or 10
   local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
   local normalisedSpeed = object.normalisedSpeed or 1
-  local inversemaxspeed = object.maxspeed or 50
-  inversemaxspeed = 1/(inversemaxspeed * normalisedSpeed) -- could be inf, don't worry
+  local maxspeed = object.maxspeed or 50
+
+  if object.player then
+    mobility, brakes = session.getAthlectics()
+    maxspeed = session.getMaxSpeed()
+  end
+
+  local inversemaxspeed = 1/(maxspeed * normalisedSpeed) -- could be inf, don't worry
 
   -- if on ground check how floor affects movement
   if object.zo == 0 or object.actAszo0 then
@@ -225,9 +231,14 @@ local mo = {}
     stand_still = function(object, dt)
       if object.zo ~= 0 then return end
       local mass = object.body:getMass()
+      local _
       local brakes = object.brakes or 6
       local brakesLim = object.brakesLim or 10
       local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
+
+      if object.player then
+        _, brakes = session.getAthlectics()
+      end
 
       if floorFriction < 1 then
         brakes = brakes * floorFriction

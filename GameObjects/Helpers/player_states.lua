@@ -211,7 +211,7 @@ player_states.run_hold = function(instance, dt, side)
   img_speed_and_footstep_sound(instance, dt)
   -- Update spin attack counter
   instance.spinAttackCounter = instance.spinAttackCounter + dt
-  if session.save.faroresCourage and instance.spinCharged == false and instance.spinAttackCounter > (session.save.swordSpeed or inv.sword.time) * 2.5 then
+  if session.save.faroresCourage and instance.spinCharged == false and instance.spinAttackCounter > session.getSwordSpeed() * 2.5 then
     instance.spinCharged = true
     snd.play(instance.sounds.swordCharge)
   end
@@ -322,7 +322,7 @@ player_states.check_missile = function(instance, dt, side)
   if pddp(instance, trig, side) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif instance.missile_cooldown > instance.missile_cooldown_limit then
+  elseif instance.missile_cooldown > session.getMagicCooldown() then
     if trig.fire_missile then
       instance.animation_state:change_state(instance, dt, side .. "missile")
     else
@@ -333,7 +333,6 @@ end
 
 player_states.start_missile = function(instance, dt, side)
   instance.missile_cooldown = 0
-  -- instance.missile_cooldown_limit = instance.missile_cooldown_limit
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/shoot_" .. side]
   else
@@ -356,7 +355,7 @@ player_states.end_missile = function(instance, dt, side)
   if side == "right" then
     instance.x_scale = 1
   end
-  if instance.missile_cooldown < instance.missile_cooldown_limit then
+  if instance.missile_cooldown < session.getMagicCooldown() then
     instance.missile.broken = true
     instance.missile.fired = true
     instance.missile_cooldown = nil
@@ -368,20 +367,24 @@ player_states.end_missile = function(instance, dt, side)
     instance.missile.fired = true
 
     if not instance.missile.body:isDestroyed() then
+
+      instance.missile.image_index = instance.missile.sprite.frames - 1
+
       local mslvx, mslvy = instance.missile.body:getLinearVelocity()
       local firevelx, firevely = 0, 0
 
-      -- If I add spritebody to missile, the speed I add will get cut in half
+      -- WARNING If I add spritebody to missile, the speed I add will get cut in half
+
+      -- missile velocity function of (base) maxspeed
       if side == "up" then
-        firevely = - instance.maxspeed
+        firevely = - session.save.playerMaxSpeed
       elseif side == "down" then
-        firevely = instance.maxspeed
+        firevely = session.save.playerMaxSpeed
       elseif side == "left" then
-        firevelx = - instance.maxspeed
+        firevelx = - session.save.playerMaxSpeed
       else
-        firevelx = instance.maxspeed
+        firevelx = session.save.playerMaxSpeed
       end
-      instance.missile.image_index = instance.missile.sprite.frames - 1
       instance.missile.body:setLinearVelocity(mslvx+firevelx, mslvy+firevely)
     end
 

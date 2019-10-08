@@ -94,9 +94,13 @@ im.spriteSettings = {
   pieceOfHeart = {
     {'pieceOfHeart', 1, padding = 0, width = 16, height = 15}
   },
-  blueTunic = {
-    {'BlueTunic_LA', 1, padding = 0, width = 16, height = 13}
-  },
+
+  -- menu stuff
+  triforce = {'Menu/menuTriforce', 4, padding = 1, width = 28, height = 24},
+  tunics = {'tunics', 4, padding = 1, width = 16, height = 13},
+  swordSkill = {'swordSkill', 4, padding = 1, width = 16, height = 13},
+  missileSkill = {'missileSkill', 4, padding = 1, width = 16, height = 13},
+  mobilitySkill = {'mobilitySkill', 4, padding = 1, width = 9, height = 13},
 
   boss1TestSprites = {
     -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
@@ -277,5 +281,10 @@ im.load_sprite(im.spriteSettings.playerSword)
 im.load_sprite(im.spriteSettings.playerMissile)
 im.load_sprite(im.spriteSettings.clock)
 im.load_sprite(im.spriteSettings.clockHand)
+im.load_sprite(im.spriteSettings.triforce)
+im.load_sprite(im.spriteSettings.tunics)
+im.load_sprite(im.spriteSettings.swordSkill)
+im.load_sprite(im.spriteSettings.missileSkill)
+im.load_sprite(im.spriteSettings.mobilitySkill)
 
 return im

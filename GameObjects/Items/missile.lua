@@ -91,7 +91,7 @@ Missile.functions = {
     if not self.fired then
 
       if cr.missile_cooldown then
-        local stage = cr.missile_cooldown/cr.missile_cooldown_limit
+        local stage = cr.missile_cooldown/session.getMagicCooldown()
         self.image_index = stage * (self.sprite.frames - 1)
       end
 

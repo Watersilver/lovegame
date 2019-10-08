@@ -1,7 +1,9 @@
 local gs = require "game_settings"
+local im = require "image"
 local inp = require "input"
 local game = require "game"
 local o = require "GameObjects.objects"
+local sm = require "state_machine"
 
 local pam = {}
 
@@ -11,8 +13,8 @@ function pam.init()
   moup = mouseP
 end
 
--- Button Bounding Boxes
-local bbb = { width = 16, height = 16, separation = 10, xstart = 11, ystart = 11}
+-- Button Bounding Boxes (Top menu: For music, sounds and quit game)
+local bbb = { width = 16, height = 16, separation = 10, xstart = 11, ystart = 11 }
 for i = 1,3 do
   -- make horizontally ordered buttons
   bbb[i] = {}
@@ -34,7 +36,7 @@ local function checkIfInBBB(x, y)
   end
   return 0
 end
-function pam.logic()
+function pam.top_menu_logic()
   if moub["1press"] then
     local bindex = checkIfInBBB(Hud:toWorld(moup.x, moup.y))
     if bindex == 1 then
@@ -65,7 +67,7 @@ function pam.logic()
   end
 end
 
-function pam.draw(l,t,w,h)
+function pam.top_menu_draw(l,t,w,h)
   local pr, pg, pb, pa = love.graphics.getColor()
   local alpha = COLORCONST
   if not gs.musicOn then alpha = 0.5 * COLORCONST end
@@ -84,5 +86,76 @@ function pam.draw(l,t,w,h)
   end
   love.graphics.setColor(pr, pg, pb, pa)
 end
+
+-- Middle menu (Sword skill, magic skill, armor, godessUpgrades)
+-- armor in middle, surrounded by triforce with three counters for
+-- sword shield and mobility on top.
+pam.middle = {
+  triforceSprite = im.sprites["Menu/menuTriforce"],
+  tunicSprite = im.sprites["tunics"],
+  swordSkillSprite = im.sprites["swordSkill"],
+  missileSkillSprite = im.sprites["missileSkill"],
+  mobilitySkillSprite = im.sprites["mobilitySkill"],
+}
+pam.middle.draw = function(l, t, w, h)
+
+  local trifx, trify = w * 0.5, h * 0.5 - 8
+  local triforceSprite = pam.middle.triforceSprite
+  -- power
+  love.graphics.draw(
+    triforceSprite.img, triforceSprite[session.save.dinsPower and 1 or 0],
+    trifx, trify - triforceSprite.cy, 0,
+    triforceSprite.res_x_scale, triforceSprite.res_y_scale,
+    triforceSprite.cx, triforceSprite.cy)
+  -- wisdom
+  love.graphics.draw(
+    triforceSprite.img, triforceSprite[session.save.nayrusWisdom and 2 or 0],
+    trifx - triforceSprite.cx, trify + triforceSprite.cy, 0,
+    triforceSprite.res_x_scale, triforceSprite.res_y_scale,
+    triforceSprite.cx, triforceSprite.cy)
+  -- courage
+  love.graphics.draw(
+    triforceSprite.img, triforceSprite[session.save.faroresCourage and 3 or 0],
+    trifx + triforceSprite.cx, trify + triforceSprite.cy, 0,
+    triforceSprite.res_x_scale, triforceSprite.res_y_scale,
+    triforceSprite.cx, triforceSprite.cy)
+
+  local upgrx, upgry = w * 0.5, h * 0.28
+  -- sword
+  local swordSkillSprite = pam.middle.swordSkillSprite
+  love.graphics.draw(
+    swordSkillSprite.img, swordSkillSprite[session.save.swordLvl or 0],
+    upgrx - 2 * swordSkillSprite.width+4, upgry, 0,
+    swordSkillSprite.res_x_scale, swordSkillSprite.res_y_scale,
+    swordSkillSprite.cx, swordSkillSprite.cy)
+  -- magic
+  local missileSkillSprite = pam.middle.missileSkillSprite
+  love.graphics.draw(
+    missileSkillSprite.img, missileSkillSprite[session.save.magicLvl or 0],
+    upgrx - swordSkillSprite.width+4, upgry, 0,
+    missileSkillSprite.res_x_scale, missileSkillSprite.res_y_scale,
+    missileSkillSprite.cx, missileSkillSprite.cy)
+  -- mobility
+  local mobilitySkillSprite = pam.middle.mobilitySkillSprite
+  love.graphics.draw(
+    mobilitySkillSprite.img, mobilitySkillSprite[session.save.athleticsLvl or 0],
+    upgrx + swordSkillSprite.width-4, upgry, 0,
+    mobilitySkillSprite.res_x_scale, mobilitySkillSprite.res_y_scale,
+    mobilitySkillSprite.cx, mobilitySkillSprite.cy)
+  -- tunic
+  local tunicSprite = pam.middle.tunicSprite
+  love.graphics.draw(
+    tunicSprite.img, tunicSprite[session.save.armorLvl or 0],
+    upgrx + 2 * swordSkillSprite.width-4, upgry, 0,
+    tunicSprite.res_x_scale, tunicSprite.res_y_scale,
+    tunicSprite.cx, tunicSprite.cy)
+
+  -- Title
+  love.graphics.print("UPGRADES", w * 0.405, h * 0.18, 0, 0.4, 0.4)
+end
+
+-- Left menu (quest list, settings, item list)
+pam.left = {};
+
 
 return pam

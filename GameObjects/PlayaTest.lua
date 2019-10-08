@@ -136,7 +136,6 @@ function Playa.initialize(instance)
   instance.triggers = {}
   instance.sideTable = {"down", "right", "left", "up"}
   instance.sensors = {downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={}}
-  instance.missile_cooldown_limit = session.save.missile_cooldown_limit or 0.4 -- 0.3 was default
   instance.item_use_counter = 0 -- Counts how long you're still while using item
   instance.currentMasks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
   instance.physical_properties = {
@@ -261,7 +260,7 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      instance.item_use_duration = session.save.swordSpeed or inv.sword.time
+      instance.item_use_duration = session.getSwordSpeed()
     end
     },
 
@@ -1901,7 +1900,7 @@ Playa.functions = {
         end
       elseif closestTile.water then
         if self.zo == 0 then
-          if self.walkOnWater then
+          if session.save.walkOnWater then
             self.inShallowWater = im.sprites[closestTile.water]
             self.landedTileSound = "water"
           else
@@ -1927,7 +1926,7 @@ Playa.functions = {
       self.floorViscosity = nil
       self.climbing = nil
     end
-
+    
     if self.zo == 0 then
       -- watersound
       if self.inShallowWater and not self.inShallowWaterPrev then
@@ -2359,7 +2358,8 @@ Playa.functions = {
         mybod:applyLinearImpulse(-lvx * mymass, -lvy * mymass)
         local impdirx, impdiry =
           u.normalize2d(self.x - other.x or self.x, self.y - other.y or self.y)
-        local clbrakes = u.clamp(0, self.brakes, self.brakesLim)
+        local _, myBrakes = session.getAthlectics()
+        local clbrakes = u.clamp(0, myBrakes, self.brakesLim)
         local ipct = other.impact or 10
         mybod:applyLinearImpulse(impdirx*ipct*clbrakes*mymass, impdiry*ipct*clbrakes*mymass)
       end

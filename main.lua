@@ -63,6 +63,10 @@ session = {
     session.save.rupees = session.save.rupees or 0
     session.save.piecesOfHeart = session.save.piecesOfHeart or 0
     session.save.armorLvl = session.save.armorLvl or 0
+    session.save.swordLvl = session.save.swordLvl or 0
+    session.save.magicLvl = session.save.magicLvl or 0
+    session.save.athleticsLvl = session.save.athleticsLvl or 0
+    session.save.playerMaxSpeed = session.save.playerMaxSpeed or 100
     -- session (depends on save, so do after save)
     session.clockAngleTarget = session.getClockAngleTarget()
     session.clockAngle = session.clockAngleTarget
@@ -106,6 +110,21 @@ session = {
     else
       return 0
     end
+  end,
+  getSwordSpeed = function()
+    return inv.sword.time - session.save.swordLvl * 0.05
+  end,
+  getMagicCooldown = function()
+    -- 0.3 was default
+    return 0.4 - session.save.magicLvl * 0.05
+  end,
+  getAthlectics = function()
+    -- return mobility, brakes
+    return 300 + session.save.athleticsLvl * 100, 6 + session.save.athleticsLvl
+  end,
+  getMaxSpeed = function()
+    -- for now does nothing, but if I add temp speedBoosts will be useful
+    return session.save.playerMaxSpeed
   end,
 }
 local session = session
@@ -478,7 +497,7 @@ function love.update(dt)
       game.pause(false)
       inv.closeInv()
     end
-    pam.logic()
+    pam.top_menu_logic()
 
   end
 
@@ -738,7 +757,8 @@ local function hudDraw(l,t,w,h)
       love.graphics.setColor(pr, pg, pb, pa)
       love.graphics.print("Day " .. session.save.days, w*0.05, h*0.1, 0, 0.5)
       inv.draw(l,t,w,h)
-      pam.draw(l,t,w,h)
+      pam.top_menu_draw(l,t,w,h)
+      pam.middle.draw(l,t,w,h)
     end
   end
 end
@@ -753,11 +773,7 @@ function love.draw()
   cam:draw(mainCameraDraw)
 
   -- Draw screen effect due to game time
-  if game.timeScreenEffect then
-    dtse.draw()
-  end
-  -- clear sources for rooms without timeScreenEffects
-  ls.clearSources()
+  dtse.draw()
 
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)

@@ -2,6 +2,7 @@ local sh = require "scaling_handler"
 local piwi = require "piecewise"
 local ls = require "lightSources"
 local u = require "utilities"
+local game = require "game"
 
 local cc = COLORCONST
 
@@ -161,9 +162,10 @@ function dtse.logic(funcName, dt)
   seFuncs[funcName](session.save.time, dt)
 end
 
-function dtse.draw()
+-- The function that draws tse
+local function draw()
 
-  -- no canvas
+  -- no canvas draw
   -- local pr, pg, pb, pa = love.graphics.getColor()
   -- local mode, alphamode = love.graphics.getBlendMode()
 
@@ -175,9 +177,10 @@ function dtse.draw()
   -- love.graphics.setColor(pr, pg, pb, pa)
   -- love.graphics.setBlendMode( mode, alphamode )
 
-  -- canvas
+  -- canvas draw
   dtsCanvas:renderTo(
     function()
+      -- light sources
       love.graphics.clear(cr, cg, cb, ca)
       ls.drawSources(dw, dh)
     end
@@ -193,6 +196,17 @@ function dtse.draw()
   love.graphics.setColor(pr, pg, pb, pa)
   love.graphics.setBlendMode( mode, alphamode )
 
+end
+
+-- The function that only draws dtse if appropriate
+function dtse.draw()
+  -- Draw screen effect due to game time
+  if game.timeScreenEffect then
+    draw()
+  else
+    -- clear sources for rooms without timeScreenEffects
+    ls.clearSources()
+  end
 end
 
 return dtse
