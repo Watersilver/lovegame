@@ -126,6 +126,17 @@ session = {
     -- for now does nothing, but if I add temp speedBoosts will be useful
     return session.save.playerMaxSpeed
   end,
+  updateQuest = function(title, stage)
+
+    session.save.quests[title] = stage
+
+  end,
+  finishQuest = function(title, result)
+
+    session.save.quests[title] = nil
+    quests[title].finish(result)
+
+  end,
 }
 local session = session
 
@@ -757,8 +768,9 @@ local function hudDraw(l,t,w,h)
       love.graphics.setColor(pr, pg, pb, pa)
       love.graphics.print("Day " .. session.save.days, w*0.05, h*0.1, 0, 0.5)
       inv.draw(l,t,w,h)
-      pam.top_menu_draw(l,t,w,h)
       pam.middle.draw(l,t,w,h)
+      pam.left.draw(l, t, w, h)
+      pam.top_menu_draw(l,t,w,h)
     end
   end
 end

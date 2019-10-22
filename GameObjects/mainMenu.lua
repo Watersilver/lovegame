@@ -56,8 +56,14 @@ local function start_game(saveName)
     session.save[key] = nil
   end
   -- Load imported save values to save
+  session.save.quests = {}
   for key, value in pairs(readSave) do
-    session.save[key] = value
+    -- if saved thing is quest place on different table, minus prefix
+    if key:find("__quest__") then
+      session.save.quests[string.gsub(key, "__quest__", "")] = value -- key is questname, value quest stage
+    else
+      session.save[key] = value
+    end
   end
   -- initialize certain values
   session.initialize()

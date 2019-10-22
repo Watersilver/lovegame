@@ -52,8 +52,16 @@ activateFuncs[2] = function (self, dt, textIndex)
     if not saveKeysToBeIgnored[key] then
       if type(value) == "string" then value = '"' .. value .. '"' end
       if type(value) == "boolean" then value = value and "true" or "false" end
-      -- love.filesystem.append(saveName, "\nsave." .. key .. " = " .. value)
-      saveContent = saveContent .. "\nsave." .. key .. " = " .. value
+
+      -- Quests are in a table in session.save. Get them out and save them with a prefix
+      if key == "quests" then
+        for questname, queststage in pairs(value) do
+          saveContent = saveContent .. "\nsave.__quest__" .. questname .. ' = "' .. queststage .. '"'
+        end
+      else
+      -- Just write the value
+        saveContent = saveContent .. "\nsave." .. key .. " = " .. value
+      end
     end
   end
   -- write coordinates

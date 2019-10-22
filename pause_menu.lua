@@ -4,6 +4,8 @@ local inp = require "input"
 local game = require "game"
 local o = require "GameObjects.objects"
 local sm = require "state_machine"
+local sh = require "scaling_handler"
+local quests = require "quests"
 
 local pam = {}
 
@@ -24,7 +26,7 @@ for i = 1,3 do
   bbb[i].y = {}
   bbb[i].y.u = bbb.ystart
   bbb[i].y.d = bbb[i].y.u + bbb.height
-  --- bbb[button_index][coordinate][side]
+  -- bbb[button_index][coordinate][side]
 end
 local function checkIfInBBB(x, y)
   if y > bbb[1].y.u and y < bbb[1].y.d then
@@ -154,8 +156,79 @@ pam.middle.draw = function(l, t, w, h)
   love.graphics.print("UPGRADES", w * 0.405, h * 0.18, 0, 0.4, 0.4)
 end
 
--- Left menu (quest list, settings, item list)
-pam.left = {};
 
+local drawFuncs = {
+  test = function(w, h, pamleft)
+    -- love.graphics.rectangle("fill", 0, 0, sciW, sciH)
+    love.graphics.rectangle("line", 0, 0, w, h)
+    love.graphics.print("test", 0, 0, 0, 0.2)
+  end,
+
+  headers = function(w, h, pamleft)
+  end,
+
+  quests = function(w, h, pamleft)
+    local textScale = 0.2
+    local padding = 2
+    if next(session.save.quests) then
+      local t, fh = 0, love.graphics.getFont():getHeight() * textScale
+      for questname in pairs(session.save.quests) do
+        love.graphics.print(questname, padding, padding + t, 0, textScale)
+        love.graphics.rectangle("line", 0, t, w, fh + 2 * padding)
+        t = t + fh + 2 * padding
+      end
+    else
+      love.graphics.print("No quests.", padding, padding, 0, textScale)
+    end
+    love.graphics.rectangle("line", 0, 0, w, h)
+  end,
+
+  tooltip = function(w, h, pamleft)
+  end
+}
+
+local function drawScissoredArea(l, t, w, h, dsX, dsY, scale, drawFunc, pamleft)
+  -- Remember graphic settings
+  love.graphics.push()
+
+  -- Set new origin
+  love.graphics.translate(l, t)
+
+  -- Set scissor. Dead space is screen pixels. New origin must be scaled.
+  love.graphics.setScissor(
+    l * scale + dsX, t * scale + dsY,
+    w * scale, h * scale
+  )
+
+  -- Draw the thing I want to draw within 0, 0, sciW, sciH.
+  drawFuncs[drawFunc](w, h, pamleft)
+  -- * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+  -- Reset scissor
+  love.graphics.setScissor()
+
+  -- Restore graphic settings
+  love.graphics.pop()
+end
+
+-- Left menu (quest list, settings, item list)
+pam.left = {
+  headerCursor = 1,
+  headers = {"quests", "customise"},
+  selectedHeader = nil,
+  questCursor = 1,
+  selectedQuest = nil, -- don't know if I will use
+}
+pam.left.logic = function()
+
+end
+pam.left.draw = function(l, t, w, h)
+  local deadSpaceX, deadSpaceY = sh.get_current_window()
+  local hudScale = sh.get_window_scale() * 2
+
+  local sl, sw = 33, 100 -- scissor left, scissor width
+  drawScissoredArea(sl, 66, sw, 15, deadSpaceX, deadSpaceY, hudScale, "headers", pam.left)
+  drawScissoredArea(sl, 81, sw, 77, deadSpaceX, deadSpaceY, hudScale, "quests", pam.left)
+end
 
 return pam
