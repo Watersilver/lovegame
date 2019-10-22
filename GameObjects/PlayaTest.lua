@@ -1926,7 +1926,7 @@ Playa.functions = {
       self.floorViscosity = nil
       self.climbing = nil
     end
-    
+
     if self.zo == 0 then
       -- watersound
       if self.inShallowWater and not self.inShallowWaterPrev then
@@ -2101,11 +2101,13 @@ Playa.functions = {
 
     -- After done with coords draw light source (gets drawn later, this just sets it up)
     -- check during pause screen if session.save.playerGlowAvailable to enable and disable
-    self.lightSource.kind = session.save.playerGlow
-    if self.lightSource.kind then
-      self.lightSource.x, self.lightSource.y = xtotal, ytotal
-      self.lightSource.image_index = self.flickerIndex
-      ls.drawSource(self.lightSource)
+    if session.save.playerGlowAvailable then
+      self.lightSource.kind = session.save.playerGlow
+      if self.lightSource.kind then
+        self.lightSource.x, self.lightSource.y = xtotal, ytotal
+        self.lightSource.image_index = self.flickerIndex
+        ls.drawSource(self.lightSource)
+      end
     end
 
     if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end

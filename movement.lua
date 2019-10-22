@@ -231,7 +231,7 @@ local mo = {}
     stand_still = function(object, dt)
       if object.zo ~= 0 then return end
       local mass = object.body:getMass()
-      local _
+      local _ -- mobility dummy
       local brakes = object.brakes or 6
       local brakesLim = object.brakesLim or 10
       local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
