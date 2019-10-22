@@ -301,7 +301,8 @@ function inv.draw(l,t,w,h)
   local itemBoxSide = 18
   local itemBoxOffset = itemBoxSide + 1
   local xInit = w * 0.5 - itemBoxOffset * 1.5
-  local x, y = xInit, h - itemBoxOffset * 3
+  local yInit = h - itemBoxOffset * 3
+  local x, y = xInit, yInit
 
   love.graphics.print("SPELLS", x, y - itemBoxOffset * 0.6, 0, 0.4, 0.4)
   for index, contents in ipairs(inv.slots) do
@@ -331,6 +332,7 @@ function inv.draw(l,t,w,h)
       love.graphics.setColor(0, 0, 0, cc * 0.3)
       love.graphics.rectangle("fill", x, y, itemBoxSide, itemBoxSide)
     end
+
     love.graphics.setBlendMode(prevBm)
     love.graphics.setColor(pr, pg, pb, pa)
     love.graphics.print(contents.key, x+1, y, 0, 0.2, 0.2)
@@ -340,6 +342,47 @@ function inv.draw(l,t,w,h)
       x = xInit
     end
   end
+
+  -- water walking
+  local wwx = xInit + itemBoxSide * 3.3
+  local wwy = yInit + itemBoxSide * 0.5
+  local wwImg = love.graphics.newImage("Sprites/Inventory/Jesus.png")
+  local pr, pg, pb, pa = love.graphics.getColor()
+  if session.save.walkOnWater then
+    love.graphics.setColor(0, 0, 0, cc * 0.5)
+    love.graphics.rectangle("line", wwx, wwy, itemBoxSide, itemBoxSide)
+    love.graphics.setColor(cc * 0.2, cc * 0.2, cc * 0.2, cc * 0.1)
+    love.graphics.rectangle("fill", wwx, wwy, itemBoxSide, itemBoxSide)
+    love.graphics.setColor(cc, cc, cc, cc)
+    love.graphics.draw(wwImg, wwx+1, wwy+1)
+  else
+    love.graphics.setColor(0, 0, 0, cc * 0.5)
+    love.graphics.rectangle("line", wwx, wwy, itemBoxSide, itemBoxSide)
+    love.graphics.setColor(0, 0, 0, cc * 0.3)
+    love.graphics.rectangle("fill", wwx, wwy, itemBoxSide, itemBoxSide)
+  end
+  love.graphics.setColor(pr, pg, pb, pa)
+
+  -- light
+  local lx = xInit - itemBoxSide * 1.3 + 2
+  local ly = yInit + itemBoxSide * 0.5
+  local lImg = love.graphics.newImage("Sprites/Inventory/Devil2.png")
+  local pr, pg, pb, pa = love.graphics.getColor()
+  if session.save.playerGlowAvailable then
+    love.graphics.setColor(0, 0, 0, cc * 0.5)
+    love.graphics.rectangle("line", lx, ly, itemBoxSide, itemBoxSide)
+    love.graphics.setColor(cc * 0.2, cc * 0.2, cc * 0.2, cc * 0.1)
+    love.graphics.rectangle("fill", lx, ly, itemBoxSide, itemBoxSide)
+    love.graphics.setColor(cc, cc, cc, cc)
+    love.graphics.draw(lImg, lx+1, ly+1)
+  else
+    love.graphics.setColor(0, 0, 0, cc * 0.5)
+    love.graphics.rectangle("line", lx, ly, itemBoxSide, itemBoxSide)
+    love.graphics.setColor(0, 0, 0, cc * 0.3)
+    love.graphics.rectangle("fill", lx, ly, itemBoxSide, itemBoxSide)
+  end
+  love.graphics.setColor(pr, pg, pb, pa)
+
 end
 
 return inv
