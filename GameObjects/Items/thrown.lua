@@ -53,6 +53,7 @@ function Thrown.initialize(instance)
     shape = instance.shape or ps.shapes.thrown,
     sensor = true,
     gravityScaleFactor = 0,
+    masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT},
     categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
   }
   instance.seeThrough = true
