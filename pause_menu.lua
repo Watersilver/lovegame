@@ -6,6 +6,7 @@ local o = require "GameObjects.objects"
 local sm = require "state_machine"
 local sh = require "scaling_handler"
 local quests = require "quests"
+local u = require "utilities"
 
 local pam = {}
 
@@ -157,26 +158,97 @@ pam.middle.draw = function(l, t, w, h)
 end
 
 
-local drawFuncs = {
-  test = function(w, h, pamleft)
-    -- love.graphics.rectangle("fill", 0, 0, sciW, sciH)
-    love.graphics.rectangle("line", 0, 0, w, h)
-    love.graphics.print("test", 0, 0, 0, 0.2)
+local logicFuncs = {
+  quests = function()
+    if inp.escapePressed then
+      pam.left.selectedHeader = false
+    end
+    if inp.upPressed then
+      pam.left.questCursor = pam.left.questCursor - 1
+      if pam.left.questCursor < 1 then pam.left.questCursor = u.tablelength(session.save.quests) end
+    end
+    if inp.downPressed then
+      pam.left.questCursor = pam.left.questCursor + 1
+      if pam.left.questCursor > u.tablelength(session.save.quests) then pam.left.questCursor = 1 end
+    end
   end,
+  customise = function()
+    if inp.escapePressed then
+      pam.left.selectedHeader = false
+    end
+  end,
+}
 
+local drawFuncs = {
   headers = function(w, h, pamleft)
+    local hwidth = 50
+    local hdist = 17
+    local pr, pg, pb, pa = love.graphics.getColor()
+
+    local x = (#pamleft.headers - 1) * hdist
+    for i = #pamleft.headers, 1, -1 do
+      if i ~= pamleft.headerCursor then
+        love.graphics.setColor(0, COLORCONST*0.2, COLORCONST*0.5, COLORCONST)
+        love.graphics.rectangle("fill", x, 0, hwidth, h)
+        love.graphics.setColor(COLORCONST*0.5, COLORCONST*0.5, COLORCONST*0.5, COLORCONST)
+        love.graphics.rectangle("line", x, 0, hwidth, h)
+        love.graphics.setColor(111, 111, 111, COLORCONST)
+        local header = pamleft.headers[i]
+        local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
+        love.graphics.print(header, x + hwidth*0.5 - txtWd2, h*0.5-2, 0, 0.2)
+      end
+      x = x - hdist
+    end
+    x = (#pamleft.headers - 1) * hdist
+    for i = #pamleft.headers, 1, -1 do
+      if i == pamleft.headerCursor then
+        if pamleft.selectedHeader then
+          love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.1, COLORCONST*0.5, COLORCONST)
+        else
+          love.graphics.setColor(COLORCONST*0.1, COLORCONST*0.4, COLORCONST*0.7, COLORCONST)
+        end
+        love.graphics.rectangle("fill", x, 0, hwidth, h)
+        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+        love.graphics.rectangle("line", x, 0, hwidth, h)
+        local header = pamleft.headers[i]
+        local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
+        love.graphics.print(header, x + hwidth*0.5 - txtWd2, h*0.5-2, 0, 0.2)
+      end
+      x = x - hdist
+    end
+
+    love.graphics.setColor(pr, pg, pb, pa)
   end,
 
   quests = function(w, h, pamleft)
     local textScale = 0.2
     local padding = 2
     if next(session.save.quests) then
-      local t, fh = 0, love.graphics.getFont():getHeight() * textScale
-      for questname in pairs(session.save.quests) do
-        love.graphics.print(questname, padding, padding + t, 0, textScale)
-        love.graphics.rectangle("line", 0, t, w, fh + 2 * padding)
-        t = t + fh + 2 * padding
+      local t, qh = pamleft.questTop, love.graphics.getFont():getHeight() * textScale + 2 * padding
+      local qindex = 1
+      for questid, queststage in pairs(session.save.quests) do
+        local qtitle = quests[questid] and quests[questid].title or "no data..."
+        love.graphics.print(qtitle, padding, padding + t, 0, textScale)
+        love.graphics.rectangle("line", 0, t, w-5, qh)
+        if pamleft.questCursor == qindex then
+          local pr, pg, pb, pa = love.graphics.getColor()
+          love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
+          love.graphics.rectangle("fill", 0, t, w-5, qh)
+          love.graphics.setColor(pr, pg, pb, pa)
+        end
+        t = t + qh
+        qindex = qindex + 1
       end
+      -- Determine questTop
+      if pamleft.questTop + pam.left.questCursor * qh - qh <= 0 then
+        pamleft.questTop = -(pam.left.questCursor * qh - qh)
+      elseif pamleft.questTop + pam.left.questCursor * qh > h then
+        pamleft.questTop = -(pam.left.questCursor * qh - h)
+      end
+
+      local questNumInv = 1 / u.tablelength(session.save.quests)
+      local scrollBarPos = (pamleft.questCursor - 1) * questNumInv
+      love.graphics.rectangle("fill", w-5, h*scrollBarPos, 5, h*questNumInv)
     else
       love.graphics.print("No quests.", padding, padding, 0, textScale)
     end
@@ -184,6 +256,7 @@ local drawFuncs = {
   end,
 
   tooltip = function(w, h, pamleft)
+    love.graphics.rectangle("line", 0, 0, w, h)
   end
 }
 
@@ -201,7 +274,7 @@ local function drawScissoredArea(l, t, w, h, dsX, dsY, scale, drawFunc, pamleft)
   )
 
   -- Draw the thing I want to draw within 0, 0, sciW, sciH.
-  drawFuncs[drawFunc](w, h, pamleft)
+  if drawFuncs[drawFunc] then drawFuncs[drawFunc](w, h, pamleft) end
   -- * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
   -- Reset scissor
@@ -215,20 +288,40 @@ end
 pam.left = {
   headerCursor = 1,
   headers = {"quests", "customise"},
-  selectedHeader = nil,
+  selectedHeader = false,
   questCursor = 1,
-  selectedQuest = nil, -- don't know if I will use
+  questTop = 0,
+  selectedQuest = false, -- don't know if I will use
 }
 pam.left.logic = function()
-
+  if not pam.left.selectedHeader then
+    if inp.enterPressed then
+      pam.left.selectedHeader = true
+    end
+    if inp.leftPressed then
+      pam.left.headerCursor = pam.left.headerCursor - 1
+      if pam.left.headerCursor < 1 then pam.left.headerCursor = #pam.left.headers end
+    end
+    if inp.rightPressed then
+      pam.left.headerCursor = pam.left.headerCursor + 1
+      if pam.left.headerCursor > #pam.left.headers then pam.left.headerCursor = 1 end
+    end
+  else
+    local header = pam.left.headers[pam.left.headerCursor]
+    if logicFuncs[header] then logicFuncs[header]() end
+  end
 end
 pam.left.draw = function(l, t, w, h)
   local deadSpaceX, deadSpaceY = sh.get_current_window()
   local hudScale = sh.get_window_scale() * 2
 
   local sl, sw = 33, 100 -- scissor left, scissor width
-  drawScissoredArea(sl, 66, sw, 15, deadSpaceX, deadSpaceY, hudScale, "headers", pam.left)
-  drawScissoredArea(sl, 81, sw, 77, deadSpaceX, deadSpaceY, hudScale, "quests", pam.left)
+  local ht, hh = 66, 7 -- header top & height
+  local bt, bh = ht + hh, 77  -- body top & height
+  local tt, th = bt + bh, 55 -- tooltip top & height
+  drawScissoredArea(sl, ht, sw, hh, deadSpaceX, deadSpaceY, hudScale, "headers", pam.left)
+  drawScissoredArea(sl, bt, sw, bh, deadSpaceX, deadSpaceY, hudScale, pam.left.headers[pam.left.headerCursor], pam.left)
+  drawScissoredArea(sl, tt, sw, th, deadSpaceX, deadSpaceY, hudScale, "tooltip", pam.left)
 end
 
 return pam

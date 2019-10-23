@@ -509,7 +509,7 @@ function love.update(dt)
       inv.closeInv()
     end
     pam.top_menu_logic()
-
+    pam.left.logic()
   end
 
   -- Handle dialogues

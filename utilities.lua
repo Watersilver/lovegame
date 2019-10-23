@@ -11,7 +11,12 @@ local atan2 = math.atan2
 function u.emptyFunc()
 end
 
--- A push operation that returns the new_index
+function u.tablelength(t)
+  local count = 0
+  for _ in pairs(t) do count = count + 1 end
+  return count
+end
+
 function u.capitalise(s)
   return s:sub(1,1):upper()..s:sub(2)
 end
