@@ -187,6 +187,26 @@ local logicFuncs = {
   end,
 }
 
+local tooltipFuncs = {
+  headers = function()
+    pam.left.tooltip = pam.left.headerDesc[pam.left.headerCursor]
+  end,
+
+  quests = function()
+    local qindex = 1
+    for questid, queststage in pairs(session.save.quests) do
+      if pam.left.questCursor == qindex then
+        if quests[questid] and quests[questid].description and quests[questid].description[queststage] then
+          pam.left.tooltip = quests[questid].description[queststage]
+        else
+          pam.left.tooltip = "No data..."
+        end
+      end
+      qindex = qindex + 1
+    end
+  end
+}
+
 local drawFuncs = {
   headers = function(w, h, pamleft)
     local hwidth = 50
@@ -232,18 +252,25 @@ local drawFuncs = {
     local textScale = 0.2
     local padding = 2
     if next(session.save.quests) then
+      local pr, pg, pb, pa = love.graphics.getColor()
+      love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+      love.graphics.rectangle("fill", 0, 0, w, h)
+      love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+      love.graphics.rectangle("line", 0, 0, w, h)
+      love.graphics.setColor(pr, pg, pb, pa)
       local t, qh = pamleft.questTop, love.graphics.getFont():getHeight() * textScale + 2 * padding
       local qindex = 1
       for questid, queststage in pairs(session.save.quests) do
-        local qtitle = quests[questid] and quests[questid].title or "no data..."
-        love.graphics.print(qtitle, padding, padding + t, 0, textScale)
+        local pr, pg, pb, pa = love.graphics.getColor()
+        love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
         love.graphics.rectangle("line", 0, t, w-5, qh)
         if pamleft.questCursor == qindex then
-          local pr, pg, pb, pa = love.graphics.getColor()
           love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
           love.graphics.rectangle("fill", 0, t, w-5, qh)
-          love.graphics.setColor(pr, pg, pb, pa)
         end
+        love.graphics.setColor(pr, pg, pb, pa)
+        local qtitle = quests[questid] and quests[questid].title or "no data..."
+        love.graphics.print(qtitle, padding, padding + t, 0, textScale)
         t = t + qh
         qindex = qindex + 1
       end
@@ -256,15 +283,23 @@ local drawFuncs = {
 
       local questNumInv = 1 / u.tablelength(session.save.quests)
       local scrollBarPos = (pamleft.questCursor - 1) * questNumInv
+      -- local pr, pg, pb, pa = love.graphics.getColor()
+      -- love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
       love.graphics.rectangle("fill", w-5, h*scrollBarPos, 5, h*questNumInv)
+      -- love.graphics.setColor(pr, pg, pb, pa)
     else
       love.graphics.print("No quests.", padding, padding, 0, textScale)
     end
-    love.graphics.rectangle("line", 0, 0, w, h)
   end,
 
   tooltip = function(w, h, pamleft)
+    local pr, pg, pb, pa = love.graphics.getColor()
+    love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+    love.graphics.rectangle("fill", 0, 0, w, h)
+    love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
     love.graphics.rectangle("line", 0, 0, w, h)
+    love.graphics.setColor(pr, pg, pb, pa)
+    love.graphics.print(pamleft.tooltip, 5, 5, 0, 0.15)
   end
 }
 
@@ -296,10 +331,12 @@ end
 pam.left = {
   headerCursor = 1,
   headers = {"quests", "customise"},
+  headerDesc = {"A list of active quests", "Visual customisation\noptions"},
   selectedHeader = false,
   questCursor = 1,
   questTop = 0,
   selectedQuest = false, -- don't know if I will use
+  tooltip = ""
 }
 pam.left.logic = function()
   if not pam.left.selectedHeader then
@@ -314,9 +351,11 @@ pam.left.logic = function()
       pam.left.headerCursor = pam.left.headerCursor + 1
       if pam.left.headerCursor > #pam.left.headers then pam.left.headerCursor = 1 end
     end
+    tooltipFuncs.headers()
   else
     local header = pam.left.headers[pam.left.headerCursor]
     if logicFuncs[header] then logicFuncs[header]() end
+    if tooltipFuncs[header] then tooltipFuncs[header]() end
   end
 end
 pam.left.draw = function(l, t, w, h)
