@@ -124,6 +124,14 @@ pam.middle.draw = function(l, t, w, h)
     triforceSprite.cx, triforceSprite.cy)
 
   local upgrx, upgry = w * 0.5, h * 0.28
+  -- draw upgrade box
+  local pr, pg, pb, pa = love.graphics.getColor()
+  love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+  love.graphics.rectangle("fill", upgrx - 40, upgry - 11, 80, 22)
+  love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+  love.graphics.rectangle("line", upgrx - 40, upgry - 11, 80, 22)
+  love.graphics.setColor(pr, pg, pb, pa)
+
   -- sword
   local swordSkillSprite = pam.middle.swordSkillSprite
   love.graphics.draw(
