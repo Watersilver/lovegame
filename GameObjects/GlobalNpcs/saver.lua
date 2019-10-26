@@ -55,8 +55,8 @@ activateFuncs[2] = function (self, dt, textIndex)
 
       -- Quests are in a table in session.save. Get them out and save them with a prefix
       if key == "quests" then
-        for questname, queststage in pairs(value) do
-          saveContent = saveContent .. "\nsave.__quest__" .. questname .. ' = "' .. queststage .. '"'
+        for qindex, questid in ipairs(value) do
+          saveContent = saveContent .. "\nsave.__quest__" .. qindex .. ' = "' .. questid .. '"'
         end
       else
       -- Just write the value

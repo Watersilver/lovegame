@@ -126,16 +126,21 @@ session = {
     -- for now does nothing, but if I add temp speedBoosts will be useful
     return session.save.playerMaxSpeed
   end,
-  updateQuest = function(title, stage)
-
-    session.save.quests[title] = stage
-
+  startQuest = function(questid, startingStage)
+    -- Only start quests that are not active or finished
+    if session.save[questid] then return end
+    table.insert(session.save.quests, questid)
+    session.save[questid] = startingStage or "stage1"
   end,
-  finishQuest = function(title, result)
-
-    session.save.quests[title] = nil
-    quests[title].finish(result)
-
+  updateQuest = function(questid, newStage)
+    if newStage then session.save[questid] = newStage end
+  end,
+  finishQuest = function(questid, result)
+    -- Set resulting stage and remove from active quests table
+    local index = u.getFirstIndexByValue(session.save.quests, questid)
+    if not index then return end
+    table.remove(session.save.quests, index)
+    session.save[questid] = result or true
   end,
 }
 local session = session

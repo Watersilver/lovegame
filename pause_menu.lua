@@ -193,16 +193,14 @@ local tooltipFuncs = {
   end,
 
   quests = function()
-    local qindex = 1
-    for questid, queststage in pairs(session.save.quests) do
-      if pam.left.questCursor == qindex then
-        if quests[questid] and quests[questid].description and quests[questid].description[queststage] then
-          pam.left.tooltip = quests[questid].description[queststage]
-        else
-          pam.left.tooltip = "No data..."
-        end
+    local questid = session.save.quests[pam.left.questCursor]
+    local queststage = session.save[questid]
+    if questid then
+      if queststage and quests[questid] and quests[questid].description and quests[questid].description[queststage] then
+        pam.left.tooltip = quests[questid].description[queststage]
+      else
+        pam.left.tooltip = "No data..."
       end
-      qindex = qindex + 1
     end
   end
 }
@@ -251,7 +249,7 @@ local drawFuncs = {
   quests = function(w, h, pamleft)
     local textScale = 0.2
     local padding = 2
-    if next(session.save.quests) then
+    if session.save.quests[1] then
       local pr, pg, pb, pa = love.graphics.getColor()
       love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
       love.graphics.rectangle("fill", 0, 0, w, h)
@@ -259,8 +257,7 @@ local drawFuncs = {
       love.graphics.rectangle("line", 0, 0, w, h)
       love.graphics.setColor(pr, pg, pb, pa)
       local t, qh = pamleft.questTop, love.graphics.getFont():getHeight() * textScale + 2 * padding
-      local qindex = 1
-      for questid, queststage in pairs(session.save.quests) do
+      for qindex, questid in ipairs(session.save.quests) do
         local pr, pg, pb, pa = love.graphics.getColor()
         love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
         love.graphics.rectangle("line", 0, t, w-5, qh)
@@ -272,7 +269,6 @@ local drawFuncs = {
         local qtitle = quests[questid] and quests[questid].title or "no data..."
         love.graphics.print(qtitle, padding, padding + t, 0, textScale)
         t = t + qh
-        qindex = qindex + 1
       end
       -- Determine questTop
       if pamleft.questTop + pam.left.questCursor * qh - qh <= 0 then

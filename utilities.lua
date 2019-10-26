@@ -11,6 +11,12 @@ local atan2 = math.atan2
 function u.emptyFunc()
 end
 
+function u.getFirstIndexByValue(arr, value)
+  for i, v in ipairs(arr) do
+    if value == v then return i end
+  end
+end
+
 function u.tablelength(t)
   local count = 0
   for _ in pairs(t) do count = count + 1 end
