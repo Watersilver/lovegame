@@ -2073,7 +2073,14 @@ Playa.functions = {
     if trig.enableHitShader then
       self.playerShader = hitShader
     else
-      if session.save.armorLvl == 1 then
+      if session.save.customTunicAvailable and session.save.customTunicEnabled then
+        shdrs.customTunic:send("rgb",
+        session.save.tunicR,
+        session.save.tunicG,
+        session.save.tunicB,
+        1) -- send one extra value to offset bug
+        self.playerShader = shdrs.customTunic
+      elseif session.save.armorLvl == 1 then
         self.playerShader = shdrs.blueTunic
       elseif session.save.armorLvl == 2 then
         self.playerShader = shdrs.redTunic
@@ -2185,11 +2192,14 @@ Playa.functions = {
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
 
     -- After done with coords draw light source (gets drawn later, this just sets it up)
-    self.lightSource.kind = session.save.playerGlow
-    if self.lightSource.kind then
-      self.lightSource.x, self.lightSource.y = xtotal, ytotal
-      self.lightSource.image_index = self.flickerIndex
-      ls.drawSource(self.lightSource)
+    -- check during pause screen if session.save.playerGlowAvailable to enable and disable
+    if session.save.playerGlowAvailable then
+      self.lightSource.kind = session.save.playerGlow
+      if self.lightSource.kind then
+        self.lightSource.x, self.lightSource.y = xtotal, ytotal
+        self.lightSource.image_index = self.flickerIndex
+        ls.drawSource(self.lightSource)
+      end
     end
 
     -- destroy joint to avoid funkyness during transition

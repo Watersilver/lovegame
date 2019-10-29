@@ -173,18 +173,69 @@ local logicFuncs = {
     end
     if inp.upPressed then
       pam.left.questCursor = pam.left.questCursor - 1
-      if pam.left.questCursor < 1 then pam.left.questCursor = u.tablelength(session.save.quests) end
     end
     if inp.downPressed then
       pam.left.questCursor = pam.left.questCursor + 1
-      if pam.left.questCursor > u.tablelength(session.save.quests) then pam.left.questCursor = 1 end
     end
+    -- Keep cursor within bounds
+    if pam.left.questCursor < 1 then pam.left.questCursor = #session.save.quests end
+    if pam.left.questCursor > #session.save.quests then pam.left.questCursor = 1 end
   end,
   customise = function()
-    if inp.escapePressed then
-      pam.left.selectedHeader = false
+    if not pam.left.selectedSetting then
+      if inp.escapePressed then
+        pam.left.selectedHeader = false
+      end
+      if inp.upPressed then
+        pam.left.customiseCursor = pam.left.customiseCursor - 1
+      end
+      if inp.downPressed then
+        pam.left.customiseCursor = pam.left.customiseCursor + 1
+      end
+      -- Keep cursor within bounds
+      if pam.left.customiseCursor < 1 then pam.left.customiseCursor = #pam.left.customise end
+      if pam.left.customiseCursor > #pam.left.customise then pam.left.customiseCursor = 1 end
+      -- Select setting
+      if inp.enterPressed then
+        if pam.left.customiseCursor == 1 and session.save.playerGlowAvailable then
+          -- lightStyle
+          pam.left.selectedSetting = true
+          pam.left.subsettingCursor = 1
+          pam.left.subsettingsNumber = 4
+        end
+      end
+    else
+      if inp.escapePressed then
+        pam.left.selectedSetting = false
+      end
+      if pam.left.customiseCursor == 1 then
+        -- lightStyle
+        if inp.upPressed then
+          pam.left.subsettingCursor = pam.left.subsettingCursor - 1
+        end
+        if inp.downPressed then
+          pam.left.subsettingCursor = pam.left.subsettingCursor + 1
+        end
+        -- Clamp cursor
+        if pam.left.subsettingCursor > pam.left.subsettingsNumber then pam.left.subsettingCursor = 1 end
+        if pam.left.subsettingCursor < 1 then pam.left.subsettingCursor = pam.left.subsettingsNumber end
+        session.save.playerGlow = pam.left.lightStyles[pam.left.subsettingCursor]
+      end
     end
   end,
+}
+
+local settingsTooltipFuncs = {
+  lightStyle = function(w, h)
+    local currentStyle = (session.save.playerGlow or "None"):gsub("player", "")
+    love.graphics.polygon("line", w*0.5, 5, w*0.5-3, 10, w*0.5+3, 10)
+    love.graphics.polygon("line", w*0.5, h - 5, w*0.5-3, h - 10, w*0.5+3, h - 10)
+    local txtWd2 = love.graphics.getFont():getWidth(currentStyle) * 0.075
+    love.graphics.print(currentStyle, w*0.5 - txtWd2, 25, 0, 0.15)
+  end,
+
+  recolor = function(w, h)
+  end
 }
 
 local tooltipFuncs = {
@@ -202,8 +253,40 @@ local tooltipFuncs = {
         pam.left.tooltip = "No data..."
       end
     end
+  end,
+
+  customise = function()
+    local setting = pam.left.customise[pam.left.customiseCursor]
+    if pam.left.selectedSetting then
+      pam.left.tooltip = settingsTooltipFuncs[setting]
+    else
+      if setting == "lightStyle" then
+        if session.save.playerGlowAvailable then
+          pam.left.tooltip = "Customise light style."
+        else
+          pam.left.tooltip = "???"
+        end
+      elseif setting == "tunic" then
+        pam.left.tooltip = "Customise " .. setting .. " colour."
+      elseif setting == "sword" then
+        pam.left.tooltip = "Customise " .. setting .. " colour."
+      elseif setting == "missile" then
+        pam.left.tooltip = "Customise " .. setting .. " colour."
+      elseif setting == "mark" then
+        pam.left.tooltip = "Customise " .. setting .. " colour."
+      end
+    end
   end
 }
+
+local function drawTransparentBox(w, h)
+  local pr, pg, pb, pa = love.graphics.getColor()
+  love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+  love.graphics.rectangle("fill", 0, 0, w, h)
+  love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+  love.graphics.rectangle("line", 0, 0, w, h)
+  love.graphics.setColor(pr, pg, pb, pa)
+end
 
 local drawFuncs = {
   headers = function(w, h, pamleft)
@@ -249,21 +332,20 @@ local drawFuncs = {
   quests = function(w, h, pamleft)
     local textScale = 0.2
     local padding = 2
+    local scrollBarWidth = 5
+    local scrollBarX = w - scrollBarWidth
+    drawTransparentBox(w, h)
     if session.save.quests[1] then
-      local pr, pg, pb, pa = love.graphics.getColor()
-      love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
-      love.graphics.rectangle("fill", 0, 0, w, h)
-      love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
-      love.graphics.rectangle("line", 0, 0, w, h)
-      love.graphics.setColor(pr, pg, pb, pa)
       local t, qh = pamleft.questTop, love.graphics.getFont():getHeight() * textScale + 2 * padding
       for qindex, questid in ipairs(session.save.quests) do
         local pr, pg, pb, pa = love.graphics.getColor()
         love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
-        love.graphics.rectangle("line", 0, t, w-5, qh)
         if pamleft.questCursor == qindex then
           love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
-          love.graphics.rectangle("fill", 0, t, w-5, qh)
+          love.graphics.rectangle("fill", 0, t, scrollBarX, qh)
+        elseif qindex % 2 == 0 then
+          love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST*0.05)
+          love.graphics.rectangle("fill", 0, t, scrollBarX, qh)
         end
         love.graphics.setColor(pr, pg, pb, pa)
         local qtitle = quests[questid] and quests[questid].title or "no data..."
@@ -279,12 +361,53 @@ local drawFuncs = {
 
       local questNumInv = 1 / u.tablelength(session.save.quests)
       local scrollBarPos = (pamleft.questCursor - 1) * questNumInv
-      -- local pr, pg, pb, pa = love.graphics.getColor()
-      -- love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+      local pr, pg, pb, pa = love.graphics.getColor()
+      love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+      love.graphics.line(scrollBarX, 0, scrollBarX, h)
+      love.graphics.setColor(pr, pg, pb, pa)
       love.graphics.rectangle("fill", w-5, h*scrollBarPos, 5, h*questNumInv)
-      -- love.graphics.setColor(pr, pg, pb, pa)
     else
       love.graphics.print("No quests.", padding, padding, 0, textScale)
+    end
+  end,
+
+  customise = function(w, h, pamleft)
+    local textScale = 0.2
+    local paddingHor = 2
+    local paddingVert = 5.3
+    local t, sh = 0, love.graphics.getFont():getHeight() * textScale + 2 * paddingVert
+    drawTransparentBox(w, h)
+    for i, setting in ipairs(pamleft.customise) do
+      local pr, pg, pb, pa = love.graphics.getColor()
+      if pamleft.customiseCursor == i then
+        if pamleft.selectedSetting then
+          love.graphics.setColor(COLORCONST*0.7, COLORCONST*0.4, COLORCONST, COLORCONST*0.2)
+          love.graphics.rectangle("fill", 0, t, w, sh)
+        else
+          love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
+          love.graphics.rectangle("fill", 0, t, w, sh)
+        end
+      elseif i % 2 == 0 then
+        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST*0.05)
+        love.graphics.rectangle("fill", 0, t, w, sh)
+      end
+      love.graphics.setColor(pr, pg, pb, pa)
+      if setting == "lightStyle" then
+        if session.save.playerGlowAvailable then
+          love.graphics.print("Light Style", paddingHor, paddingVert + t, 0, textScale)
+        else
+          love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
+        end
+      elseif setting == "tunic" then
+        love.graphics.print("Tunic Colour", paddingHor, paddingVert + t, 0, textScale)
+      elseif setting == "sword" then
+        love.graphics.print("Sword Colour", paddingHor, paddingVert + t, 0, textScale)
+      elseif setting == "missile" then
+        love.graphics.print("Missile Colour", paddingHor, paddingVert + t, 0, textScale)
+      elseif setting == "mark" then
+        love.graphics.print("Mark Colour", paddingHor, paddingVert + t, 0, textScale)
+      end
+      t = t + sh
     end
   end,
 
@@ -295,7 +418,11 @@ local drawFuncs = {
     love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
     love.graphics.rectangle("line", 0, 0, w, h)
     love.graphics.setColor(pr, pg, pb, pa)
-    love.graphics.print(pamleft.tooltip, 5, 5, 0, 0.15)
+    if type(pamleft.tooltip) == "function" then
+      pamleft.tooltip(w, h)
+    else
+      love.graphics.print(pamleft.tooltip, 5, 5, 0, 0.15)
+    end
   end
 }
 
@@ -331,8 +458,11 @@ pam.left = {
   selectedHeader = false,
   questCursor = 1,
   questTop = 0,
-  selectedQuest = false, -- don't know if I will use
-  tooltip = ""
+  tooltip = "",
+  customise = {"lightStyle", "tunic", "sword", "missile", "mark"},
+  customiseCursor = 1,
+  selectedSetting = false,
+  lightStyles = {"playerTorch", "playerGlow", "playerSpotlight"}
 }
 pam.left.logic = function()
   if not pam.left.selectedHeader then

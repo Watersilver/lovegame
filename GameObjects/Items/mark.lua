@@ -17,8 +17,17 @@ function Mark.initialize(instance)
   image_indexProgressDirection = 1
   instance.image_index = image_indexProgress
   instance.seeThrough = true
-  if session.save.missileShader then
-    instance.myShader = shdrs[session.save.markShader]
+  if session.save.customMarkAvailable and session.save.customMarkEnabled then
+    local secondaryR = 0.65 + session.save.markR * 0.35
+    local secondaryG = 0.65 + session.save.markG * 0.35
+    local secondaryB = 0.65 + session.save.markB * 0.35
+    shdrs.markCustomShader:send("rgb",
+    session.save.markR,
+    session.save.markG,
+    session.save.markB,
+    secondaryR, secondaryG, secondaryB,
+    1) -- send one extra value to offset bug
+    instance.myShader = shdrs.markCustomShader
   else
     if session.save.faroresCourage then instance.myShader = shdrs["itemGreenShader"] end
   end

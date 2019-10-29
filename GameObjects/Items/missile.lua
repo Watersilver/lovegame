@@ -68,8 +68,17 @@ function Missile.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.immamissile = true
-  if session.save.missileShader then
-    instance.myShader = shdrs[session.save.missileShader]
+  if session.save.customMissileAvailable and session.save.customMissileEnabled then
+    local secondaryR = 0.65 + session.save.missileR * 0.35
+    local secondaryG = 0.65 + session.save.missileG * 0.35
+    local secondaryB = 0.65 + session.save.missileB * 0.35
+    shdrs.missileCustomShader:send("rgb",
+    session.save.missileR,
+    session.save.missileG,
+    session.save.missileB,
+    secondaryR, secondaryG, secondaryB,
+    1) -- send one extra value to offset bug
+    instance.myShader = shdrs.missileCustomShader
   else
     if session.save.nayrusWisdom then instance.myShader = shdrs["itemBlueShader"] end
   end
