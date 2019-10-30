@@ -7,6 +7,7 @@ local sm = require "state_machine"
 local sh = require "scaling_handler"
 local quests = require "quests"
 local u = require "utilities"
+local snd = require "sound"
 
 local pam = {}
 
@@ -84,6 +85,10 @@ function pam.top_menu_draw(l,t,w,h)
   love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
   love.graphics.print("Quit", bbb[3].x.l, bbb[3].y.u, 0, 0.2)
   if pam.quitting then
+    love.graphics.setColor(0, 0, 0, COLORCONST * 0.6)
+    love.graphics.rectangle("fill", l-1, t-1, w+2, h+2)
+    love.graphics.setColor(0, 0, 0, COLORCONST)
+    love.graphics.rectangle("fill", l-1, 80, w+2, 44)
     love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
     love.graphics.print("Are you sure you want to quit?\n\zYes(Enter)   No(Escape)", 22, 88, 0, 0.5)
   end
@@ -169,12 +174,15 @@ end
 local logicFuncs = {
   quests = function()
     if inp.escapePressed then
+      snd.play(glsounds.deselect)
       pam.left.selectedHeader = false
     end
     if inp.upPressed then
+      snd.play(glsounds.cursor)
       pam.left.questCursor = pam.left.questCursor - 1
     end
     if inp.downPressed then
+      snd.play(glsounds.cursor)
       pam.left.questCursor = pam.left.questCursor + 1
     end
     -- Keep cursor within bounds
@@ -184,12 +192,15 @@ local logicFuncs = {
   customise = function()
     if not pam.left.selectedSetting then
       if inp.escapePressed then
+        snd.play(glsounds.deselect)
         pam.left.selectedHeader = false
       end
       if inp.upPressed then
+        snd.play(glsounds.cursor)
         pam.left.customiseCursor = pam.left.customiseCursor - 1
       end
       if inp.downPressed then
+        snd.play(glsounds.cursor)
         pam.left.customiseCursor = pam.left.customiseCursor + 1
       end
       -- Keep cursor within bounds
@@ -197,34 +208,98 @@ local logicFuncs = {
       if pam.left.customiseCursor > #pam.left.customise then pam.left.customiseCursor = 1 end
       -- Select setting
       if inp.enterPressed then
-        if pam.left.customiseCursor == 1 and session.save.playerGlowAvailable then
-          -- lightStyle
+        if pam.left.customiseCursor == 1 and session.save.playerGlowAvailable or
+          pam.left.customiseCursor == 2 and session.save.customTunicAvailable or
+          pam.left.customiseCursor == 3 and session.save.customSwordAvailable or
+          pam.left.customiseCursor == 4 and session.save.customMissileAvailable or
+          pam.left.customiseCursor == 5 and session.save.customMarkAvailable
+        then
+          snd.play(glsounds.select)
           pam.left.selectedSetting = true
           pam.left.subsettingCursor = 1
           pam.left.subsettingsNumber = 4
+        else
+          snd.play(glsounds.error)
         end
       end
     else
       if inp.escapePressed then
+        snd.play(glsounds.deselect)
         pam.left.selectedSetting = false
       end
       if pam.left.customiseCursor == 1 then
         -- lightStyle
         if inp.upPressed then
+          snd.play(glsounds.cursor)
           pam.left.subsettingCursor = pam.left.subsettingCursor - 1
         end
         if inp.downPressed then
+          snd.play(glsounds.cursor)
           pam.left.subsettingCursor = pam.left.subsettingCursor + 1
         end
         -- Clamp cursor
         if pam.left.subsettingCursor > pam.left.subsettingsNumber then pam.left.subsettingCursor = 1 end
         if pam.left.subsettingCursor < 1 then pam.left.subsettingCursor = pam.left.subsettingsNumber end
         session.save.playerGlow = pam.left.lightStyles[pam.left.subsettingCursor]
+      else
+        -- custom Colour
+        local subsetting
+        if pam.left.customiseCursor == 2 then subsetting = "tunic"
+        elseif pam.left.customiseCursor == 3 then subsetting = "sword"
+        elseif pam.left.customiseCursor == 4 then subsetting = "missile"
+        elseif pam.left.customiseCursor == 5 then subsetting = "mark"
+        end
+        if inp.upPressed then
+          snd.play(glsounds.cursor)
+          pam.left.subsettingCursor = pam.left.subsettingCursor - 1
+        end
+        if inp.downPressed then
+          snd.play(glsounds.cursor)
+          pam.left.subsettingCursor = pam.left.subsettingCursor + 1
+        end
+        -- Clamp cursor
+        if pam.left.subsettingCursor > pam.left.subsettingsNumber then pam.left.subsettingCursor = 1 end
+        if pam.left.subsettingCursor < 1 then pam.left.subsettingCursor = pam.left.subsettingsNumber end
+        if pam.left.subsettingCursor == 1 then
+          if inp.leftPressed or inp.rightPressed then
+            snd.play(glsounds.cursor)
+            session.save["custom".. u.capitalise(subsetting) .."Enabled"] = not session.save["custom".. u.capitalise(subsetting) .."Enabled"]
+          end
+        else
+          local colour
+          if pam.left.subsettingCursor == 2 then colour = "R"
+          elseif pam.left.subsettingCursor == 3 then colour = "G"
+          elseif pam.left.subsettingCursor == 4 then colour = "B"
+          end
+          if inp.leftPressed then
+            local colorBefore = session.save[subsetting .. colour]
+            local addend = - 0.01 * (inp.shift and 10 or 1)
+            session.save[subsetting .. colour] = u.clamp(0, session.save[subsetting .. colour] + addend, 1)
+            if colorBefore ~= session.save[subsetting .. colour] then snd.play(glsounds.cursor) end
+          elseif inp.rightPressed then
+            local colorBefore = session.save[subsetting .. colour]
+            local addend = 0.01 * (inp.shift and 10 or 1)
+            session.save[subsetting .. colour] = u.clamp(0, session.save[subsetting .. colour] + addend, 1)
+            if colorBefore ~= session.save[subsetting .. colour] then snd.play(glsounds.cursor) end
+          end
+        end
       end
     end
   end,
 }
 
+
+local function recolor(w, h, subsetting)
+  local pr, pg, pb, pa = love.graphics.getColor()
+  love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
+  love.graphics.rectangle("fill", 0, (pam.left.subsettingCursor - 1) * 10, w, 10)
+  love.graphics.setColor(pr, pg, pb, pa)
+  love.graphics.print("Enabled: " .. (session.save["custom" .. u.capitalise(subsetting) .. "Enabled"] and "Yes" or "No"), 5, 5, 0, 0.15)
+  love.graphics.print("Red: " .. string.format("%03d", session.save[subsetting .. "R"] * 100), 5, 15, 0, 0.15)
+  love.graphics.print("Green: " .. string.format("%03d", session.save[subsetting .. "G"] * 100), 5, 25, 0, 0.15)
+  love.graphics.print("Blue: " .. string.format("%03d", session.save[subsetting .. "B"] * 100), 5, 35, 0, 0.15)
+  love.graphics.print("(Hold shift to change values faster)", 5, 45, 0, 0.1)
+end
 local settingsTooltipFuncs = {
   lightStyle = function(w, h)
     local currentStyle = (session.save.playerGlow or "None"):gsub("player", "")
@@ -234,8 +309,28 @@ local settingsTooltipFuncs = {
     love.graphics.print(currentStyle, w*0.5 - txtWd2, 25, 0, 0.15)
   end,
 
-  recolor = function(w, h)
-  end
+  recolor = function(w, h, subsetting)
+    love.graphics.print("Enabled: " .. session.save["custom" .. u.capitalise(subsetting) .. "Enabled"] and "Yes" or "No", 5, 5, 0, 0.15)
+    love.graphics.print("Red: " .. session.save[subsetting .. "R"], 5, 15, 0, 0.15)
+    love.graphics.print("Green: " .. session.save[subsetting .. "G"], 5, 25, 0, 0.15)
+    love.graphics.print("Blue: " .. session.save[subsetting .. "B"], 5, 35, 0, 0.15)
+  end,
+
+  tunic = function(w, h)
+    recolor(w, h, "tunic")
+  end,
+
+  sword = function(w, h)
+    recolor(w, h, "sword")
+  end,
+
+  missile = function(w, h)
+    recolor(w, h, "missile")
+  end,
+
+  mark = function(w, h)
+    recolor(w, h, "mark")
+  end,
 }
 
 local tooltipFuncs = {
@@ -267,13 +362,29 @@ local tooltipFuncs = {
           pam.left.tooltip = "???"
         end
       elseif setting == "tunic" then
-        pam.left.tooltip = "Customise " .. setting .. " colour."
+        if session.save.customTunicAvailable then
+          pam.left.tooltip = "Customise " .. setting .. " colour."
+        else
+          pam.left.tooltip = "???"
+        end
       elseif setting == "sword" then
-        pam.left.tooltip = "Customise " .. setting .. " colour."
+        if session.save.customTunicAvailable then
+          pam.left.tooltip = "Customise " .. setting .. " colour."
+        else
+          pam.left.tooltip = "???"
+        end
       elseif setting == "missile" then
-        pam.left.tooltip = "Customise " .. setting .. " colour."
+        if session.save.customTunicAvailable then
+          pam.left.tooltip = "Customise " .. setting .. " colour."
+        else
+          pam.left.tooltip = "???"
+        end
       elseif setting == "mark" then
-        pam.left.tooltip = "Customise " .. setting .. " colour."
+        if session.save.customTunicAvailable then
+          pam.left.tooltip = "Customise " .. setting .. " colour."
+        else
+          pam.left.tooltip = "???"
+        end
       end
     end
   end
@@ -399,13 +510,29 @@ local drawFuncs = {
           love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
         end
       elseif setting == "tunic" then
-        love.graphics.print("Tunic Colour", paddingHor, paddingVert + t, 0, textScale)
+        if session.save.playerGlowAvailable then
+          love.graphics.print("Tunic Colour", paddingHor, paddingVert + t, 0, textScale)
+        else
+          love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
+        end
       elseif setting == "sword" then
-        love.graphics.print("Sword Colour", paddingHor, paddingVert + t, 0, textScale)
+        if session.save.playerGlowAvailable then
+          love.graphics.print("Sword Colour", paddingHor, paddingVert + t, 0, textScale)
+        else
+          love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
+        end
       elseif setting == "missile" then
-        love.graphics.print("Missile Colour", paddingHor, paddingVert + t, 0, textScale)
+        if session.save.playerGlowAvailable then
+          love.graphics.print("Missile Colour", paddingHor, paddingVert + t, 0, textScale)
+        else
+          love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
+        end
       elseif setting == "mark" then
-        love.graphics.print("Mark Colour", paddingHor, paddingVert + t, 0, textScale)
+        if session.save.playerGlowAvailable then
+          love.graphics.print("Mark Colour", paddingHor, paddingVert + t, 0, textScale)
+        else
+          love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
+        end
       end
       t = t + sh
     end
@@ -465,15 +592,19 @@ pam.left = {
   lightStyles = {"playerTorch", "playerGlow", "playerSpotlight"}
 }
 pam.left.logic = function()
+  if pam.quitting then return end
   if not pam.left.selectedHeader then
     if inp.enterPressed then
+      snd.play(glsounds.select)
       pam.left.selectedHeader = true
     end
     if inp.leftPressed then
+      snd.play(glsounds.cursor)
       pam.left.headerCursor = pam.left.headerCursor - 1
       if pam.left.headerCursor < 1 then pam.left.headerCursor = #pam.left.headers end
     end
     if inp.rightPressed then
+      snd.play(glsounds.cursor)
       pam.left.headerCursor = pam.left.headerCursor + 1
       if pam.left.headerCursor > #pam.left.headers then pam.left.headerCursor = 1 end
     end

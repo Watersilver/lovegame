@@ -76,6 +76,10 @@ function input.check_input()
   input.rightPrevious = input.right
   input.right = love.keyboard.isDown("right")
   input.rightPressed = input.right and not input.rightPrevious
+
+  input.shiftPrevious = input.shift
+  input.shift = love.keyboard.isDown("lshift", "rshift")
+  input.shiftPressed = input.shift and not input.shiftPrevious
 end
 
 function input.disable_controller(playername)
