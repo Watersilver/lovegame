@@ -58,6 +58,11 @@ activateFuncs[2] = function (self, dt, textIndex)
         for qindex, questid in ipairs(value) do
           saveContent = saveContent .. "\nsave.__quest__" .. qindex .. ' = "' .. questid .. '"'
         end
+      -- Items are in a table in session.save. Get them out and save them with a prefix
+      elseif key == "items" then
+        for iindex, itemid in ipairs(value) do
+          saveContent = saveContent .. "\nsave.__item__" .. iindex .. ' = "' .. itemid .. '"'
+        end
       else
       -- Just write the value
         saveContent = saveContent .. "\nsave." .. key .. " = " .. value

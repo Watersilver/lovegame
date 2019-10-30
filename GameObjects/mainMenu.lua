@@ -57,14 +57,19 @@ local function start_game(saveName)
   end
   -- Load imported save values to save
   session.save.quests = {}
+  session.save.items = {}
   for key, value in pairs(readSave) do
     -- if saved thing is quest place on different table, minus prefix
     if key:find("__quest__") then
-      -- tonumber
       local questIndex = string.gsub(key, "__quest__", "")
       -- Two steps because gsub returns two values, so tonumber will thing second is base
       questIndex = tonumber(questIndex)
-      session.save.quests[questIndex] = value -- key is questname, value quest stage
+      session.save.quests[questIndex] = value -- key is index, value quest id
+    elseif key:find("__item__") then
+      local itemIndex = string.gsub(key, "__item__", "")
+      -- Two steps because gsub returns two values, so tonumber will thing second is base
+      itemIndex = tonumber(itemIndex)
+      session.save.items[itemIndex] = value -- key is index, value item id
     else
       session.save[key] = value
     end
