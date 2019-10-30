@@ -101,7 +101,7 @@ end
 player_states.check_swing = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if pddp(instance, trig, side) then
-  elseif trig.swing_sword then
+  elseif trig.swing_sword and session.save.swordLvl > 2 then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif otherstate == "normal" then
     if trig.hold_sword and instance.sword then

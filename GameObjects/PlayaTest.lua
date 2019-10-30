@@ -321,7 +321,7 @@ function Playa.initialize(instance)
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
-      if trig.swing_sword and not otherstate:find("stab") and not instance.liftState then
+      if trig.swing_sword and not otherstate:find("stab") and (not otherstate:find("swing") or session.save.swordLvl > 2) and not instance.liftState then
         instance.movement_state:change_state(instance, dt, "using_sword")
       elseif instance.item_use_counter > instance.item_use_duration then
         instance.movement_state:change_state(instance, dt, "normal")
