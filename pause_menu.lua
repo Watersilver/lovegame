@@ -335,7 +335,7 @@ local settingsTooltipFuncs = {
 
 local tooltipFuncs = {
   headers = function()
-    pam.left.tooltip = pam.left.headerDesc[pam.left.headerCursor]
+    pam.left.tooltip = pam.left.headerDesc[pam.left.headers[pam.left.headerCursor]]
   end,
 
   quests = function()
@@ -405,39 +405,49 @@ local drawFuncs = {
     local hdist = 17
     local pr, pg, pb, pa = love.graphics.getColor()
 
-    local x = (#pamleft.headers - 1) * hdist
-    for i = #pamleft.headers, 1, -1 do
-      if i ~= pamleft.headerCursor then
-        love.graphics.setColor(0, COLORCONST*0.2, COLORCONST*0.5, COLORCONST)
-        love.graphics.rectangle("fill", x, 0, hwidth, h)
-        love.graphics.setColor(COLORCONST*0.5, COLORCONST*0.5, COLORCONST*0.5, COLORCONST)
-        love.graphics.rectangle("line", x, 0, hwidth, h)
-        love.graphics.setColor(111, 111, 111, COLORCONST)
-        local header = pamleft.headers[i]
-        local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
-        love.graphics.print(header, x + hwidth*0.5 - txtWd2, h*0.5-2, 0, 0.2)
-      end
-      x = x - hdist
+    local x = 0
+    for i = 1, pamleft.headerCursor - 1 do
+      love.graphics.setColor(0, COLORCONST*0.2, COLORCONST*0.5, COLORCONST)
+      love.graphics.rectangle("fill", x, 0, hwidth, h)
+      love.graphics.setColor(COLORCONST*0.5, COLORCONST*0.5, COLORCONST*0.5, COLORCONST)
+      love.graphics.rectangle("line", x, 0, hwidth, h)
+      local header = pamleft.headers[i]
+      local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
+      love.graphics.print(header, x + hwidth*0.5 - txtWd2, h*0.5-2, 0, 0.2)
+      x = x + hdist
     end
-    x = (#pamleft.headers - 1) * hdist
-    for i = #pamleft.headers, 1, -1 do
-      if i == pamleft.headerCursor then
-        if pamleft.selectedHeader then
-          love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.1, COLORCONST*0.5, COLORCONST)
-        else
-          love.graphics.setColor(COLORCONST*0.1, COLORCONST*0.4, COLORCONST*0.7, COLORCONST)
-        end
-        love.graphics.rectangle("fill", x, 0, hwidth, h)
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-        love.graphics.rectangle("line", x, 0, hwidth, h)
-        local header = pamleft.headers[i]
-        local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
-        love.graphics.print(header, x + hwidth*0.5 - txtWd2, h*0.5-2, 0, 0.2)
-      end
+
+    local x = (#pamleft.headers - 1) * hdist
+    for i = #pamleft.headers, pamleft.headerCursor + 1, -1 do
+      love.graphics.setColor(0, COLORCONST*0.2, COLORCONST*0.5, COLORCONST)
+      love.graphics.rectangle("fill", x, 0, hwidth, h)
+      love.graphics.setColor(COLORCONST*0.5, COLORCONST*0.5, COLORCONST*0.5, COLORCONST)
+      love.graphics.rectangle("line", x, 0, hwidth, h)
+      local header = pamleft.headers[i]
+      local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
+      love.graphics.print(header, x + hwidth*0.5 - txtWd2, h*0.5-2, 0, 0.2)
       x = x - hdist
     end
 
+    local x = (pamleft.headerCursor - 1) * hdist
+    if pamleft.selectedHeader then
+      love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.1, COLORCONST*0.5, COLORCONST)
+    else
+      love.graphics.setColor(COLORCONST*0.1, COLORCONST*0.4, COLORCONST*0.7, COLORCONST)
+    end
+    love.graphics.rectangle("fill", x, 0, hwidth, h)
+    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    love.graphics.rectangle("line", x, 0, hwidth, h)
+    local header = pamleft.headers[pamleft.headerCursor]
+    local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
+    love.graphics.print(header, x + hwidth*0.5 - txtWd2, h*0.5-2, 0, 0.2)
+
     love.graphics.setColor(pr, pg, pb, pa)
+  end,
+
+  items = function(w, h, pamleft)
+    drawTransparentBox(w, h)
+    -- draw the list
   end,
 
   quests = function(w, h, pamleft)
@@ -580,8 +590,8 @@ end
 -- Left menu (quest list, settings, item list)
 pam.left = {
   headerCursor = 1,
-  headers = {"quests", "customise"},
-  headerDesc = {"A list of active quests", "Visual customisation\noptions"},
+  headers = {"items", "quests", "customise"},
+  headerDesc = {items = "List of items\nin your possession", quests = "A list of active quests", customise = "Visual customisation\noptions"},
   selectedHeader = false,
   questCursor = 1,
   questTop = 0,
