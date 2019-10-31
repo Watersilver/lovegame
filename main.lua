@@ -154,6 +154,27 @@ session = {
     table.remove(session.save.quests, index)
     session.save[questid] = result or true
   end,
+  addItem = function(itemid)
+    if session.save[itemid] then
+      session.save[itemid] = session.save[itemid] + 1
+    else
+      session.save[itemid] = 1
+      table.insert(session.save.items, itemid)
+      table.sort(session.save.items,
+        function(a, b)
+          return a:upper() < b:upper()
+        end
+      )
+    end
+  end,
+  removeItem = function(itemid)
+    session.save[itemid] = session.save[itemid] - 1
+    if session.save[itemid] < 1 then
+      session.save[itemid] = nil
+      local index = u.getFirstIndexByValue(session.save.quests, itemid)
+      table.remove(session.save.items, index)
+    end
+  end,
 }
 local session = session
 
