@@ -6,6 +6,7 @@ local o = require "GameObjects.objects"
 local sm = require "state_machine"
 local sh = require "scaling_handler"
 local quests = require "quests"
+local items = require "items"
 local u = require "utilities"
 local snd = require "sound"
 
@@ -170,42 +171,53 @@ pam.middle.draw = function(l, t, w, h)
   love.graphics.print("UPGRADES", w * 0.405, h * 0.18, 0, 0.4, 0.4)
 end
 
-
+local function basicListLogic(cursor, list)
+  local navButtonPressed = false
+  if inp.escapePressed then
+    snd.play(glsounds.deselect)
+    pam.left.selectedHeader = false
+    session.usedItemComment = nil
+  end
+  local cursorBefore = pam.left[cursor]
+  if inp.upPressed then
+    pam.left[cursor] = pam.left[cursor] - 1
+    navButtonPressed = true
+  end
+  if inp.downPressed then
+    pam.left[cursor] = pam.left[cursor] + 1
+    navButtonPressed = true
+  end
+  -- Keep cursor within bounds
+  if #list == 0 then
+    pam.left[cursor] = 1
+  else
+    if pam.left[cursor] < 1 then pam.left[cursor] = #list end
+    if pam.left[cursor] > #list then pam.left[cursor] = 1 end
+  end
+  if cursorBefore ~= pam.left[cursor] and navButtonPressed then
+    snd.play(glsounds.cursor)
+    session.usedItemComment = nil
+  end
+end
 local logicFuncs = {
+  items = function()
+    basicListLogic("itemCursor", session.save.items)
+    local itemid = session.save.items[pam.left.itemCursor]
+    if inp.enterPressed then
+      if items[itemid] and items[itemid].use then
+        items[itemid].use()
+        snd.play(glsounds.useItem)
+      else
+        snd.play(glsounds.error)
+      end
+    end
+  end,
   quests = function()
-    if inp.escapePressed then
-      snd.play(glsounds.deselect)
-      pam.left.selectedHeader = false
-    end
-    if inp.upPressed then
-      snd.play(glsounds.cursor)
-      pam.left.questCursor = pam.left.questCursor - 1
-    end
-    if inp.downPressed then
-      snd.play(glsounds.cursor)
-      pam.left.questCursor = pam.left.questCursor + 1
-    end
-    -- Keep cursor within bounds
-    if pam.left.questCursor < 1 then pam.left.questCursor = #session.save.quests end
-    if pam.left.questCursor > #session.save.quests then pam.left.questCursor = 1 end
+    basicListLogic("questCursor", session.save.quests)
   end,
   customise = function()
     if not pam.left.selectedSetting then
-      if inp.escapePressed then
-        snd.play(glsounds.deselect)
-        pam.left.selectedHeader = false
-      end
-      if inp.upPressed then
-        snd.play(glsounds.cursor)
-        pam.left.customiseCursor = pam.left.customiseCursor - 1
-      end
-      if inp.downPressed then
-        snd.play(glsounds.cursor)
-        pam.left.customiseCursor = pam.left.customiseCursor + 1
-      end
-      -- Keep cursor within bounds
-      if pam.left.customiseCursor < 1 then pam.left.customiseCursor = #pam.left.customise end
-      if pam.left.customiseCursor > #pam.left.customise then pam.left.customiseCursor = 1 end
+      basicListLogic("customiseCursor", pam.left.customise)
       -- Select setting
       if inp.enterPressed then
         if pam.left.customiseCursor == 1 and session.save.playerGlowAvailable or
@@ -338,6 +350,19 @@ local tooltipFuncs = {
     pam.left.tooltip = pam.left.headerDesc[pam.left.headers[pam.left.headerCursor]]
   end,
 
+  items = function()
+    local itemid = session.save.items[pam.left.itemCursor]
+    if session.usedItemComment then
+      pam.left.tooltip = session.usedItemComment
+    elseif itemid then
+      if items[itemid] and items[itemid].description then
+        pam.left.tooltip = items[itemid].description
+      else
+        pam.left.tooltip = "No data..."
+      end
+    end
+  end,
+
   quests = function()
     local questid = session.save.quests[pam.left.questCursor]
     local queststage = session.save[questid]
@@ -446,8 +471,48 @@ local drawFuncs = {
   end,
 
   items = function(w, h, pamleft)
+    local textScale = 0.2
+    local padding = 2
+    local scrollBarWidth = 5
+    local scrollBarX = w - scrollBarWidth
     drawTransparentBox(w, h)
-    -- draw the list
+    if session.save.items[1] then
+      local t, ih = pamleft.itemTop, love.graphics.getFont():getHeight() * textScale + 2 * padding
+      for iindex, itemid in ipairs(session.save.items) do
+        local pr, pg, pb, pa = love.graphics.getColor()
+        love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+        if pamleft.itemCursor == iindex then
+          love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
+          love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
+        elseif iindex % 2 == 0 then
+          love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST*0.05)
+          love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
+        end
+        love.graphics.setColor(pr, pg, pb, pa)
+        local iname = items[itemid] and items[itemid].name or "no data..."
+        love.graphics.print(iname, padding, padding + t, 0, textScale)
+        local inameWidth = love.graphics.getFont():getWidth(iname) * textScale
+        local duplicates = session.save[itemid] or "?"
+        love.graphics.print(" x" .. duplicates, padding + inameWidth, padding + t, 0, textScale)
+        t = t + ih
+      end
+      -- Determine itemTop
+      if pamleft.itemTop + pam.left.itemCursor * ih - ih <= 0 then
+        pamleft.itemTop = -(pam.left.itemCursor * ih - ih)
+      elseif pamleft.itemTop + pam.left.itemCursor * ih > h then
+        pamleft.itemTop = -(pam.left.itemCursor * ih - h)
+      end
+
+      local itemNumInv = 1 / #session.save.items
+      local scrollBarPos = (pamleft.itemCursor - 1) * itemNumInv
+      local pr, pg, pb, pa = love.graphics.getColor()
+      love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+      love.graphics.line(scrollBarX, 0, scrollBarX, h)
+      love.graphics.setColor(pr, pg, pb, pa)
+      love.graphics.rectangle("fill", w-5, h*scrollBarPos, 5, h*itemNumInv)
+    else
+      love.graphics.print("No items.", padding, padding, 0, textScale)
+    end
   end,
 
   quests = function(w, h, pamleft)
@@ -480,7 +545,7 @@ local drawFuncs = {
         pamleft.questTop = -(pam.left.questCursor * qh - h)
       end
 
-      local questNumInv = 1 / u.tablelength(session.save.quests)
+      local questNumInv = 1 / #session.save.quests
       local scrollBarPos = (pamleft.questCursor - 1) * questNumInv
       local pr, pg, pb, pa = love.graphics.getColor()
       love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
@@ -599,7 +664,9 @@ pam.left = {
   customise = {"lightStyle", "tunic", "sword", "missile", "mark"},
   customiseCursor = 1,
   selectedSetting = false,
-  lightStyles = {"playerTorch", "playerGlow", "playerSpotlight"}
+  lightStyles = {"playerTorch", "playerGlow", "playerSpotlight"},
+  itemTop = 0,
+  itemCursor = 1,
 }
 pam.left.logic = function()
   if pam.quitting then return end
