@@ -171,7 +171,7 @@ session = {
     session.save[itemid] = session.save[itemid] - 1
     if session.save[itemid] < 1 then
       session.save[itemid] = nil
-      local index = u.getFirstIndexByValue(session.save.quests, itemid)
+      local index = u.getFirstIndexByValue(session.save.items, itemid)
       table.remove(session.save.items, index)
     end
   end,
@@ -202,7 +202,8 @@ glsounds = snd.load_sounds{
   fanfareItem = {"Effects/Oracle_Fanfare_Item"},
   open = {"Effects/Oracle_Chest"},
   heartContainer = {"Effects/Oracle_HeartContainer"},
-  stairs = {"Effects/Oracle_Stairs"}
+  stairs = {"Effects/Oracle_Stairs"},
+  useItem = {"Effects/Oracle_Get_Item"}
 }
 
 -- Set up cameras
