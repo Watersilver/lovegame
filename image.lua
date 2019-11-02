@@ -206,7 +206,6 @@ function im.load_sprite(args)
 
   -- if it already exists, don't add it again
   if not im.sprites[img_name] then
-
     -- store optional arguments in local memory
     local rows = args.rows or args[2] or 1
     local columns = args.columns or args[3] or 1
@@ -264,9 +263,38 @@ function im.load_sprite(args)
   return sprite
 end
 
+function im.replace_sprite(oldImageName, newSpriteBlueprint)
+  -- Get new image name
+  local img_name
+  if type(newSpriteBlueprint) == "string" then
+    img_name = newSpriteBlueprint
+  else
+    img_name = newSpriteBlueprint.img_name or newSpriteBlueprint[1]
+  end
+  -- load new sprite
+  local newSprite = im.load_sprite(newSpriteBlueprint)
+  -- Remember the right amount of times loaded
+  local timesLoaded = im.sprites[oldImageName] and im.sprites[oldImageName].times_loaded or 1
+  newSprite.times_loaded = timesLoaded
+  -- Delete normal sprite load
+  im.sprites[img_name] = nil
+  -- Do the replacing
+  im.sprites[oldImageName] = newSprite
+end
+
 function im.unload_sprite(img_name)
   im.sprites[img_name].times_loaded = im.sprites[img_name].times_loaded - 1
   if im.sprites[img_name].times_loaded == 0 then im.sprites[img_name] = nil end
+end
+
+function im.reloadPlSprites()
+  for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
+    -- preserve times_loaded to avoid bugs
+    local timesLoaded = im.sprites[plSprite[1]].times_loaded
+    im.sprites[plSprite[1]] = nil
+    -- reload sprites
+    im.load_sprite(plSprite).times_loaded = timesLoaded
+  end
 end
 
 -- Preload some stuff here

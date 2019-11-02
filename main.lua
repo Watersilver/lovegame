@@ -60,8 +60,10 @@ session = {
     -- Menu cursors
     pam.left.initCursors()
     -- Reload skin in case of skin change
-    for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
-      im.replace_sprite(plSprite[1], im.spriteSettings.playerSprites[i])
+    im.reloadPlSprites()
+    -- Apply ring effects
+    if session.save.equippedRing then
+      require("items")[session.save.equippedRing].equip()
     end
     -- save
     session.save.time = session.save.time or 6
@@ -366,6 +368,7 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
+
 	dt = math.min(0.03333333, dt)
   -- Store mouse input
   moub["1press"] = moub[1] and not moub["1prev"]

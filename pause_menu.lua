@@ -4,7 +4,7 @@ local inp = require "input"
 local game = require "game"
 local o = require "GameObjects.objects"
 local sm = require "state_machine"
-local sh = require "scaling_handler"
+local shan = require "scaling_handler"
 local quests = require "quests"
 local items = require "items"
 local u = require "utilities"
@@ -481,7 +481,10 @@ local drawFuncs = {
       for iindex, itemid in ipairs(session.save.items) do
         local pr, pg, pb, pa = love.graphics.getColor()
         love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
-        if pamleft.itemCursor == iindex then
+        if session.save.equippedRing == itemid then
+          love.graphics.setColor(COLORCONST*0.7, COLORCONST*0.4, COLORCONST, COLORCONST*0.2)
+          love.graphics.rectangle("fill", 0, t, w, ih)
+        elseif pamleft.itemCursor == iindex then
           love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
           love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
         elseif iindex % 2 == 0 then
@@ -703,8 +706,8 @@ pam.left.logic = function()
   end
 end
 pam.left.draw = function(l, t, w, h)
-  local deadSpaceX, deadSpaceY = sh.get_current_window()
-  local hudScale = sh.get_window_scale() * 2
+  local deadSpaceX, deadSpaceY = shan.get_current_window()
+  local hudScale = shan.get_window_scale() * 2
 
   local sl, sw = 33, 100 -- scissor left, scissor width
   local ht, hh = 66, 7 -- header top & height
