@@ -1,13 +1,13 @@
 local o = require "GameObjects.objects"
 local chooseFromChanceTable = (require "utilities").chooseFromChanceTable
-local Heart = require "Gameobjects.drops.heart"
-local Rupee = require "Gameobjects.drops.rupee"
-local Rupee5 = require "Gameobjects.drops.rupee5"
-local Rupee20 = require "Gameobjects.drops.rupee20"
-local Rupee100 = require "Gameobjects.drops.rupee100"
-local Rupee200 = require "Gameobjects.drops.rupee200"
-local pieceOfHeart = require "Gameobjects.drops.pieceOfHeart"
-local Fairy = require "Gameobjects.drops.fairy"
+local Heart = require "GameObjects.drops.heart"
+local Rupee = require "GameObjects.drops.rupee"
+local Rupee5 = require "GameObjects.drops.rupee5"
+local Rupee20 = require "GameObjects.drops.rupee20"
+local Rupee100 = require "GameObjects.drops.rupee100"
+local Rupee200 = require "GameObjects.drops.rupee200"
+local pieceOfHeart = require "GameObjects.drops.pieceOfHeart"
+local Fairy = require "GameObjects.drops.fairy"
 
 local drops = {}
 

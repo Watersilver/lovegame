@@ -7,7 +7,7 @@ local im = require "image"
 local snd = require "sound"
 local expl = require "GameObjects.explode"
 local o = require "GameObjects.objects"
-local drops = require "Gameobjects.drops.drops"
+local drops = require "GameObjects.drops.drops"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 

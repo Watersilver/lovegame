@@ -7,7 +7,7 @@ local expl = require "GameObjects.explode"
 local o = require "GameObjects.objects"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local snd = require "sound"
-local drops = require "Gameobjects.drops.drops"
+local drops = require "GameObjects.drops.drops"
 
 
 local function throw_collision(self)

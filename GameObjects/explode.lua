@@ -7,7 +7,7 @@ local o = require "GameObjects.objects"
 local im = require "image"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
-local drops = require "Gameobjects.drops.drops"
+local drops = require "GameObjects.drops.drops"
 
 local noBody = require "GameObjects.noBody"
 
