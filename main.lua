@@ -57,6 +57,12 @@ session = {
   },
   mslQueue = u.newQueue(),
   initialize = function()
+    -- Menu cursors
+    pam.left.initCursors()
+    -- Reload skin in case of skin change
+    for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
+      im.replace_sprite(plSprite[1], im.spriteSettings.playerSprites[i])
+    end
     -- save
     session.save.time = session.save.time or 6
     session.save.days = session.save.days or 1
@@ -548,8 +554,8 @@ function love.update(dt)
       game.pause(false)
       inv.closeInv()
     end
-    pam.top_menu_logic()
     pam.left.logic()
+    pam.top_menu_logic()
   end
 
   -- Handle dialogues

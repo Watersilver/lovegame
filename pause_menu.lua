@@ -668,6 +668,16 @@ pam.left = {
   itemTop = 0,
   itemCursor = 1,
 }
+function pam.left.initCursors()
+  pam.left.headerCursor = 1
+  pam.left.selectedHeader = false
+  pam.left.questCursor = 1
+  pam.left.questTop = 0
+  pam.left.customiseCursor = 1
+  pam.left.selectedSetting = false
+  pam.left.itemTop = 0
+  pam.left.itemCursor = 1
+end
 pam.left.logic = function()
   if pam.quitting then return end
   if not pam.left.selectedHeader then
