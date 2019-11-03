@@ -40,24 +40,24 @@ items.testi2 = {
   end
 }
 
-items.ringMageForm = {
-  name = "(R) Mage Form",
+-- Rings
+-- Skins
+items.ringMage = {
+  name = "(R) Mage Ring",
   description = "Transform into\nMage!",
   equip = function()
     session.usedItemComment = "Equipped Ring of Mage\nForm!"
     for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
       im.replace_sprite(plSprite[1], altSkins.origPlayerSprites[i])
     end
-    -- force change immediately
   end,
   unequip = function()
     session.usedItemComment = "Unequipped Ring of Mage\nForm!"
     im.reloadPlSprites()
-    -- force change immediately
   end
 }
-items.ringMageForm.use = function()
-  useRing("ringMageForm")
+items.ringMage.use = function()
+  useRing("ringMage")
 end
 
 

@@ -74,10 +74,10 @@ local function start_game(saveName)
       session.save[key] = value
     end
   end
-  -- initialize certain values
-  session.initialize()
   -- Remember which save I am
   session.save.saveName = saveName
+  -- initialize certain values
+  session.initialize()
 
   game.transition{
     type = "whiteScreen",

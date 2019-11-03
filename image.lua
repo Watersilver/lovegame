@@ -285,12 +285,19 @@ function im.unload_sprite(img_name)
 end
 
 function im.reloadPlSprites()
-  for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
-    -- preserve times_loaded to avoid bugs
-    local timesLoaded = im.sprites[plSprite[1]].times_loaded
-    im.sprites[plSprite[1]] = nil
-    -- reload sprites
-    im.load_sprite(plSprite).times_loaded = timesLoaded
+  fuck = session.save.saveName
+  if session.save.saveName:upper() == "ZELDA" then
+    for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
+      im.replace_sprite(plSprite[1], require ("altSkins").zeldaPlayerSprites[i])
+    end
+  else
+    for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
+      -- preserve times_loaded to avoid bugs
+      local timesLoaded = im.sprites[plSprite[1]].times_loaded
+      im.sprites[plSprite[1]] = nil
+      -- reload sprites
+      im.load_sprite(plSprite).times_loaded = timesLoaded
+    end
   end
 end
 
