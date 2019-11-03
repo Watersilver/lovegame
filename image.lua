@@ -159,10 +159,7 @@ im.spriteSettings = {
     {'Witch/die', 7, padding = 2, width = 16, height = 16},
     {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
     {'Witch/defaultGrass', 2, padding = 2, width = 16, height = 16},
-    {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
-    {'health', 5, padding = 2, width = 7, height = 7},
-    {'rupees', 1, padding = 0, width = 7, height = 7},
-    {'Test', 1, padding = 0},
+    {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6}
   },
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
   playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4},
@@ -301,6 +298,9 @@ end
 for _, plSprite in ipairs(im.spriteSettings.playerSprites) do
   im.load_sprite(plSprite)
 end
+im.load_sprite{'health', 5, padding = 2, width = 7, height = 7}
+im.load_sprite{'rupees', 1, padding = 0, width = 7, height = 7}
+im.load_sprite{'Test', 1, padding = 0}
 im.load_sprite(im.spriteSettings.floorOutside)
 im.load_sprite(im.spriteSettings.solidsOutside)
 im.load_sprite(im.spriteSettings.zeldarip)

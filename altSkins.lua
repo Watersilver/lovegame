@@ -46,10 +46,7 @@ altSkins.origPlayerSprites = {
   {'WitchOrig/die', 7, padding = 2, width = 16, height = 16},
   {'WitchOrig/shadow', 1, padding = 2, width = 16, height = 16},
   {'WitchOrig/defaultGrass', 2, padding = 2, width = 16, height = 16},
-  {'WitchOrig/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
-  {'health', 5, padding = 2, width = 7, height = 7},
-  {'rupees', 1, padding = 0, width = 7, height = 7},
-  {'Test', 1, padding = 0},
+  {'WitchOrig/defaultWaterRipples', 4, padding = 2, width = 16, height = 6}
 }
 
 return altSkins

@@ -483,7 +483,7 @@ local drawFuncs = {
         love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
         if session.save.equippedRing == itemid then
           love.graphics.setColor(COLORCONST*0.7, COLORCONST*0.4, COLORCONST, COLORCONST*0.2)
-          love.graphics.rectangle("fill", 0, t, w, ih)
+          love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
         elseif pamleft.itemCursor == iindex then
           love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
           love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
