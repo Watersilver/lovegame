@@ -285,7 +285,6 @@ function im.unload_sprite(img_name)
 end
 
 function im.reloadPlSprites()
-  fuck = session.save.saveName
   if session.save.saveName:upper() == "ZELDA" then
     for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
       im.replace_sprite(plSprite[1], require ("altSkins").zeldaPlayerSprites[i])
