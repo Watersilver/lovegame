@@ -1,3 +1,19 @@
+-- Setup main canvas and aspect ratio
+local mainCanvas = love.graphics.newCanvas()
+local function initAspectRatio()
+  local screenWidth = love.graphics.getWidth()
+  local screenHeight = love.graphics.getHeight()
+  local width = 1600--1600
+  local aspect_ratio = 16/9
+  local height = width / aspect_ratio -- 900 if t.window.width = 1600
+  local _, __, flags = love.window.getMode( )
+  flags.x = (screenWidth - width) * 0.5
+  flags.y = (screenHeight - height) * 0.5
+  love.window.setMode( width, height, flags)
+end
+initAspectRatio()
+
+
 local verh = require "version_handling"
 -- Set up save directory
 if not verh.fileExists("game_settings.lua") then
@@ -825,6 +841,10 @@ local function hudDraw(l,t,w,h)
 end
 function love.draw()
 
+  -- delete following lines and the resetting of canvas below to disable main canvas
+  love.graphics.setCanvas(mainCanvas)
+  love.graphics.clear()
+
   cam:setScale(sh.get_total_scale())
   -- local l, t, w, h = cam:getWindow()
   -- cam:setWindow(cam.noisel,cam.noiset,w,h)
@@ -835,6 +855,10 @@ function love.draw()
 
   -- Draw screen effect due to game time
   dtse.draw()
+
+  -- delete following lines and the setting of canvas above to disable main canvas
+  love.graphics.setCanvas()
+  love.graphics.draw(mainCanvas)
 
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)
