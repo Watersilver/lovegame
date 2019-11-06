@@ -64,6 +64,8 @@ function pam.top_menu_logic()
         progress = 0,
         roomTarget = "Rooms/main_menu.lua"
       }
+      session.drug = nil
+      session.ringShader = nil
     elseif inp.escapePressed then
       pam.quitting = nil
     end

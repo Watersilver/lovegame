@@ -17,6 +17,12 @@ shdrs.redTunic = love.graphics.newShader("Shaders/red_tunic.fs")
 shdrs.mauveTunic = love.graphics.newShader("Shaders/mauve_tunic.fs")
 shdrs.customTunic = love.graphics.newShader("Shaders/custom_tunic.fs")
 
+shdrs.grayscale = love.graphics.newShader("Shaders/grayscale.fs")
+shdrs.sepia = love.graphics.newShader("Shaders/sepia/sepia.fs")
+shdrs.vignette = love.graphics.newShader("Shaders/vignette/vignette.fs")
+shdrs.oldScreen = love.graphics.newShader("Shaders/oldScreen.fs")
+shdrs.drugShader = love.graphics.newShader("Shaders/drugShader.fs")
+
 shdrs.multiply = love.graphics.newShader("Shaders/multiply.fs")
 
 return shdrs
