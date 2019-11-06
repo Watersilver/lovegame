@@ -767,7 +767,8 @@ local function mainCameraDraw(l,t,w,h)
 end
 local function hudDraw(l,t,w,h)
   local hpspr = im.sprites["health"]
-  if hpspr then
+  local transing = game.transitioning
+  if hpspr and not (transing and transing.type == "whiteScreen") then
     -- Draw as many filled hearts as player has health
     for i = 1, pl1.maxHealth do
       local healthFrame
@@ -824,7 +825,7 @@ local function hudDraw(l,t,w,h)
 
 
     -- Draw pause menu
-    if game.paused and not game.transitioning and not game.cutscene then
+    if game.paused and not transing and not game.cutscene then
       -- local pr, pg, pb, pa = love.graphics.getColor()
       love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
       love.graphics.rectangle("fill", l, t, w, h)
