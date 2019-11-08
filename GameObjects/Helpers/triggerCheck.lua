@@ -1,6 +1,6 @@
 local tch = {}
 
-function tch.playerDieDrownPlummet(instance, trig, myside)
+function tch.playerDieDrownPlummet(instance, trig, myside, dt)
   if trig.noHealth then
     instance.animation_state:change_state(instance, dt, "downdie")
     return true

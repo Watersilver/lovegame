@@ -31,15 +31,15 @@ local img_speed_and_footstep_sound = player_states.img_speed_and_footstep_sound
 
 player_states.check_walk = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif inv.check_use(instance, trig, side) then
+  elseif inv.check_use(instance, trig, side, dt) then
   elseif instance.zo ~= 0 then
     instance.animation_state:change_state(instance, dt, side .. "fall")
-  elseif td.check_push_a(instance, trig, side) then
-  elseif td.check_walk_while_walking(instance, trig, side) then
-  elseif td.check_halt_a(instance, trig, side) then
+  elseif td.check_push_a(instance, trig, side, dt) then
+  elseif td.check_walk_while_walking(instance, trig, side, dt) then
+  elseif td.check_halt_a(instance, trig, side, dt) then
   elseif trig.restish then
     instance.animation_state:change_state(instance, dt, side .. "still")
   end
@@ -47,40 +47,40 @@ end
 
 player_states.check_halt = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif inv.check_use(instance, trig, side) then
+  elseif inv.check_use(instance, trig, side, dt) then
   elseif instance.zo ~= 0 then
     instance.animation_state:change_state(instance, dt, side .. "fall")
-  elseif td.check_push_a(instance, trig, side) then
-  elseif td.check_walk_a(instance, trig, side) then
+  elseif td.check_push_a(instance, trig, side, dt) then
+  elseif td.check_walk_a(instance, trig, side, dt) then
   elseif trig.restish then
     instance.animation_state:change_state(instance, dt, side .. "still")
-  elseif td.check_halt_notme(instance, trig, side) then
+  elseif td.check_halt_notme(instance, trig, side, dt) then
   end
 end
 
 player_states.check_still = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif inv.check_use(instance, trig, side) then
+  elseif inv.check_use(instance, trig, side, dt) then
   elseif instance.zo ~= 0 then
     instance.animation_state:change_state(instance, dt, side .. "fall")
-  elseif td.check_push_a(instance, trig, side) then
-  elseif td.check_walk_a(instance, trig, side) then
-  elseif td.check_halt_a(instance, trig, side) then
+  elseif td.check_push_a(instance, trig, side, dt) then
+  elseif td.check_walk_a(instance, trig, side, dt) then
+  elseif td.check_halt_a(instance, trig, side, dt) then
   end
 end
 
 player_states.check_push = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif inv.check_use(instance, trig, side) then
+  elseif inv.check_use(instance, trig, side, dt) then
   elseif not trig["push_" .. side] then
     instance.animation_state:change_state(instance, dt, side .. "still")
   end
@@ -100,7 +100,7 @@ end
 
 player_states.check_swing = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif trig.swing_sword and session.save.swordLvl > 2 then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif otherstate == "normal" then
@@ -174,7 +174,7 @@ end
 
 player_states.check_stab = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif otherstate == "normal" then
     if trig.hold_sword and instance.sword then
       instance.animation_state:change_state(instance, dt, side .. "hold")
@@ -221,7 +221,7 @@ end
 
 player_states.check_hold = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif trig.stab then
@@ -286,7 +286,7 @@ end
 
 player_states.check_fall = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif instance.zo == 0 then
@@ -324,7 +324,7 @@ end
 
 player_states.check_missile = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif instance.missile_cooldown > session.getMagicCooldown() then
@@ -406,7 +406,7 @@ end
 
 player_states.check_gripping = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif not trig.grip or not instance.grippedOb.exists then
@@ -478,7 +478,7 @@ end
 
 player_states.check_lifting = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif instance.liftingStage == 4 then
     instance.dontThrow = true
     instance.animation_state:change_state(instance, dt, side .. "lifted")
@@ -533,12 +533,12 @@ end
 
 player_states.check_lifted = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-  if pddp(instance, trig, side) then
+  if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif trig.gripping then
     instance.animation_state:change_state(instance, dt, side .. "walk")
-  elseif td.check_carry_while_carrying(instance, trig, side) then
+  elseif td.check_carry_while_carrying(instance, trig, side, dt) then
   end
   -- Variable to ensure lifted object won't be thrown when changing direction
   -- Set at check_carry_while_carrying function in movement.top_down

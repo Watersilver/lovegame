@@ -181,7 +181,7 @@ end
 inv.closeInv()
 
 
-function inv.check_use(instance, trig, side)
+function inv.check_use(instance, trig, side, dt)
   if trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
     return true

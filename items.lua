@@ -50,7 +50,7 @@ items.ringFocus = {
   description = "Helps with reflexes!",
   equip = function()
     session.usedItemComment = "Equipped Focus Ring!"
-    session.ringSlomo = 1 / 1.2
+    session.ringSlomo = 0.8
   end,
   unequip = function()
     session.usedItemComment = "Unequipped Focus Ring!"

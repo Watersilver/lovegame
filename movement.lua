@@ -405,7 +405,7 @@ local mo = {}
 
 
     -- Animation state checking functions
-    check_push_a = function(instance, trig, myside)
+    check_push_a = function(instance, trig, myside, dt)
       if myside and trig["push_" .. myside] then
         instance.animation_state:change_state(instance, dt, myside .. "push")
         return true
@@ -426,7 +426,7 @@ local mo = {}
       return false
     end,
 
-    check_walk_a = function(instance, trig, myside)
+    check_walk_a = function(instance, trig, myside, dt)
       if myside and trig["walk_" .. myside] then
         instance.animation_state:change_state(instance, dt, myside .. "walk")
         return true
@@ -451,7 +451,7 @@ local mo = {}
       return false
     end,
 
-    check_walk_while_walking = function(instance, trig, myside)
+    check_walk_while_walking = function(instance, trig, myside, dt)
       if trig[walktable[myside].first_check.check1]
         and not trig[walktable[myside].first_check.check2] then
           instance.animation_state:change_state(instance, dt, walktable[myside].first_check.result)
@@ -469,7 +469,7 @@ local mo = {}
       return false
     end,
 
-    check_halt_a = function(instance, trig, myside)
+    check_halt_a = function(instance, trig, myside, dt)
       if myside and trig["halt_" .. myside] then
         instance.animation_state:change_state(instance, dt, myside .. "halt")
         return true
@@ -490,7 +490,7 @@ local mo = {}
       return false
     end,
 
-    check_halt_notme = function(instance, trig, myside)
+    check_halt_notme = function(instance, trig, myside, dt)
       if trig.halt_down and myside ~= "down" then
         instance.animation_state:change_state(instance, dt, "downhalt")
         return true
@@ -507,7 +507,7 @@ local mo = {}
       return false
     end,
 
-    check_carry_while_carrying = function(instance, trig, myside)
+    check_carry_while_carrying = function(instance, trig, myside, dt)
       -- Variable to ensure lifted object won't be thrown when changing direction
       instance.dontThrow = true
       if trig[carrytable[myside].first_check.check1]

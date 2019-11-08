@@ -148,8 +148,10 @@ session = {
     return 300 + session.save.athleticsLvl * 100, 6 + session.save.athleticsLvl
   end,
   getMaxSpeed = function()
-    -- for now does nothing, but if I add temp speedBoosts will be useful
-    return session.save.playerMaxSpeed
+    -- maybe also add add temp speedBoosts
+    local maxSpeed = session.save.playerMaxSpeed
+    -- Modifier due to temp speedBoosts or penalties
+    return maxSpeed
   end,
   startQuest = function(questid, startingStage)
     -- Only start quests that are not active or finished
@@ -187,7 +189,7 @@ session = {
       local index = u.getFirstIndexByValue(session.save.items, itemid)
       table.remove(session.save.items, index)
     end
-  end,
+  end
 }
 local session = session
 
@@ -373,7 +375,6 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
-
 	dt = math.min(0.03333333, dt)
   local drugSlomo
   if session.drug then drugSlomo = session.drug.slomo end
@@ -766,9 +767,9 @@ local function mainCameraDraw(l,t,w,h)
 
 end
 local function hudDraw(l,t,w,h)
-  local hpspr = im.sprites["health"]
   local transing = game.transitioning
-  if hpspr and not (transing and transing.type == "whiteScreen") then
+  if pl1 and not (transing and transing.type == "whiteScreen") then
+    local hpspr = im.sprites["health"]
     -- Draw as many filled hearts as player has health
     for i = 1, pl1.maxHealth do
       local healthFrame
@@ -788,13 +789,14 @@ local function hudDraw(l,t,w,h)
       love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5, 0, hpspr.res_x_scale, hpspr.res_y_scale)
     end
 
+    local pr, pg, pb, pa = love.graphics.getColor()
+
     -- Draw rupees
     local maxMoney = session.maxMoney()
     local rupeeDigits = u.countIntDigits(maxMoney)
     local rupees = string.format("%0"..rupeeDigits.."d", (session.save.rupees or 0))
     local rspr = im.sprites["rupees"]
     love.graphics.draw(rspr.img, rspr[0], w-9, h-9,  0, rspr.res_x_scale, rspr.res_y_scale)
-    local pr, pg, pb, pa = love.graphics.getColor()
     love.graphics.setColor(0, 0, 0, COLORCONST)
     local rupeeOffset = rupeeDigits * 6.1 + 10
     local rupeeYBase = h-7.5
