@@ -122,4 +122,72 @@ function snd.bgm:handleFade(dt)
   end
 end
 
+
+-- BGM ver2
+local function fadeToVolume(source, targetVol, vChangPerSec, dt)
+  local curVol = source:getVolume()
+  if curVol ~= targetVol then
+    if curVol > targetVol then
+      local newVol = curVol - vChangPerSec * dt
+      if newVol < targetVol then newVol = targetVol end
+      source:setVolume(newVol)
+    else
+      local newVol = curVol + vChangPerSec * dt
+      if newVol > targetVol then newVol = targetVol end
+      source:setVolume(newVol)
+    end
+  end
+end
+
+local function playNextSource(bgmv2)
+  bgmv2.silenceTimer = 0
+  self.current = self.next
+  self.source = love.audio.newSource( self.next.name, "stream" )
+  self.source:setLooping(true)
+  self.source:setVolume(0)
+  self.source:play()
+end
+
+snd.bgmV2 = {
+  current = {},
+  next = {},
+  silenceTimer = 0
+}
+
+function snd.bgmv2:load(piece_info)
+  if type(piece_info) == "string" then
+    piece_info = {name = "piece_info"}
+  end
+  self.next = {
+    name = piece_info.name,
+    targetVolume = piece_info.targetVolume or 1,
+    forceRestart = piece_info.forceRestart or false,
+    previousFadeOut = piece_info.previousFadeOut or 1,
+    fadeSpeed = piece_info.fadeSpeed or 1,
+    silenceDuration = piece_info.silenceDuration or 3
+  }
+end
+
+function snd.bgmv2:update(dt)
+  -- Count silence time
+  if self.source:getVolume() == 0 then self.silenceTimer = self.silenceTimer + dt end
+  if self.current.name ~= self.next.name or self.next.forceRestart then
+    -- If next piece is different or piece must restart, fade out current, then load next
+    fadeToVolume(self.source, 0, self.next.previousFadeOut, dt)
+    if self.source:getVolume() == 0 then
+      if self.source:isPlaying() then self.source:stop() end
+      -- Stay silent for a while and then start new piece
+      if self.silenceTimer > self.next.silenceDuration then
+        playNextSource(self)
+      end
+    end
+  elseif self.current.targetVolume ~= self.next.targetVolume then
+    -- If same piece with diff target vol, set new target
+    self.current.targetVolume = self.next.targetVolume
+  elseif self.source:getVolume() ~= self.current.targetVolume then
+    -- Fade to target volume
+    fadeToVolume(self.source, self.current.targetVolume, self.current.fadeSpeed, dt)
+  end
+end
+
 return snd
