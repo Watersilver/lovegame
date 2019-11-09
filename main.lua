@@ -268,7 +268,8 @@ function love.load()
   -- Normal game
   game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
   rm.build_room(game.room)
-  snd.bgm:load(game.room.music_info)
+  -- snd.bgm:load(game.room.music_info)
+  snd.bgmV2:load(game.room.music_info[1])
   game.clockInactive = game.room.timeDoesntPass
 
   -- Room Creator
@@ -486,7 +487,8 @@ function love.update(dt)
       game.paused = false
       game.transitioning = false
 
-      snd.bgm:load(newRoom.music_info)
+      -- snd.bgm:load(newRoom.music_info)
+      snd.bgmV2:load(game.room.music_info[1])
       game.timeScreenEffect = room.timeScreenEffect
       game.clockInactive = room.timeDoesntPass
 
@@ -703,7 +705,8 @@ function love.update(dt)
   snd.play_soundsToBePlayed()
 
   -- Update music
-  snd.bgm:update(dt)
+  -- snd.bgm:update(dt)
+  snd.bgmV2:update(dt)
 
   -- Shake camera
   gsh.shake(cam, dt)

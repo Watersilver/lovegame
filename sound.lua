@@ -124,9 +124,16 @@ end
 
 
 -- BGM ver2
+local silentSource = {
+  getVolume = function() return 0 end,
+  setVolume = function() end,
+  isPlaying = function() return false end,
+  stop = function() end
+}
+
 local function fadeToVolume(source, targetVol, vChangPerSec, dt)
   local curVol = source:getVolume()
-  if curVol ~= targetVol then
+  if source ~= silentSource and curVol ~= targetVol then
     if curVol > targetVol then
       local newVol = curVol - vChangPerSec * dt
       if newVol < targetVol then newVol = targetVol end
@@ -141,25 +148,34 @@ end
 
 local function playNextSource(bgmv2)
   bgmv2.silenceTimer = 0
-  self.current = self.next
-  self.source = love.audio.newSource( self.next.name, "stream" )
-  self.source:setLooping(true)
-  self.source:setVolume(0)
-  self.source:play()
+  bgmv2.current = bgmv2.next
+  if bgmv2.source:isPlaying() then bgmv2.source:stop() end
+  if bgmv2.next.name then
+    bgmv2.source = love.audio.newSource( bgmv2.next.folder .. bgmv2.next.name .. bgmv2.next.extension, "stream" )
+    bgmv2.source:setLooping(true)
+    bgmv2.source:setVolume(0)
+    bgmv2.source:play()
+  else
+    bgmv2.source = silentSource
+  end
 end
 
 snd.bgmV2 = {
   current = {},
   next = {},
-  silenceTimer = 0
+  silenceTimer = 0,
+  source = silentSource
 }
 
-function snd.bgmv2:load(piece_info)
+function snd.bgmV2:load(piece_info)
   if type(piece_info) == "string" then
-    piece_info = {name = "piece_info"}
+    piece_info = {name = piece_info}
   end
   self.next = {
     name = piece_info.name,
+    -- folder = piece_info.folder or "Sounds/Music/",
+    folder = piece_info.folder or "Sounds/",
+    extension = piece_info.extension or ".ogg",
     targetVolume = piece_info.targetVolume or 1,
     forceRestart = piece_info.forceRestart or false,
     previousFadeOut = piece_info.previousFadeOut or 1,
@@ -168,25 +184,29 @@ function snd.bgmv2:load(piece_info)
   }
 end
 
-function snd.bgmv2:update(dt)
-  -- Count silence time
-  if self.source:getVolume() == 0 then self.silenceTimer = self.silenceTimer + dt end
-  if self.current.name ~= self.next.name or self.next.forceRestart then
-    -- If next piece is different or piece must restart, fade out current, then load next
-    fadeToVolume(self.source, 0, self.next.previousFadeOut, dt)
-    if self.source:getVolume() == 0 then
-      if self.source:isPlaying() then self.source:stop() end
-      -- Stay silent for a while and then start new piece
-      if self.silenceTimer > self.next.silenceDuration then
-        playNextSource(self)
+function snd.bgmV2:update(dt)
+  if gs.musicOn then
+    -- Count silence time
+    if self.source:getVolume() == 0 then self.silenceTimer = self.silenceTimer + dt end
+    if self.current.name ~= self.next.name or self.next.forceRestart then
+      -- If next piece is different or piece must restart, fade out current, then load next
+      fadeToVolume(self.source, 0, self.next.previousFadeOut, dt)
+      if self.source:getVolume() == 0 then
+        -- Stay silent for a while and then start new piece
+        if self.silenceTimer > self.next.silenceDuration then
+          playNextSource(self)
+        end
       end
+    elseif self.current.targetVolume ~= self.next.targetVolume then
+      -- If same piece with diff target vol, set new target
+      self.current.targetVolume = self.next.targetVolume
+    elseif self.source:getVolume() ~= self.current.targetVolume then
+      -- Fade to target volume
+      fadeToVolume(self.source, self.current.targetVolume, self.current.fadeSpeed, dt)
     end
-  elseif self.current.targetVolume ~= self.next.targetVolume then
-    -- If same piece with diff target vol, set new target
-    self.current.targetVolume = self.next.targetVolume
-  elseif self.source:getVolume() ~= self.current.targetVolume then
-    -- Fade to target volume
-    fadeToVolume(self.source, self.current.targetVolume, self.current.fadeSpeed, dt)
+  else
+    self.source:setVolume(0)
+    self.silenceTimer = self.silenceTimer + dt
   end
 end
 
