@@ -20,7 +20,7 @@ end
 
 Go.functions = {
   load = function (self)
-    snd.bgm:load{"Music/GameOver"}
+    snd.bgmV2:load{name = "GameOver", previousFadeOut = 0.5, silenceDuration = 1}
   end,
 
   update = function (self, dt)

@@ -97,7 +97,8 @@ NPC.functions = {
 
   delete = function (self)
     if self.skipDelete then return end
-    snd.bgm:load(self.roomMusic)
+    -- snd.bgm:load(self.roomMusic)
+    snd.bgmV2:load(session.getMusic())
   end
 }
 

@@ -4,7 +4,7 @@ local im = require "image"
 
 local room = {}
 
-room.music_info = {"Silence"}
+-- room.music_info = {name = "Silence", folder = "Sounds/"}
 
 room.width = 500
 room.height = 450

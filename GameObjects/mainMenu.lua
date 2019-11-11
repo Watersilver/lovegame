@@ -44,7 +44,7 @@ local tipboxX, tipboxY, tipboxRepeats, tipboxRepeatsH, tipboxTip =
 
 local function start_game(saveName)
   -- Disable menu music
-  snd.bgm:load(snd.silence)
+  snd.bgmV2:load({previousFadeOut = math.huge, silenceDuration = 0})
   -- assert(love.filesystem.load instead of require to detect file changes
   local readSave = assert(love.filesystem.load("Saves/" .. saveName .. ".lua"))()
   -- Nilify session (Only values!!!)

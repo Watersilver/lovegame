@@ -189,6 +189,9 @@ session = {
       local index = u.getFirstIndexByValue(session.save.items, itemid)
       table.remove(session.save.items, index)
     end
+  end,
+  getMusic = function()
+    return game.room.music_info
   end
 }
 local session = session
@@ -269,7 +272,7 @@ function love.load()
   game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
   rm.build_room(game.room)
   -- snd.bgm:load(game.room.music_info)
-  snd.bgmV2:load(game.room.music_info[1])
+  snd.bgmV2:load(session.getMusic())
   game.clockInactive = game.room.timeDoesntPass
 
   -- Room Creator
@@ -488,7 +491,8 @@ function love.update(dt)
       game.transitioning = false
 
       -- snd.bgm:load(newRoom.music_info)
-      snd.bgmV2:load(game.room.music_info[1])
+      -- snd.bgmV2:load(game.room.music_info)
+      snd.bgmV2:load(session.getMusic())
       game.timeScreenEffect = room.timeScreenEffect
       game.clockInactive = room.timeDoesntPass
 

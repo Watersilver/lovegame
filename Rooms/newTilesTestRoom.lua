@@ -5,7 +5,7 @@ local u = require "utilities"
 
 local room = {}
 
-room.music_info = {"Music/MusicTest2"}--{"Music/MusicTest"}
+room.music_info = "MusicTest2"--{"Music/MusicTest"}
 
 room.timeScreenEffect = "default"
 

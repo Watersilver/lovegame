@@ -168,19 +168,20 @@ snd.bgmV2 = {
 }
 
 function snd.bgmV2:load(piece_info)
-  if type(piece_info) == "string" then
+  if not piece_info then
+    piece_info = {}
+  elseif type(piece_info) == "string" then
     piece_info = {name = piece_info}
   end
   self.next = {
     name = piece_info.name,
-    -- folder = piece_info.folder or "Sounds/Music/",
-    folder = piece_info.folder or "Sounds/",
+    folder = piece_info.folder or "Sounds/Music/",
     extension = piece_info.extension or ".ogg",
     targetVolume = piece_info.targetVolume or 1,
     forceRestart = piece_info.forceRestart or false,
-    previousFadeOut = piece_info.previousFadeOut or 1,
-    fadeSpeed = piece_info.fadeSpeed or 1,
-    silenceDuration = piece_info.silenceDuration or 3
+    previousFadeOut = piece_info.previousFadeOut or 5,
+    fadeSpeed = piece_info.fadeSpeed or math.huge,
+    silenceDuration = piece_info.silenceDuration or 0
   }
 end
 

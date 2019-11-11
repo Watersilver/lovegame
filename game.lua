@@ -27,7 +27,7 @@ end
 function game.change_room(roomTarget)
   -- local roomTarget = u.utf8_backspace(roomTarget, 4)
   -- return require(roomTarget)
-  newRoom = assert(love.filesystem.load(roomTarget))()
+  local newRoom = assert(love.filesystem.load(roomTarget))()
   return newRoom
 end
 

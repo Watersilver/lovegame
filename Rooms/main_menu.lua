@@ -5,7 +5,7 @@ local trans = require "transitions"
 
 local room = {}
 
-room.music_info = {"Music/MusicTest"}
+room.music_info = "MusicTest"
 
 room.timeDoesntPass = true
 
