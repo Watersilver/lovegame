@@ -39,7 +39,7 @@ activateFuncs[1] = function (self, dt, textIndex)
   snd.play(self.sounds.myFanfare or glsounds.fanfareItem)
   -- self.music_info = snd.bgm.last_loaded_music_info
   self.music_info = snd.bgmV2.current
-  snd.bgmV2:load({previousFadeOut = math.huge, silenceDuration = 0})
+  snd.bgmV2.overrideAndLoad({previousFadeOut = math.huge, silenceDuration = 0})
 
   self.typical_activate(self, dt, textIndex)
   self.next = 2
@@ -53,7 +53,7 @@ local function onDialogueRealEnd(instance)
   instance.image_index = 0
   instance.activator.invisible = false
   game.cutscenePause(false)
-  snd.bgmV2:load(session.getMusic())
+  snd.bgmV2.overrideAndLoad()
   o.removeFromWorld(instance)
 end
 

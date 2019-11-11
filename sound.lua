@@ -185,6 +185,15 @@ function snd.bgmV2:load(piece_info)
   }
 end
 
+function snd.bgmV2.getMusicAndload()
+  snd.bgmV2:load(session.getMusic())
+end
+
+function snd.bgmV2.overrideAndLoad(override_info)
+  session.setMusicOverride(override_info)
+  snd.bgmV2.getMusicAndload()
+end
+
 function snd.bgmV2:update(dt)
   if gs.musicOn then
     -- Count silence time

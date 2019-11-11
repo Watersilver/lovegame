@@ -18,7 +18,15 @@ if not success then love.errhand("Failed to create save directory") end
 GCON = {
   -- pieces of heart in world:
   -- 4 random
-  maxPOHs = 4
+  maxPOHs = 4,
+  -- Day and night music breaking points
+  music = {
+    daySilence = 6,
+    dayMusic = 7.5,
+    nightSilence = 19.5,
+    nightMusic = 21,
+    fadeToSilenceSpeed = 0.2
+  }
 }
 -- Load stuff from save directory
 local gs = require "game_settings"
@@ -98,12 +106,19 @@ session = {
     session.clockHandAngle = session.save.time
   end,
   updateTime = function(hoursPassed)
+    local preUpdate = session.checkTimeOfDayForMusic()
+
     session.save.time = session.save.time + hoursPassed
 
     -- assume that time only flows forward for now
     while session.save.time >= 24 do
       session.save.time = session.save.time - 24
       session.save.days = session.save.days + 1
+    end
+
+    local postUpdate = session.checkTimeOfDayForMusic()
+    if preUpdate ~= postUpdate then
+      snd.bgmV2.getMusicAndload()
     end
   end,
   maxMoney = function()
@@ -191,8 +206,31 @@ session = {
     end
   end,
   getMusic = function()
-    return game.room.music_info
-  end
+    local music_info = session.musicOverride or game.room.music_info
+    if music_info and type(music_info) ~= "string" and music_info.day then
+      -- if music_info.day exists, it means that the table
+      -- has day & night info so choose appropriate here
+      local todForMusic = session.checkTimeOfDayForMusic()
+      if todForMusic then
+        music_info = music_info[todForMusic]
+      else
+        music_info = {previousFadeOut = GCON.music.fadeToSilenceSpeed}
+      end
+    end
+    return music_info
+  end,
+  checkTimeOfDayForMusic = function()
+    local time = session.save.time
+    if time > GCON.music.dayMusic and time < GCON.music.nightSilence then
+      return "day"
+    elseif time > GCON.music.nightMusic or time < GCON.music.daySilence then
+      return "night"
+    end
+  end,
+  setMusicOverride = function(override_info)
+    -- Music that will persist when changing rooms and has to be nilified manually
+    session.musicOverride = override_info
+  end,
 }
 local session = session
 
@@ -272,7 +310,7 @@ function love.load()
   game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
   rm.build_room(game.room)
   -- snd.bgm:load(game.room.music_info)
-  snd.bgmV2:load(session.getMusic())
+  snd.bgmV2.getMusicAndload()
   game.clockInactive = game.room.timeDoesntPass
 
   -- Room Creator
@@ -491,8 +529,7 @@ function love.update(dt)
       game.transitioning = false
 
       -- snd.bgm:load(newRoom.music_info)
-      -- snd.bgmV2:load(game.room.music_info)
-      snd.bgmV2:load(session.getMusic())
+      snd.bgmV2.getMusicAndload()
       game.timeScreenEffect = room.timeScreenEffect
       game.clockInactive = room.timeDoesntPass
 
