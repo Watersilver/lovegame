@@ -19,18 +19,33 @@ function pam.init()
 end
 
 -- Button Bounding Boxes (Top menu: For music, sounds and quit game)
-local bbb = { width = 16, height = 16, separation = 10, xstart = 11, ystart = 11 }
-for i = 1,3 do
-  -- make horizontally ordered buttons
-  bbb[i] = {}
-  bbb[i].x = {}
-  bbb[i].x.l = bbb.xstart + (i-1)*(bbb.separation + bbb.width)
-  bbb[i].x.r = bbb[i].x.l + bbb.width
-  bbb[i].y = {}
-  bbb[i].y.u = bbb.ystart
-  bbb[i].y.d = bbb[i].y.u + bbb.height
-  -- bbb[button_index][coordinate][side]
-end
+-- local bbb = { width = 16, height = 16, separation = 10, xstart = 11, ystart = 11 }
+-- for i = 1,3 do
+--   -- make horizontally ordered buttons
+--   bbb[i] = {}
+--   bbb[i].x = {}
+--   if i ~= 3 then
+--     bbb[i].x.l = bbb.xstart + (i-1)*(bbb.separation * 4 + bbb.width)
+--   else
+--     bbb[i].x.l = bbb.xstart + 14 * (bbb.separation + bbb.width)
+--   end
+--   bbb[i].x.r = bbb[i].x.l + bbb.width
+--   bbb[i].y = {}
+--   bbb[i].y.u = bbb.ystart
+--   bbb[i].y.d = bbb[i].y.u + bbb.height
+--   -- bbb[button_index][coordinate][side]
+-- end
+local bbb = {w = 24, h = 5, xs = 5, ys = 5}
+bbb[1] = {x = {l = bbb.xs}}
+bbb[1].x.r = bbb[1].x.l + bbb.w
+bbb[2] = {x = {l = bbb[1].x.r + bbb.xs}}
+bbb[2].x.r = bbb[2].x.l + bbb.w
+bbb[3] = {x = {l = 377}}
+bbb[3].x.r = bbb[3].x.l + bbb.w
+bbb.y = {u = bbb.ys, d = bbb.ys + bbb.h}
+bbb[1].y = bbb.y
+bbb[2].y = bbb.y
+bbb[3].y = bbb.y
 local function checkIfInBBB(x, y)
   if y > bbb[1].y.u and y < bbb[1].y.d then
     for bindex, box in ipairs(bbb) do
