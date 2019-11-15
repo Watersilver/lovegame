@@ -160,7 +160,10 @@ function rm.build_room(room)
 
     -- If there are no symbols, require element from blueprint variable
     else
-      local blueprint = require("GameObjects." .. room_part.blueprint)
+      -- load instead of require to not bloat memory
+      -- local blueprint = require("GameObjects." .. room_part.blueprint)
+      local blocation = room_part.blueprint:gsub("%.", "/")
+      local blueprint = assert(love.filesystem.load("GameObjects/" .. blocation .. ".lua"))()
       local element = blueprint:new(init)
       element.xstart = x_that_I_start
       element.ystart = y_that_I_start
