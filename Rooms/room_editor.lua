@@ -82,7 +82,7 @@ tilesets_to_symbols['Tiles/BasicFriendlyInterior'] = {
   'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
 }
 tilesets_to_symbols['Tiles/zeldarip'] = {
-  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'ld', 'f',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'ld', 'b',
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'ld', 'f',
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f',
   'w', 'w', 'w', 'w', 'st', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'f', 'f',
@@ -148,10 +148,10 @@ tilesets_to_symbols['Tiles/zeldarip'] = {
   'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'f', 'f', 'f', 'w', 'w', 'f', 'f', 'f', 'w', 'w', 'w', 'w', 'w', 'ptl', 'sL', 'w',
   'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f', 'w', 'ptl', 'ptl', 'w', 'f', 'w', 'f', 'w',
-  'f', 'f', 'f', 'w', 'w', 'b', 'b', 'b', 'sL', 'rT', 'n', 'n', 'n', 'n', 'n', 'n',
-  'f', 'f', 'f', 'w', 'w', 'w', 'ptl', 'w', 'pl', 'pl', 'n', 'n', 'n', 'n', 'n', 'n',
-  'f', 'f', 'f', 'w', 'w', 'w', 'w', 'ptl', 'g', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
-  'wa', 'n', 'n', 'wa', 'n', 'n', 'wa', 'n', 'n', 'shW', 'n', 'n', 'n', 'n', 'n', 'n',
+  'f', 'f', 'f', 'w', 'w', 'b', 'b', 'b', 'sL', 'rT', 'n', 'n', 'n', 'n', 'eL', 'eR',
+  'f', 'f', 'f', 'w', 'w', 'w', 'ptl', 'w', 'pl', 'pl', 'n', 'n', 'n', 'n', 'eL', 'eR',
+  'f', 'f', 'f', 'w', 'w', 'w', 'w', 'ptl', 'g', 'f', 'shW', 'n', 'n', 'n', 'n', 'n',
+  'wa2', 'n', 'n', 'n', 'wa2', 'n', 'n', 'n', 'wa2', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
   'aF2', 'n', 'n', 'n', 'aF2', 'n', 'n', 'n', 'aF2', 'n', 'n', 'n', 'aF2', 'n', 'n', 'n',
 }
 
