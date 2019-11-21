@@ -26,14 +26,7 @@ Go.functions = {
   update = function (self, dt)
     if inp.enterPressed and not self.pressed then
       self.pressed = true
-      if self.player then
-        self.player.transPersistent = nil
-      end
-      game.transition{
-        type = "whiteScreen",
-        progress = 0,
-        roomTarget = "Rooms/main_menu.lua"
-      }
+      session.toMainMenu()
     end
   end,
 

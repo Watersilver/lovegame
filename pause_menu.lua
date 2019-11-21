@@ -71,16 +71,7 @@ function pam.top_menu_logic()
     inp.disable_controller("player1")
     if inp.enterPressed then
       pam.quitting = nil
-      if o.identified.PlayaTest and o.identified.PlayaTest[1] then
-        o.identified.PlayaTest[1].transPersistent = nil
-      end
-      game.transition{
-        type = "whiteScreen",
-        progress = 0,
-        roomTarget = "Rooms/main_menu.lua"
-      }
-      session.drug = nil
-      session.ringShader = nil
+      session.toMainMenu()
     elseif inp.escapePressed then
       pam.quitting = nil
     end
