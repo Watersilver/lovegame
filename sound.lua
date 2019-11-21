@@ -3,6 +3,7 @@ local gs = require "game_settings"
 local snd = {}
 
 snd.silence = {"Silence"}
+snd.ovrwrld1 = {day = "zelOverworld", night = "nightTest"}
 
 snd.sounds = {}
 snd.bgm = {} -- Background Music

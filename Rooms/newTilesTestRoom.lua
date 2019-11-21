@@ -1,12 +1,12 @@
 local rm = require("Rooms.room_manager")
 local sh = require "scaling_handler"
 local im = require "image"
+local snd = require "sound"
 local u = require "utilities"
 
 local room = {}
 
--- room.music_info = "MusicTest2"--{"Music/MusicTest"}
-room.music_info = {day = "MusicTest2", night = "nightTest"}--{"Music/MusicTest"}
+room.music_info = snd.ovrwrld1
 
 room.timeScreenEffect = "default"
 

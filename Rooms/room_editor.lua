@@ -218,6 +218,7 @@ local function SaveMap()
     "local rm = require(\"Rooms.room_manager\")\n\z
     local sh = require \"scaling_handler\"\n\z
     local im = require \"image\"\n\z
+    local snd = require \"sound\"\n\z
     \n\z
     local room = {}\n\z
     \n\z
