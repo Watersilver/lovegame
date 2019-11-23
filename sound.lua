@@ -3,7 +3,7 @@ local gs = require "game_settings"
 local snd = {}
 
 snd.silence = {"Silence"}
-snd.ovrwrld1 = {day = "zelOverworld", night = "nightTest"}
+snd.ovrwrld1 = {day = {name = "zelOverworld", introName = "zelOverworldIntro"}, night = "nightTest"}
 
 snd.sounds = {}
 snd.bgm = {} -- Background Music
@@ -127,10 +127,59 @@ end
 -- BGM ver2
 local silentSource = {
   getVolume = function() return 0 end,
-  setVolume = function() end,
   isPlaying = function() return false end,
-  stop = function() end
+  setLooping = function() end,
+  setVolume = function() end,
+  play = function() end,
+  stop = function() end,
+  update = function() end,
 }
+
+-- bgm with intro
+local bgmV2Source = {
+  setLooping = function(self, bool)
+    self.main:setLooping(bool)
+  end,
+  isPlaying = function(self)
+    return self[self.section]:isPlaying()
+  end,
+  play = function(self)
+    self[self.section]:play()
+    self.stopped = false
+  end,
+  stop = function(self)
+    self[self.section]:stop()
+    self.section = self.intro and "intro" or "main"
+    self.stopped = true
+  end,
+  setVolume = function(self, vol)
+    self[self.section]:setVolume(vol)
+  end,
+  getVolume = function(self)
+    return self[self.section]:getVolume()
+  end
+}
+bgmV2Source.new = function(sourceInfo)
+  if sourceInfo.introName then
+    bgmV2Source.intro = love.audio.newSource( sourceInfo.folder .. sourceInfo.introName .. sourceInfo.extension, "stream" )
+    bgmV2Source.section = "intro"
+  else
+    bgmV2Source.intro = nil
+    bgmV2Source.section = "main"
+  end
+  bgmV2Source.main = love.audio.newSource( sourceInfo.folder .. sourceInfo.name .. sourceInfo.extension, "stream" )
+  return bgmV2Source
+end
+bgmV2Source.update = function(dt)
+  if bgmV2Source.section == "intro" then
+    if not bgmV2Source.intro:isPlaying() then
+      bgmV2Source.section = "main"
+      bgmV2Source.main:setVolume(bgmV2Source.intro:getVolume())
+      bgmV2Source.main:play()
+    end
+  end
+end
+
 
 local function fadeToVolume(source, targetVol, vChangPerSec, dt)
   local curVol = source:getVolume()
@@ -152,7 +201,10 @@ local function playNextSource(bgmv2)
   bgmv2.current = bgmv2.next
   if bgmv2.source:isPlaying() then bgmv2.source:stop() end
   if bgmv2.next.name then
-    bgmv2.source = love.audio.newSource( bgmv2.next.folder .. bgmv2.next.name .. bgmv2.next.extension, "stream" )
+    -- bgmv2.source = love.audio.newSource( bgmv2.next.folder .. bgmv2.next.name .. bgmv2.next.extension, "stream" )
+    -- bgm with intro
+    bgmv2.source = bgmV2Source.new( bgmv2.next )
+
     bgmv2.source:setLooping(true)
     bgmv2.source:setVolume(0)
     bgmv2.source:play()
@@ -176,6 +228,7 @@ function snd.bgmV2:load(piece_info)
   end
   self.next = {
     name = piece_info.name,
+    introName = piece_info.introName,
     folder = piece_info.folder or "Sounds/Music/",
     extension = piece_info.extension or ".ogg",
     targetVolume = piece_info.targetVolume or 1,
@@ -197,6 +250,9 @@ end
 
 function snd.bgmV2:update(dt)
   if gs.musicOn then
+    -- bgm with intro
+    self.source.update(dt)
+
     -- Count silence time
     if self.source:getVolume() == 0 then self.silenceTimer = self.silenceTimer + dt end
     if self.current.name ~= self.next.name or self.next.forceRestart then
@@ -217,7 +273,6 @@ function snd.bgmV2:update(dt)
     end
   else
     self.source:setVolume(0)
-    self.silenceTimer = self.silenceTimer + dt
   end
 end
 
