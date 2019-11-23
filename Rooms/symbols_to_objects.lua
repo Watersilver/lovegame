@@ -36,9 +36,6 @@ local NpcTest = require("GameObjects.NpcTest")
 local portal = require("GameObjects.portal")
 local mainMenu = require("GameObjects.mainMenu")
 
--- global Npcs
-local itemGiver = require "GameObjects.GlobalNpcs.itemGiver"
-
 local symbols_to_objects_default = {
   w = Wall,
   sL = softLiftable,
@@ -77,10 +74,7 @@ local symbols_to_objects_default = {
   twr = thickWallRight,
   twu = thickWallUp,
   NpcTest = NpcTest,
-  mainMenu = mainMenu,
-
-  --global Npcs
-  itgvr = itemGiver
+  mainMenu = mainMenu
 }
 
 return symbols_to_objects_default

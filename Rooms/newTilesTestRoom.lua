@@ -200,7 +200,7 @@ room_part.tileset_index_table = {
 table.insert(room.room_parts, room_part)
 ---
 local room_part = {
-'itgvr'
+blueprint = "GlobalNpcs.test.itemGiver"
 }
 room_part.x_that_I_start = 222
 room_part.y_that_I_start = 188
@@ -213,7 +213,33 @@ room_part.init.layer = 20
 table.insert(room.room_parts, room_part)
 ---
 local room_part = {
-blueprint = "GlobalNpcs.mobilityGiver"
+blueprint = "GlobalNpcs.test.passiveSpellGiver"
+}
+room_part.x_that_I_start = 188
+room_part.y_that_I_start = 188
+room_part.row_length = 1
+room_part.col_length = 1
+room_part.tile_width = 16
+room_part.init = {}
+room_part.init.layer = 20
+
+table.insert(room.room_parts, room_part)
+---
+local room_part = {
+blueprint = "GlobalNpcs.test.powerGiver"
+}
+room_part.x_that_I_start = 245
+room_part.y_that_I_start = 188
+room_part.row_length = 1
+room_part.col_length = 1
+room_part.tile_width = 16
+room_part.init = {}
+room_part.init.layer = 20
+
+table.insert(room.room_parts, room_part)
+---
+local room_part = {
+blueprint = "GlobalNpcs.test.levelManager"
 }
 room_part.x_that_I_start = 272
 room_part.y_that_I_start = 222
@@ -238,6 +264,16 @@ table.insert(room.room_parts, room_part)
 ---
 local room_part = {blueprint = 'GlobalNpcs.chest'}
 room_part.x_that_I_start = 281
+room_part.y_that_I_start = 313
+room_part.row_length = 1
+room_part.col_length = 1
+room_part.tile_width = 16
+room_part.init = {}
+
+table.insert(room.room_parts, room_part)
+---
+local room_part = {blueprint = 'GlobalNpcs.test.debugItemContainer'}
+room_part.x_that_I_start = 313
 room_part.y_that_I_start = 313
 room_part.row_length = 1
 room_part.col_length = 1

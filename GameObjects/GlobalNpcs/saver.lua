@@ -1,5 +1,4 @@
 local im = require "image"
-local snd = require "sound"
 local p = require "GameObjects.prototype"
 local inp = require "input"
 local inv = require "inventory"
