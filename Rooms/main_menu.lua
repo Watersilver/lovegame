@@ -32,6 +32,13 @@ room_part.y_that_I_start = 0
 
 table.insert(room.room_parts, room_part)
 ---
+if not introDone then
+  local room_part = {blueprint = 'intro'}
+  room_part.x_that_I_start = 0
+  room_part.y_that_I_start = 0
+
+  table.insert(room.room_parts, room_part)
+end
 ----------End of arrays of geography of parts of room----------
 
 -- rm.build_room(room)

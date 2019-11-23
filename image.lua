@@ -320,5 +320,8 @@ im.load_sprite(im.spriteSettings.tunics)
 im.load_sprite(im.spriteSettings.swordSkill)
 im.load_sprite(im.spriteSettings.missileSkill)
 im.load_sprite(im.spriteSettings.mobilitySkill)
+im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15, height = 31}
+im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32, height = 50}
+im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44, height = 70}
 
 return im
