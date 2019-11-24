@@ -20,7 +20,11 @@ end
 
 Go.functions = {
   load = function (self)
-    snd.bgmV2:load{name = "GameOver", previousFadeOut = 0.5, silenceDuration = 1}
+    snd.bgmV2.overrideAndLoad{name = "GameOver", previousFadeOut = 0.5, silenceDuration = 1}
+  end,
+
+  delete = function (self)
+    session.setMusicOverride()
   end,
 
   update = function (self, dt)
