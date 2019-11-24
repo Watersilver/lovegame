@@ -623,7 +623,9 @@ function love.update(dt)
   elseif not game.transitioning and not game.cutscene then -- not game.paused
 
     inv.manage(game.paused)
-    if inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0 then
+    if (inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0)
+      or (not pam.quitting and inp.cancelPressed and not pam.left.selectedHeader)
+    then
       game.pause(false)
       inv.closeInv()
     end

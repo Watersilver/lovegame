@@ -72,7 +72,7 @@ function pam.top_menu_logic()
     if inp.enterPressed then
       pam.quitting = nil
       session.toMainMenu()
-    elseif inp.escapePressed then
+    elseif inp.cancelPressed then
       pam.quitting = nil
     end
   else
@@ -181,7 +181,7 @@ end
 
 local function basicListLogic(cursor, list)
   local navButtonPressed = false
-  if inp.escapePressed then
+  if inp.cancelPressed then
     snd.play(glsounds.deselect)
     pam.left.selectedHeader = false
     session.usedItemComment = nil
@@ -243,7 +243,7 @@ local logicFuncs = {
         end
       end
     else
-      if inp.escapePressed then
+      if inp.cancelPressed then
         snd.play(glsounds.deselect)
         pam.left.selectedSetting = false
       end

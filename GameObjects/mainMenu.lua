@@ -964,12 +964,8 @@ update = function (self, dt)
   self.enter = input.enter
   self.enterPressed = input.enterPressed
 
-  self.prevEscape = input.escapePrevious
-  self.escape = input.escape
-  self.escapePressed = input.escapePressed
-
   -- Act on input
-  if self.escapePressed then
+  if input.cancelPressed then
     self.currentMenu = backspaceMenu[self.currentMenu]
   end
   if currMenu.cursor then

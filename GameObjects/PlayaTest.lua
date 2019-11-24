@@ -1950,7 +1950,7 @@ Playa.functions = {
     -- Return movement table based on the given input (Players)
     self.input = inp.current[self.player]
     self.previnput = inp.previous[self.player]
-    if self.input.start == 1 and self.previnput.start == 0 then
+    if (self.input.start == 1 and self.previnput.start == 0) or inp.cancelPressed then
       game.pause(self)
     end
 

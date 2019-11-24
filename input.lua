@@ -61,6 +61,13 @@ function input.check_input()
   input.escape = love.keyboard.isDown("escape")
   input.escapePressed = input.escape and not input.escapePrevious
 
+  input.backspacePrevious = input.backspace
+  input.backspace = love.keyboard.isDown("backspace")
+  input.backspacePressed = input.backspace and not input.backspacePrevious
+
+  input.cancel = input.escape or input.backspace
+  input.cancelPressed = input.escapePressed or input.backspacePressed
+
   input.upPrevious = input.up
   input.up = love.keyboard.isDown("up")
   input.upPressed = input.up and not input.upPrevious
