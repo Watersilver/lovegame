@@ -8,6 +8,7 @@ local text = require "text"
 local u = require "utilities"
 local inp = require "input"
 local input = inp
+local o = require "GameObjects.objects"
 
 local gs = require "game_settings"
 
@@ -940,32 +941,36 @@ update = function (self, dt)
   end
 
   -- Check input
-  self.prevUp = input.upPrevious
-  self.up = input.up
-  self.upPressed = input.upPressed
+  if not o.identified.introID then
+    self.prevUp = input.upPrevious
+    self.up = input.up
+    self.upPressed = input.upPressed
 
-  self.prevDown = input.downPrevious
-  self.down = input.down
-  self.downPressed = input.downPressed
+    self.prevDown = input.downPrevious
+    self.down = input.down
+    self.downPressed = input.downPressed
 
-  self.prevLeft = input.leftPrevious
-  self.left = input.left
-  self.leftPressed = input.leftPressed
+    self.prevLeft = input.leftPrevious
+    self.left = input.left
+    self.leftPressed = input.leftPressed
 
-  self.prevRight = input.rightPrevious
-  self.right = input.right
-  self.rightPressed = input.rightPressed
+    self.prevRight = input.rightPrevious
+    self.right = input.right
+    self.rightPressed = input.rightPressed
 
-  self.prevShift = self.shift
-  self.shift = love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift")
-  self.shiftPressed = self.shift == true and self.shift ~= self.prevShift
+    self.prevShift = input.shiftPrevious
+    self.shift = input.shift
+    self.shiftPressed = input.shiftPressed
 
-  self.prevEnter = input.enterPrevious
-  self.enter = input.enter
-  self.enterPressed = input.enterPressed
+    self.prevEnter = input.enterPrevious
+    self.enter = input.enter
+    self.enterPressed = input.enterPressed
+
+    self.cancelPressed = input.cancelPressed
+  end
 
   -- Act on input
-  if input.cancelPressed then
+  if self.cancelPressed then
     self.currentMenu = backspaceMenu[self.currentMenu]
   end
   if currMenu.cursor then

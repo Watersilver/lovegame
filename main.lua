@@ -271,11 +271,14 @@ glsounds = snd.load_sounds{
   open = {"Effects/Oracle_Chest"},
   heartContainer = {"Effects/Oracle_HeartContainer"},
   stairs = {"Effects/Oracle_Stairs"},
-  useItem = {"Effects/Oracle_Get_Item"}
+  useItem = {"Effects/Oracle_Get_Item"},
+  portal = {"Effects/Oracle_Dungeon_Teleport"},
 }
 
 -- Set up cameras
-mainCamera = gamera.new(0,0,800,450)
+camWidth = 800
+camHeight = 450
+mainCamera = gamera.new(0,0,camWidth,camHeight)
 local cam = mainCamera
 cam.xt = 0
 cam.yt = 0

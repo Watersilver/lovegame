@@ -320,8 +320,20 @@ im.load_sprite(im.spriteSettings.tunics)
 im.load_sprite(im.spriteSettings.swordSkill)
 im.load_sprite(im.spriteSettings.missileSkill)
 im.load_sprite(im.spriteSettings.mobilitySkill)
-im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15, height = 31}
-im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32, height = 50}
-im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44, height = 70}
+-- im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15, height = 31}
+-- im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32, height = 50}
+-- im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44, height = 70}
+-- im.load_sprite{'introBackground', 1, padding = 0, width = 160, height = 96}
+im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15 * 5, height = 31 * 5}
+im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32 * 5, height = 50 * 5}
+im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44 * 5, height = 70 * 5}
+im.load_sprite{'linkHorseback4', 4, padding = 0, width = 88 * 5, height = 140 * 5}
+im.load_sprite{'linkHorseback5', 1, padding = 0, width = 160 * 5, height = 256 * 5}
+im.load_sprite{'linkHorseback6', 4, padding = 0, width = 68 * 4.2, height = 60 * 4.2}
+im.load_sprite{'linkKidnappedPortal', 2, padding = 1, width = 16 * 4.2, height = 16 * 4.2}
+im.load_sprite{'horseAlone', 3, padding = 0, width = 68 * 4.2, height = 53 * 4.2}
+im.load_sprite{'linkKidnapped', 1, padding = 0, width = 24 * 4.2, height = 16 * 4.2}
+im.load_sprite{'introBackground', 1, padding = 0, width = 160 * 5, height = 96 * 5}
+im.load_sprite{'introBackground2', 1, padding = 0, width = 192 * 4.2, height = 144 * 4.2}
 
 return im
