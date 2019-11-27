@@ -37,6 +37,7 @@ function Intro.initialize(instance)
   instance.kidscale = 1
   instance.portalScale = 1
   instance.kidAngle = 0
+  instance.kidAngleSpeed = 0
   instance.preCounter = 0
 end
 
@@ -98,7 +99,8 @@ Intro.functions = {
         self.kidnx = self.kidnx + dt * self.kidnxMod
         self.kidny = self.kidny - dt * self.kidnyMod
         self.kidscale = self.kidscale * 0.995
-        self.kidAngle = self.kidAngle + dt * 12
+        self.kidAngle = self.kidAngle + dt * self.kidAngleSpeed -- 12
+        self.kidAngleSpeed = self.kidAngleSpeed + dt * 5
         if self.counter > portalPoint2 then
           self.portalScale = self.portalScale * 0.993
         end

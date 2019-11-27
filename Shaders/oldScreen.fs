@@ -1,4 +1,3 @@
-// Public domain:
 // Copyright (C) 2017 by Matthias Richter <vrld@vrld.org>
 // Permission to use, copy, modify, and/or distribute this software for any
 // purpose with or without fee is hereby granted.
