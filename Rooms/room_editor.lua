@@ -315,7 +315,7 @@ local states = {
       text.inputLim = 999
       fbTxt = "room name to load room"
       if enterP then
-        if text.input == "" then self.state = "getW"; fbTxt = "Give room width and height in order"
+        if text.input == "" then self.state = "getW"; fbTxt = "Give room width and height in that order and in tiles"
         else loadMap(text.input); self.state = "building"
         end
         text.inputLim = 10
@@ -334,7 +334,8 @@ local states = {
         self.state = "getH"
         room.width = tonumber(text.input) or 100
         text.input = ""
-        room.width = math.floor(room.width / 16) * 16
+        -- room.width = math.floor(room.width / 16) * 16
+        room.width = math.floor(room.width) * 16
         fbTxt = "room.width set to " .. room.width
       end
     end,
@@ -350,7 +351,8 @@ local states = {
       if enterP then
         self.state = "building"
         room.height = tonumber(text.input) or 100
-        room.height = math.floor(room.height / 16) * 16
+        -- room.height = math.floor(room.height / 16) * 16
+        room.height = math.floor(room.height) * 16
         text.input = ""
         fbTxt = "room.height set to " .. room.height
         mainCamera:setWorld(0, 0, room.width, room.height)
