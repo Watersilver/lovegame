@@ -33,7 +33,8 @@ ps.shapes = {
     u = love.physics.newEdgeShape(-8, -8, 8, -8), -- upper side
     l = love.physics.newEdgeShape(-8, -8, -8, 8), -- left side
     r = love.physics.newEdgeShape(8, -8, 8, 8), -- right side
-    d = love.physics.newEdgeShape(-8, 8, 8, 8) -- down side
+    d = love.physics.newEdgeShape(-8, 8, 8, 8), -- down side
+    d2 = love.physics.newEdgeShape(-8, 0, 8, 0) -- down side for zelda edges
   },
   edgeRectHalfxHalf = {
     u = love.physics.newEdgeShape(-4, -8, 4, -8), -- upper side

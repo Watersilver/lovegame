@@ -117,12 +117,12 @@ load = function (self)
     self.wentOverEdge = ec.wentOverRightEdge
     self.fixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
   else
-    self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.d)
+    self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.d2)
     -- self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeDown)
     self.belowEdge = ec.belowDownEdge
     self.wentOverEdge = ec.wentOverDownEdge
     self.fixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)--, PLAYERATTACKCAT)
-    self.height = self.height + ps.shapes.plshapeHeight
+    self.height = self.height + ps.shapes.plshapeHeight - 8
   end
 end
 }
