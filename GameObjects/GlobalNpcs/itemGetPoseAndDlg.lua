@@ -9,7 +9,7 @@ local o = require "GameObjects.objects"
 local game = require "game"
 local ps = require "physics_settings"
 
-local npcTest = require "GameObjects.NpcTest"
+local npcTest = require "GameObjects.npcTest"
 local typicalNpc = require "GameObjects.GlobalNpcs.typicalNpc"
 local autoActivatedDlg = require "GameObjects.GlobalNpcs.autoActivatedDlg"
 

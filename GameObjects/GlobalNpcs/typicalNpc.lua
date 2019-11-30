@@ -3,7 +3,7 @@ local snd = require "sound"
 local p = require "GameObjects.prototype"
 local inp = require "input"
 local dlg = require "dialogue"
-local npcTest = require "GameObjects.NpcTest"
+local npcTest = require "GameObjects.npcTest"
 
 
 local floor = math.floor

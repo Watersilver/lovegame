@@ -5,7 +5,7 @@ local inv = require "inventory"
 local dlg = require "dialogue"
 local u = require "utilities"
 
-local npcTest = require "GameObjects.NpcTest"
+local npcTest = require "GameObjects.npcTest"
 local typicalNpc = require "GameObjects.GlobalNpcs.typicalNpc"
 
 

@@ -8,7 +8,7 @@ local game = require "game"
 local itemGetPoseAndDlg = require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"
 local o = require "GameObjects.objects"
 
-local npcTest = require "GameObjects.NpcTest"
+local npcTest = require "GameObjects.npcTest"
 local chest = require "GameObjects.GlobalNpcs.chest"
 
 

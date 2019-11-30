@@ -11,7 +11,7 @@ local dc = require "GameObjects.Helpers.determine_colliders"
 local itemGetPoseAndDlg = require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"
 local o = require "GameObjects.objects"
 
-local npcTest = require "GameObjects.NpcTest"
+local npcTest = require "GameObjects.npcTest"
 
 
 local function throw_collision(self)
