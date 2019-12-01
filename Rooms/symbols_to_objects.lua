@@ -38,9 +38,12 @@ local mainMenu = require("GameObjects.mainMenu")
 
 local symbols_to_objects_default = {
   w = Wall,
+  w1234 = require("GameObjects.BrickTest1234"),
+  wV = require("GameObjects.BrickTestVibration"),
   sL = softLiftable,
   rT = rockTest,
   f = floorTile,
+  iF = require("GameObjects.Floor.iceFloor"),
   pl = floorTile, --placeholder
   shW = shallowWater,
   wa = water,

@@ -12,21 +12,36 @@ local im = {}
 
 -- For animated background
 local giiSpeed = 3
+local giiFastSpeed = 12
 local gii1234float = 0
+local giiFast1234float = 0
+local gii4loopfloat = 0
 local giiMax = 4
+local giiLoopMax = 6
 im.globimage_index1234 = gii1234float
+im.globimageFast_index1234 = giiFast1234float
 local gii1213table = {1, 0, 2, [0] = 0}
 im.globimage_index1213 = gii1213table[im.globimage_index1234]
+local gii4loopTable = {[0] = 0, 1, 2, 3, 2, 1}
+im.globimage_index4loop = gii4loopTable[floor(gii4loopfloat)]
 
 function im.updateGlobalImageIndexes(dt)
   gii1234float = gii1234float + giiSpeed * dt
   while gii1234float >= giiMax do gii1234float = gii1234float - giiMax end
+  giiFast1234float = giiFast1234float + giiFastSpeed * dt
+  while giiFast1234float >= giiMax do giiFast1234float = giiFast1234float - giiMax end
+  gii4loopfloat = gii4loopfloat + giiSpeed * dt
+  while gii4loopfloat >= giiLoopMax do gii4loopfloat = gii4loopfloat - giiLoopMax end
   im.globimage_index1234 = floor(gii1234float)
+  im.globimageFast_index1234 = floor(giiFast1234float)
   im.globimage_index1213 = gii1213table[im.globimage_index1234]
+  im.globimage_index4loop = gii4loopTable[floor(gii4loopfloat)]
 end
 
 im.spriteSettings = {
   testtiles = {'Tiles/TestTiles', 4, 7},
+  floor = {'Tiles/Floor', 8, 32, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floor"},
+  walls = {'Tiles/Walls', 7, 35, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.walls"},
   zeldarip = {'Tiles/zeldarip', 16, 71, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.zeldarip"},
   floorOutside = {'Tiles/FloorOutside', 10, 10, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floorOutside"},
   solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},
@@ -320,6 +335,7 @@ im.load_sprite(im.spriteSettings.tunics)
 im.load_sprite(im.spriteSettings.swordSkill)
 im.load_sprite(im.spriteSettings.missileSkill)
 im.load_sprite(im.spriteSettings.mobilitySkill)
+im.load_sprite(im.spriteSettings.floor)
 -- im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15, height = 31}
 -- im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32, height = 50}
 -- im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44, height = 70}

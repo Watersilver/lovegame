@@ -22,8 +22,8 @@ Brick.functions = {
 draw = function (self)
   local x, y = self.body and self.body:getPosition() or self.xstart, self.ystart
   local sprite = self.sprite
-  self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
-  local frame = sprite[self.image_index]
+  local int_image_index = math.floor(self.image_index)
+  local frame = sprite[int_image_index]
   love.graphics.draw(
   sprite.img, frame, x, y, 0,
   sprite.res_x_scale, sprite.res_y_scale,
@@ -40,8 +40,8 @@ trans_draw = function (self)
   local xtotal, ytotal = trans.still_objects_coords(self)
 
   local sprite = self.sprite
-  self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
-  local frame = sprite[self.image_index]
+  local int_image_index = math.floor(self.image_index)
+  local frame = sprite[int_image_index]
   love.graphics.draw(
   sprite.img, frame, xtotal, ytotal, 0,
   sprite.res_x_scale, sprite.res_y_scale,
@@ -52,10 +52,6 @@ trans_draw = function (self)
   --     love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
   --   end
   -- end
-end,
-
-load = function(self)
-  self.image_speed = 0
 end,
 
 lift_delete = function(self)
