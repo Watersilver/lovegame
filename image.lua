@@ -40,8 +40,11 @@ end
 
 im.spriteSettings = {
   testtiles = {'Tiles/TestTiles', 4, 7},
-  floor = {'Tiles/Floor', 8, 32, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floor"},
-  walls = {'Tiles/Walls', 7, 35, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.walls"},
+  floor = {'Tiles/Floor', 8, 33, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floor"},
+  walls = {'Tiles/Walls', 7, 39, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.walls"},
+  portals = {'Tiles/Portals', 5, 3, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.portals"},
+  edges = {'Tiles/Edges', 2, 2, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.edges"},
+  clutter = {'Tiles/Clutter', 8, 8, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.clutter"},
   zeldarip = {'Tiles/zeldarip', 16, 71, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.zeldarip"},
   floorOutside = {'Tiles/FloorOutside', 10, 10, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floorOutside"},
   solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},
@@ -336,6 +339,10 @@ im.load_sprite(im.spriteSettings.swordSkill)
 im.load_sprite(im.spriteSettings.missileSkill)
 im.load_sprite(im.spriteSettings.mobilitySkill)
 im.load_sprite(im.spriteSettings.floor)
+im.load_sprite(im.spriteSettings.walls)
+im.load_sprite(im.spriteSettings.portals)
+im.load_sprite(im.spriteSettings.edges)
+im.load_sprite(im.spriteSettings.clutter)
 -- im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15, height = 31}
 -- im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32, height = 50}
 -- im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44, height = 70}

@@ -30,6 +30,11 @@ local drawSymbols = false
 local camscale = 1
 
 local tilesets = {
+  im.spriteSettings.floor,
+  im.spriteSettings.walls,
+  im.spriteSettings.portals,
+  im.spriteSettings.edges,
+  im.spriteSettings.clutter,
   im.spriteSettings.zeldarip,
   im.spriteSettings.floorOutside,
   im.spriteSettings.solidsOutside,
@@ -80,6 +85,110 @@ tilesets_to_symbols['Tiles/BasicFriendlyInterior'] = {
   'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
   'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
   'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n',
+}
+tilesets_to_symbols['Tiles/Floor'] = {
+  'g', 'f', 'g', 'f', 'g', 'f', 'f', 'f',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+  -- Snow area 1
+  'f', 'f', 'f', 'f', 'g', 'f', 'g', 'f',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  'f', 'f', 'f', 'f', 'aF2', 'n', 'n', 'n',
+
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  'f', 'ga', 'f', 'f', 'f', 'ga', 'f', 'f',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  -- Snow area 2
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  'f', 'ga', 'f', 'f', 'f', 'f', 'f', 'f',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'f',
+  'f', 'f', 'f', 'f', 'f', 'shW', 'n', 'n',
+  'f', 'f', 'f', 'f', 'f', 'shW', 'n', 'n',
+  'f', 'f', 'f', 'f', 'f', 'shW', 'n', 'n',
+  'wa2', 'n', 'n', 'n', 'wa2', 'n', 'n', 'n',
+  'wa2', 'n', 'n', 'n', 'wa2', 'n', 'n', 'n',
+  'ld', 'st', 'ld', 'ld', 'f', 'f', 'f', 'f',
+  'ld', 'f', 'ld', 'ld', 'f', 'f', 'f', 'f',
+  'ld', 'f', 'f', 'ld', 'f', 'f', 'f', 'f',
+  'f', 'f', 'f', 'ga', 'ga', 'ga', 'ga', 'f',
+  'f', 'f', 'f', 'f', 'f', 'f', 'f', 'iF',
+  'f', 'f', 'f', 'n', 'n', 'n', 'n', 'n',
+}
+tilesets_to_symbols['Tiles/Walls'] = {
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  -- bush and snow
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  -- waterfall
+  'w1234', 'n', 'n', 'n', 'deD', 'w', 'w',
+  'w1234', 'n', 'n', 'n', 'deU', 'deR', 'deL',
+  'w', 'w', 'deD', 'w', 'w', 'w', 'w',
+  'deR', 'deL', 'deU', 'w', 'w', 'b', 'b',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  -- torch
+  'deR', 'deL', 'wV', 'n', 'n', 'n', 'w',
+  'w', 'w', 'wV', 'n', 'n', 'n', 'w',
+  'w', 'w', 'wV', 'n', 'n', 'n', 'w',
+  'deR', 'deL', 'wV', 'n', 'n', 'n', 'w',
+  'w', 'w', 'deD', 'w', 'w', 'w', 'w',
+  'w', 'w', 'deU', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'twu', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+}
+tilesets_to_symbols['Tiles/Portals'] = {
+  'ptl', 'ptl', 'ptl', 'ptl', 'ptl',
+  'ptl', 'ptl', 'ptl', 'ptl', 'ptl',
+  'ptl', 'ptl', 'ptl', 'ptl', 'ptl',
+}
+tilesets_to_symbols['Tiles/Edges'] = {
+  'eD', 'eD',
+  'eR', 'eL',
+}
+tilesets_to_symbols['Tiles/Clutter'] = {
+  'rT', 'sL', 'sL', 'sL', 'sL', 'sL', 'rW', 'rW',
+  'rW', 'rW', 'w', 'rW', 'rW', 'rW', 'rW', 'rW',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'twu', 'twu', 'twu', 'twu', 'twu', 'twu',
+  'w', 'w', 'w', 'w', 'w', 'w', 'w', 'rW',
+  'b', 'b', 'b', 'b', 'w', 'w', 'b', 'rT',
+  'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+  'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
 }
 tilesets_to_symbols['Tiles/zeldarip'] = {
   'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'w', 'ld', 'b',
@@ -190,7 +299,7 @@ local function roomPartDrawFunctionsMaker(room_part)
 end
 
 local function loadMap(mapName)
-  room = require(mapName)
+  room = require("Rooms." .. mapName)
   mainCamera:setWorld(0, 0, room.width, room.height)
   for _, room_part in ipairs(room.room_parts) do
     local selflayer = room_part.layer

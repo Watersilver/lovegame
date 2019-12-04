@@ -60,7 +60,7 @@ Portal.functions = {
 
     if other.player then
       -- allow player to jump over ground portal
-      if not (self.grounded and other.zo < 0) then
+      if not game.transitioning and not (self.grounded and other.zo < 0) then
         snd.play(glsounds.stairs)
         game.transition{
           type = "whiteScreen",

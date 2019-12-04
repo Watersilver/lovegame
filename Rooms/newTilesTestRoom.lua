@@ -10,8 +10,8 @@ room.music_info = snd.ovrwrld1
 
 room.timeScreenEffect = "default"
 
-room.width = 496
-room.height = 448
+room.width = 496 -- 31
+room.height = 448 -- 28
 room.downTrans = {
   {
     roomTarget = "Rooms/NWTestRoom.lua", -- Room you'll go to if this transition happens
