@@ -49,7 +49,7 @@ local game = require "game"
 local inv = require "inventory"
 local trans = require "transitions"
 local gsh = require "gamera_shake"
-local rm = require("Rooms.room_manager")
+local rm = require("RoomBuilding.room_manager")
 local ls = require "lightSources"
 
 local gamera = require "gamera.gamera"
@@ -329,8 +329,10 @@ function love.load()
   game.clockInactive = game.room.timeDoesntPass
 
   -- Room Creator
-  -- game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
+  -- -- game.room = assert(love.filesystem.load("Rooms/room_editor.lua"))()
+  -- game.room = assert(love.filesystem.load("RoomBuilding/room_editor.lua"))()
   -- sh.calculate_total_scale{game_scale=game.room.game_scale}
+  -- session.initialize()
 end
 
 function love.textinput(t)
