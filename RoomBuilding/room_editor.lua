@@ -29,14 +29,12 @@ local drawSymbols = false
 
 local camscale = 1
 
-local tilesets = {
-  im.spriteSettings.floor,
-  im.spriteSettings.walls,
-  im.spriteSettings.portals,
-  im.spriteSettings.edges,
-  im.spriteSettings.clutter,
-  index = 1
-}
+local tilesets = require "RoomBuilding.tilesets"
+
+local tilesetToIndex = {}
+for index, tileset in ipairs(tilesets) do
+  tilesetToIndex[tileset.positionstring] = index
+end
 
 -- prepare room
 local room = {gameObjects = {}}
@@ -91,9 +89,9 @@ local function SaveMap()
       gObjString = gObjString ..
       "{ x = " .. gO.x .. ", \z
          y = " .. gO.y .. ", \z
-         init = {layer = " .. gO.init.layer .. "}, \z
-         tileset = " .. gO.tileset.positionstring .. ", \z
-         index = " .. gO.index .. "\z
+         n = {l = " .. gO.n.l .. "}, \z
+         t = " .. gO.t .. ", \z
+         i = " .. gO.i .. "\z
        },\n"
   end
   love.filesystem.append("new_room.lua",
@@ -135,7 +133,7 @@ local states = {
     update = function (self, dt)
       if enterP then
         self.state = "getH"
-        room.width = tonumber(text.input) or 31
+        room.width = tonumber(text.input) or 32
         text.input = ""
         -- room.width = math.floor(room.width / 16) * 16
         room.width = math.floor(room.width) * 16
@@ -153,7 +151,7 @@ local states = {
     update = function (self, dt)
       if enterP then
         self.state = "building"
-        room.height = tonumber(text.input) or 28
+        room.height = tonumber(text.input) or 32
         -- room.height = math.floor(room.height / 16) * 16
         room.height = math.floor(room.height) * 16
         text.input = ""
@@ -177,7 +175,7 @@ local states = {
             -- remove previous tile
             for i=#room.gameObjects,1,-1 do
               local prevObj = room.gameObjects[i]
-              if prevObj.init.layer == layerTable[layerIndex] and prevObj.x == xquantized and prevObj.y == yquantized then
+              if prevObj.n.l == layerTable[layerIndex] and prevObj.x == xquantized and prevObj.y == yquantized then
                 table.remove(room.gameObjects, i)
               end
             end
@@ -187,9 +185,9 @@ local states = {
             local newOb = {}
             newOb.x = xquantized
             newOb.y = yquantized
-            newOb.init = {layer = layerTable[layerIndex]}
-            newOb.tileset = tilesets[tilesets.index]
-            newOb.index = tileset.index - 1
+            newOb.n = {l = layerTable[layerIndex]}
+            newOb.t = tilesetToIndex[tilesets[tilesets.index].positionstring]
+            newOb.i = tileset.index - 1
             table.insert(room.gameObjects, newOb)
           end
         end
@@ -314,11 +312,11 @@ Re.functions = {
 
   draw = function (self)
     -- Draw room
-    for _, obj in ipairs(room.gameObjects) do
-      for _, drawinglayer in ipairs(layerTable) do
-        if obj.init.layer == drawinglayer then
-          local sprite = im.sprites[obj.tileset[1]]
-          love.graphics.draw(sprite.img, sprite[obj.index], obj.x, obj.y, 0, 1, 1, 8, 8)
+    for _, drawinglayer in ipairs(layerTable) do
+      for _, obj in ipairs(room.gameObjects) do
+        if obj.n.l == drawinglayer then
+          local sprite = im.sprites[tilesets[obj.t][1]]
+          love.graphics.draw(sprite.img, sprite[obj.i], obj.x, obj.y, 0, 1, 1, 8, 8)
         end
       end
     end

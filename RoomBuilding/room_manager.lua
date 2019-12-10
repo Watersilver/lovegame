@@ -8,6 +8,7 @@ local rm = {}
 
 local sto = require "RoomBuilding.symbols_to_objects"
 local tts = require "RoomBuilding.tilesets_to_symbols"
+local tilesets = require "RoomBuilding.tilesets"
 
 -- Table that takes a room table and builds it in the world
 function rm.build_room(room)
@@ -178,21 +179,15 @@ function rm.build_room(room)
   else
 
     for _, objInfo in ipairs(room.gameObjects) do
-
       local element
-      if objInfo.tileset then
-        local tilesetName = objInfo.tileset[1]
-        local symbol = tts[tilesetName][objInfo.index]
-        if symbol == 'n' or not symbol then break end
-        element = sto[symbol]:new(objInfo.init)
-        -- Determine sprite
-        element.sprite_info = {objInfo.tileset}
-        element.image_index = objInfo.index
-      elseif objInfo.blueprint then
-        local blocation = objInfo.blueprint:gsub("%.", "/")
-        local blueprint = assert(love.filesystem.load("GameObjects/" .. blocation .. ".lua"))()
-        element = blueprint:new(objInfo.init)
-      end
+      local tileset = tilesets[objInfo.t]
+      local tilesetName = tileset[1]
+      local symbol = tts[tilesetName][objInfo.i]
+      if symbol == 'n' or not symbol then break end
+      element = sto[symbol]:new(objInfo.n)
+      -- Determine sprite
+      element.sprite_info = {tileset}
+      element.image_index = objInfo.i
 
       -- Create tiles
       if element.physical_properties and element.physical_properties.tile then
@@ -204,7 +199,25 @@ function rm.build_room(room)
       element.x = element.xstart
       element.y = element.ystart
       o.addToWorld(element)
+    end
 
+    if room.manuallyPlacedObjects then
+      for _, objInfo in ipairs(room.manuallyPlacedObjects) do
+        local blocation = objInfo.blueprint:gsub("%.", "/")
+        local blueprint = assert(love.filesystem.load("GameObjects/" .. blocation .. ".lua"))()
+        element = blueprint:new(objInfo.n)
+
+        -- Create tiles
+        if element.physical_properties and element.physical_properties.tile then
+          element.physical_properties.tile = {"u", "d", "l", "r"}
+        end
+
+        element.xstart = objInfo.x
+        element.ystart = objInfo.y
+        element.x = element.xstart
+        element.y = element.ystart
+        o.addToWorld(element)
+      end
     end
 
   end
