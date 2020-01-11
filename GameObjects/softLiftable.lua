@@ -26,9 +26,13 @@ end
 local Brick = {}
 
 function Brick.initialize(instance)
+  -- instance.physical_properties = {
+  --   tile = true,
+  --   edgetable = ps.shapes.edgeRect1x1
+  -- }
   instance.physical_properties = {
-    tile = true,
-    edgetable = ps.shapes.edgeRect1x1
+    shape = ps.shapes.circleAlmost1,
+    masks = {PLAYERJUMPATTACKCAT}
   }
   instance.sprite_info = {
     {'Brick', 2, 2}

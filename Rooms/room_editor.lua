@@ -123,7 +123,7 @@ tilesets_to_symbols['Tiles/Floor'] = {
   'ld', 'f', 'f', 'ld', 'f', 'f', 'f', 'f',
   'f', 'f', 'f', 'ga', 'ga', 'ga', 'ga', 'f',
   'f', 'f', 'f', 'f', 'f', 'f', 'f', 'iF',
-  'f', 'f', 'f', 'n', 'n', 'n', 'n', 'n',
+  'f', 'f', 'f', 'f', 'f', 'n', 'n', 'n',
 }
 tilesets_to_symbols['Tiles/Walls'] = {
   'w', 'w', 'w', 'w', 'w', 'w', 'w',

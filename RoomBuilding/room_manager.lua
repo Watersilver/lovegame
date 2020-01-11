@@ -183,22 +183,25 @@ function rm.build_room(room)
       local tileset = tilesets[objInfo.t]
       local tilesetName = tileset[1]
       local symbol = tts[tilesetName][objInfo.i]
-      if symbol == 'n' or not symbol then break end
-      element = sto[symbol]:new(objInfo.n)
-      -- Determine sprite
-      element.sprite_info = {tileset}
-      element.image_index = objInfo.i
+      if not (symbol == 'n' or not symbol) then
+        objInfo.n.layer = objInfo.n.l
+        objInfo.n.l = nil
+        element = sto[symbol]:new(objInfo.n)
+        -- Determine sprite
+        element.sprite_info = {tileset}
+        element.image_index = objInfo.i
 
-      -- Create tiles
-      if element.physical_properties and element.physical_properties.tile then
-        element.physical_properties.tile = {"u", "d", "l", "r"}
+        -- Create tiles
+        if element.physical_properties and element.physical_properties.tile then
+          element.physical_properties.tile = {"u", "d", "l", "r"}
+        end
+
+        element.xstart = objInfo.x
+        element.ystart = objInfo.y
+        element.x = element.xstart
+        element.y = element.ystart
+        o.addToWorld(element)
       end
-
-      element.xstart = objInfo.x
-      element.ystart = objInfo.y
-      element.x = element.xstart
-      element.y = element.ystart
-      o.addToWorld(element)
     end
 
     if room.manuallyPlacedObjects then
