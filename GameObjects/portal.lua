@@ -18,7 +18,7 @@ function Portal.initialize(instance)
     shape = ps.shapes.portal,
     masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT}
   }
-  instance.destination = "Rooms/room1.lua"
+  -- instance.destination = "Rooms/room1.lua"
   instance.desx = 55
   instance.desy = 55
   instance.unpushable = true
@@ -58,7 +58,7 @@ Portal.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-    if other.player then
+    if other.player and self.destination then
       -- allow player to jump over ground portal
       if not game.transitioning and not (self.grounded and other.zo < 0) then
         snd.play(glsounds.stairs)
