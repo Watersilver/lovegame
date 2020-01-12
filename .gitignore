@@ -44,7 +44,8 @@ luac.out
 
 # Test rooms
 *testroom*
-Rooms
+Rooms/room_manager.lua
+Rooms/room_editor.lua
 
 # Graphics
 Sprites
