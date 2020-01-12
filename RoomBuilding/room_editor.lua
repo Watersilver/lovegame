@@ -268,6 +268,9 @@ Re.functions = {
     if love.keyboard.isDown("g") then g = true else g = false end
     gP = g and not gpr
     gpr = g
+    if love.keyboard.isDown("h") then h = true else h = false end
+    hP = h and not hpr
+    hpr = h
     if love.keyboard.isDown("r") then r = true else r = false end
     rP = r and not rpr
     rpr = r
@@ -297,6 +300,7 @@ Re.functions = {
       if layerIndex > #layerTable then layerIndex = 1 end
     end
     if gP then grid = not grid end
+    if hP then highlight = not highlight end
     if tileset.name then
       if upP then tileset.index = tileset.index - tileset.width / tileset.size end
       if leftP then tileset.index = tileset.index - 1 end
@@ -312,11 +316,15 @@ Re.functions = {
 
   draw = function (self)
     -- Draw room
+    local selectedLayer = layerTable[layerIndex]
     for _, drawinglayer in ipairs(layerTable) do
       for _, obj in ipairs(room.gameObjects) do
         if obj.n.l == drawinglayer then
           local sprite = im.sprites[tilesets[obj.t][1]]
           love.graphics.draw(sprite.img, sprite[obj.i], obj.x, obj.y, 0, 1, 1, 8, 8)
+          if highlight and drawinglayer == selectedLayer then
+            love.graphics.rectangle("line", obj.x - 8, obj.y - 8, 16, 16)
+          end
         end
       end
     end
