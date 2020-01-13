@@ -39,8 +39,8 @@ trans_draw = function (self)
   local x, y = self.x , self.y
 
   if self.playershadow then
-    x = x + trans.xtransform - game.transitioning.progress * trans.xadjust
-    y = y + trans.ytransform - game.transitioning.progress * trans.yadjust
+    x = x + game.transitioning.xmod + trans.xtransform - game.transitioning.progress * trans.xadjust
+    y = y + game.transitioning.ymod + trans.ytransform - game.transitioning.progress * trans.yadjust
   else
     x, y = trans.moving_objects_coords(self)
   end

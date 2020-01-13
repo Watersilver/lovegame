@@ -175,8 +175,7 @@ Missile.functions = {
     local x, y = self.x, self.y
 
     if td then
-      x = x + trans.xtransform
-      y = y + trans.ytransform
+      x, y = trans.moving_objects_coords(self)
     end
 
     -- missile light

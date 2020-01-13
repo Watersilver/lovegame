@@ -122,8 +122,7 @@ Thrown.functions = {
     local x, y = self.body:getPosition()
 
     if td then
-      x = x + trans.xtransform
-      y = y + trans.ytransform
+      x, y = trans.moving_objects_coords(self)
     end
 
     self.x, self.y = x, y

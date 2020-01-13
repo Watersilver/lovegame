@@ -346,8 +346,8 @@ Sword.functions = {
     local x, y = self.body:getPosition()
 
     if td then
-      x = x + trans.xtransform - game.transitioning.progress * trans.xadjust
-      y = y + trans.ytransform - game.transitioning.progress * trans.yadjust
+      x = x + trans.xtransform + game.transitioning.xmod - game.transitioning.progress * trans.xadjust
+      y = y + trans.ytransform + game.transitioning.ymod - game.transitioning.progress * trans.yadjust
     end
 
     self.x, self.y = x, y

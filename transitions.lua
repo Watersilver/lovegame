@@ -110,13 +110,17 @@ function trans.still_objects_coords(instance)
   local zo = instance.zo or 0
 
   if instance.onPreviousRoom then
-    xtotal = instance.xstart + trans.xtransform
-    ytotal = instance.ystart + zo + trans.ytransform
+    xtotal = instance.xstart
+      + game.transitioning.xmod
+      + trans.xtransform
+    ytotal = instance.ystart
+      + game.transitioning.ymod
+      + zo + trans.ytransform
   else
     xtotal = instance.xstart + trans.xtransform
-      - game.transitioning.xmod + trans.xdisplacement
+      + trans.xdisplacement
     ytotal = instance.ystart + zo + trans.ytransform
-      - game.transitioning.ymod + trans.ydisplacement
+      + trans.ydisplacement
   end
 
   return xtotal, ytotal
@@ -127,12 +131,14 @@ function trans.moving_objects_coords(instance)
 
   if instance.onPreviousRoom then
     xtotal = instance.x + trans.xtransform
+      + game.transitioning.xmod
     ytotal = instance.y + trans.ytransform
+      + game.transitioning.ymod
   else
     xtotal = instance.x + trans.xtransform
-      - game.transitioning.xmod + trans.xdisplacement
+      + trans.xdisplacement
     ytotal = instance.y + trans.ytransform
-      - game.transitioning.ymod + trans.ydisplacement
+      + trans.ydisplacement
   end
 
   return xtotal, ytotal

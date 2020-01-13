@@ -165,8 +165,8 @@ HeldSword.functions = {
     end
 
     if td then
-      x = x + trans.xtransform - game.transitioning.progress * trans.xadjust
-      y = y + trans.ytransform - game.transitioning.progress * trans.yadjust
+      x = x + trans.xtransform + game.transitioning.xmod - game.transitioning.progress * trans.xadjust
+      y = y + trans.ytransform + game.transitioning.ymod - game.transitioning.progress * trans.yadjust
     else
       self.spritebody:setPosition(x, y)
       self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)

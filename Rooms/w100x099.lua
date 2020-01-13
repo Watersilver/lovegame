@@ -15,13 +15,29 @@ room.height = 512
 room.downTrans = {
   {
     roomTarget = "Rooms/w100x100.lua",
-    xleftmost = 0, xrightmost = 520,
+    xleftmost = 0, xrightmost = 416,
     xmod = 0, ymod = 0
   }
 }
 room.rightTrans = {}
 room.leftTrans = {}
-room.upTrans = {}
+room.upTrans = {
+  {
+    roomTarget = "Rooms/w100x098.lua",
+    xleftmost = 0, xrightmost = 416,
+    xmod = 0, ymod = 0
+  },
+  {
+    roomTarget = "Rooms/w100x098b.lua",
+    xleftmost = 416, xrightmost = 448,
+    xmod = -112, ymod = 0
+  },
+  {
+    roomTarget = "Rooms/w100x098.lua",
+    xleftmost = 448, xrightmost = 520,
+    xmod = 0, ymod = 0
+  }
+}
 
 room.game_scale = 2
 
