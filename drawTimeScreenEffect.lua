@@ -150,6 +150,11 @@ local seFuncs = {
     currentToTarget(dt)
   end,
 
+  forestMagic = function(curTime, dt)
+    tr, tg, tb, ta = cc * 0.5, cc * 0.9, cc * 0.7, cc
+    currentToTarget(dt)
+  end,
+
   default = function(curTime, dt)
     tr, tg, tb, ta = defaultScreenEffects.run(curTime)
     currentToTarget(dt)

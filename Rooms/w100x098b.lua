@@ -7,7 +7,7 @@ local room = {}
 room.newType = true
 
 room.music_info = snd.ovrwrld1
-room.timeScreenEffect = 'default'
+room.timeScreenEffect = 'forestMagic'
 
 room.width = 400
 room.height = 224
