@@ -15,7 +15,7 @@ room.height = 512
 room.downTrans = {
   {
     roomTarget = "Rooms/w100x100.lua",
-    xleftmost = 0, xrightmost = 416,
+    xleftmost = 0, xrightmost = 520,
     xmod = 0, ymod = 0
   }
 }
@@ -28,9 +28,9 @@ room.upTrans = {
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/w100x098b.lua",
+    roomTarget = "Rooms/w100x098.lua",
     xleftmost = 416, xrightmost = 448,
-    xmod = -112, ymod = 0
+    xmod = 0, ymod = 0
   },
   {
     roomTarget = "Rooms/w100x098.lua",
@@ -1091,4 +1091,9 @@ room.gameObjects = {
 { x = 216, y = 72, n = {l = 10}, t = 2, i = 65},
 ----------End of gameObjects----------
 }
+
+room.manuallyPlacedObjects = {
+  {x = 440, y = 408, blueprint = "InRooms.w100x099.portalChecker100x099"}
+}
+
 return room

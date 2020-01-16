@@ -2189,7 +2189,7 @@ Playa.functions = {
     y = y + game.transitioning.ymod + trans.ytransform - game.transitioning.progress * trans.yadjust
 
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
-fuck = xtotal
+
     -- After done with coords draw light source (gets drawn later, this just sets it up)
     -- check during pause screen if session.save.playerGlowAvailable to enable and disable
     if session.save.playerGlowAvailable then

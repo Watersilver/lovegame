@@ -458,10 +458,10 @@ function love.update(dt)
     end
   end
 
-  -- display mouse position
-  local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  local wmrx, wmry = math.floor(wmx / 16) * 16, math.floor(wmy / 16) * 16
-  fuck = tostring(wmrx) .. "/" .. tostring(wmry)
+  -- -- display mouse position
+  -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
+  -- local wmrx, wmry = math.floor(wmx / 16) * 16, math.floor(wmy / 16) * 16
+  -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
 
   if o.to_be_added[1] then
     o.to_be_added:add_all()

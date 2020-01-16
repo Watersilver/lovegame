@@ -151,7 +151,7 @@ local seFuncs = {
   end,
 
   forestMagic = function(curTime, dt)
-    tr, tg, tb, ta = cc * 0.5, cc * 0.9, cc * 0.7, cc
+    tr, tg, tb, ta = cc * 0.7, cc * 1, cc * 0.9, cc
     currentToTarget(dt)
   end,
 
