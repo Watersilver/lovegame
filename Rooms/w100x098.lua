@@ -18,7 +18,13 @@ room.downTrans = {
     xmod = 0, ymod = 0
   }
 }
-room.rightTrans = {}
+room.rightTrans = {
+  {
+    roomTarget = "Rooms/w101x098.lua",
+    yupper = 0, ylower = 520,
+    xmod = 0, ymod = 0
+  }
+}
 room.leftTrans = {}
 room.upTrans = {}
 
@@ -510,7 +516,6 @@ room.gameObjects = {
 { x = 424, y = 264, n = {l = 10}, t = 2, i = 50},
 { x = 424, y = 248, n = {l = 10}, t = 2, i = 43},
 { x = 424, y = 232, n = {l = 10}, t = 2, i = 43},
-{ x = 424, y = 216, n = {l = 10}, t = 2, i = 36},
 { x = 408, y = 216, n = {l = 10}, t = 2, i = 58},
 { x = 392, y = 216, n = {l = 10}, t = 2, i = 58},
 { x = 376, y = 216, n = {l = 10}, t = 2, i = 58},
@@ -938,6 +943,7 @@ room.gameObjects = {
 { x = 424, y = 120, n = {l = 10}, t = 1, i = 171},
 { x = 408, y = 120, n = {l = 10}, t = 1, i = 171},
 { x = 392, y = 120, n = {l = 10}, t = 1, i = 171},
+{ x = 424, y = 216, n = {l = 10}, t = 2, i = 60},
 ----------End of gameObjects----------
 }
 return room
