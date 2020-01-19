@@ -1709,14 +1709,20 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
+      instance.noVelTrans = true
       instance.respawnCounter = 0
       instance.respawnCounterMax = 0.4
       instance.invisible = true
       inp.controllers[instance.player].disabled = true
       instance:setGhost(true)
+      if not instance.xLastSteppable or not instance.yLastSteppable then
+        instance.xLastSteppable = instance.xUnsteppable
+        instance.yLastSteppable = instance.yUnsteppable
+      end
     end,
 
     end_state = function(instance, dt)
+      instance.noVelTrans = false
       instance.body:setPosition(instance.xLastSteppable, instance.yLastSteppable)
       instance.invisible = false
       inp.controllers[instance.player].disabled = nil

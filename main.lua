@@ -457,10 +457,10 @@ function love.update(dt)
     end
   end
 
-  -- -- display mouse position
-  -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  -- local wmrx, wmry = math.floor(wmx / 16) * 16, math.floor(wmy / 16) * 16
-  -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
+  -- display mouse position
+  local wmx, wmy = cam:toWorld(moup.x, moup.y)
+  local wmrx, wmry = math.floor(wmx / 16) * 16, math.floor(wmy / 16) * 16
+  fuck = tostring(wmrx) .. "/" .. tostring(wmry)
 
   if o.to_be_added[1] then
     o.to_be_added:add_all()
@@ -517,15 +517,59 @@ function love.update(dt)
     else
 
       o.to_be_deleted:remove_all()
+
+      local room = game.room
+
+
       -- Store player
       local playaTest = o.identified.PlayaTest
       if playaTest and playaTest[1].x then
         pl1 = playaTest[1]
+        -- Die if fall in unsteppable after transition
+        -- pl1.xLastSteppable = nil
+        -- pl1.yLastSteppable = nil
+
+        local gts = game.transitioning.side
+        if gts then
+          if gts == "up" then
+            if pl1.yLastSteppable then
+              pl1.yLastSteppable = pl1.yLastSteppable + room.height
+            end
+            if pl1.yUnsteppable then
+              pl1.yUnsteppable = pl1.yUnsteppable + room.height
+            end
+          elseif gts == "down" then
+            if pl1.yLastSteppable then
+              pl1.yLastSteppable = pl1.yLastSteppable - room.height
+            end
+            if pl1.yUnsteppable then
+              pl1.yUnsteppable = pl1.yUnsteppable - room.height
+            end
+          elseif gts == "left" then
+            if pl1.xLastSteppable then
+              pl1.xLastSteppable = pl1.xLastSteppable + room.width
+            end
+            if pl1.xUnsteppable then
+              pl1.xUnsteppable = pl1.xUnsteppable + room.width
+            end
+          elseif gts == "right" then
+            if pl1.xLastSteppable then
+              pl1.xLastSteppable = pl1.xLastSteppable - room.width
+            end
+            if pl1.xUnsteppable then
+              pl1.xUnsteppable = pl1.xUnsteppable - room.width
+            end
+          end
+        else
+          pl1.xLastSteppable = nil
+          pl1.yLastSteppable = nil
+        end
+        -- instance.xLastSteppable = instance.xUnsteppable
+        -- instance.yLastSteppable = instance.yUnsteppable
+
       else
         pl1 = nil
       end
-
-      local room = game.room
 
 
       local playa = game.transitioning.playa
@@ -671,7 +715,8 @@ function love.update(dt)
       -- check if a screen edge transition will happen
       -- left
       if playax - halfw < l - screenEdgeThreshold then
-        if playa.vx < 0 then
+        if playa.vx < 0 or playa.noVelTrans then
+          playa.noVelTrans = false
           for _, transInfo in ipairs(room.leftTrans) do
             if playay > transInfo.yupper and playay < transInfo.ylower then
 
@@ -693,7 +738,8 @@ function love.update(dt)
         end
       -- right
       elseif playax + halfw > w + screenEdgeThreshold then
-        if playa.vx > 0 then
+        if playa.vx > 0 or playa.noVelTrans then
+          playa.noVelTrans = false
           for _, transInfo in ipairs(room.rightTrans) do
             if playay > transInfo.yupper and playay < transInfo.ylower then
 
@@ -715,7 +761,8 @@ function love.update(dt)
         end
       -- down
       elseif playay + fullh > h + screenEdgeThreshold then
-        if playa.vy > 0 then
+        if playa.vy > 0 or playa.noVelTrans then
+          playa.noVelTrans = false
           for _, transInfo in ipairs(room.downTrans) do
             if playax > transInfo.xleftmost and playax < transInfo.xrightmost then
 
@@ -734,7 +781,8 @@ function love.update(dt)
         end
       -- up
       elseif playay - fullh < t - screenEdgeThreshold then
-        if playa.vy < 0 then
+        if playa.vy < 0 or playa.noVelTrans then
+          playa.noVelTrans = false
           for _, transInfo in ipairs(room.upTrans) do
             if playax > transInfo.xleftmost and playax < transInfo.xrightmost then
 
