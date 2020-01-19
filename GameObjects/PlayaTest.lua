@@ -2187,6 +2187,7 @@ Playa.functions = {
 
   trans_draw = function(self)
     if self.animation_state.state == "dontdraw" then return end
+    if self.invisible then return end
 
     local x, y = self.x, self.y
 
