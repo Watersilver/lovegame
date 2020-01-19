@@ -20,6 +20,7 @@ function Edge.initialize(instance)
 end
 
 Edge.functions = {
+
 beginContact = function(self, a, b, coll, aob, bob)
   local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
@@ -106,6 +107,10 @@ end,
 
 load = function (self)
   self.image_speed = 0
+  if not self.height then
+    love.errhand("No height set: Edge at " .. self.x .. "/" .. self.y)
+    self.height = 0
+  end
   if self.side == "left" then
     self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.l)
     self.belowEdge = ec.belowLeftEdge
