@@ -86,10 +86,11 @@ local function SaveMap()
     ----------Start of gameObjects----------\n")
     local gObjString = ""
     for _, gO in ipairs(room.gameObjects) do
+      local n = gO.n.height and gO.n.l .. ", height = " .. gO.n.height or gO.n.l
       gObjString = gObjString ..
       "{ x = " .. gO.x .. ", \z
          y = " .. gO.y .. ", \z
-         n = {l = " .. gO.n.l .. "}, \z
+         n = {l = " .. n .. "}, \z
          t = " .. gO.t .. ", \z
          i = " .. gO.i .. "\z
        },\n"
