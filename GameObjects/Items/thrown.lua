@@ -123,9 +123,10 @@ Thrown.functions = {
 
     if td then
       x, y = trans.moving_objects_coords(self)
+    else
+      self.x, self.y = x, y
     end
 
-    self.x, self.y = x, y
     local sprite = self.sprite
     -- Check in case animation changed to something with fewer frames
     while self.image_index >= sprite.frames do
