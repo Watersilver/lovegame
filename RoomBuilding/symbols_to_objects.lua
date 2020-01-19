@@ -32,7 +32,7 @@ local thickWallDown = require("GameObjects.ThickWall.thickWallDown")
 local thickWallLeft = require("GameObjects.ThickWall.thickWallLeft")
 local thickWallRight = require("GameObjects.ThickWall.thickWallRight")
 local thickWallUp = require("GameObjects.ThickWall.thickWallUp")
-local NpcTest = require("GameObjects.NpcTest")
+local NpcTest = require("GameObjects.npcTest")
 local portal = require("GameObjects.portal")
 local mainMenu = require("GameObjects.mainMenu")
 

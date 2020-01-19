@@ -1,4 +1,4 @@
-local rm = require("Rooms.room_manager")
+local rm = require("RoomBuilding.room_manager")
 local sh = require "scaling_handler"
 local im = require "image"
 local snd = require "sound"

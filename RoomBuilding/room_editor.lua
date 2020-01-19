@@ -61,7 +61,7 @@ local function SaveMap()
   local newfile = love.filesystem.newFile("new_room.lua")
   newfile:close()
   local success = love.filesystem.write("new_room.lua",
-    "local rm = require(\"Rooms.room_manager\")\n\z
+    "local rm = require(\"RoomBuilding.room_manager\")\n\z
     local sh = require \"scaling_handler\"\n\z
     local im = require \"image\"\n\z
     local snd = require \"sound\"\n\z
