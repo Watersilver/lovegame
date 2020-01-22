@@ -16,7 +16,7 @@ function drops.cheapest(x, y)
   local Drop = chooseFromChanceTable{
     {value = Heart, chance = 0.02},
     {value = Rupee, chance = 0.02},
-    {value = Fairy, chance = 0.002},
+    {value = Fairy, chance = 0.001},
     {value = pieceOfHeart, chance = rpoh < 1 and 0.00001 or 0},
   }
   if Drop then
@@ -31,7 +31,7 @@ function drops.cheap(x, y)
     {value = Rupee, chance = 0.05},
     {value = Rupee5, chance = 0.02},
     {value = Rupee20, chance = 0.004},
-    {value = Fairy, chance = 0.002},
+    {value = Fairy, chance = 0.001},
     {value = Rupee100, chance = 0.0005},
     {value = Rupee200, chance = 0.0002},
     {value = pieceOfHeart, chance = rpoh < 2 and 0.00003 or 0},
@@ -48,7 +48,7 @@ function drops.normal(x, y)
     {value = Rupee, chance = 0.12},
     {value = Rupee5, chance = 0.08},
     {value = Rupee20, chance = 0.01},
-    {value = Fairy, chance = 0.002},
+    {value = Fairy, chance = 0.001},
     {value = Rupee100, chance = 0.0005},
     {value = Rupee200, chance = 0.0002},
     {value = pieceOfHeart, chance = rpoh < 4 and 0.00005 or 0},
@@ -65,7 +65,7 @@ function drops.rich(x, y)
     {value = Rupee, chance = 0.05},
     {value = Rupee5, chance = 0.15},
     {value = Rupee20, chance = 0.10},
-    {value = Fairy, chance = 0.003},
+    {value = Fairy, chance = 0.002},
     {value = Rupee100, chance = 0.0006},
     {value = Rupee200, chance = 0.0003},
     {value = pieceOfHeart, chance = rpoh < 4 and 0.0005 or 0},
