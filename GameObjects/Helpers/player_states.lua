@@ -595,7 +595,7 @@ player_states.start_damaged = function(instance, dt, side)
   if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
     instance:addHealth(-(instance.triggers.damaged or 1))
   end
-  inp.controllers[instance.player].disabled = true
+  inp.disable_controller(instance.player)
   instance.invulnerable = 1
   instance.damCounter = 0.5
   snd.play(instance.sounds.hurt)
@@ -605,7 +605,7 @@ player_states.end_damaged = function(instance, dt, side)
   if side == "right" then
     instance.x_scale = 1
   end
-  inp.controllers[instance.player].disabled = nil
+  inp.enable_controller(instance.player)
   if instance.floorFriction > 0.9 then
     instance.body:setLinearVelocity(0, 0)
   end

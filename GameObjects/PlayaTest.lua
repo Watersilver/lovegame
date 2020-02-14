@@ -183,7 +183,7 @@ function Playa.initialize(instance)
   })
   instance.floorTiles = {role = "playerFloorTilesIndex"} -- Tracks what kind of floortiles I'm on
   instance.player = "player1"
-  inp.controllers[instance.player].disabled = nil
+  inp.enable_controller(instance.player)
   instance.layer = 20
   instance.movement_state = sm.new_state_machine{
     state = "start",
@@ -1630,7 +1630,7 @@ function Playa.initialize(instance)
       instance.fo = 0
       instance.zvel = 0
       instance.sprite = im.sprites["Witch/drown_down"]
-      inp.controllers[instance.player].disabled = true
+      inp.disable_controller(instance.player)
       snd.play(instance.sounds.water)
       instance:setGhost(true)
     end,
@@ -1638,11 +1638,43 @@ function Playa.initialize(instance)
     end_state = function(instance, dt)
       instance.image_index = 0
       instance.image_speed = 0
-      inp.controllers[instance.player].disabled = nil
+      inp.enable_controller(instance.player)
       instance:setGhost(false)
       if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
         instance:addHealth(-1)
       end
+    end
+    },
+
+
+    downeating = {
+    run_state = function(instance, dt)
+      -- inp.disable_controller(instance.player)
+    end,
+
+    check_state = function(instance, dt)
+      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+      if trig.damaged then
+        instance.animation_state:change_state(instance, dt, "downdamaged")
+      elseif otherstate == "normal" then
+        instance:addHealth(instance.item_health_bonus)
+        snd.play(glsounds.getHeart)
+        instance.animation_state:change_state(instance, dt, "downstill")
+      end
+    end,
+
+    start_state = function(instance, dt)
+      instance.image_index = 0
+      instance.image_speed = 0.05
+      instance.sprite = im.sprites["Witch/eating_down"]
+      inp.disable_controller(instance.player)
+    end,
+
+    end_state = function(instance, dt)
+      instance.image_index = 0
+      instance.image_speed = 0
+      instance.item_health_bonus = nil
+      inp.enable_controller(instance.player)
     end
     },
 
@@ -1672,14 +1704,14 @@ function Playa.initialize(instance)
       instance.plummetFrames = instance.sprite.frames
       instance.image_index = 0
       instance.image_speed = 0.1
-      inp.controllers[instance.player].disabled = true
+      inp.disable_controller(instance.player)
       instance:setGhost(true)
     end,
 
     end_state = function(instance, dt)
       instance.xUnsteppable = instance.x
       instance.yUnsteppable = instance.y
-      inp.controllers[instance.player].disabled = nil
+      inp.enable_controller(instance.player)
       instance:setGhost(false)
       if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
         instance:addHealth(-1)
@@ -1713,7 +1745,7 @@ function Playa.initialize(instance)
       instance.respawnCounter = 0
       instance.respawnCounterMax = 0.4
       instance.invisible = true
-      inp.controllers[instance.player].disabled = true
+      inp.disable_controller(instance.player)
       instance:setGhost(true)
       if not instance.xLastSteppable or not instance.yLastSteppable then
         instance.xLastSteppable = instance.xUnsteppable
@@ -1725,7 +1757,7 @@ function Playa.initialize(instance)
       instance.noVelTrans = false
       instance.body:setPosition(instance.xLastSteppable, instance.yLastSteppable)
       instance.invisible = false
-      inp.controllers[instance.player].disabled = nil
+      inp.enable_controller(instance.player)
       instance:setGhost(false)
       instance.invulnerable = 1
     end
@@ -1795,7 +1827,7 @@ function Playa.initialize(instance)
       snd.bgm:setFadeState("fadeout")
       snd.play(instance.sounds.dying)
       instance.sprite = im.sprites["Witch/die"]
-      inp.controllers[instance.player].disabled = true
+      inp.disable_controller(instance.player)
       instance.deathPhase = 1
       instance.image_index = 0
       instance.image_speed = 0.1
@@ -1825,7 +1857,7 @@ function Playa.initialize(instance)
     start_state = function(instance, dt)
       if instance.dontdrawStart then instance:dontdrawStart(dt) end
       instance.invisible = true
-      inp.controllers[instance.player].disabled = true
+      inp.disable_controller(instance.player)
       instance:setGhost(true)
     end,
 
@@ -1836,7 +1868,7 @@ function Playa.initialize(instance)
       dontdrawStart = nil
       dontdrawEnd = nil
       instance.invisible = false
-      inp.controllers[instance.player].disabled = nil
+      inp.enable_controller(instance.player)
       instance:setGhost(false)
     end
     }
@@ -1940,14 +1972,14 @@ Playa.functions = {
       -- dungeonJumpingLand
       if self.dungeonJumping and self.zvel == 0 then
         self.dungeonJumping = nil
-        inp.controllers[self.player].disabled = nil
+        inp.enable_controller(instance.player)
         self:setGhost(false)
       end
     else
       -- dungeonJumping
       if self.dungeonJumping then
         self:setGhost(true)
-        inp.controllers[self.player].disabled = true
+        inp.disable_controller(instance.player)
         self.body:setLinearVelocity(self.dungeonJumping[1], self.dungeonJumping[2])
       end
     end

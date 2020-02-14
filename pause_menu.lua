@@ -74,9 +74,8 @@ function pam.top_menu_logic()
       session.toMainMenu()
     elseif inp.cancelPressed then
       pam.quitting = nil
+      inp.enable_controller("player1")
     end
-  else
-    inp.enable_controller("player1")
   end
 end
 
@@ -214,7 +213,9 @@ local logicFuncs = {
     if inp.enterPressed then
       if items[itemid] and items[itemid].use then
         items[itemid].use()
-        snd.play(glsounds.useItem)
+        if not items[itemid].handleUseSound then
+          snd.play(glsounds.useItem)
+        end
       else
         snd.play(glsounds.error)
       end

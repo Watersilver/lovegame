@@ -90,10 +90,12 @@ function input.check_input()
 end
 
 function input.disable_controller(playername)
+  fuck = fuck + 1
   input.controllers[playername].disabled = true
 end
 
 function input.enable_controller(playername)
+  fuck = fuck + 1
   input.controllers[playername].disabled = nil
 end
 
