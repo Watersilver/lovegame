@@ -699,7 +699,7 @@ function love.update(dt)
   -- end
 
   -- Check edge transitions
-  if pl1 then
+  if pl1 and not inp.shift then
 
     if not game.transitioning then
 
