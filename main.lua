@@ -243,6 +243,9 @@ session = {
       roomTarget = "Rooms/main_menu.lua"
     }
   end,
+  barrierBounce = function(plaObj, horDir, verDir)
+    plaObj.body:setLinearVelocity(200 * horDir, 200 * verDir)
+  end,
 }
 local session = session
 
@@ -719,6 +722,7 @@ function love.update(dt)
       if playax - halfw < l - screenEdgeThreshold then
         if playa.vx < 0 or playa.noVelTrans then
           playa.noVelTrans = false
+          local transed = false
           for _, transInfo in ipairs(room.leftTrans) do
             if playay > transInfo.yupper and playay < transInfo.ylower then
 
@@ -735,13 +739,19 @@ function love.update(dt)
               cam.xt = 0
               cam.yt = playay + playa.fo or cam.yt
 
+              transed = true
+
             end
+          end
+          if not transed then
+            session.barrierBounce(playa, 1, 0)
           end
         end
       -- right
       elseif playax + halfw > w + screenEdgeThreshold then
         if playa.vx > 0 or playa.noVelTrans then
           playa.noVelTrans = false
+          local transed = false
           for _, transInfo in ipairs(room.rightTrans) do
             if playay > transInfo.yupper and playay < transInfo.ylower then
 
@@ -758,13 +768,19 @@ function love.update(dt)
               cam.xt = game.room.width
               cam.yt = playay + playa.fo or cam.yt
 
+              transed = true
+
             end
+          end
+          if not transed then
+            session.barrierBounce(playa, -1, 0)
           end
         end
       -- down
       elseif playay + fullh > h + screenEdgeThreshold then
         if playa.vy > 0 or playa.noVelTrans then
           playa.noVelTrans = false
+          local transed = false
           for _, transInfo in ipairs(room.downTrans) do
             if playax > transInfo.xleftmost and playax < transInfo.xrightmost then
 
@@ -778,13 +794,19 @@ function love.update(dt)
                 roomTarget = transInfo.roomTarget
               }
 
+              transed = true
+
             end
+          end
+          if not transed then
+            session.barrierBounce(playa, 0, -1)
           end
         end
       -- up
       elseif playay - fullh < t - screenEdgeThreshold then
         if playa.vy < 0 or playa.noVelTrans then
           playa.noVelTrans = false
+          local transed = false
           for _, transInfo in ipairs(room.upTrans) do
             if playax > transInfo.xleftmost and playax < transInfo.xrightmost then
 
@@ -798,7 +820,12 @@ function love.update(dt)
                 roomTarget = transInfo.roomTarget
               }
 
+              transed = true
+
             end
+          end
+          if not transed then
+            session.barrierBounce(playa, 0, 1)
           end
         end
       end
