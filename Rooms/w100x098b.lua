@@ -9,11 +9,11 @@ room.newType = true
 room.music_info = snd.ovrwrld1
 room.timeScreenEffect = 'forestMagic'
 
-room.width = 400
-room.height = 224
+room.width = 400 -- 400 / 16 = 25
+room.height = 224 -- 224 / 16 = 14
 room.downTrans = {
   {
-    roomTarget = "Rooms/w100x099.lua",
+    roomTarget = "Rooms/w100x099.lua", -- Ver To Up Right
     xleftmost = 0, xrightmost = 400,
     xmod = 112, ymod = 0
   }
