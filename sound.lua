@@ -3,7 +3,7 @@ local gs = require "game_settings"
 local snd = {}
 
 snd.silence = {"Silence"}
-snd.ovrwrld1 = {day = {name = "zelOverworld", introName = "zelOverworldIntro"}, night = "nightTest"}
+snd.ovrwrld1 = {day = {name = "zelOverworld", introName = "zelOverworldIntro"}, night = "PaperMarioCrystalPalace"}
 
 snd.sounds = {}
 snd.bgm = {} -- Background Music
