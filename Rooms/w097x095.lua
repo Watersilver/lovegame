@@ -25,8 +25,20 @@ room.rightTrans = {
     xmod = 0, ymod = 0
   }
 }
-room.leftTrans = {}
-room.upTrans = {}
+room.leftTrans = {
+  {
+    roomTarget = "Rooms/w096x095.lua",
+    yupper = 0, ylower = 520,
+    xmod = 0, ymod = 0
+  }
+}
+room.upTrans = {
+  {
+    roomTarget = "Rooms/w097x094.lua",
+    xleftmost = 0, xrightmost = 520,
+    xmod = 0, ymod = 0
+  }
+}
 
 room.game_scale = 2
 
