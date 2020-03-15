@@ -11,7 +11,13 @@ room.timeScreenEffect = 'default'
 
 room.width = 512
 room.height = 512
-room.downTrans = {}
+room.downTrans = {
+  {
+    roomTarget = "Rooms/w095x097.lua",
+    xleftmost = 0, xrightmost = 520,
+    xmod = 0, ymod = 0
+  }
+}
 room.rightTrans = {
   {
     roomTarget = "Rooms/w096x096.lua",
@@ -367,9 +373,6 @@ room.gameObjects = {
 { x = 24, y = 424, n = {l = 10}, t = 2, i = 8},
 { x = 24, y = 440, n = {l = 10}, t = 2, i = 8},
 { x = 24, y = 456, n = {l = 10}, t = 2, i = 8},
-{ x = 24, y = 472, n = {l = 10}, t = 2, i = 8},
-{ x = 24, y = 488, n = {l = 10}, t = 2, i = 8},
-{ x = 24, y = 504, n = {l = 10}, t = 2, i = 8},
 { x = 8, y = 200, n = {l = 10}, t = 1, i = 0},
 { x = 8, y = 216, n = {l = 10}, t = 1, i = 0},
 { x = 8, y = 232, n = {l = 10}, t = 1, i = 0},
@@ -385,8 +388,6 @@ room.gameObjects = {
 { x = 8, y = 424, n = {l = 10}, t = 1, i = 0},
 { x = 8, y = 440, n = {l = 10}, t = 1, i = 0},
 { x = 8, y = 456, n = {l = 10}, t = 1, i = 0},
-{ x = 8, y = 488, n = {l = 10}, t = 1, i = 0},
-{ x = 8, y = 504, n = {l = 10}, t = 1, i = 0},
 { x = 8, y = 360, n = {l = 10}, t = 1, i = 68},
 { x = 8, y = 248, n = {l = 10}, t = 1, i = 68},
 { x = 8, y = 472, n = {l = 10}, t = 1, i = 68},
@@ -1100,6 +1101,11 @@ room.gameObjects = {
 { x = 200, y = 344, n = {l = 11}, t = 5, i = 1},
 { x = 312, y = 392, n = {l = 11}, t = 5, i = 1},
 { x = 200, y = 232, n = {l = 11}, t = 5, i = 15},
+{ x = 24, y = 488, n = {l = 10}, t = 2, i = 15},
+{ x = 24, y = 472, n = {l = 10}, t = 2, i = 8},
+{ x = 24, y = 504, n = {l = 10}, t = 2, i = 22},
+{ x = 8, y = 488, n = {l = 10}, t = 2, i = 30},
+{ x = 8, y = 504, n = {l = 10}, t = 2, i = 34},
 ----------End of gameObjects----------
 }
 return room
