@@ -44,6 +44,7 @@ function Brick.initialize(instance)
   instance.allsides = true
   instance.ballbreaker = true
   instance.liftable = true
+  instance.lift_info = "softLiftable"
   instance.throw_collision = throw_collision
   instance.explLayer = 25
   instance.lifterSpeedMod = 0.8

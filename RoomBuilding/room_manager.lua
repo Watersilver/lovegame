@@ -183,6 +183,10 @@ function rm.build_room(room)
       local tileset = tilesets[objInfo.t]
       local tilesetName = tileset[1]
       local symbol = tts[tilesetName][objInfo.i]
+      local initFields = tts[tilesetName].initFields[objInfo.i]
+      if initFields then
+        for k,v in pairs(initFields) do objInfo.n[k] = v end
+      end
       if not (symbol == 'n' or not symbol) then
         objInfo.n.layer = objInfo.n.l
         objInfo.n.l = nil

@@ -38,6 +38,7 @@ tilesets_to_symbols['Tiles/Floor'] = {
   'f', 'f', 'f', 'f', 'f', 'f', 'f', 'iF',
   'f', 'f', 'f', 'f', 'f', 'n', 'n', 'n',
 }
+tilesets_to_symbols['Tiles/Floor'].initFields = {}
 tilesets_to_symbols['Tiles/Walls'] = {
   [0] = 'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'w', 'w', 'w', 'w', 'w', 'w', 'w',
@@ -84,15 +85,18 @@ tilesets_to_symbols['Tiles/Walls'] = {
   'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'w', 'w', 'w', 'w', 'w', 'w', 'w',
 }
+tilesets_to_symbols['Tiles/Walls'].initFields = {}
 tilesets_to_symbols['Tiles/Portals'] = {
   [0] = 'ptl', 'ptl', 'ptl', 'ptl', 'ptl',
   'ptl', 'ptl', 'ptl', 'ptl', 'ptl',
   'ptl', 'ptl', 'ptl', 'ptl', 'ptl',
 }
+tilesets_to_symbols['Tiles/Portals'].initFields = {}
 tilesets_to_symbols['Tiles/Edges'] = {
   [0] = 'eD', 'eD',
   'eR', 'eL',
 }
+tilesets_to_symbols['Tiles/Edges'].initFields = {}
 tilesets_to_symbols['Tiles/Clutter'] = {
   [0] = 'rT', 'sL', 'sL', 'sL', 'sL', 'sL', 'rW', 'rW',
   'rW', 'rW', 'w', 'rW', 'rW', 'rW', 'rW', 'rW',
@@ -102,5 +106,8 @@ tilesets_to_symbols['Tiles/Clutter'] = {
   'b', 'b', 'b', 'b', 'w', 'w', 'b', 'rT',
   'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
   'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
+}
+tilesets_to_symbols['Tiles/Clutter'].initFields = {
+  [1] = {lift_info = "shrub"} -- shrub
 }
 return tilesets_to_symbols
