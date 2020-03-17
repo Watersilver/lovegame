@@ -18,8 +18,11 @@ local floor = math.floor
 local pi = math.pi
 
 local function destroyself(self)
-  self:throw_collision()
-  o.removeFromWorld(self)
+  if not self.destroyedself then
+    self.destroyedself = true
+    self:throw_collision()
+    o.removeFromWorld(self)
+  end
 end
 
 local sink_sprite = im.spriteSettings.rockSink
