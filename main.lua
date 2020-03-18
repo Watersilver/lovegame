@@ -260,6 +260,7 @@ glsounds = snd.load_sounds{
   wingFlap = {"Effects/Wing_flap"},
   pauseOpen = {"Effects/Oracle_PauseMenu_Open"},
   pauseClose = {"Effects/Oracle_PauseMenu_Close"},
+  secret = {"Effects/Oracle_Secret"},
   select = {"Effects/Oracle_Menu_Select"},
   deselect = {"Effects/Oracle_Menu_Cursor_low_pitch"},
   error = {"Effects/Oracle_Error"},
@@ -460,9 +461,9 @@ function love.update(dt)
     end
   end
 
-  -- display mouse position
+  -- -- display mouse position
   -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  -- local wmrx, wmry = math.floor(wmx / 16) * 16, math.floor(wmy / 16) * 16
+  -- local wmrx, wmry = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
   -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
 
   if o.to_be_added[1] then

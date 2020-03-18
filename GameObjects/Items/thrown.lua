@@ -22,6 +22,8 @@ local function destroyself(self)
     self.destroyedself = true
     self:throw_collision()
     o.removeFromWorld(self)
+    if self.shadow then o.removeFromWorld(self.shadow) end
+    self.shadow = nil
   end
 end
 
@@ -78,8 +80,6 @@ Thrown.functions = {
     if self.zo >= 0 then
       -- self.zo = 0
       -- self.zvel = 0
-      if self.shadow then o.removeFromWorld(self.shadow) end
-      self.shadow = nil
       if self.floorTiles[1] then
         local x, y = self.body:getPosition()
         -- I could be stepping on up to four tiles. Find closest to determine mods
@@ -168,8 +168,6 @@ Thrown.functions = {
     if other.attackDodger then return end
 
     -- destroy
-    if self.shadow then o.removeFromWorld(self.shadow) end
-    self.shadow = nil
     destroyself(self)
   end,
 
