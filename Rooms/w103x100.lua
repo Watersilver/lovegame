@@ -12,7 +12,13 @@ room.timeScreenEffect = 'default'
 room.width = 512
 room.height = 512
 room.downTrans = {}
-room.rightTrans = {}
+room.rightTrans = {
+  {
+    roomTarget = "Rooms/w104x100.lua",
+    yupper = 0, ylower = 520,
+    xmod = 0, ymod = 0
+  }
+}
 room.leftTrans = {
   {
     roomTarget = "Rooms/w102x100.lua",

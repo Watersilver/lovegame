@@ -1881,6 +1881,10 @@ Playa.functions = {
   end,
 
   update = function(self, dt)
+    -- -- float
+    -- self.fo = -2
+    -- self.zvel = 0
+
     -- Store usefull stuff
     local vx, vy = self.body:getLinearVelocity()
     local x, y = self.body:getPosition()
