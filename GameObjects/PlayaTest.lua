@@ -155,6 +155,7 @@ function Playa.initialize(instance)
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.sprite_info = im.spriteSettings.playerSprites
   instance.lightSource = {}
+  instance.lowGlow = {}
   instance.flickerPeriod = 1 / 30 -- in secs
   instance.flickerTick = 0
   instance.sounds = snd.load_sounds({
@@ -1880,6 +1881,21 @@ Playa.functions = {
     self.health = math.min(self.health + addedHealth, self.maxHealth)
   end,
 
+  drawMyLights = function (self, x, y)
+    if session.save.playerGlowAvailable then
+      self.lightSource.kind = session.save.playerGlow
+      if self.lightSource.kind then
+        self.lightSource.x, self.lightSource.y = x, y
+        self.lightSource.image_index = self.flickerIndex
+        ls.drawSource(self.lightSource)
+      end
+
+      self.lowGlow.kind = "lowGlow"
+      self.lowGlow.x, self.lowGlow.y = x, y
+      ls.drawSource(self.lowGlow)
+    end
+  end,
+
   update = function(self, dt)
     -- -- float
     -- self.fo = -2
@@ -2149,14 +2165,7 @@ Playa.functions = {
 
     -- After done with coords draw light source (gets drawn later, this just sets it up)
     -- check during pause screen if session.save.playerGlowAvailable to enable and disable
-    if session.save.playerGlowAvailable then
-      self.lightSource.kind = session.save.playerGlow
-      if self.lightSource.kind then
-        self.lightSource.x, self.lightSource.y = xtotal, ytotal
-        self.lightSource.image_index = self.flickerIndex
-        ls.drawSource(self.lightSource)
-      end
-    end
+    self:drawMyLights(xtotal, ytotal)
 
     if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
     self.spritebody:setPosition(xtotal, ytotal)
@@ -2235,14 +2244,7 @@ Playa.functions = {
 
     -- After done with coords draw light source (gets drawn later, this just sets it up)
     -- check during pause screen if session.save.playerGlowAvailable to enable and disable
-    if session.save.playerGlowAvailable then
-      self.lightSource.kind = session.save.playerGlow
-      if self.lightSource.kind then
-        self.lightSource.x, self.lightSource.y = xtotal, ytotal
-        self.lightSource.image_index = self.flickerIndex
-        ls.drawSource(self.lightSource)
-      end
-    end
+    self:drawMyLights(xtotal, ytotal)
 
     -- destroy joint to avoid funkyness during transition
     if self.spritejoint then
