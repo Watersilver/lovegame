@@ -42,7 +42,7 @@ local lights = {
   playerTorch = {sprite = im.load_sprite({'flickeringLight', 2, padding = 1, width = 48, height = 48})},
   playerGlow = radialGradient(24, {gradFunc = "elipseQuadrant", a = 0.5}),
   playerSpotlight = radialGradient(24, {a = 0.5}),
-  lowGlow = radialGradient(140, {gradFunc = "elipseQuadrant", a = 0.29}),
+  lowGlow = radialGradient(140, {gradFunc = "elipseQuadrant", r = 0.13, g = 0.1, b = 0.1}), -- a = 0.2
   --240
 
   circleWhite8 = radialGradient(8),
