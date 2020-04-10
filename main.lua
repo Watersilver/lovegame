@@ -703,7 +703,7 @@ function love.update(dt)
   -- end
 
   -- Check edge transitions
-  if pl1 and not inp.shift then
+  if pl1 then
 
     if not game.transitioning then
 
@@ -719,9 +719,10 @@ function love.update(dt)
       cam.yt = playay + playa.fo or cam.yt
 
       -- check if a screen edge transition will happen
+      local canTrans = (not playa.disableTransitions) and (not inp.shift)
       -- left
       if playax - halfw < l - screenEdgeThreshold then
-        if playa.vx < 0 or playa.noVelTrans then
+        if (playa.vx < 0 or playa.noVelTrans) and canTrans then
           playa.noVelTrans = false
           local transed = false
           for _, transInfo in ipairs(room.leftTrans) do
@@ -744,13 +745,15 @@ function love.update(dt)
 
             end
           end
-          if not transed then
+          if transed then
+            if playa.animation_state.state == "respawn" then playa.disableTransitions = true end
+          else
             session.barrierBounce(playa, 1, 0)
           end
         end
       -- right
       elseif playax + halfw > w + screenEdgeThreshold then
-        if playa.vx > 0 or playa.noVelTrans then
+        if (playa.vx > 0 or playa.noVelTrans) and canTrans then
           playa.noVelTrans = false
           local transed = false
           for _, transInfo in ipairs(room.rightTrans) do
@@ -773,13 +776,15 @@ function love.update(dt)
 
             end
           end
-          if not transed then
+          if transed then
+            if playa.animation_state.state == "respawn" then playa.disableTransitions = true end
+          else
             session.barrierBounce(playa, -1, 0)
           end
         end
       -- down
       elseif playay + fullh > h + screenEdgeThreshold then
-        if playa.vy > 0 or playa.noVelTrans then
+        if (playa.vy > 0 or playa.noVelTrans) and canTrans then
           playa.noVelTrans = false
           local transed = false
           for _, transInfo in ipairs(room.downTrans) do
@@ -799,13 +804,15 @@ function love.update(dt)
 
             end
           end
-          if not transed then
+          if transed then
+            if playa.animation_state.state == "respawn" then playa.disableTransitions = true end
+          else
             session.barrierBounce(playa, 0, -1)
           end
         end
       -- up
       elseif playay - fullh < t - screenEdgeThreshold then
-        if playa.vy < 0 or playa.noVelTrans then
+        if (playa.vy < 0 or playa.noVelTrans) and canTrans then
           playa.noVelTrans = false
           local transed = false
           for _, transInfo in ipairs(room.upTrans) do
@@ -825,7 +832,9 @@ function love.update(dt)
 
             end
           end
-          if not transed then
+          if transed then
+            if playa.animation_state.state == "respawn" then playa.disableTransitions = true end
+          else
             session.barrierBounce(playa, 0, 1)
           end
         end

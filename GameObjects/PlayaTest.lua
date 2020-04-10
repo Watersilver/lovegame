@@ -1756,6 +1756,7 @@ function Playa.initialize(instance)
 
     end_state = function(instance, dt)
       instance.noVelTrans = false
+      instance.disableTransitions = false
       instance.body:setPosition(instance.xLastSteppable, instance.yLastSteppable)
       instance.invisible = false
       inp.enable_controller(instance.player)
@@ -1900,6 +1901,7 @@ Playa.functions = {
     -- -- float
     -- self.fo = -2
     -- self.zvel = 0
+    fuck = self.body:getLinearVelocity()
 
     -- Store usefull stuff
     local vx, vy = self.body:getLinearVelocity()
