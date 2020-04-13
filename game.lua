@@ -27,6 +27,13 @@ end
 function game.change_room(roomTarget)
   -- local roomTarget = u.utf8_backspace(roomTarget, 4)
   -- return require(roomTarget)
+
+  -- placed above assert so it doesn't get messed up in the first room (room0)
+  -- If below, game will think last room visited is room0
+  session.latestVisitedRooms:add(roomTarget)
+  if session.latestVisitedRooms.length > GCON.rtr then
+    session.latestVisitedRooms:remove()
+  end
   local newRoom = assert(love.filesystem.load(roomTarget))()
   return newRoom
 end

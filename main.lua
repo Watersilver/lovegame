@@ -26,7 +26,9 @@ GCON = {
     nightSilence = 19.5,
     nightMusic = 21,
     fadeToSilenceSpeed = 0.2
-  }
+  },
+  -- How many rooms to remember?
+  rtr = 20
 }
 -- Load stuff from save directory
 local gs = require "game_settings"
@@ -69,6 +71,7 @@ session = {
     swordSpeed = nil
   },
   mslQueue = u.newQueue(),
+  latestVisitedRooms = u.newQueue(),
   initialize = function()
     -- Menu cursors
     pam.left.initCursors()
@@ -326,7 +329,7 @@ function love.load()
   -- game.room = assert(love.filesystem.load("Rooms/room0.lua"))()
 
   -- Normal game
-  game.room = assert(love.filesystem.load("Rooms/main_menu.lua"))()
+  game.room = game.change_room("Rooms/main_menu.lua")
   rm.build_room(game.room)
   -- snd.bgm:load(game.room.music_info)
   snd.bgmV2.getMusicAndload()

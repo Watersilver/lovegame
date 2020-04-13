@@ -68,11 +68,12 @@ activateFuncs[2] = function (self, dt, textIndex)
       end
     end
   end
-  -- write coordinates
+  -- write coordinates and roomName
   -- love.filesystem.append(saveName, "\nsave.playerX = " .. pl1.x)
   -- love.filesystem.append(saveName, "\nsave.playerY = " .. pl1.y)
   saveContent = saveContent .. "\nsave.playerX = " .. pl1.x
   saveContent = saveContent .. "\nsave.playerY = " .. pl1.y
+  saveContent = saveContent .. '\nsave.room = "' .. session.latestVisitedRooms[session.latestVisitedRooms.last] .. '"'
   -- write health
   saveContent = saveContent .. "\nsave.playerHealth = " .. pl1.health
   -- write spel slots
