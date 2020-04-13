@@ -1901,7 +1901,6 @@ Playa.functions = {
     -- -- float
     -- self.fo = -2
     -- self.zvel = 0
-    fuck = self.body:getLinearVelocity()
 
     -- Store usefull stuff
     local vx, vy = self.body:getLinearVelocity()

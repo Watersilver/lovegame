@@ -3,7 +3,9 @@ local sh = require "scaling_handler"
 local trans = require "transitions"
 local game = require "game"
 
-
+-- Special starting room that doesn't quite follow room rules
+-- Used to create the persistent player object
+-- (Yes I could have created it a different way no real reason for this room)
 local room = {}
 
 room.width = 800
