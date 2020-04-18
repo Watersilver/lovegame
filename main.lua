@@ -440,7 +440,7 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
-	-- dt = math.min(0.03333333, dt)
+	dt = math.min(0.03333333, dt)
   local drugSlomo
   if session.drug then drugSlomo = session.drug.slomo end
   dt = dt * (drugSlomo or session.ringSlomo or 1)
