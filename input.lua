@@ -26,7 +26,7 @@ end
 function input.check_input()
   local controllers = input.controllers
   for playername, controller in pairs(controllers) do
-    if not controller.disabled then -- WARNING !!!MUST BE NIL, NOT FALSE!!!
+    if (not controller.disabled) and (not input.transing) then -- WARNING !!!MUST BE NIL, NOT FALSE!!!
       -- Handle controller if not disabled
       local player = input.current[playername]
       -- Store previous input

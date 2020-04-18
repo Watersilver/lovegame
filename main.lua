@@ -440,7 +440,7 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
-	dt = math.min(0.03333333, dt)
+	-- dt = math.min(0.03333333, dt)
   local drugSlomo
   if session.drug then drugSlomo = session.drug.slomo end
   dt = dt * (drugSlomo or session.ringSlomo or 1)
@@ -492,7 +492,6 @@ function love.update(dt)
   if game.transitioning then
 
     if not game.transitioning.startedTransition then
-
       if game.transitioning.type == "whiteScreen" then
 
         -- Don't draw a time screen effect over white screen
@@ -522,6 +521,8 @@ function love.update(dt)
       if game.transitioning.progress > 1 then game.transitioning.progress = 1 end
       trans.determine_coordinates_transformation()
     else
+
+      inp.transing = false
 
       o.to_be_deleted:remove_all()
 
@@ -750,6 +751,7 @@ function love.update(dt)
           end
           if transed then
             if playa.animation_state.state == "respawn" then playa.disableTransitions = true end
+            inp.transing = true
           else
             session.barrierBounce(playa, 1, 0)
           end
@@ -781,6 +783,7 @@ function love.update(dt)
           end
           if transed then
             if playa.animation_state.state == "respawn" then playa.disableTransitions = true end
+            inp.transing = true
           else
             session.barrierBounce(playa, -1, 0)
           end
@@ -809,6 +812,7 @@ function love.update(dt)
           end
           if transed then
             if playa.animation_state.state == "respawn" then playa.disableTransitions = true end
+            inp.transing = true
           else
             session.barrierBounce(playa, 0, -1)
           end
@@ -837,6 +841,7 @@ function love.update(dt)
           end
           if transed then
             if playa.animation_state.state == "respawn" then playa.disableTransitions = true end
+            inp.transing = true
           else
             session.barrierBounce(playa, 0, 1)
           end
