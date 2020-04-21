@@ -469,6 +469,9 @@ function love.update(dt)
   -- local wmrx, wmry = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
   -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
 
+  -- -- display room
+  -- fuck = session.latestVisitedRooms[session.latestVisitedRooms.last]
+
   if o.to_be_added[1] then
     o.to_be_added:add_all()
   end
@@ -528,6 +531,10 @@ function love.update(dt)
 
       local room = game.room
 
+      local gts = game.transitioning.side
+      local horside = gts == "left" and -1 or (gts == "right" and 1 or 0)
+      local verside = gts == "up" and -1 or (gts == "down" and 1 or 0)
+
 
       -- Store player
       local playaTest = o.identified.PlayaTest
@@ -536,37 +543,18 @@ function love.update(dt)
         -- Die if fall in unsteppable after transition
         -- pl1.xLastSteppable = nil
         -- pl1.yLastSteppable = nil
-
-        local gts = game.transitioning.side
         if gts then
-          if gts == "up" then
-            if pl1.yLastSteppable then
-              pl1.yLastSteppable = pl1.yLastSteppable + room.height
-            end
-            if pl1.yUnsteppable then
-              pl1.yUnsteppable = pl1.yUnsteppable + room.height
-            end
-          elseif gts == "down" then
-            if pl1.yLastSteppable then
-              pl1.yLastSteppable = pl1.yLastSteppable - room.height
-            end
-            if pl1.yUnsteppable then
-              pl1.yUnsteppable = pl1.yUnsteppable - room.height
-            end
-          elseif gts == "left" then
-            if pl1.xLastSteppable then
-              pl1.xLastSteppable = pl1.xLastSteppable + room.width
-            end
-            if pl1.xUnsteppable then
-              pl1.xUnsteppable = pl1.xUnsteppable + room.width
-            end
-          elseif gts == "right" then
-            if pl1.xLastSteppable then
-              pl1.xLastSteppable = pl1.xLastSteppable - room.width
-            end
-            if pl1.xUnsteppable then
-              pl1.xUnsteppable = pl1.xUnsteppable - room.width
-            end
+          if pl1.yLastSteppable then
+            pl1.yLastSteppable = pl1.yLastSteppable - verside * room.height
+          end
+          if pl1.yUnsteppable then
+            pl1.yUnsteppable = pl1.yUnsteppable - verside * room.height
+          end
+          if pl1.xLastSteppable then
+            pl1.xLastSteppable = pl1.xLastSteppable - horside * room.width
+          end
+          if pl1.xUnsteppable then
+            pl1.xUnsteppable = pl1.xUnsteppable - horside * room.width
           end
         else
           pl1.xLastSteppable = nil
@@ -589,7 +577,12 @@ function love.update(dt)
           -- Also set spritebody to avoid funkyness
           playa.spritebody:setPosition(game.transitioning.desx, game.transitioning.desy)
         end
-        playa.body:setLinearVelocity(u.sign(playa.vx), u.sign(playa.vy))
+        -- reset player veolocity after transition if necessary
+        -- playa.body:setLinearVelocity(u.sign(playa.vx), u.sign(playa.vy))
+        local xtransvel = u.sign(playa.vx) * u.clamp(math.abs(horside * 10), math.abs(playa.vx * 0.25), 25)
+        local ytransvel = u.sign(playa.vy) * u.clamp(math.abs(verside * 10), math.abs(playa.vy * 0.25), 25)
+        playa.body:setLinearVelocity(xtransvel, ytransvel)
+        -- playa.body:setLinearVelocity(playa.vx * 0.25, playa.vy * 0.25)
         playa.zvel = 0
       end
 

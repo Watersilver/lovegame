@@ -13,7 +13,13 @@ room.width = 512
 room.height = 512
 room.downTrans = {}
 room.rightTrans = {}
-room.leftTrans = {}
+room.leftTrans = {
+  {
+    roomTarget = "Rooms/w100x105.lua",
+    yupper = 0, ylower = 520,
+    xmod = 0, ymod = 0
+  }
+}
 room.upTrans = {
   {
     roomTarget = "Rooms/w101x104.lua",
