@@ -1937,7 +1937,7 @@ Playa.functions = {
         previousClosestDistance = closestDistance
         -- Magic number to account for player height
         closestDistance = min(distanceSqared2d(x, y+6, floorTile.xstart, floorTile.ystart), closestDistance)
-        if closestDistance <= previousClosestDistance then
+        if closestDistance < previousClosestDistance then
           closestTile = floorTile
         end
       end
