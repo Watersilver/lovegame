@@ -28,7 +28,7 @@ function ec.wentOverDownEdge(edge, other)
   -- local ex, ey = other.body:getPosition()
   -- if abs(sy - ey) > 1 then return true end
   -- return false
-  
+
   -- old
   -- if other.y > edge.ystart then return true end
   -- return false

@@ -104,8 +104,7 @@ thickness, height * proportion
 
 function ps.shapes.edgeToTiles(instance, edgetable)
   local i = 1
-  if instance.physical_properties.tile[1] == "none" then return
-  end
+  if instance.physical_properties.tile[1] == "none" then return end
   instance.body = love.physics.newBody(ps.pw, instance.xstart, instance.ystart)
   instance.body:setUserData(instance)
   instance.fixtures = {}

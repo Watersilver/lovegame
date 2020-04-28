@@ -123,6 +123,15 @@ load = function (self)
     self.fixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
   else
     self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.d2)
+    -- Create downwall for very low walls
+    local wd = require "GameObjects.wallDown"
+    local nwd = wd:new()
+    nwd.xstart = self.x
+    nwd.ystart = self.y
+    nwd.x = nwd.xstart
+    nwd.y = nwd.ystart
+    local o = require "GameObjects.objects"
+    o.addToWorld(nwd)
     -- self.fixture = love.physics.newFixture(self.body, ps.shapes.edgeDown)
     self.belowEdge = ec.belowDownEdge
     self.wentOverEdge = ec.wentOverDownEdge
