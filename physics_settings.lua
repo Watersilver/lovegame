@@ -28,6 +28,7 @@ ps.shapes = {
     rect1x1minusinfinitesimal = love.physics.newRectangleShape(15, 15),
   circle1 = love.physics.newCircleShape(8),
   circleAlmost1 = love.physics.newCircleShape(7),
+  circleAlmost2 = love.physics.newCircleShape(0, 8, 3),
   circleHalf = love.physics.newCircleShape(4),
   edgeRect1x1 = {
     u = love.physics.newEdgeShape(-8, -8, 8, -8), -- upper side

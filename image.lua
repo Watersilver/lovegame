@@ -44,7 +44,7 @@ im.spriteSettings = {
   walls = {'Tiles/Walls', 7, 39, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.walls"},
   portals = {'Tiles/Portals', 5, 3, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.portals"},
   edges = {'Tiles/Edges', 2, 2, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.edges"},
-  clutter = {'Tiles/Clutter', 8, 8, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.clutter"},
+  clutter = {'Tiles/Clutter', 8, 10, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.clutter"},
   zeldarip = {'Tiles/zeldarip', 16, 71, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.zeldarip"},
   floorOutside = {'Tiles/FloorOutside', 10, 10, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floorOutside"},
   solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},

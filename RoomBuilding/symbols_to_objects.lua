@@ -39,6 +39,7 @@ local mainMenu = require("GameObjects.mainMenu")
 local symbols_to_objects_default = {
   w = Wall,
   rW = require("GameObjects.roundWall"),
+  rW2 = require("GameObjects.roundWall2"),
   w1234 = require("GameObjects.BrickTest1234"),
   wV = require("GameObjects.BrickTestVibration"),
   sL = softLiftable,
