@@ -409,7 +409,7 @@ player_states.check_gripping = function(instance, dt, side)
   if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif not trig.grip or not instance.grippedOb.exists then
+  elseif not trig.grip or not instance.grippedOb or not instance.grippedOb.exists then
     instance.animation_state:change_state(instance, dt, side .. "walk")
   end
 end
