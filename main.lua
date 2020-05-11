@@ -470,7 +470,7 @@ function love.update(dt)
   -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
 
   -- -- display room
-  -- fuck = session.latestVisitedRooms[session.latestVisitedRooms.last]
+  fuck = session.latestVisitedRooms[session.latestVisitedRooms.last]
 
   if o.to_be_added[1] then
     o.to_be_added:add_all()

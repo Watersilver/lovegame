@@ -18,7 +18,13 @@ room.downTrans = {
     xmod = 0, ymod = 0
   }
 }
-room.rightTrans = {}
+room.rightTrans = {
+  {
+    roomTarget = "Rooms/w094x096.lua",
+    yupper = 0, ylower = 520,
+    xmod = 0, ymod = 0
+  }
+}
 room.leftTrans = {
   {
     roomTarget = "Rooms/w092x096.lua",

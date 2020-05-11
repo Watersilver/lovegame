@@ -26,7 +26,13 @@ room.rightTrans = {
   }
 }
 room.leftTrans = {}
-room.upTrans = {}
+room.upTrans = {
+  {
+    roomTarget = "Rooms/w101x096.lua",
+    xleftmost = 0, xrightmost = 520,
+    xmod = 0, ymod = 0
+  }
+}
 
 room.game_scale = 2
 

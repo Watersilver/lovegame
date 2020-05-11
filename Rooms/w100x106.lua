@@ -12,7 +12,13 @@ room.timeScreenEffect = 'default'
 room.width = 512
 room.height = 512
 room.downTrans = {}
-room.rightTrans = {}
+room.rightTrans = {
+  {
+    roomTarget = "Rooms/w101x106.lua",
+    yupper = 0, ylower = 520,
+    xmod = 0, ymod = 0
+  }
+}
 room.leftTrans = {
   {
     roomTarget = "Rooms/w099x106.lua",
@@ -856,7 +862,6 @@ room.gameObjects = {
 { x = 376, y = 488, n = {l = 10}, t = 1, i = 212},
 { x = 440, y = 472, n = {l = 10}, t = 1, i = 212},
 { x = 392, y = 488, n = {l = 10}, t = 1, i = 212},
-{ x = 408, y = 488, n = {l = 10}, t = 1, i = 212},
 { x = 488, y = 488, n = {l = 10}, t = 1, i = 212},
 { x = 504, y = 488, n = {l = 10}, t = 1, i = 212},
 { x = 472, y = 472, n = {l = 10}, t = 1, i = 212},
@@ -1086,10 +1091,7 @@ room.gameObjects = {
 { x = 56, y = 104, n = {l = 10}, t = 1, i = 164},
 { x = 56, y = 120, n = {l = 10}, t = 1, i = 164},
 { x = 56, y = 8, n = {l = 10}, t = 1, i = 164},
+{ x = 408, y = 488, n = {l = 10}, t = 1, i = 204},
 ----------End of gameObjects----------
-}
-
-room.manuallyPlacedObjects = {
-  {x = 184, y = 232, blueprint = "InRooms.w100x106.portalChecker100x106"},
 }
 return room
