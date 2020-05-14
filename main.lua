@@ -30,6 +30,12 @@ GCON = {
   -- How many rooms to remember?
   rtr = 20
 }
+
+-- global variables
+gvar = {
+  t = 0
+}
+
 -- Load stuff from save directory
 local gs = require "game_settings"
 
@@ -444,6 +450,10 @@ function love.update(dt)
   local drugSlomo
   if session.drug then drugSlomo = session.drug.slomo end
   dt = dt * (drugSlomo or session.ringSlomo or 1)
+
+  -- update timers
+  gvar.t = gvar.t + dt
+
   -- Store mouse input
   moub["1press"] = moub[1] and not moub["1prev"]
   moub["2press"] = moub[2] and not moub["2prev"]
@@ -465,12 +475,12 @@ function love.update(dt)
   end
 
   -- -- display mouse position
-  -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  -- local wmrx, wmry = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
-  -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
+  local wmx, wmy = cam:toWorld(moup.x, moup.y)
+  local wmrx, wmry = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
+  fuck = tostring(wmrx) .. "/" .. tostring(wmry)
 
   -- -- display room
-  fuck = session.latestVisitedRooms[session.latestVisitedRooms.last]
+  fuck = fuck .. "\n" .. session.latestVisitedRooms[session.latestVisitedRooms.last]
 
   if o.to_be_added[1] then
     o.to_be_added:add_all()

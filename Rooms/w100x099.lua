@@ -1103,4 +1103,8 @@ room.gameObjects = {
 { x = 312, y = 408, n = {l = 10}, t = 1, i = 17},
 ----------End of gameObjects----------
 }
+
+room.manuallyPlacedObjects = {
+  {x = 440, y = 408, blueprint = "InRooms.w100x099.portalChecker100x099"}
+}
 return room
