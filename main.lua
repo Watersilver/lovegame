@@ -479,7 +479,7 @@ function love.update(dt)
   local wmrx, wmry = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
   fuck = tostring(wmrx) .. "/" .. tostring(wmry)
 
-  -- -- display room
+  -- display room
   fuck = fuck .. "\n" .. session.latestVisitedRooms[session.latestVisitedRooms.last]
 
   if o.to_be_added[1] then

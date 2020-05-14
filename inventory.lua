@@ -174,6 +174,30 @@ local function single_inv_key_press(object, input, previnput)
   return key, keys
 end
 
+local function checkJumpingSword(input)
+  local jumpkey = false
+  local swordkey = false
+  local otherkey = false
+  for _, slot in ipairs(inv.slots) do
+    if input[slot.key] == 1 then
+      if slot.item and slot.item.name == "sword" then
+        swordkey = slot.key
+      elseif slot.item and slot.item.name == "jump" then
+        jumpkey = slot.key
+      else
+        otherkey = true
+      end
+    end
+    if swordkey and jumpkey then break end
+  end
+  if otherkey then
+    return false
+  elseif swordkey and jumpkey then
+    return swordkey, jumpkey
+  end
+  return false
+end
+
 
 function inv.closeInv()
   inv.spellSelection = nil
@@ -211,9 +235,17 @@ function inv.determine_equipment_triggers(object, dt)
   local trig = object.triggers
 
   local keypressing, keyspressing = single_inv_key_press(object, myinput)
-  if keypressing and keyspressing == 1 then
-    local item = inv.slots[keypressing].item
-    if item then trig[item.check_trigger(object, previnput[keypressing])] = true end
+  if keypressing then
+    if keyspressing == 1 then
+      local item = inv.slots[keypressing].item
+      if item then trig[item.check_trigger(object, previnput[keypressing])] = true end
+    elseif keyspressing == 2 then
+      local swordkey, jumpkey = checkJumpingSword(myinput)
+      if swordkey then
+        trig[inv.sword.check_trigger(object, previnput[swordkey])] = true
+        trig[inv.jump.check_trigger(object, previnput[jumpkey])] = true
+      end
+    end
   end
 end
 
