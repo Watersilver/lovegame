@@ -218,4 +218,29 @@ function u.obliterateBody(body)
   body:destroy()
 end
 
+function u.rememberFloorTile(self, other)
+  if other.floor then
+    -- old method
+    -- other.playerFloorTilesIndex = push(self.floorTiles, other)
+    u.push(self.floorTiles, other)
+  end
+end
+
+function u.forgetFloorTile(self, other)
+  if other.floor then
+    -- old method
+    -- u.free(self.floorTiles, other.playerFloorTilesIndex)
+    -- other.playerFloorTilesIndex = nil
+    if self.floorTiles then
+      for i, floorTile in ipairs(self.floorTiles) do
+        if other == floorTile then
+          u.free(self.floorTiles, i)
+          break
+        end
+      end
+    end
+
+  end
+end
+
 return u

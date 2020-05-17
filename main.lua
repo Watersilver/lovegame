@@ -193,9 +193,17 @@ session = {
     table.remove(session.save.quests, index)
     session.save[questid] = result or true
   end,
+  checkItemLim = function(itemid)
+    return require("items")[itemid].limit
+  end,
   addItem = function(itemid)
     if session.save[itemid] then
       session.save[itemid] = session.save[itemid] + 1
+      -- Check if I reached carry limit
+      local carryLim = session.checkItemLim(itemid) or 99
+      if session.save[itemid] > carryLim then
+        session.save[itemid] = carryLim
+      end
     else
       session.save[itemid] = 1
       table.insert(session.save.items, itemid)
@@ -207,11 +215,13 @@ session = {
     end
   end,
   removeItem = function(itemid)
+    if not session.save[itemid] then return "don't have any" end
     session.save[itemid] = session.save[itemid] - 1
     if session.save[itemid] < 1 then
       session.save[itemid] = nil
       local index = u.getFirstIndexByValue(session.save.items, itemid)
       table.remove(session.save.items, index)
+      return "ran out"
     end
   end,
   getMusic = function()
@@ -286,6 +296,8 @@ glsounds = snd.load_sounds{
   stairs = {"Effects/Oracle_Stairs"},
   useItem = {"Effects/Oracle_Get_Item"},
   portal = {"Effects/Oracle_Dungeon_Teleport"},
+  bomb = {"Effects/Oracle_Bomb_Blow"},
+  bombDrop = {"Effects/Oracle_Bomb_Drop"}
 }
 
 -- Set up cameras
@@ -475,12 +487,12 @@ function love.update(dt)
   end
 
   -- -- display mouse position
-  local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  local wmrx, wmry = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
-  fuck = tostring(wmrx) .. "/" .. tostring(wmry)
-
-  -- display room
-  fuck = fuck .. "\n" .. session.latestVisitedRooms[session.latestVisitedRooms.last]
+  -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
+  -- local wmrx, wmry = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
+  -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
+  --
+  -- -- display room
+  -- fuck = fuck .. "\n" .. session.latestVisitedRooms[session.latestVisitedRooms.last]
 
   if o.to_be_added[1] then
     o.to_be_added:add_all()
@@ -983,6 +995,28 @@ local function hudDraw(l,t,w,h)
     love.graphics.draw(cspr.img, cspr[0], clockX, h, session.clockAngle, cspr.res_x_scale, cspr.res_y_scale, cspr.cx, cspr.cy)
     local chspr = im.sprites["clockHand"]
     love.graphics.draw(chspr.img, chspr[session.clockAngleTarget == 0 and 0 or 1], clockX, h, -session.clockAngle + session.save.time * math.pi / 12, chspr.res_x_scale, chspr.res_y_scale, chspr.cx, chspr.cy)
+
+    -- Draw bombs
+    if session.save.hasBomb then
+      local maxBombs = session.checkItemLim("somaBlastSeed")
+      local bombs = string.format("%02d", (session.save.somaBlastSeed or 0))
+      local bspr = im.sprites["Drops/blastSeed"]
+      love.graphics.draw(bspr.img, bspr[0], 2, h-9,  0, bspr.res_x_scale, bspr.res_y_scale)
+      love.graphics.setColor(0, 0, 0, COLORCONST)
+      local bombOffset = 12
+      local bombYBase = h-6.8
+      love.graphics.print(bombs, bombOffset + rno, bombYBase, 0, 0.255)
+      love.graphics.print(bombs, bombOffset - rno, bombYBase, 0, 0.255)
+      love.graphics.print(bombs, bombOffset, bombYBase + rno, 0, 0.255)
+      love.graphics.print(bombs, bombOffset, bombYBase - rno, 0, 0.255)
+      if maxBombs == session.save.somaBlastSeed then
+        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST * 0.2, COLORCONST)
+      else
+        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      end
+      love.graphics.print(bombs, bombOffset, bombYBase, 0, 0.255)
+    end
+
     love.graphics.setColor(pr, pg, pb, pa)
 
 

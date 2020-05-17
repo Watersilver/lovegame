@@ -45,6 +45,9 @@ Projectile.functions = {
   hitByThrown = function (self, other, myF, otherF)
   end,
 
+  hitByBombsplosion = function (self, other, myF, otherF)
+  end,
+
   preSolve = function(self, a, b, coll, aob, bob)
     coll:setEnabled(false)
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)

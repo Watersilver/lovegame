@@ -65,6 +65,13 @@ items.testi2 = {
   end
 }
 
+-- Somatic
+items.somaBlastSeed = {
+  name = "Blast seed",
+  description = "Used to cast magic blast",
+  limit = 10
+}
+
 -- Recovery
 items.foodFrittata = {
   name = "Frittata",

@@ -90,10 +90,18 @@ function ebh.bounceOffScreenEdge(object)
   end
 end
 
+local function checkIfShieldPierced(object)
+  return (
+    object.weakShield and
+    (session.save.dinsPower and object.lastHit == "sword") or
+    object.lastHit == "bombsplosion"
+  )
+end
+
 function ebh.damagedByHit(object, other, myF, otherF)
 
   -- Determine if shield was pierced
-  local piercedShield = (object.weakShield and session.save.dinsPower and object.lastHit == "sword")
+  local piercedShield = checkIfShieldPierced(object)
 
   if (not object.shielded) or object.shieldDown or piercedShield then
     -- Calculate damage received
@@ -109,6 +117,9 @@ function ebh.damagedByHit(object, other, myF, otherF)
     elseif object.lastHit == "thrown" then
       baseDamage = session.save.dinsPower and 5 or 4
       damageMod = object.thrownDamageMod or 1
+    elseif object.lastHit == "bombsplosion" then
+      baseDamage = session.save.dinsPower and 5 or 4
+      damageMod = object.bombsplosionDamageMod or 1
     end
     local damage = baseDamage * damageMod
 
@@ -127,8 +138,8 @@ end
 function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invframesMod)
 
   -- Determine if shield was pierced
-  local piercedShield = (object.weakShield and session.save.dinsPower and object.lastHit == "sword")
-
+  local piercedShield = checkIfShieldPierced(object)
+  
   -- Calculate force
   local baseForceMod
   local attackForceMod
@@ -142,6 +153,9 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
   elseif object.lastHit == "thrown" then
     baseForceMod = session.save.dinsPower and 3 or 2
     attackForceMod = object.thrownForceMod or 1
+  elseif object.lastHit == "bombsplosion" then
+    baseForceMod = session.save.dinsPower and 5 or 4
+    attackForceMod = object.bombsplosionForceMod or 1
   end
   local forceMod = baseForceMod * attackForceMod
 

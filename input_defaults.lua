@@ -11,7 +11,10 @@ id.player1 = {
   z = "z",
   d = "d",
   s = "s",
-  a = "a"
+  a = "a",
+  q = "q",
+  w = "w",
+  e = "e"
 }
 
 return id

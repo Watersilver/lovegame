@@ -183,6 +183,8 @@ im.spriteSettings = {
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
   playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4},
   playerMissileOutline = {'Inventory/UseMissileOutlineL1', 1, padding = 2, width = 6, height = 6},
+  playerBomb = {'Inventory/UseBomb', 1, padding = 2, width = 8, height = 13},
+  playerBlast = {'Inventory/UseBombsplosionL1', 6, padding = 2, width = 32, height = 32},
   -- Enemy sprites
   bullKnight = {
     {'Enemies/BullKnight/walk_left', 2, padding = 2, width = 16, height = 16},
@@ -325,6 +327,7 @@ for _, plSprite in ipairs(im.spriteSettings.playerSprites) do
 end
 im.load_sprite{'health', 5, padding = 2, width = 7, height = 7}
 im.load_sprite{'rupees', 1, padding = 0, width = 7, height = 7}
+im.load_sprite{'Drops/blastSeed', 1, padding = 0, width = 8, height = 8}
 im.load_sprite{'Test', 1, padding = 0}
 im.load_sprite(im.spriteSettings.floorOutside)
 im.load_sprite(im.spriteSettings.solidsOutside)
@@ -332,6 +335,7 @@ im.load_sprite(im.spriteSettings.zeldarip)
 im.load_sprite(im.spriteSettings.basicFriendlyInterior)
 im.load_sprite(im.spriteSettings.playerSword)
 im.load_sprite(im.spriteSettings.playerMissile)
+im.load_sprite(im.spriteSettings.playerBomb)
 im.load_sprite(im.spriteSettings.clock)
 im.load_sprite(im.spriteSettings.clockHand)
 im.load_sprite(im.spriteSettings.triforce)

@@ -1,6 +1,8 @@
 local inp = require "input"
+local im = require "image"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
+local o = require "GameObjects.objects"
 
 local powToShad = {
   dinsPower = "itemRedShader",
@@ -133,6 +135,24 @@ inv.recall = {
   end
 }
 
+inv.bomb = {
+  name = "bomb",
+  powerUp = "dinsPower",
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgBomb.png"),
+  check_trigger = function(object, keyheld)
+    if keyheld == 0 then
+      return "bomb"
+    else
+      return "none"
+    end
+  end,
+  l1 = {
+    lvl = 1,
+    sprite_info = {im.spriteSettings.playerBomb},
+    image_index = 0,
+  }
+}
+
 inv.slots = {}
 
 -- inv.slots[6] = {key = "c", item = inv.sword}
@@ -142,12 +162,15 @@ inv.slots = {}
 -- inv.slots[2] = {key = "s", item = inv.recall}
 -- inv.slots[1] = {key = "a", item = inv.grip}
 
-inv.slots[6] = {key = "c", index=6}
-inv.slots[5] = {key = "x", index=5}
-inv.slots[4] = {key = "z", index=4}
-inv.slots[3] = {key = "d", index=3}
-inv.slots[2] = {key = "s", index=2}
-inv.slots[1] = {key = "a", index=1}
+inv.slots[9] = {key = "c", index=9}
+inv.slots[8] = {key = "x", index=8}
+inv.slots[7] = {key = "z", index=7}
+inv.slots[6] = {key = "d", index=6}
+inv.slots[5] = {key = "s", index=5}
+inv.slots[4] = {key = "a", index=4}
+inv.slots[3] = {key = "e", index=3}
+inv.slots[2] = {key = "w", index=2}
+inv.slots[1] = {key = "q", index=1}
 
 for index, contents in ipairs(inv.slots) do
   inv.slots[inv.slots[index].key] = inv.slots[index]
@@ -214,6 +237,24 @@ function inv.check_use(instance, trig, side, dt)
     return true
   elseif trig.fire_missile then
     instance.animation_state:change_state(instance, dt, side .. "missile")
+    return true
+  elseif trig.bomb then
+    local removeResult = session.removeItem("somaBlastSeed")
+    if removeResult == "don't have any" then return end
+    local blvl = inv.bomb.l1
+    instance.liftedOb = (require "GameObjects.Items.lifted"):new{
+      creator = instance,
+      side = side,
+      layer = side == "up" and instance.layer - 1 or instance.layer + 1,
+      iAmBomb = true,
+      timer = 2,
+      blevel = blvl.lvl,
+      sprite_info = blvl.sprite_info,
+      image_index = math.floor(blvl.image_index),
+      lifterSpeedMod = 0.9
+    }
+    o.addToWorld(instance.liftedOb)
+    instance.animation_state:change_state(instance, dt, side .. "lifting")
     return true
   elseif trig.gripping and instance.sensors[side .. "Touch"] then
     instance.animation_state:change_state(instance, dt, side .. "gripping")

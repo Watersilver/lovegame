@@ -32,7 +32,7 @@ Tile.functions = {
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     -- If other is a sword that is slashing then cut the grass
-    if other.immasword then
+    if other.immasword or other.immabombsplosion then
       if not other.stab then
         self.grass = nil
         self.floorViscosity = nil

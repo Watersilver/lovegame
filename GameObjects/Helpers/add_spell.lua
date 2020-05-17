@@ -3,6 +3,12 @@ local inv = require "inventory"
 local asp = {}
 
 function asp.insertToSpellSlot (self, spellName, spellKey)
+
+  -- Check if spell already here
+  for _, slot in  ipairs(inv.slots) do
+    if slot.item == inv[spellName] then return end
+  end
+
   -- Try to put the spell in the correct position
   if spellKey then
     if not inv.slots[spellKey].item then

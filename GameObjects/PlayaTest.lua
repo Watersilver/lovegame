@@ -1897,6 +1897,29 @@ Playa.functions = {
     end
   end,
 
+  takeDamage = function (self, other)
+    if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) and other.damager and not self.invulnerable and not other.harmless then
+      self.triggers.damaged =
+        (other.attackDmg or 1) *
+        (0.5 + (session.save.nayrusWisdom and 0 or 0.25) +
+        (0.25 - session.getArmorDamageReduction() * 0.25))
+      local mybod = self.body
+      local mymass = mybod:getMass()
+      local lvx, lvy = mybod:getLinearVelocity()
+      mybod:applyLinearImpulse(-lvx * mymass, -lvy * mymass)
+      local impdirx, impdiry =
+        u.normalize2d(self.x - other.x or self.x, self.y - other.y or self.y)
+      local _, myBrakes = session.getAthlectics()
+      local clbrakes = u.clamp(0, myBrakes, self.brakesLim)
+      local ipct = other.impact or 10
+      if other.immabombsplosion then
+        self.zvel = other.blowUpForce or 177
+        self.triggers.damCounter = other.damCounter or 1.5
+      end
+      mybod:applyLinearImpulse(impdirx*ipct*clbrakes*mymass, impdiry*ipct*clbrakes*mymass)
+    end
+  end,
+
   update = function(self, dt)
     -- -- float
     -- self.fo = -2
@@ -2325,6 +2348,7 @@ Playa.functions = {
 
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
+      if other.untouchable then return end
       local sensorID = myF:getUserData() -- string
 
       if sensorID then
@@ -2349,8 +2373,10 @@ Playa.functions = {
       if other.edge then self.onEdge = true end
 
       -- Remember Floor tiles
-      if other.floor then
-        other.playerFloorTilesIndex = push(self.floorTiles, other)
+      u.rememberFloorTile(self, other)
+
+      if otherF:isSensor() then
+        self:takeDamage(other)
       end
     end
 
@@ -2362,6 +2388,7 @@ Playa.functions = {
 
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
+      if other.untouchable then return end
       local sensorID = myF:getUserData()
 
       if sensorID then
@@ -2391,10 +2418,7 @@ Playa.functions = {
       if other.edge then self.onEdge = false end
 
       -- Forget Floor tiles
-      if other.floor then
-        u.free(self.floorTiles, other.playerFloorTilesIndex)
-        other.playerFloorTilesIndex = nil
-      end
+      u.forgetFloorTile(self, other)
     end
 
   end,
@@ -2407,19 +2431,7 @@ Playa.functions = {
       if other.grounded then
         if self.zo < 0 then coll:setEnabled(false); return end
       end
-      if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) and other.damager and not self.invulnerable and not other.harmless then
-        self.triggers.damaged = (other.attackDmg or 1) * (0.5 + (session.save.nayrusWisdom and 0 or 0.25) + (0.25 - session.getArmorDamageReduction() * 0.25))
-        local mybod = self.body
-        local mymass = mybod:getMass()
-        local lvx, lvy = mybod:getLinearVelocity()
-        mybod:applyLinearImpulse(-lvx * mymass, -lvy * mymass)
-        local impdirx, impdiry =
-          u.normalize2d(self.x - other.x or self.x, self.y - other.y or self.y)
-        local _, myBrakes = session.getAthlectics()
-        local clbrakes = u.clamp(0, myBrakes, self.brakesLim)
-        local ipct = other.impact or 10
-        mybod:applyLinearImpulse(impdirx*ipct*clbrakes*mymass, impdiry*ipct*clbrakes*mymass)
-      end
+      self:takeDamage(other)
       if other.fairy then
         o.removeFromWorld(other)
         self:addHealth(8)

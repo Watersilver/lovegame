@@ -108,7 +108,7 @@ NPC.functions = {
 
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-    if other.immasword and session.save.dinsPower then
+    if (other.immasword and session.save.dinsPower) or other.immabombsplosion then
       self:throw_collision()
       o.removeFromWorld(self)
       self.beginContact = nil

@@ -6,6 +6,9 @@ local game = require "game"
 local u = require "utilities"
 local expl = require "GameObjects.explode"
 local im = require "image"
+local snd = require "sound"
+local bspl = require "GameObjects.Items.bombsplosion"
+local shdrs = require "Shaders.shaders"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -20,10 +23,44 @@ local pi = math.pi
 local function destroyself(self)
   if not self.destroyedself then
     self.destroyedself = true
-    self:throw_collision()
+    if self.throw_collision then self:throw_collision() else u.emptyFunc() end
     o.removeFromWorld(self)
     if self.shadow then o.removeFromWorld(self.shadow) end
     self.shadow = nil
+    if self.iAmBomb then
+      local newBspl = bspl:new{x = self.x, y = self.y, layer = self.layer}
+      o.addToWorld(newBspl)
+    end
+  end
+end
+
+local function touchGround(self)
+  if self.iAmBomb then
+    if not self.planted then snd.play(glsounds.bombDrop) end
+    if self.bounces == 0 then
+      self.bounces = 1
+      self.zvel = 55
+      self.zo = -1
+      local vx, vy = self.body:getLinearVelocity()
+      self.body:setLinearVelocity(vx * 0.25, vy * 0.25)
+      o.change_layer(self, self.layer - 2)
+    elseif self.bounces == 1 then
+      self.bounces = 2
+      self.zvel = 22
+      self.zo = -1
+      local vx, vy = self.body:getLinearVelocity()
+      self.body:setLinearVelocity(vx * 0.25, vy * 0.25)
+    else
+      self.gravity = 0
+      self.zvel = 0
+      self.zo = 0
+      self.planted = true
+      self.body:setLinearVelocity(0, 0)
+      if self.shadow then o.removeFromWorld(self.shadow) end
+      self.shadow = nil
+    end
+  else
+    destroyself(self)
   end
 end
 
@@ -58,11 +95,13 @@ function Thrown.initialize(instance)
     shape = instance.shape or ps.shapes.thrown,
     sensor = true,
     gravityScaleFactor = 0,
-    masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT},
+    masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT},
     categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
   }
   instance.seeThrough = true
   instance.immathrown = true
+  instance.bounces = 0
+  instance.thrownGoesThrough = true
 end
 
 Thrown.functions = {
@@ -71,6 +110,7 @@ Thrown.functions = {
     self.zo = - 1.5 * ps.shapes.plshapeHeight
     self.body:setPosition(self.x, self.y - self.zo)
     self.body:setLinearVelocity(self.vx, self.vy)
+    if session.save.dinsPower and self.iAmBomb then self.myShader = shdrs["bombRedShader"] end
   end,
 
   update = function(self, dt)
@@ -101,10 +141,10 @@ Thrown.functions = {
         elseif closestTile.gap then
           plummet(self)
         else
-          destroyself(self)
+          touchGround(self)
         end
       else
-        destroyself(self)
+        touchGround(self)
       end
     else
       self.zvel = self.zvel - self.gravity * dt
@@ -116,6 +156,20 @@ Thrown.functions = {
         o.addToWorld(self.shadow)
       end
     end
+
+    -- life timer (for bombs)
+    if self.timer then
+      if self.timer < 0 then
+        destroyself(self)
+      end
+      local vibrSpeedMod = 15 / (2 * self.timer / self.startingTimer - 0.25)
+      if vibrSpeedMod < 0 or vibrSpeedMod > 50 then vibrSpeedMod = 50 end
+      self.vibrPhase = self.vibrPhase + dt * vibrSpeedMod
+      self.xvscale = math.sin(self.vibrPhase) * 0.1
+      self.yvscale = math.cos(self.vibrPhase) * 0.1
+      self.timer = self.timer - dt
+    end
+
 
     -- throw_update is a function fed by what I was before I was thrown
     if self.throw_update then throw_update(self, dt) end
@@ -136,10 +190,16 @@ Thrown.functions = {
       self.image_index = self.image_index - sprite.frames
     end
     local frame = sprite[self.image_index]
+    local worldShader = love.graphics.getShader()
+
+    love.graphics.setShader(self.myShader)
     love.graphics.draw(
     sprite.img, frame, x, y + self.zo, self.angle,
-    sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
+    sprite.res_x_scale*(self.x_scale + (self.xvscale or 0)),
+    sprite.res_y_scale*(self.y_scale + (self.yvscale or 0)),
     sprite.cx, sprite.cy)
+
+    love.graphics.setShader(worldShader)
 
     -- Debug
     -- love.graphics.polygon("line",
@@ -158,17 +218,22 @@ Thrown.functions = {
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     -- remember tiles
-    if other.floor then
-      other.thrownFloorTilesIndex = u.push(self.floorTiles, other)
-      return
-    end
+    u.rememberFloorTile(self, other)
+
+    if other.floor then return end
 
     if other.grass then return end
 
     if other.attackDodger then return end
 
     -- destroy
-    destroyself(self)
+    if not other.thrownGoesThrough then
+      if self.iAmBomb then
+        if not other.bombGoesThrough then self.body:setLinearVelocity(0, 0) end
+      else
+        destroyself(self)
+      end
+    end
   end,
 
   endContact = function(self, a, b, coll, aob, bob)
@@ -177,10 +242,7 @@ Thrown.functions = {
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     -- Forget Floor tiles
-    if other.floor then
-      u.free(self.floorTiles, other.thrownFloorTilesIndex)
-      other.thrownFloorTilesIndex = nil
-    end
+    u.forgetFloorTile(self, other)
   end
 
   -- preSolve = function(self, a, b, coll, aob, bob)

@@ -54,6 +54,7 @@ function Enemy.initialize(instance)
   instance.behaviourTimer = 0
   instance.bounceEdge = true
   instance.ballbreaker = true
+  instance.bombGoesThrough = true
   instance.ignoreFloorMovementModifiers = true
   instance.lookFor = si.lookFor
   instance.layer = 20
@@ -97,6 +98,11 @@ Enemy.functions = {
   end,
 
   hitByThrown = function (self, other, myF, otherF)
+    ebh.damagedByHit(self, other, myF, otherF)
+    ebh.propelledByHit(self, other, myF, otherF)
+  end,
+
+  hitByBombsplosion = function (self, other, myF, otherF)
     ebh.damagedByHit(self, other, myF, otherF)
     ebh.propelledByHit(self, other, myF, otherF)
   end,
@@ -276,10 +282,17 @@ Enemy.functions = {
     end
 
     -- Check if hit by thrown object
-    if other.immathrown == true and not self.invulnerable and not self.undamageable then
+    if other.immathrown == true and not other.iAmBomb and not self.invulnerable and not self.undamageable then
       self.lastHit = "thrown"
       self.attacked = true
       self:hitByThrown(other, myF, otherF)
+    end
+
+    -- Check if hit by bombsplosion
+    if other.immabombsplosion == true and not self.invulnerable and not self.undamageable then
+      self.lastHit = "bombsplosion"
+      self.attacked = true
+      self:hitByBombsplosion(other, myF, otherF)
     end
   end,
 

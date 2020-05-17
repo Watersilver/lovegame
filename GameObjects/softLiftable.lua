@@ -94,7 +94,7 @@ beginContact = function(self, a, b, coll, aob, bob)
 
   -- Find which fixture belongs to whom
   local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-  if other.immasword then
+  if other.immasword or other.immabombsplosion then
     self:throw_collision()
     o.removeFromWorld(self)
     self.beginContact = nil

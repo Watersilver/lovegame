@@ -4,8 +4,25 @@ local game = require "game"
 local im = require "image"
 local o = require "GameObjects.objects"
 local ps = require "physics_settings"
+local bspl = require "GameObjects.Items.bombsplosion"
+local shdrs = require "Shaders.shaders"
 
 local thr = require "GameObjects.Items.thrown"
+
+local function destroyself(self)
+  if not self.destroyedself then
+    self.destroyedself = true
+    o.removeFromWorld(self)
+    if self.shadow then o.removeFromWorld(self.shadow) end
+    self.shadow = nil
+    self.creator.triggers.bomb = true
+    self.creator.liftedOb = nil
+    if self.iAmBomb then
+      local newBspl = bspl:new{x = self.x, y = self.y, layer = self.layer}
+      o.addToWorld(newBspl)
+    end
+  end
+end
 
 
 local floor = math.floor
@@ -13,19 +30,28 @@ local floor = math.floor
 local endOffset = {x = 0, y = -0.6 * ps.shapes.plshapeHeight}
 local offsets = {
   down = {
-    {x = 0, y = 3 * ps.shapes.plshapeHeight},
-    {x = 0, y = 2.5 * ps.shapes.plshapeHeight},
-    {x = 0, y = 1.5 * ps.shapes.plshapeHeight},
+    -- {x = 0, y = 3 * ps.shapes.plshapeHeight},
+    -- {x = 0, y = 2.5 * ps.shapes.plshapeHeight},
+    -- {x = 0, y = 1.5 * ps.shapes.plshapeHeight},
+    {x = 0, y = 2 * ps.shapes.plshapeHeight},
+    {x = 0, y = 1.7 * ps.shapes.plshapeHeight},
+    {x = 0, y = 1.3 * ps.shapes.plshapeHeight},
     endOffset
   },
   right = {
-    {x = 1.5 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
+    -- {x = 1.5 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
+    -- {x = 0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
+    -- {x = 0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
+    {x = 1.2 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
     {x = 0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
     {x = 0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
     endOffset
   },
   left = {
-    {x = -1.5 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
+    -- {x = -1.5 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
+    -- {x = -0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
+    -- {x = -0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
+    {x = -1.2 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
     {x = -0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
     {x = -0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
     endOffset
@@ -59,6 +85,9 @@ Lifted.functions = {
     local x, y = creatorx + xoff, creatory + yoff - cr.height + cr.zo + fy
 
     self.x, self.y = x, y
+    self.vibrPhase = 0
+    self.startingTimer = self.timer
+    if session.save.dinsPower and self.iAmBomb then self.myShader = shdrs["bombRedShader"] end
   end,
 
   update = function (self, dt)
@@ -113,6 +142,19 @@ Lifted.functions = {
 
     self.x, self.y = x, y
 
+    -- life timer (for bombs)
+    if self.timer then
+      if self.timer < 0 then
+        destroyself(self)
+      end
+      local vibrSpeedMod = 15 / (2 * self.timer / self.startingTimer - 0.25)
+      if vibrSpeedMod < 0 or vibrSpeedMod > 50 then vibrSpeedMod = 50 end
+      self.vibrPhase = self.vibrPhase + dt * vibrSpeedMod
+      self.xvscale = math.sin(self.vibrPhase) * 0.1
+      self.yvscale = math.cos(self.vibrPhase) * 0.1
+      self.timer = self.timer - dt
+    end
+
     -- lift_update is a function fed by what I was before I was lifted
     if self.lift_update then lift_update(self, dt) end
   end,
@@ -127,12 +169,17 @@ Lifted.functions = {
 
     local sprite = self.sprite
     local frame = sprite[self.image_index]
+    local worldShader = love.graphics.getShader()
+
+    love.graphics.setShader(self.myShader)
     if self.creator and not self.creator.invisible then
       love.graphics.draw(
       sprite.img, frame, x, y, self.angle,
-      sprite.res_x_scale, sprite.res_y_scale,
+      sprite.res_x_scale + (self.xvscale or 0), sprite.res_y_scale + (self.yvscale or 0),
       sprite.cx, sprite.cy)
     end
+
+    love.graphics.setShader(worldShader)
   end,
 
   trans_draw = function (self)
@@ -173,7 +220,11 @@ Lifted.functions = {
       explosionNumber = self.explosionNumber,
       explosionSprite = self.explosionSprite,
       explosionSpeed = self.explosionSpeed,
-      explosionSound = self.explosionSound
+      explosionSound = self.explosionSound,
+      iAmBomb = self.iAmBomb,
+      timer = self.timer,
+      vibrPhase = self.vibrPhase,
+      startingTimer = self.startingTimer
     }
     o.addToWorld(thrownOb)
 

@@ -12,6 +12,6 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
       return vec4(0,0,0,c.a);
     }
     else {
-      return vec4(1,0,0,c.a);
+      return vec4(0.6,0,0,c.a);
     }
 }

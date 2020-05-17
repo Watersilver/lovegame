@@ -19,6 +19,17 @@ local itemGetFunc = function ()
   session.addItem("ringScreen")
   session.addItem("ringGrey")
   session.addItem("ringVignette")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
+  session.addItem("somaBlastSeed")
 end
 
 gottenItem.itemInfo = {

@@ -537,7 +537,7 @@ player_states.check_lifted = function(instance, dt, side)
   if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif trig.gripping then
+  elseif trig.gripping or trig.bomb then
     instance.animation_state:change_state(instance, dt, side .. "walk")
   elseif td.check_carry_while_carrying(instance, trig, side, dt) then
   end
@@ -571,6 +571,11 @@ end
 
 player_states.run_damaged = function(instance, dt, side)
   instance.damCounter = instance.damCounter - dt
+  if instance.triggers.land then
+    instance.sprite = im.sprites["Witch/die"]
+    instance.image_speed = 0
+    instance.image_index = 5
+  end
 end
 
 player_states.check_damaged = function(instance, dt, side)
@@ -580,7 +585,8 @@ player_states.check_damaged = function(instance, dt, side)
   elseif instance.inDeepWater then
     instance.animation_state:change_state(instance, dt, "downdrown")
   elseif instance.damCounter < 0 then
-    instance.animation_state:change_state(instance, dt, side .. "still")
+    instance.animation_state:change_state(instance, dt,
+    (instance.sprite == im.sprites["Witch/die"] and "down" or side) .. "still")
   end
 end
 
@@ -598,7 +604,7 @@ player_states.start_damaged = function(instance, dt, side)
   end
   inp.disable_controller(instance.player)
   instance.invulnerable = 1
-  instance.damCounter = 0.5
+  instance.damCounter = instance.triggers.damCounter or 0.5
   snd.play(instance.sounds.hurt)
 end
 
