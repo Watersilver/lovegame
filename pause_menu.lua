@@ -693,7 +693,7 @@ end
 pam.left.logic = function()
   if pam.quitting then return end
   if not pam.left.selectedHeader then
-    if inp.enterPressed then
+    if inp.enterPressed or inp.downPressed then
       snd.play(glsounds.select)
       pam.left.selectedHeader = true
     end
