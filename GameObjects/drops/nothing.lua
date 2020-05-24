@@ -37,6 +37,7 @@ function Drop.initialize(instance)
   instance.gravity = 400
   instance.shadowHeightMod = -3
   instance.notSolidStatic = true
+  instance.notSolid = true
   instance.bounceOnce = true
 end
 

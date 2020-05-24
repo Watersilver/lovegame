@@ -13,6 +13,27 @@ local dc = require "GameObjects.Helpers.determine_colliders"
 
 local fT = require "GameObjects.floorTile"
 
+
+local function getDestroyed(self, other, myF, otherF)
+  self.grass = nil
+  self.floorViscosity = nil
+  myF:setMask(1,2,3,4,5,6,7,8,9,10,11,12,14,15,16)
+  self.image_index = self.image_index + 1
+  local explOb = expl:new{
+    x = self.x or self.xstart, y = self.y or self.ystart,
+    -- layer = self.layer+1,
+    layer = 25,
+    explosionNumber = 1,
+    sprite_info = self.explosionSprite,
+    image_speed = self.explosionSpeed,
+    sounds = snd.load_sounds({explode = self.explosionSound})
+  }
+  o.addToWorld(explOb)
+  drops.cheapest(self.xstart, self.ystart)
+  self.beginContact = nil
+end
+
+
 local Tile = {}
 
 function Tile.initialize(instance)
@@ -32,24 +53,9 @@ Tile.functions = {
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     -- If other is a sword that is slashing then cut the grass
-    if other.immasword or other.immabombsplosion then
+    if other.immasword or other.immabombsplosion or (other.immasprint and not otherF:isSensor()) then
       if not other.stab then
-        self.grass = nil
-        self.floorViscosity = nil
-        myF:setMask(1,2,3,4,5,6,7,8,9,10,11,12,14,15,16)
-        self.image_index = self.image_index + 1
-        local explOb = expl:new{
-          x = self.x or self.xstart, y = self.y or self.ystart,
-          -- layer = self.layer+1,
-          layer = 25,
-          explosionNumber = 1,
-          sprite_info = self.explosionSprite,
-          image_speed = self.explosionSpeed,
-          sounds = snd.load_sounds({explode = self.explosionSound})
-        }
-        o.addToWorld(explOb)
-        drops.cheapest(self.xstart, self.ystart)
-        self.beginContact = nil
+        getDestroyed(self, other, myF, otherF)
       end
     end
   end

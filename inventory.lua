@@ -153,6 +153,18 @@ inv.bomb = {
   }
 }
 
+inv.speed = {
+  name = "speed",
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgSpeed.png"),
+  check_trigger = function(object, keyheld)
+    if keyheld == 0 then
+      return "speed_start"
+    else
+      return "speed"
+    end
+  end,
+}
+
 inv.slots = {}
 
 -- inv.slots[6] = {key = "c", item = inv.sword}
@@ -237,6 +249,9 @@ function inv.check_use(instance, trig, side, dt)
     return true
   elseif trig.fire_missile then
     instance.animation_state:change_state(instance, dt, side .. "missile")
+    return true
+  elseif trig.speed_start then
+    instance.animation_state:change_state(instance, dt, side .. "sprintcharge")
     return true
   elseif trig.bomb then
     local removeResult = session.removeItem("somaBlastSeed")

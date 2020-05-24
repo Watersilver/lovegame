@@ -12,6 +12,7 @@ ors.player = function (instance)
   instance:insertToSpellSlot(session.save.hasRecall, session.save.recallKey)
   instance:insertToSpellSlot(session.save.hasGrip, session.save.gripKey)
   instance:insertToSpellSlot(session.save.hasBomb, session.save.bombKey)
+  instance:insertToSpellSlot(session.save.hasSpeed, session.save.speedKey)
 
   --debug
   -- instance:insertToSpellSlot("sword", session.save.swordKey)

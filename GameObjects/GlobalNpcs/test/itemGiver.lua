@@ -41,6 +41,7 @@ activateFuncs[3] = function (self, dt, textIndex)
   session.save.hasRecall = "recall"
   session.save.hasGrip = "grip"
   session.save.hasBomb = "bomb"
+  session.save.hasSpeed = "speed"
   if self.activator then self.activator:readSave() end
   self.next = "end"
 end

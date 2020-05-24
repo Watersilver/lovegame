@@ -205,8 +205,36 @@ function Playa.initialize(instance)
 
     normal = {
     run_state = function(instance, dt)
+      local otherstate = instance.animation_state.state
+
       -- Apply movement table
-      td.walk(instance, dt)
+      if otherstate:find("sprintcharge") and instance.triggers.speed then
+        td.stand_still(instance, dt)
+      elseif otherstate == "sprint" and instance.triggers.speed then
+        local myinput = instance.input
+        -- local horin, verin = myinput.right - myinput.left, myinput.down - myinput.up
+        local _, targetDir = u.cartesianToPolar(myinput.right - myinput.left, myinput.down - myinput.up)
+        local turnSpeed = dt + dt * session.save.athleticsLvl + dt * (session.save.faroresCourage and 3 or 0)
+        turnSpeed = turnSpeed * (instance.floorFriction or 1)
+        if myinput.right - myinput.left == 0 and myinput.up - myinput.down == 0 then
+          instance.sprintDir = instance.sprintDir
+        elseif math.abs(instance.sprintDir - targetDir) < turnSpeed then
+          instance.sprintDir = targetDir
+        else
+          instance.sprintDir = instance.sprintDir + turnSpeed * u.findSmallestArc(instance.sprintDir, targetDir)
+        end
+        while instance.sprintDir > math.pi do
+          instance.sprintDir = instance.sprintDir - math.pi * 2
+        end
+        while instance.sprintDir <= -math.pi do
+          instance.sprintDir = instance.sprintDir + math.pi * 2
+        end
+
+        td.sprint(instance, dt)
+      else
+        td.walk(instance, dt)
+      end
+
     end,
 
     check_state = function(instance, dt)
@@ -215,17 +243,19 @@ function Playa.initialize(instance)
         if not instance.liftState then
           if not instance.climbing then
 
-            if trig.stab then
-              instance.movement_state:change_state(instance, dt, "using_sword")
-            elseif trig.swing_sword and otherstate ~= "spinattack" then
-              instance.movement_state:change_state(instance, dt, "using_sword")
-            elseif instance.zo == 0 and (
-              otherstate:find("still") or
+            local swhp = otherstate:find("still") or
               otherstate:find("walk") or
               otherstate:find("halt") or
               otherstate:find("push")
-            )
-            then
+
+            local fs = otherstate:find("fall") or otherstate:find("swing")
+
+            if trig.stab then
+              instance.movement_state:change_state(instance, dt, "using_sword")
+            -- elseif trig.swing_sword and otherstate ~= "spinattack" then
+            elseif trig.swing_sword and (swhp or fs) then
+              instance.movement_state:change_state(instance, dt, "using_sword")
+            elseif instance.zo == 0 and swhp then
               -- trigger these only grounded and during certain animations
               -- WHY DID I SEPARATE MOVEMENT STATE AND ANIMATIO STATE?
               if trig.mark then
@@ -1479,6 +1509,101 @@ function Playa.initialize(instance)
     },
 
 
+    downsprintcharge = {
+    run_state = function(instance, dt)
+      hps.run_sprintcharge(instance, dt, "down")
+    end,
+
+    check_state = function(instance, dt)
+      hps.check_sprintcharge(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      hps.start_sprintcharge(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+      hps.end_sprintcharge(instance, dt, "down")
+    end
+    },
+
+
+    rightsprintcharge = {
+    run_state = function(instance, dt)
+      hps.run_sprintcharge(instance, dt, "right")
+    end,
+
+    check_state = function(instance, dt)
+      hps.check_sprintcharge(instance, dt, "right")
+    end,
+
+    start_state = function(instance, dt)
+      hps.start_sprintcharge(instance, dt, "right")
+    end,
+
+    end_state = function(instance, dt)
+      hps.end_sprintcharge(instance, dt, "right")
+    end
+    },
+
+
+    leftsprintcharge = {
+    run_state = function(instance, dt)
+      hps.run_sprintcharge(instance, dt, "left")
+    end,
+
+    check_state = function(instance, dt)
+      hps.check_sprintcharge(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      hps.start_sprintcharge(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      hps.end_sprintcharge(instance, dt, "left")
+    end
+    },
+
+
+    upsprintcharge = {
+    run_state = function(instance, dt)
+      hps.run_sprintcharge(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      hps.check_sprintcharge(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      hps.start_sprintcharge(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      hps.end_sprintcharge(instance, dt, "up")
+    end
+    },
+
+
+    sprint = {
+    run_state = function(instance, dt)
+      hps.run_sprint(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+      hps.check_sprint(instance, dt)
+    end,
+
+    start_state = function(instance, dt)
+      hps.start_sprint(instance, dt)
+    end,
+
+    end_state = function(instance, dt)
+      hps.end_sprint(instance, dt)
+    end
+    },
+
+
     downmark = {
     run_state = function(instance, dt)
       instance.markanim = instance.markanim - dt
@@ -2425,7 +2550,8 @@ Playa.functions = {
 
   preSolve = function(self, a, b, coll, aob, bob)
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-    if other.floor then coll:setEnabled(false) return end
+    -- don't collide with floors
+    if other.floor or other.notSolidStatic then coll:setEnabled(false) return end
     if not myF:isSensor() then
       -- jump over stuff on ground
       if other.grounded then
@@ -2436,6 +2562,54 @@ Playa.functions = {
         o.removeFromWorld(other)
         self:addHealth(8)
         snd.play(glsounds.getHeart)
+        coll:setEnabled(false)
+        return
+      end
+      if self.immasprint then
+        if other.sprintThrough then
+          coll:setEnabled(false)
+          if other.liftable and (other.pushover or (other.strongPushover and session.save.faroresCourage)) then
+            other:throw_collision()
+            o.removeFromWorld(other)
+            other.beginContact = nil
+          end
+        elseif self.speed > 0 then
+          -- Get vector perpendicular to collision
+          local nx, ny = coll:getNormal()
+
+          -- make sure it points AWAY from obstacle if applied to player
+          local dx, dy = self.x - other.x, self.y - other.y
+          if nx * dx < 0 or ny * dy < 0 then -- checks if they have different signs
+            nx, ny = -nx, -ny
+          end
+
+          -- make sure it was an (almost) head-on collision
+          -- find angle between vectors (th)
+          local dot = nx * self.vx + ny * self.vy
+          -- costh = 	a*b / |a|*|b|
+          -- my magn is self.speed and normal's magn is 1 by definition:
+          local costh = dot / self.speed * 1
+          local th = math.acos(costh)
+          fuck = math.deg(th)
+
+          -- react to collision
+          if th > 0.74 * math.pi then
+            if other.liftable and (other.pushover or (other.strongPushover and session.save.faroresCourage)) then
+              other:throw_collision()
+              o.removeFromWorld(other)
+              other.beginContact = nil
+            end
+            if session.bounceRing then
+              self._, self.sprintDir = u.cartesianToPolar(nx, ny)
+            else
+              self.triggers.damaged = 0
+              self.triggers.damCounter = session.save.faroresCourage and 0 or 1
+              self.triggers.damKeepMoving = true
+              self.zvel = 100
+              self.body:setLinearVelocity(nx * self.speed * 0.8, ny * self.speed * 0.8)
+            end
+          end
+        end
       end
     end
   end,

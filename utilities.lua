@@ -114,6 +114,17 @@ function u.cartesianToPolar(x, y)
   return sqrt(x*x + y*y), atan2(y, x)
 end
 
+function u.findSmallestArc(th, targetTh)
+  -- th and targetTh belong to (-pi, pi]
+  -- returns the sign that if added to th it will move towards targetTh
+
+  if math.abs(targetTh - th) < math.pi then
+    return u.sign(targetTh - th)
+  else
+    return -u.sign(targetTh - th)
+  end
+end
+
 function u.distanceSqared2d(x0, y0, x1, y1)
   local xd, yd = x1-x0, y1-y0
   return xd * xd + yd * yd

@@ -5,6 +5,7 @@ local inp = require "input"
 local snd = require "sound"
 local ps = require "physics_settings"
 local dlg = require "dialogue"
+local u = require "utilities"
 
 local o = require "GameObjects.objects"
 local sw = require "GameObjects.Items.sword"
@@ -605,6 +606,7 @@ player_states.start_damaged = function(instance, dt, side)
   inp.disable_controller(instance.player)
   instance.invulnerable = 1
   instance.damCounter = instance.triggers.damCounter or 0.5
+  instance.damKeepMoving = instance.triggers.damKeepMoving
   snd.play(instance.sounds.hurt)
 end
 
@@ -613,10 +615,121 @@ player_states.end_damaged = function(instance, dt, side)
     instance.x_scale = 1
   end
   inp.enable_controller(instance.player)
-  if instance.floorFriction > 0.9 then
+  if instance.floorFriction > 0.9 and not instance.damKeepMoving then
     instance.body:setLinearVelocity(0, 0)
   end
 end
+
+player_states.run_sprintcharge = function(instance, dt, side)
+  instance.sprintCharge = instance.sprintCharge - dt
+
+  -- make footstep sounds
+  if instance.image_index % 2 >= 1 and instance.image_index_prev % 2 < 1 then
+    snd.play(instance.sounds[instance.landedTileSound])
+  end
+end
+
+player_states.check_sprintcharge = function(instance, dt, side)
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if pddp(instance, trig, side, dt) then
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif instance.zo ~= 0 then
+    instance.animation_state:change_state(instance, dt, side .. "fall")
+  elseif not trig.speed then
+    instance.animation_state:change_state(instance, dt, side .. "still")
+  elseif instance.sprintCharge < 0 then
+    instance.animation_state:change_state(instance, dt, "sprint")
+  end
+end
+
+player_states.start_sprintcharge = function(instance, dt, side)
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/walk_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/walk_left"]
+    instance.x_scale = -1
+  end
+  instance.image_speed = 0.3
+  instance.sprintCharge = 0.5
+end
+
+player_states.end_sprintcharge = function(instance, dt, side)
+  instance.sprintCharge = nil
+  if side == "up" then
+    instance.sprintDir = - math.pi * 0.5
+  elseif side == "left" then
+    instance.sprintDir = math.pi
+  elseif side == "right" then
+    instance.sprintDir = 0
+  elseif side == "down" then
+    instance.sprintDir = math.pi * 0.5
+  end
+  instance.sprintSide = side
+  if side == "right" then
+    instance.x_scale = 1
+  end
+end
+
+
+player_states.run_sprint = function(instance, dt)
+  -- Determine instance.sprintSide from instance.sprintDir
+  if instance.sprintDir < - math.pi * 0.25 and instance.sprintDir > - math.pi * 0.75 then
+    instance.sprintSide = "up"
+  elseif instance.sprintDir > math.pi * 0.25 and instance.sprintDir < math.pi * 0.75 then
+    instance.sprintSide = "down"
+  elseif (instance.sprintDir >= 0 and instance.sprintDir < math.pi * 0.25) or (instance.sprintDir < 0 and instance.sprintDir > - math.pi * 0.25) then
+    instance.sprintSide = "right"
+  elseif (instance.sprintDir >= 0 and instance.sprintDir > math.pi * 0.75) or (instance.sprintDir < 0 and instance.sprintDir < - math.pi * 0.75) then
+    instance.sprintSide = "left"
+  end
+  if instance.sprintSide ~= "right" then
+    instance.sprite = im.sprites["Witch/walk_" .. instance.sprintSide]
+    instance.x_scale = 1
+  else
+    instance.sprite = im.sprites["Witch/walk_left"]
+    instance.x_scale = -1
+  end
+
+  -- make footstep sounds
+  if instance.image_index % 2 >= 1 and instance.image_index_prev % 2 < 1 then
+    snd.play(instance.sounds[instance.landedTileSound])
+  end
+end
+
+player_states.check_sprint = function(instance, dt)
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if pddp(instance, trig, instance.sprintSide, dt) then
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
+  elseif instance.zo ~= 0 then
+    instance.animation_state:change_state(instance, dt, instance.sprintSide .. "fall")
+  elseif not trig.speed then
+    instance.animation_state:change_state(instance, dt, instance.sprintSide .. "still")
+  end
+end
+
+player_states.start_sprint = function(instance, dt)
+  if instance.sprintSide ~= "right" then
+    instance.sprite = im.sprites["Witch/walk_" .. instance.sprintSide]
+  else
+    instance.sprite = im.sprites["Witch/walk_left"]
+    instance.x_scale = -1
+  end
+  instance.image_speed = 0.3
+  instance.sprintDir = instance.sprintDir or 0
+  instance.immasprint = true
+end
+
+player_states.end_sprint = function(instance, dt)
+  if instance.sprintSide == "right" then
+    instance.x_scale = 1
+  end
+  instance.sprintSide = nil
+  instance.sprintDir = nil
+  instance.immasprint = nil
+end
+
 
 player_states.run_climbing = function(instance, dt, side)
   td.image_speed(instance, dt, 1)

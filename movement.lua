@@ -130,6 +130,10 @@ local universalWalk = function(object, dt, inputForceFunc)
   if object.player then
     mobility, brakes = session.getAthlectics()
     maxspeed = session.getMaxSpeed()
+    if object.animation_state.state == "sprint" then
+      maxspeed = maxspeed * 2
+      mobility = mobility * 100
+    end
   end
 
   local inversemaxspeed = 1/(maxspeed * normalisedSpeed) -- could be inf, don't worry
@@ -173,7 +177,8 @@ local universalWalk = function(object, dt, inputForceFunc)
   -- As do high inversemaxspeed values
   inversemaxspeed = clamp(0, inversemaxspeed, 0.08) -- lowest max speed = 12.5
   -- As do high mobility values
-  mobility = clamp(0, mobility, 1000)
+  -- mobility = clamp(0, mobility, 1000) -- old value
+  mobility = clamp(0, mobility, 3000)
 
   -- Calculate force due to input
   local infx, infy = iff[inputForceFunc](myinput, direction, mass, mobility)
@@ -222,6 +227,11 @@ local mo = {}
 
     walk = function(object, dt)
       universalWalk(object, dt, "keyboardInput")
+    end,
+
+    sprint = function(object, dt)
+      object.direction = object.sprintDir
+      universalWalk(object, dt, "analogueInput")
     end,
 
     analogueWalk = function(object, dt)

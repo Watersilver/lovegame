@@ -34,6 +34,7 @@ function rt.initialize(instance)
   }
   instance.layer = 15
   instance.liftable = true
+  instance.strongPushover = true
   instance.pushback = true
   instance.ballbreaker = true
   instance.image_index = 0

@@ -167,9 +167,10 @@ session = {
     -- 0.3 was default
     return 0.4 - session.save.magicLvl * 0.05
   end,
-  getAthlectics = function()
-    -- return mobility, brakes
-    return 300 + session.save.athleticsLvl * 100, 6 + session.save.athleticsLvl
+  getAthlectics = function(getLvl)
+    -- return mobility, brakes. Level starts from 0
+    local lvl = getLvl or session.save.athleticsLvl
+    return 300 + lvl * 100, 6 + lvl
   end,
   getMaxSpeed = function()
     -- maybe also add add temp speedBoosts
