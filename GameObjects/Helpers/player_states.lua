@@ -607,7 +607,7 @@ player_states.start_damaged = function(instance, dt, side)
   instance.invulnerable = 1
   instance.damCounter = instance.triggers.damCounter or 0.5
   instance.damKeepMoving = instance.triggers.damKeepMoving
-  snd.play(instance.sounds.hurt)
+  snd.play(instance.triggers.altHurtSound or instance.sounds.hurt)
 end
 
 player_states.end_damaged = function(instance, dt, side)
@@ -683,17 +683,50 @@ player_states.run_sprint = function(instance, dt)
   elseif (instance.sprintDir >= 0 and instance.sprintDir > math.pi * 0.75) or (instance.sprintDir < 0 and instance.sprintDir < - math.pi * 0.75) then
     instance.sprintSide = "left"
   end
+  local moveType = session.save.faroresCourage and "roll" or "walk"
   if instance.sprintSide ~= "right" then
-    instance.sprite = im.sprites["Witch/walk_" .. instance.sprintSide]
+    instance.sprite = im.sprites["Witch/".. moveType .."_" .. instance.sprintSide]
     instance.x_scale = 1
   else
-    instance.sprite = im.sprites["Witch/walk_left"]
+    instance.sprite = im.sprites["Witch/".. moveType .."_left"]
     instance.x_scale = -1
   end
 
+  instance.rollSoundTimer = instance.rollSoundTimer + dt
+  instance.rollFxTimer = instance.rollFxTimer + dt
   -- make footstep sounds
-  if instance.image_index % 2 >= 1 and instance.image_index_prev % 2 < 1 then
-    snd.play(instance.sounds[instance.landedTileSound])
+  if session.save.faroresCourage then
+    if instance.rollSoundTimer > 0.23 then
+      instance.rollSoundTimer = 0
+      snd.play(instance.sounds.roll)
+    end
+    if instance.rollFxTimer > 0.0766 then
+      instance.rollFxTimer = 0
+      local explOb = (require "GameObjects.explode"):new{
+        x = instance.x, y = instance.y + 4,
+        -- layer = self.layer+1,
+        layer = instance.layer - 1,
+        -- explosionNumber = 1,
+        sprite_info = {im.spriteSettings.playerDust},
+        image_speed = 0.25,
+        nosound = true
+      }
+      o.addToWorld(explOb)
+    end
+  else
+    if instance.image_index % 2 >= 1 and instance.image_index_prev % 2 < 1 then
+      snd.play(instance.sounds[instance.landedTileSound])
+      local explOb = (require "GameObjects.explode"):new{
+        x = instance.x, y = instance.y + 4,
+        -- layer = self.layer+1,
+        layer = instance.layer - 1,
+        -- explosionNumber = 1,
+        sprite_info = {im.spriteSettings.playerDust},
+        image_speed = 0.25,
+        nosound = true
+      }
+      o.addToWorld(explOb)
+    end
   end
 end
 
@@ -719,6 +752,8 @@ player_states.start_sprint = function(instance, dt)
   instance.image_speed = 0.3
   instance.sprintDir = instance.sprintDir or 0
   instance.immasprint = true
+  instance.rollSoundTimer = 0.23
+  instance.rollFxTimer = 0.0766
 end
 
 player_states.end_sprint = function(instance, dt)
@@ -728,6 +763,7 @@ player_states.end_sprint = function(instance, dt)
   instance.sprintSide = nil
   instance.sprintDir = nil
   instance.immasprint = nil
+  instance.rollSoundTimer = nil
 end
 
 

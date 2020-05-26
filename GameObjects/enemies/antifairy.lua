@@ -17,6 +17,8 @@ function Antifairy.initialize(instance)
   instance.image_speed = 0.3
   instance.hp = 1 --love.math.random(3)
   instance.shielded = true
+  instance.canBeBullrushed = false
+  instance.canBeRolledThrough = false
   instance.shieldWall = true
 end
 

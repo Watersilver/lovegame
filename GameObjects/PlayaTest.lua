@@ -14,6 +14,7 @@ local game = require "game"
 local o = require "GameObjects.objects"
 local trans = require "transitions"
 local dlg = require "dialogue"
+local gsh = require "gamera_shake"
 
 local hps = require "GameObjects.Helpers.player_states"
 local ors = require "GameObjects.Helpers.object_read_save"
@@ -180,7 +181,8 @@ function Playa.initialize(instance)
     dying = {"Effects/Oracle_Link_Dying"},
     die = {"Effects/Oracle_ScentSeed"},
     swordCharge = {"Effects/Oracle_Sword_Charge"},
-    swordSpin = {"Effects/Oracle_Sword_Spin"}
+    swordSpin = {"Effects/Oracle_Sword_Spin"},
+    roll = {"Effects/WL3_Rolling"}
   })
   instance.floorTiles = {role = "playerFloorTilesIndex"} -- Tracks what kind of floortiles I'm on
   instance.player = "player1"
@@ -2022,8 +2024,17 @@ Playa.functions = {
     end
   end,
 
+  successfullyBullrushed = function (self, other)
+    return self.immasprint and other.canBeBullrushed and (not other.shielded or other.shieldDown)
+  end,
+
   takeDamage = function (self, other)
-    if self.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) and other.damager and not self.invulnerable and not other.harmless then
+    if self.body:getType() ~= "static" and
+    not (dlg.enable or dlg.enabled) and
+    other.damager and not self.invulnerable and
+    not other.harmless and
+    not self:successfullyBullrushed(other)
+    then
       self.triggers.damaged =
         (other.attackDmg or 1) *
         (0.5 + (session.save.nayrusWisdom and 0 or 0.25) +
@@ -2037,7 +2048,7 @@ Playa.functions = {
       local _, myBrakes = session.getAthlectics()
       local clbrakes = u.clamp(0, myBrakes, self.brakesLim)
       local ipct = other.impact or 10
-      if other.immabombsplosion then
+      if other.immabombsplosion or other.explosive then
         self.zvel = other.blowUpForce or 177
         self.triggers.damCounter = other.damCounter or 1.5
       end
@@ -2565,15 +2576,25 @@ Playa.functions = {
         coll:setEnabled(false)
         return
       end
+
+      -- Handle sprinting collisions
       if self.immasprint then
-        if other.sprintThrough then
+        -- If not on ground
+        if other.zo and other.zo < 0 and not other.lowFlight then return end
+        -- If damager that can't be bullrushed, skip this to take damage
+        if other.damager and not other.canBeBullrushed then return end
+
+        if other.sprintThrough or (other.canBeBullrushed and other.canBeRolledThrough and session.save.faroresCourage) then
+          -- If target is "soft" go through it
           coll:setEnabled(false)
           if other.liftable and (other.pushover or (other.strongPushover and session.save.faroresCourage)) then
             other:throw_collision()
             o.removeFromWorld(other)
             other.beginContact = nil
           end
-        elseif self.speed > 0 then
+        elseif self.speed > 2 then
+          -- else see if you get thrown back
+
           -- Get vector perpendicular to collision
           local nx, ny = coll:getNormal()
 
@@ -2590,7 +2611,6 @@ Playa.functions = {
           -- my magn is self.speed and normal's magn is 1 by definition:
           local costh = dot / self.speed * 1
           local th = math.acos(costh)
-          fuck = math.deg(th)
 
           -- react to collision
           if th > 0.74 * math.pi then
@@ -2601,10 +2621,15 @@ Playa.functions = {
             end
             if session.bounceRing then
               self._, self.sprintDir = u.cartesianToPolar(nx, ny)
+              snd.play(glsounds.bombDrop)
             else
-              self.triggers.damaged = 0
+              -- if unsuccesfull bullrush on enemy that can
+              -- be bullrushed, take already calculated damage
+              self.triggers.damaged = self.triggers.damaged or 0
               self.triggers.damCounter = session.save.faroresCourage and 0 or 1
               self.triggers.damKeepMoving = true
+              self.triggers.altHurtSound = self.sounds.die
+              gsh.newShake(mainCamera, "displacement")
               self.zvel = 100
               self.body:setLinearVelocity(nx * self.speed * 0.8, ny * self.speed * 0.8)
             end

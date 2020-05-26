@@ -120,6 +120,9 @@ function ebh.damagedByHit(object, other, myF, otherF)
     elseif object.lastHit == "bombsplosion" then
       baseDamage = session.save.dinsPower and 5 or 4
       damageMod = object.bombsplosionDamageMod or 1
+    elseif object.lastHit == "bullrush" then
+      baseDamage = session.save.faroresCourage and 1 or 0.5
+      damageMod = object.bullrushDamageMod or 1
     end
     local damage = baseDamage * damageMod
 
@@ -139,7 +142,7 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
 
   -- Determine if shield was pierced
   local piercedShield = checkIfShieldPierced(object)
-  
+
   -- Calculate force
   local baseForceMod
   local attackForceMod
@@ -156,6 +159,9 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
   elseif object.lastHit == "bombsplosion" then
     baseForceMod = session.save.dinsPower and 5 or 4
     attackForceMod = object.bombsplosionForceMod or 1
+  elseif object.lastHit == "bullrush" then
+    baseForceMod = session.save.faroresCourage and 4 or 3
+    attackForceMod = object.bullrushForceMod or 1
   end
   local forceMod = baseForceMod * attackForceMod
 

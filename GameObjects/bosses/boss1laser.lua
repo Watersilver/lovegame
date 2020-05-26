@@ -20,7 +20,13 @@ function Laser.initialize(instance)
   instance.direction = 0
   instance.sprite_info = im.spriteSettings.boss1TestSprites
   instance.hp = 1
+  instance.attackDmg = 3
+  instance.explosive = true
+  instance.blowUpForce = 56
+  instance.damCounter = 2
   instance.boss1laser = true
+  instance.canBeRolledThrough = false
+  instance.canBeBullrushed = false
   instance.image_index = 1
   instance.sounds = snd.load_sounds({
     laserSound = {"Effects/OOA_Boss_Shoot"}

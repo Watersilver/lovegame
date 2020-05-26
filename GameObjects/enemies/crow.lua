@@ -143,7 +143,8 @@ function Crow.initialize(instance)
   instance.maxHeight = -5
   instance.zo = 0
   instance.ballbreakerEvenIfHigh = true
-  instance.actAszo0 = true
+  instance.controlledFlight = true
+  instance.lowFlight = true
   instance.grounded = false
   instance.unpushable = true
   instance.canLeaveRoom = true

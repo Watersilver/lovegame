@@ -100,6 +100,22 @@ items.ringFocus = {
   end
 }
 
+items.ringRubber = {
+  name = "R. Rubber Ring",
+  description = "Makes you bouncy!",
+  equip = function()
+    session.usedItemComment = "Equipped Rubber Ring!"
+    session.bounceRing = true
+  end,
+  unequip = function()
+    session.usedItemComment = "Unequipped Rubber Ring!"
+    session.bounceRing = nil
+  end,
+  use = function()
+    useRing("ringRubber")
+  end
+}
+
 -- Skins
 items.ringMage = {
   name = "R. Mage Ring",

@@ -155,6 +155,7 @@ inv.bomb = {
 
 inv.speed = {
   name = "speed",
+  powerUp = "faroresCourage",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgSpeed.png"),
   check_trigger = function(object, keyheld)
     if keyheld == 0 then

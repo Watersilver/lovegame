@@ -11,6 +11,7 @@ function Fairy.initialize(instance)
   instance.fairy = true
   instance.unpushable = true
   instance.notSolid = true
+  instance.canBeBullrushed = false
   instance.sprite_info = im.spriteSettings.dropFairy
   instance.physical_properties.masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT, ENEMYATTACKCAT}
 end

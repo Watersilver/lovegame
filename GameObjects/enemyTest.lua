@@ -38,7 +38,6 @@ function Enemy.initialize(instance)
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.input = {left = 0, right = 0, up = 0, down = 0}
   instance.zo = 0
-  instance.actAszo0 = false -- move in regards to floor friction etc as if grounded
   instance.x_scale = 1
   instance.y_scale = 1
   instance.image_speed = 0
@@ -48,13 +47,22 @@ function Enemy.initialize(instance)
   instance.grounded = true -- can be jumped over
   instance.flying = false -- can go through walls
   instance.levitating = false -- can go through over hazardous floor
+  instance.actAszo0 = false -- move in regards to floor friction etc as if grounded
+  instance.controlledFlight = false -- Floor doesn't affect me at all, but I still have breaks on air
+  instance.lowFlight = false -- can be affected by attacks that only target grounded targets
   instance.canSeeThroughWalls = false -- what it says on the tin
+  instance.shielded = false -- can be damaged
+  instance.shieldDown = false -- shield temporarily disabled
+  instance.shieldWall = false -- can be propelled by force
+  instance.weakShield = false -- shield can be broken with dins power and bombs
   instance.hp = love.math.random(3)
   instance.maxspeed = 20
   instance.behaviourTimer = 0
   instance.bounceEdge = true
   instance.ballbreaker = true
   instance.bombGoesThrough = true
+  instance.canBeBullrushed = true
+  instance.canBeRolledThrough = true
   instance.ignoreFloorMovementModifiers = true
   instance.lookFor = si.lookFor
   instance.layer = 20
@@ -103,6 +111,11 @@ Enemy.functions = {
   end,
 
   hitByBombsplosion = function (self, other, myF, otherF)
+    ebh.damagedByHit(self, other, myF, otherF)
+    ebh.propelledByHit(self, other, myF, otherF)
+  end,
+
+  hitByBullrush = function (self, other, myF, otherF)
     ebh.damagedByHit(self, other, myF, otherF)
     ebh.propelledByHit(self, other, myF, otherF)
   end,
@@ -293,6 +306,13 @@ Enemy.functions = {
       self.lastHit = "bombsplosion"
       self.attacked = true
       self:hitByBombsplosion(other, myF, otherF)
+    end
+
+    -- Check if hit by sprint
+    if not otherF:isSensor() and other.immasprint == true and self.canBeBullrushed and not self.invulnerable and not self.undamageable then
+      self.lastHit = "bullrush"
+      self.attacked = true
+      self:hitByBullrush(other, myF, otherF)
     end
   end,
 

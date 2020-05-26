@@ -37,9 +37,11 @@ function Orb.initialize(instance)
   instance.shielded = true
   instance.shieldWall = true
   instance.unpushable = true
+  instance.canBeRolledThrough = false
   instance.harmless = true
   instance.gravity = 300
   instance.attackDodger = true
+  instance.attackDmg = 2
   instance.zvel = 0 -- 55
   instance.zo = - 150
   instance.grounded = false

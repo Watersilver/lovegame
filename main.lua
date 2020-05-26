@@ -999,6 +999,7 @@ local function hudDraw(l,t,w,h)
 
     -- Draw bombs
     if session.save.hasBomb then
+      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
       local maxBombs = session.checkItemLim("somaBlastSeed")
       local bombs = string.format("%02d", (session.save.somaBlastSeed or 0))
       local bspr = im.sprites["Drops/blastSeed"]

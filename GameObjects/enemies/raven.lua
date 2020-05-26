@@ -156,10 +156,11 @@ function Raven.initialize(instance)
   instance.maxHeight = -64
   instance.zo = 0
   instance.ballbreakerEvenIfHigh = true
-  instance.actAszo0 = true
+  instance.controlledFlight = true
   instance.harmless = true
   instance.attackDodger = true
   instance.undamageable = true
+  instance.lowFlight = false
   instance.grounded = false
   instance.unpushable = true
   instance.canSeeThroughWalls = true -- what it says on the tin
@@ -187,10 +188,12 @@ Raven.functions = {
         self.harmless = false
         self.attackDodger = false
         self.undamageable = false
+        self.lowFlight = true
       else
         self.harmless = true
         self.attackDodger = true
         self.undamageable = true
+        self.lowFlight = false
       end
     end
 

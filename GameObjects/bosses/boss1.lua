@@ -381,6 +381,12 @@ Boss1.functions = {
     self.gotHit = true
   end,
 
+  hitByBombsplosion = function (self, other, myF, otherF)
+  end,
+
+  hitByBullrush = function (self, other, myF, otherF)
+  end,
+
   hitSolidStatic = function (self, other, myF, otherF)
     -- self.state = "changingDir"
     -- self.changingDirCounter = 1

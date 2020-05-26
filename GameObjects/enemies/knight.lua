@@ -20,6 +20,7 @@ function Knight.initialize(instance)
   instance.shielded = true
   instance.weakShield = true
   instance.shieldWall = true
+  instance.canBeRolledThrough = false
   instance.facing = "down"
   instance.sightWidth = 16
   instance.state = "wander"
@@ -122,14 +123,31 @@ Knight.functions = {
     end
   end,
 
+  getStunned = function (self)
+    self.state = "stunned"
+    self.behaviourTimer = 2
+    self.shieldDown = true
+    self.shieldWall = false
+  end,
+
+  hitByBullrush = function (self, other, myF, otherF)
+    ebh.damagedByHit(self, other, myF, otherF)
+    if session.save.faroresCourage then self:getStunned() end
+    -- make invulnerable for a little while
+    -- if it seems hitByBullrush is getting
+    -- called multiple times, to prevent that.
+    -- In this case unessecary because it's
+    -- fixed by making enemyTest check for solid
+    -- bodies only when bullrushed
+    -- self.invulnerable = 0.1
+    ebh.propelledByHit(self, other, myF, otherF)
+  end,
+
   hitSolidStatic = function (self, other, myF, otherF)
     if self.state == "charge" then
       if other.pushback then
-        self.state = "stunned"
+        self:getStunned()
         gsh.newShake(mainCamera, "displacement")
-        self.behaviourTimer = 2
-        self.shieldDown = true
-        self.shieldWall = false
         snd.play(self.hitWallSound)
       else
         self.state = "wander"

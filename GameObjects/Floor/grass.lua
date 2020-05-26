@@ -52,8 +52,8 @@ Tile.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-    -- If other is a sword that is slashing then cut the grass
-    if other.immasword or other.immabombsplosion or (other.immasprint and not otherF:isSensor()) then
+    -- If other is a sword that is slashing, a bomb or a super sprint then cut the grass
+    if other.immasword or other.immabombsplosion or (other.immasprint and not otherF:isSensor() and session.save.faroresCourage) then
       if not other.stab then
         getDestroyed(self, other, myF, otherF)
       end

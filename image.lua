@@ -168,6 +168,9 @@ im.spriteSettings = {
     {'Witch/jump_down', 4, padding = 2, width = 16, height = 16},
     {'Witch/jump_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/jump_up', 4, padding = 2, width = 16, height = 16},
+    {'Witch/roll_down', 4, padding = 2, width = 16, height = 16},
+    {'Witch/roll_left', 4, padding = 2, width = 16, height = 16},
+    {'Witch/roll_up', 4, padding = 2, width = 16, height = 16},
     {'Witch/mark_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/recall_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/display_down', 2, padding = 2, width = 16, height = 16},
@@ -184,6 +187,7 @@ im.spriteSettings = {
   playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4},
   playerMissileOutline = {'Inventory/UseMissileOutlineL1', 1, padding = 2, width = 6, height = 6},
   playerBomb = {'Inventory/UseBomb', 1, padding = 2, width = 8, height = 13},
+  playerDust = {'Inventory/UseSpeedL1', 3, padding = 2, width = 10, height = 10},
   playerBlast = {'Inventory/UseBombsplosionL1', 6, padding = 2, width = 32, height = 32},
   -- Enemy sprites
   bullKnight = {
@@ -336,6 +340,7 @@ im.load_sprite(im.spriteSettings.basicFriendlyInterior)
 im.load_sprite(im.spriteSettings.playerSword)
 im.load_sprite(im.spriteSettings.playerMissile)
 im.load_sprite(im.spriteSettings.playerBomb)
+im.load_sprite(im.spriteSettings.playerDust)
 im.load_sprite(im.spriteSettings.clock)
 im.load_sprite(im.spriteSettings.clockHand)
 im.load_sprite(im.spriteSettings.triforce)

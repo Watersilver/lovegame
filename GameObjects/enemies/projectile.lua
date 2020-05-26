@@ -21,6 +21,8 @@ function Projectile.initialize(instance)
   instance.vx, instance.vy = 0, 0
   instance.layer = 25
   instance.unpushable = true
+  instance.canBeRolledThrough = false
+  instance.canBeBullrushed = false
 end
 
 Projectile.functions = {
@@ -46,6 +48,9 @@ Projectile.functions = {
   end,
 
   hitByBombsplosion = function (self, other, myF, otherF)
+  end,
+
+  hitByBullrush = function (self, other, myF, otherF)
   end,
 
   preSolve = function(self, a, b, coll, aob, bob)
