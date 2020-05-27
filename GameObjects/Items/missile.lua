@@ -68,7 +68,7 @@ function Missile.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.immamissile = true
-  if session.save.customMissileAvailable and session.save.customMissileEnabled then
+  if shdrs.missileCustomShader and session.save.customMissileAvailable and session.save.customMissileEnabled then
     local secondaryR = 0.65 + session.save.missileR * 0.35
     local secondaryG = 0.65 + session.save.missileG * 0.35
     local secondaryB = 0.65 + session.save.missileB * 0.35

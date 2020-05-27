@@ -2290,7 +2290,7 @@ Playa.functions = {
     if trig.enableHitShader then
       self.playerShader = hitShader
     else
-      if session.save.customTunicAvailable and session.save.customTunicEnabled then
+      if shdrs.customTunic and session.save.customTunicAvailable and session.save.customTunicEnabled then
         shdrs.customTunic:send("rgb",
         session.save.tunicR,
         session.save.tunicG,

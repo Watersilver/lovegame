@@ -62,7 +62,7 @@ function HeldSword.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.minZo = - ps.shapes.plshapeHeight * 0.9
-  if session.save.customSwordAvailable and session.save.customSwordEnabled then
+  if shdrs.swordCustomShader and session.save.customSwordAvailable and session.save.customSwordEnabled then
     local secondaryR = 0.65 + session.save.swordR * 0.35
     local secondaryG = 0.65 + session.save.swordG * 0.35
     local secondaryB = 0.65 + session.save.swordB * 0.35
@@ -145,7 +145,9 @@ HeldSword.functions = {
         r1, g1, b1, r2, g2, b2 =
         r1 * ccInv, g1 * ccInv, b1 * ccInv,
         r2 * ccInv, g2 * ccInv, b2 * ccInv
-        self.chargedShader:send("rgb", r1, g1, b1, r2, g2, b2, a)
+        if self.chargedShader then
+          self.chargedShader:send("rgb", r1, g1, b1, r2, g2, b2, a)
+        end
         self.currentShader = self.chargedShader
       end
     else

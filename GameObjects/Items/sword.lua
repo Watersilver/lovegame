@@ -155,7 +155,7 @@ function Sword.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.minZo = - ps.shapes.plshapeHeight * 0.9
-  if session.save.customSwordAvailable and session.save.customSwordEnabled then
+  if shdrs.swordCustomShader and session.save.customSwordAvailable and session.save.customSwordEnabled then
     local secondaryR = 0.65 + session.save.swordR * 0.35
     local secondaryG = 0.65 + session.save.swordG * 0.35
     local secondaryB = 0.65 + session.save.swordB * 0.35
@@ -166,8 +166,8 @@ function Sword.initialize(instance)
     secondaryR, secondaryG, secondaryB,
     1) -- send one extra value to offset bug
     instance.myShader = shdrs.swordCustomShader
-  else
-    if session.save.dinsPower then instance.myShader = shdrs["itemRedShader"] end
+  elseif session.save.dinsPower then
+    instance.myShader = shdrs["itemRedShader"]
   end
 end
 

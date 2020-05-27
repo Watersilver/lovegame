@@ -17,7 +17,7 @@ function Mark.initialize(instance)
   image_indexProgressDirection = 1
   instance.image_index = image_indexProgress
   instance.seeThrough = true
-  if session.save.customMarkAvailable and session.save.customMarkEnabled then
+  if shdrs.markCustomShader and session.save.customMarkAvailable and session.save.customMarkEnabled then
     local secondaryR = 0.65 + session.save.markR * 0.35
     local secondaryG = 0.65 + session.save.markG * 0.35
     local secondaryB = 0.65 + session.save.markB * 0.35
