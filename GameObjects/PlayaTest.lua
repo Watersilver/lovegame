@@ -2150,6 +2150,13 @@ Playa.functions = {
     -- self.fo = -2
     -- self.zvel = 0
 
+    -- Make see through if there's a decoy
+    if session.decoy then
+      self.seeThrough = true
+    else
+      self.seeThrough = nil
+    end
+
     -- Store usefull stuff
     local vx, vy = self.body:getLinearVelocity()
     local x, y = self.body:getPosition()
@@ -2434,6 +2441,10 @@ Playa.functions = {
       self.image_index = self.image_index - sprite.frames
     end
     local frame = sprite[floor(self.image_index)]
+    local prevBm = love.graphics.getBlendMode()
+    if session.decoy then
+      love.graphics.setBlendMode("subtract")
+    end
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.playerShader)
     love.graphics.draw(
@@ -2441,6 +2452,7 @@ Playa.functions = {
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
     love.graphics.setShader(worldShader)
+    love.graphics.setBlendMode(prevBm)
 
     -- Draw Grass
     if self.ongrass then

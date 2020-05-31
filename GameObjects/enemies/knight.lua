@@ -36,8 +36,12 @@ end
 
 Knight.functions = {
   enemyUpdate = function (self, dt)
+
+    -- Get ticked by decoy
+    local target = session.decoy or pl1
+
     -- Look for player
-    if self.lookFor then self.canSeePlayer = self:lookFor(pl1) end
+    if self.lookFor then self.canSeePlayer = self:lookFor(target) end
     -- Fortify self again after taking damage
     if self.invulnerableEnd then
       self.shieldDown = false
@@ -49,7 +53,7 @@ Knight.functions = {
         self.state = "notice"
         snd.play(self.noticeSound)
         self.noticeTimer = 0.1
-        local dx, dy = pl1.x - self.x, pl1.y - self.y
+        local dx, dy = target.x - self.x, target.y - self.y
         -- self.direction = math.atan2(dy, dx)
         self._, self.direction = u.cartesianToPolar(dx, dy)
         -- figure out direction

@@ -86,6 +86,15 @@ MagicDust.functions = {
     o.addToWorld(box)
   end,
 
+  createDecoy = function (self)
+    local decoy = (require "GameObjects.Items.decoy"):new{
+      x = self.x, y = self.y,
+      layer = self.layer,
+      side = self.side
+    }
+    o.addToWorld(decoy)
+  end,
+
   update = function (self, dt)
 
     if self.fixture then
@@ -102,6 +111,8 @@ MagicDust.functions = {
         {value = self.chainReaction, chance = session.save.nayrusWisdom and 0 or 0.02},
         -- If you hit a wall, no magic block
         {value = self.createBlock, chance = not self.hitSolid and 0.4 or 0},
+        -- If you hit a wall, no decoy
+        {value = self.createDecoy, chance = not self.hitSolid and 0.2 or 0},
         -- If none of the above happens, nothing happens
         {value = u.emptyFunc, chance = 1},
       }

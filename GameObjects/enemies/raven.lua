@@ -40,7 +40,7 @@ local states = {
       instance.body:setLinearVelocity(0, 0)
     end,
     check_state = function(instance, dt)
-      if (instance.lookFor and instance:lookFor(pl1)) or instance.attacked then
+      if (instance.lookFor and instance:lookFor(instance.target)) or instance.attacked then
         instance.state:change_state(instance, dt, "rising")
       end
     end,
@@ -80,7 +80,7 @@ local states = {
       instance.body:setLinearVelocity(0, 0)
     end,
     check_state = function(instance, dt)
-      if instance.lookFor and instance:lookFor(pl1) then
+      if instance.lookFor and instance:lookFor(instance.target) then
         instance.state:change_state(instance, dt, "diving")
       elseif instance.risenTimer > instance.risenMaxDuration then
         instance.state:change_state(instance, dt, "landing")
@@ -127,9 +127,9 @@ local states = {
       instance.divingSpeed = oneDivHT * pi / 2
       if pl1 and not pl1.deathState then
         local speedDependency = love.math.random(0, 1) * halftime
-        local newVx = pl1.vx * speedDependency + pl1.x - instance.x -- distance per second
+        local newVx = instance.target.vx * speedDependency + instance.target.x - instance.x -- distance per second
         -- + 0.5 * ps.shapes.plshapeHeight
-        local newVy = pl1.vy * speedDependency + pl1.y - instance.y -- distance per second
+        local newVy = instance.target.vy * speedDependency + instance.target.y - instance.y -- distance per second
         instance.body:setLinearVelocity(oneDivHT * newVx, oneDivHT * newVy)
         if newVx > 0 then
           instance.x_scale = -1
@@ -174,6 +174,8 @@ end
 
 Raven.functions = {
   enemyUpdate = function (self, dt)
+    -- Get tricked by decoy
+    self.target = session.decoy or pl1
 
     -- do stuff depending on state
     local state = self.state

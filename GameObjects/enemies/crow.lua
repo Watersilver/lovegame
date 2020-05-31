@@ -43,7 +43,7 @@ local states = {
       instance.body:setLinearVelocity(0, 0)
     end,
     check_state = function(instance, dt)
-      if (instance.lookFor and instance:lookFor(pl1)) or instance.attacked then
+      if (instance.lookFor and instance:lookFor(instance.target)) or instance.attacked then
         instance.state:change_state(instance, dt, "rising")
       end
     end,
@@ -76,7 +76,7 @@ local states = {
       if pl1 and not pl1.deathState then
         -- get vector perpendicular to velocity
         local perpx, perpy = u.perpendicularRightTurn2d(instance.body:getLinearVelocity())
-        local nprojx, nprojy = u.normalize2d(u.projection2d(pl1.x - instance.x, pl1.y - instance.y, perpx, perpy))
+        local nprojx, nprojy = u.normalize2d(u.projection2d(instance.target.x - instance.x, instance.target.y - instance.y, perpx, perpy))
         local mass = instance.body:getMass()
         instance.body:applyForce(nprojx * mass * 222, nprojy * mass * 222)
       end
@@ -99,7 +99,7 @@ local states = {
       instance.chargeDuration = 3
       if pl1 then
         -- normal vector components
-        local nvcx, nvcy = u.normalize2d(pl1.x - instance.x, pl1.y - instance.y)
+        local nvcx, nvcy = u.normalize2d(instance.target.x - instance.x, instance.target.y - instance.y)
         -- instance.body:setLinearVelocity(nvcx * instance.maxSpeed, nvcy * instance.maxSpeed)
         local mymass = instance.body:getMass()
         instance.body:applyLinearImpulse(nvcx * instance.maxSpeed * mymass, nvcy * instance.maxSpeed * mymass)
@@ -166,6 +166,9 @@ Crow.functions = {
         o.removeFromWorld(self)
       end
     end
+
+    -- Get tricked by decoy
+    self.target = session.decoy or pl1
 
     -- do stuff depending on state
     local state = self.state

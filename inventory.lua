@@ -256,18 +256,19 @@ inv.closeInv()
 
 
 function inv.check_use(instance, trig, side, dt)
+  local returnValue = false
   if trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
-    return true
+    returnValue = true
   elseif trig.jump then
     instance.animation_state:change_state(instance, dt, side .. "jump")
-    return true
+    returnValue = true
   elseif trig.fire_missile then
     instance.animation_state:change_state(instance, dt, side .. "missile")
-    return true
+    returnValue = true
   elseif trig.speed_start then
     instance.animation_state:change_state(instance, dt, side .. "sprintcharge")
-    return true
+    returnValue = true
   elseif trig.bomb then
     local removeResult = session.removeItem("somaBlastSeed")
     if removeResult == "don't have any" then return end
@@ -285,21 +286,23 @@ function inv.check_use(instance, trig, side, dt)
     }
     o.addToWorld(instance.liftedOb)
     instance.animation_state:change_state(instance, dt, side .. "lifting")
-    return true
+    returnValue = true
   elseif trig.gripping and instance.sensors[side .. "Touch"] then
     instance.animation_state:change_state(instance, dt, side .. "gripping")
-    return true
+    returnValue = true
   elseif trig.mystery then
     instance.animation_state:change_state(instance, dt, side .. "mdust")
-    return true
+    returnValue = true
   elseif trig.mark then
     instance.animation_state:change_state(instance, dt, "downmark")
-    return true
+    returnValue = true
   elseif trig.recall then
     instance.animation_state:change_state(instance, dt, "downrecall")
-    return true
+    returnValue = true
   end
-  return false
+  -- Destroy decoy if using items
+  if returnValue then session.decoy = nil end
+  return returnValue
 end
 
 

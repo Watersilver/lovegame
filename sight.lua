@@ -54,7 +54,11 @@ function si.lookFor(seer, target, seeDead)
     seenObjs[i].seen = nil
     seenObjs[i] = nil
   end
-  if seenObjsNum == 1 then return true else return false end
+  -- To ensure there are no obstacles between me and my target:
+  -- If target is a physical object and has a body,
+  -- the seenobjs must be one because I can see the target's body.
+  -- If the target is just coordinates, the seen objects must be zero
+  if seenObjsNum == ((target.body and not target.seeThrough) and 1 or 0) then return true else return false end
 end
 
 function si.drawRay(seer, target)

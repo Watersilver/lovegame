@@ -3,15 +3,15 @@ local bspl = require "GameObjects.Items.bombsplosion"
 local u = require "utilities"
 local o = require "GameObjects.objects"
 
-local Brick = {}
+local ChainReaction = {}
 
-function Brick.initialize(instance)
+function ChainReaction.initialize(instance)
   instance.freq = 0.1
   instance.radius = 16 * 10
   instance.explosions = 20
 end
 
-Brick.functions = {
+ChainReaction.functions = {
   load = function (self)
     self.timer = self.freq
   end,
@@ -42,10 +42,10 @@ Brick.functions = {
   end,
 }
 
-function Brick:new(init)
+function ChainReaction:new(init)
   local instance = p:new() -- add parent functions and fields
-  p.new(Brick, instance, init) -- add own functions and fields
+  p.new(ChainReaction, instance, init) -- add own functions and fields
   return instance
 end
 
-return Brick
+return ChainReaction
