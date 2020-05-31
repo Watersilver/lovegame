@@ -2659,10 +2659,7 @@ Playa.functions = {
       end
       self:takeDamage(other)
       if other.fairy then
-        o.removeFromWorld(other)
-        self:addHealth(8)
-        snd.play(glsounds.getHeart)
-        coll:setEnabled(false)
+        other:healPlaya(self, coll)
         return
       end
 

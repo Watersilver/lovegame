@@ -5,6 +5,7 @@ local im = require "image"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local sh = require "GameObjects.shadow"
 local zAxis = (require "movement").top_down.zAxis
+local u = require "utilities"
 
 local o = require "GameObjects.objects"
 
@@ -18,7 +19,8 @@ local pp = {
   bodyType = "static",
   fixedRotation = true,
   shape = ps.shapes.circleHalf,
-  masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
+  -- masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
+  masks = {FLOORCOLLIDECAT}
 }
 
 local function onPlayerTouch()
@@ -39,6 +41,8 @@ function Drop.initialize(instance)
   instance.notSolidStatic = true
   instance.notSolid = true
   instance.bounceOnce = true
+  instance.thrownGoesThrough = true
+  instance.attackDodger = true
 end
 
 Drop.functions = {
@@ -57,6 +61,30 @@ update = function (self, dt)
   if self.zo == 0 then o.change_layer(self, 19) end
 
   sh.handleShadow(self)
+
+  if self.touchedBySword and self.zo == 0 and self.touchedBySword.creator and not self.touchedBySword.creator.triggers.posingForItem then
+    o.removeFromWorld(self)
+    self.touchedBySword.creator.triggers.posingForItem = true
+    self:onPlayerTouch()
+    self.onPlayerTouch = u.emptyFunc
+    return
+  end
+end,
+
+beginContact = function(self, a, b, coll, aob, bob)
+  local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+  if other.immasword then
+    self.touchedBySword = other
+  end
+end,
+
+endContact = function(self, a, b, coll, aob, bob)
+  local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+  if other.immasword then
+    self.touchedBySword = nil
+  end
 end,
 
 preSolve = function(self, a, b, coll, aob, bob)
@@ -67,6 +95,7 @@ preSolve = function(self, a, b, coll, aob, bob)
       o.removeFromWorld(self)
       other.triggers.posingForItem = true
       self:onPlayerTouch()
+      self.onPlayerTouch = u.emptyFunc
       return
     end
   end
