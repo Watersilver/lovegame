@@ -42,11 +42,6 @@ function Bombsplosion.initialize(instance)
     categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT, ENEMYATTACKCAT}
   }
   instance.seeThrough = true
-  if session.save.dinsPower then
-    instance.myShader = shdrs["itemRedShader"]
-    instance.blowUpForce = 200
-    instance.damCounter = 1.7
-  end
 end
 
 Bombsplosion.functions = {
@@ -54,6 +49,13 @@ Bombsplosion.functions = {
     self.timer = 0.4
     self.startingTimer = self.timer
     self.body:setPosition(self.x, self.y)
+
+    if session.save.dinsPower and not self.dustAccident then
+      self.myShader = shdrs["itemRedShader"]
+      self.blowUpForce = 200
+      self.damCounter = 1.7
+      self.poweredUp = true
+    end
 
     -- find how far the explosion is happening from the player
     local pldistance = 0
@@ -64,7 +66,7 @@ Bombsplosion.functions = {
 
     -- determine the explosion's effects based pldistance and explosions power
     local magn, freq, dur = 1, 0.05, 1
-    if session.save.dinsPower then
+    if session.save.dinsPower and not self.dustAccident then
       -- < 85 is close, > 95 is far
       if pldistance < 20 then
         magn, dur = 1.5, 2
@@ -109,7 +111,7 @@ Bombsplosion.functions = {
 
     self.x, self.y = x, y
 
-    -- missile light
+    -- bomb light
     self.lightSource.x, self.lightSource.y = x, y
     ls.drawSource(self.lightSource)
 

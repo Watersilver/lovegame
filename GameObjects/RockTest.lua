@@ -72,7 +72,7 @@ rt.functions = {
 
   beginContact = function(self, a, b, coll, aob, bob)
     self.contacts = self.contacts + 1
-    if session.save.dinsPower and ((aob.immasword or bob.immasword) or (aob.immabombsplosion or bob.immabombsplosion)) then
+    if (session.save.dinsPower and (aob.immasword or bob.immasword)) or ((aob.immabombsplosion and aob.poweredUp) or (bob.immabombsplosion and bob.poweredUp)) then
       throw_collision(self)
       o.removeFromWorld(self)
     end

@@ -12,6 +12,7 @@ local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
 local msl = require "GameObjects.Items.missile"
 local lft = require "GameObjects.Items.lifted"
+local mdu = require "GameObjects.Items.mdust"
 local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDrownPlummet
 
 local floor = math.floor
@@ -764,6 +765,60 @@ player_states.end_sprint = function(instance, dt)
   instance.sprintDir = nil
   instance.immasprint = nil
   instance.rollSoundTimer = nil
+end
+
+
+player_states.run_mdust = function(instance, dt, side)
+  if instance.image_index >= 1 and instance.image_index_prev < 1 then
+
+    local xmod, ymod
+    local hormod, vermod = 12, 6
+    if side == "up" then
+      xmod, ymod = 0, -vermod
+    elseif side == "left" then
+      xmod, ymod = -hormod, 0
+    elseif side == "down" then
+      xmod, ymod = 0, vermod + ps.shapes.plshapeHeight
+    elseif side == "right" then
+      xmod, ymod = hormod, 0
+    end
+
+    -- Create sprinkle
+    local mdust = mdu:new{
+      creator = instance,
+      side = side,
+      layer = side == "up" and instance.layer - 1 or instance.layer + 1,
+      xstart = instance.x + xmod, x = instance.x + xmod,
+      ystart = instance.y + ymod, y = instance.y + ymod
+    }
+    o.addToWorld(mdust)
+  end
+end
+
+player_states.check_mdust = function(instance, dt, side)
+  local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+  if pddp(instance, trig, instance.sprintSide, dt) then
+  elseif trig.animation_end then
+    instance.animation_state:change_state(instance, dt, side .. "still")
+  end
+end
+
+player_states.start_mdust = function(instance, dt, side)
+  instance.image_index = 0
+  instance.image_speed = 0.1
+  instance.triggers.animation_end = false
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/mdust_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/mdust_left"]
+    instance.x_scale = -1
+  end
+end
+
+player_states.end_mdust = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = 1
+  end
 end
 
 

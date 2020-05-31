@@ -166,6 +166,20 @@ inv.speed = {
   end,
 }
 
+inv.mystery = {
+  name = "mystery",
+  powerUp = "nayrusWisdom",
+  invImage = love.graphics.newImage("Sprites/Inventory/InvImgMystery.png"),
+  time = 0.3,
+  check_trigger = function(object, keyheld)
+    if keyheld == 0 then
+      return "mystery"
+    else
+      return "none"
+    end
+  end,
+}
+
 inv.slots = {}
 
 -- inv.slots[6] = {key = "c", item = inv.sword}
@@ -274,6 +288,9 @@ function inv.check_use(instance, trig, side, dt)
     return true
   elseif trig.gripping and instance.sensors[side .. "Touch"] then
     instance.animation_state:change_state(instance, dt, side .. "gripping")
+    return true
+  elseif trig.mystery then
+    instance.animation_state:change_state(instance, dt, side .. "mdust")
     return true
   elseif trig.mark then
     instance.animation_state:change_state(instance, dt, "downmark")

@@ -171,6 +171,9 @@ im.spriteSettings = {
     {'Witch/roll_down', 4, padding = 2, width = 16, height = 16},
     {'Witch/roll_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/roll_up', 4, padding = 2, width = 16, height = 16},
+    {'Witch/mdust_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/mdust_left', 2, padding = 2, width = 16, height = 16},
+    {'Witch/mdust_up', 2, padding = 2, width = 16, height = 16},
     {'Witch/mark_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/recall_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/display_down', 2, padding = 2, width = 16, height = 16},
@@ -189,6 +192,9 @@ im.spriteSettings = {
   playerBomb = {'Inventory/UseBomb', 1, padding = 2, width = 8, height = 13},
   playerDust = {'Inventory/UseSpeedL1', 3, padding = 2, width = 10, height = 10},
   playerBlast = {'Inventory/UseBombsplosionL1', 6, padding = 2, width = 32, height = 32},
+  playerMdust = {'Inventory/UseSprinkle', 6, padding = 2, width = 24, height = 10},
+  playerMbox = {'Inventory/UseMagicBox', 4, padding = 2, width = 16, height = 16},
+  playerDissapearMbox = {'Inventory/DissapearEffect', 3, padding = 2, width = 16, height = 16},
   -- Enemy sprites
   bullKnight = {
     {'Enemies/BullKnight/walk_left', 2, padding = 2, width = 16, height = 16},

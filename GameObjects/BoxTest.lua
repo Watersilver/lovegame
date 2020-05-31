@@ -24,6 +24,7 @@ end
 bt.functions = {
   update = function(self)
     self.mycolour = self.contacts>0 and 0 or COLORCONST
+    self.x, self.y = self.body:getPosition()
     -- self.mycolour = self.mycolour>254 and 255 or self.mycolour+1
   end
   ,

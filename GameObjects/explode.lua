@@ -26,7 +26,8 @@ function Explode.commonExplosion(instance, explosion_sprite, explosion_sound, xd
     explosionNumber = 1,
     explosion_sprite = explosion_sprite or default_explosion_sprite,
     image_speed = instance.explosionSpeed,
-    sounds = snd.load_sounds({explode = explosion_sound or default_explosion_sound})
+    sounds = snd.load_sounds({explode = explosion_sound or default_explosion_sound}),
+    sound = nil
   }
   explOb.xdest = xdest
   explOb.ydest = ydest
@@ -51,7 +52,13 @@ Explode.functions = {
     self.yexplode = self.yexplode or self.ystart
     self.explodeDistance = self.explodeDistance or 8
     self.explosionTimer = 0
-    if not self.nosound then snd.play(self.sounds.explode) end
+    if not self.nosound then
+      if self.sound then
+        snd.play(self.sound)
+      elseif self.sounds then
+        snd.play(self.sounds.explode)
+      end
+    end
     if self.explosion_sprite then
       im.load_sprite(self.explosion_sprite)
       self.sprite = im.sprites[self.explosion_sprite[1] or self.explosion_sprite["img_name"]]

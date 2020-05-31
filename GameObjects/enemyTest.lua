@@ -120,6 +120,9 @@ Enemy.functions = {
     ebh.propelledByHit(self, other, myF, otherF)
   end,
 
+  hitByMdust = function (self, other, myF, otherF)
+  end,
+
   hitPlayer = function (self, other, myF, otherF)
   end,
 
@@ -313,6 +316,13 @@ Enemy.functions = {
       self.lastHit = "bullrush"
       self.attacked = true
       self:hitByBullrush(other, myF, otherF)
+    end
+
+    -- Check if hit by magic dust
+    if other.immamdust == true and not self.invulnerable and not self.undamageable then
+      self.lastHit = "mdust"
+      self.attacked = true
+      self:hitByMdust(other, myF, otherF)
     end
   end,
 

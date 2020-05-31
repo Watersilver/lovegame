@@ -264,6 +264,8 @@ function Playa.initialize(instance)
                 instance.movement_state:change_state(instance, dt, "using_mark")
               elseif trig.recall then
                 instance.movement_state:change_state(instance, dt, "using_recall")
+              elseif trig.mystery then
+                instance.movement_state:change_state(instance, dt, "using_mdust")
               end
             end
 
@@ -323,6 +325,17 @@ function Playa.initialize(instance)
       else
         instance.item_use_duration = inv.recall.time * 2
       end
+    end
+    },
+
+
+    using_mdust = {
+    start_state = function(instance, dt)
+      instance.movement_state:change_state(instance, dt, "using_item")
+    end,
+
+    end_state = function(instance, dt)
+      instance.item_use_duration = inv.mystery.time
     end
     },
 
@@ -1507,6 +1520,82 @@ function Playa.initialize(instance)
 
     end_state = function(instance, dt)
       hps.end_damaged(instance, dt, "up")
+    end
+    },
+
+
+    downmdust = {
+    run_state = function(instance, dt)
+      hps.run_mdust(instance, dt, "down")
+    end,
+
+    check_state = function(instance, dt)
+      hps.check_mdust(instance, dt, "down")
+    end,
+
+    start_state = function(instance, dt)
+      hps.start_mdust(instance, dt, "down")
+    end,
+
+    end_state = function(instance, dt)
+      hps.end_mdust(instance, dt, "down")
+    end
+    },
+
+
+    rightmdust = {
+    run_state = function(instance, dt)
+      hps.run_mdust(instance, dt, "right")
+    end,
+
+    check_state = function(instance, dt)
+      hps.check_mdust(instance, dt, "right")
+    end,
+
+    start_state = function(instance, dt)
+      hps.start_mdust(instance, dt, "right")
+    end,
+
+    end_state = function(instance, dt)
+      hps.end_mdust(instance, dt, "right")
+    end
+    },
+
+
+    leftmdust = {
+    run_state = function(instance, dt)
+      hps.run_mdust(instance, dt, "left")
+    end,
+
+    check_state = function(instance, dt)
+      hps.check_mdust(instance, dt, "left")
+    end,
+
+    start_state = function(instance, dt)
+      hps.start_mdust(instance, dt, "left")
+    end,
+
+    end_state = function(instance, dt)
+      hps.end_mdust(instance, dt, "left")
+    end
+    },
+
+
+    upmdust = {
+    run_state = function(instance, dt)
+      hps.run_mdust(instance, dt, "up")
+    end,
+
+    check_state = function(instance, dt)
+      hps.check_mdust(instance, dt, "up")
+    end,
+
+    start_state = function(instance, dt)
+      hps.start_mdust(instance, dt, "up")
+    end,
+
+    end_state = function(instance, dt)
+      hps.end_mdust(instance, dt, "up")
     end
     },
 

@@ -298,7 +298,9 @@ glsounds = snd.load_sounds{
   useItem = {"Effects/Oracle_Get_Item"},
   portal = {"Effects/Oracle_Dungeon_Teleport"},
   bomb = {"Effects/Oracle_Bomb_Blow"},
-  bombDrop = {"Effects/Oracle_Bomb_Drop"}
+  bombDrop = {"Effects/Oracle_Bomb_Drop"},
+  magicDust = {"Effects/Oracle_MakuTree_Leaves"},
+  appearVanish = {"Effects/Oracle_AppearVanish"}
 }
 
 -- Set up cameras

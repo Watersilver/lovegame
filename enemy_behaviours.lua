@@ -118,7 +118,7 @@ function ebh.damagedByHit(object, other, myF, otherF)
       baseDamage = session.save.dinsPower and 5 or 4
       damageMod = object.thrownDamageMod or 1
     elseif object.lastHit == "bombsplosion" then
-      baseDamage = session.save.dinsPower and 5 or 4
+      baseDamage = other.poweredUp and 5 or 4
       damageMod = object.bombsplosionDamageMod or 1
     elseif object.lastHit == "bullrush" then
       baseDamage = session.save.faroresCourage and 1 or 0.5
@@ -157,7 +157,7 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
     baseForceMod = session.save.dinsPower and 3 or 2
     attackForceMod = object.thrownForceMod or 1
   elseif object.lastHit == "bombsplosion" then
-    baseForceMod = session.save.dinsPower and 5 or 4
+    baseForceMod = other.poweredUp and 5 or 4
     attackForceMod = object.bombsplosionForceMod or 1
   elseif object.lastHit == "bullrush" then
     baseForceMod = session.save.faroresCourage and 4 or 3
