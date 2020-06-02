@@ -50,6 +50,8 @@ shaderPcall("customTunic", "custom_tunic")
 
 -- Freeze, stone and plant shaders
 shaderPcall("frozenShader", "frozen_shader")
+shaderPcall("stoneShader", "stone_shader")
+shaderPcall("plantShader", "plant_shader")
 
 --
 -- shdrs.grayscale = love.graphics.newShader("Shaders/grayscale.fs")

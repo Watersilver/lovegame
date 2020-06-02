@@ -171,7 +171,7 @@ Lifted.functions = {
     local frame = sprite[self.image_index]
     local worldShader = love.graphics.getShader()
 
-    love.graphics.setShader(self.myShader)
+    love.graphics.setShader(self.inheritedShader or self.myShader)
     if self.creator and not self.creator.invisible then
       love.graphics.draw(
       sprite.img, frame, x, y, self.angle,
@@ -224,7 +224,8 @@ Lifted.functions = {
       iAmBomb = self.iAmBomb,
       timer = self.timer,
       vibrPhase = self.vibrPhase,
-      startingTimer = self.startingTimer
+      startingTimer = self.startingTimer,
+      inheritedShader = self.inheritedShader
     }
     o.addToWorld(thrownOb)
 

@@ -28,7 +28,10 @@ local function destroyself(self)
     if self.shadow then o.removeFromWorld(self.shadow) end
     self.shadow = nil
     if self.iAmBomb then
-      local newBspl = bspl:new{x = self.x, y = self.y, layer = self.layer}
+      local newBspl = bspl:new{
+        x = self.x, y = self.y, layer = self.layer,
+        dustAccident = self.dustBomb
+      }
       o.addToWorld(newBspl)
     end
   end
@@ -90,15 +93,23 @@ function Thrown.initialize(instance)
   instance.immathrown = true
   instance.bounces = 0
   instance.thrownGoesThrough = true
+  instance.zo = - 1.5 * ps.shapes.plshapeHeight
 end
 
 Thrown.functions = {
 
   load = function(self)
-    self.zo = - 1.5 * ps.shapes.plshapeHeight
     self.body:setPosition(self.x, self.y - self.zo)
     self.body:setLinearVelocity(self.vx, self.vy)
-    if session.save.dinsPower and self.iAmBomb then self.myShader = shdrs["bombRedShader"] end
+    if self.iAmBomb then
+      if session.save.dinsPower and not self.dustBomb then
+        self.myShader = shdrs["bombRedShader"]
+      end
+      self.startingTimer = self.startingTimer or self.timer
+      self.vibrPhase = self.vibrPhase or 0
+      self.xvscale = self.xvscale or 0
+      self.yvscale = self.yvscale or 0
+    end
   end,
 
   update = function(self, dt)
@@ -180,7 +191,7 @@ Thrown.functions = {
     local frame = sprite[self.image_index]
     local worldShader = love.graphics.getShader()
 
-    love.graphics.setShader(self.myShader)
+    love.graphics.setShader(self.inheritedShader or self.myShader)
     love.graphics.draw(
     sprite.img, frame, x, y + self.zo, self.angle,
     sprite.res_x_scale*(self.x_scale + (self.xvscale or 0)),

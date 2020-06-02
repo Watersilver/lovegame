@@ -10,6 +10,7 @@ local snd = require "sound"
 local u = require "utilities"
 local mdust = require "GameObjects.Items.mdust"
 local drops = require "GameObjects.drops.drops"
+local shdrs = require "Shaders.shaders"
 
 local function myDrops(x, y)
   drops.cheap(x, y)
@@ -62,16 +63,20 @@ Brick.functions = {
 
 onMdustTouch = function (self, other)
   local reaction = u.chooseFromChanceTable{
+    -- chance of stoning
+    {value = other.createStone, chance = 0.1},
+    -- chance of exploding
+    {value = other.createBomb, chance = 0.02},
     -- chance of freezing
-    {value = other.createFrozenBlock, chance = 10.5},
+    {value = other.createFrozenBlock, chance = 0.25},
     -- chance of burning
-    {value = other.createFire, chance = 0.5},
+    {value = other.createFire, chance = 0.25},
     -- If none of the above happens, nothing happens
     -- {value = nil, chance = 1},
   }
   if not reaction then return end
   if reaction == other.createFire then self.onMdustTouch = nil
-  elseif reaction == other.createFrozenBlock then o.removeFromWorld(self) end
+  else o.removeFromWorld(self) end
   reaction(self)
 end,
 
@@ -80,15 +85,25 @@ onFireEnd = function (self)
   o.removeFromWorld(self)
 end,
 
+load = function(self)
+  self.image_speed = 0
+  if self.plantified then
+    self.myShader = shdrs.plantShader
+  end
+end,
+
 draw = function (self)
   local x, y = self.body and self.body:getPosition() or self.xstart, self.ystart
   local sprite = self.sprite
   self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
   local frame = sprite[self.image_index]
+  local worldShader = love.graphics.getShader()
+  love.graphics.setShader(self.myShader)
   love.graphics.draw(
   sprite.img, frame, x, y, 0,
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
+  love.graphics.setShader(worldShader)
   -- if self.body then
   --   for i, fixture in ipairs(self.fixtures) do
   --     local shape = fixture:getShape()
@@ -103,20 +118,19 @@ trans_draw = function (self)
   local sprite = self.sprite
   self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
   local frame = sprite[self.image_index]
+  local worldShader = love.graphics.getShader()
+  love.graphics.setShader(self.myShader)
   love.graphics.draw(
   sprite.img, frame, xtotal, ytotal, 0,
   sprite.res_x_scale, sprite.res_y_scale,
   sprite.cx, sprite.cy)
+  love.graphics.setShader(worldShader)
   -- if self.body then
   --   for i, fixture in ipairs(self.fixtures) do
   --     local shape = fixture:getShape()
   --     love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
   --   end
   -- end
-end,
-
-load = function(self)
-  self.image_speed = 0
 end,
 
 beginContact = function(self, a, b, coll, aob, bob)
@@ -127,7 +141,7 @@ beginContact = function(self, a, b, coll, aob, bob)
     self:throw_collision()
     o.removeFromWorld(self)
     self.beginContact = nil
-  elseif other.immamdust and not other.hasReacted and self.onMdustTouch then
+  elseif not self.plantified and other.immamdust and not other.hasReacted and self.onMdustTouch then
     other.hasReacted = true
     self.onMdustTouch(self, other)
   end

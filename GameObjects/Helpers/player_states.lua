@@ -447,7 +447,8 @@ player_states.start_gripping = function(instance, dt, side)
         explosionSpeed = other.explosionSpeed,
         explosionSound = other.explosionSound,
         lifterSpeedMod = other.lifterSpeedMod or 0.5,
-        throw_collision = other.throw_collision or emptyfunc
+        throw_collision = other.throw_collision or emptyfunc,
+        inheritedShader = other.myShader
       }
       o.addToWorld(instance.liftedOb)
       return

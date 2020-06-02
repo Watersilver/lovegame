@@ -138,12 +138,18 @@ MagicDust.functions = {
 
   createFrozenBlock = function (freezee)
     snd.play(glsounds.ice)
+    local layer
+    if pl1 and pl1.exists then
+      layer = math.min(freezee.layer + 1, pl1.layer - 1)
+    else
+      layer = freezee.layer + 1
+    end
     local frBlock = (require "GameObjects.frozenBox"):new{
       xstart = freezee.x,
       ystart = freezee.y,
       x = freezee.x,
       y = freezee.y,
-      layer = freezee.layer + 1,
+      layer = layer,
       sprite_info = freezee.sprite_info,
       image_index = math.floor(freezee.image_index),
     }
@@ -151,6 +157,80 @@ MagicDust.functions = {
       frBlock.physical_properties.shape = freezee.fixture:getShape()
     end
     o.addToWorld(frBlock)
+  end,
+
+  createBomb = function (bombee)
+    local layer
+    if pl1 and pl1.exists then
+      layer = math.min(bombee.layer + 1, pl1.layer - 1)
+    else
+      layer = bombee.layer + 1
+    end
+    local bomb = (require "GameObjects.Items.thrown"):new{
+      xstart = bombee.x,
+      ystart = bombee.y,
+      x = bombee.x,
+      y = bombee.y,
+      layer = layer,
+      iAmBomb = true,
+      dustBomb = true,
+      bounces = 1,
+      timer = 2,
+      sprite_info = bombee.sprite_info,
+      image_index = math.floor(bombee.image_index),
+      zo = 0,
+      vx = 0,
+      vy = 0,
+    }
+    o.addToWorld(bomb)
+  end,
+
+  createStone = function (stonee)
+    local layer
+    if pl1 and pl1.exists then
+      layer = math.min(stonee.layer + 1, pl1.layer - 1)
+    else
+      layer = stonee.layer + 1
+    end
+    local stBlock = (require "GameObjects.RockTest"):new{
+      xstart = stonee.x,
+      ystart = stonee.y,
+      x = stonee.x,
+      y = stonee.y,
+      layer = layer,
+      sprite_info = stonee.sprite_info,
+      image_index = math.floor(stonee.image_index),
+      lift_info = stonee.petrifiedLI or "petrified",
+      petrified = true
+    }
+    if stonee.fixture then
+      stBlock.physical_properties.shape = stonee.fixture:getShape()
+    end
+    o.addToWorld(stBlock)
+  end,
+
+  createPlant = function (plantee)
+    local layer
+    if pl1 and pl1.exists then
+      layer = math.min(plantee.layer + 1, pl1.layer - 1)
+    else
+      layer = plantee.layer + 1
+    end
+    local plBlock = (require "GameObjects.softLiftable"):new{
+      xstart = plantee.x,
+      ystart = plantee.y,
+      x = plantee.x,
+      y = plantee.y,
+      layer = layer,
+      sprite_info = plantee.sprite_info,
+      image_index = math.floor(plantee.image_index),
+      lift_info = plantee.plantifiedLI or "plantified",
+      plantified = true
+    }
+    if plantee.fixture then
+      plBlock.physical_properties.shape = plantee.fixture:getShape()
+    end
+    o.addToWorld(plBlock)
   end,
 
   vanish = function (self)

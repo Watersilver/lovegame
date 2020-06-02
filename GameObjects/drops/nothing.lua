@@ -63,8 +63,10 @@ end,
 
 reactWith = function (self, other)
   return u.chooseFromChanceTable{
+    -- chance of freezing
+    {value = other.createFrozenBlock, chance = 0.02},
     -- chance of vanishing
-    {value = other.vanish, chance = 0.75},
+    {value = other.vanish, chance = 0.73},
     -- If none of the above happens, nothing happens
     {value = nil, chance = 1},
   }
