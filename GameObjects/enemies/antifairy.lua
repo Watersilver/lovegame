@@ -5,6 +5,7 @@ local et = require "GameObjects.enemyTest"
 local ebh = require "enemy_behaviours"
 local td = require "movement"; td = td.top_down
 local u = require "utilities"
+local o = require "GameObjects.objects"
 
 local Antifairy = {}
 
@@ -26,6 +27,21 @@ Antifairy.functions = {
   load = function (self)
     et.functions.load(self)
     self.body:setLinearVelocity(u.polarToCartesian(self.maxspeed, self.direction))
+  end,
+
+  hitByMdust = function (self, other, myF, otherF)
+    local pUp = other.poweredUp and 1 or 0
+    local reaction = u.chooseFromChanceTable{
+      -- Chance of vanishing
+      {value = other.vanish, chance = 0.1 + session.save.magicLvl * 0.05 - pUp * 0.25},
+      -- Chance of truning into fairy
+      {value = other.createFairy, chance = 0.1 + session.save.magicLvl * 0.05 + pUp},
+      -- If none of the above happens, nothing happens
+      {value = nil, chance = 1},
+    }
+    if not reaction then return end
+    reaction(self)
+    o.removeFromWorld(self)
   end,
 
   enemyUpdate = u.emptyFunc,

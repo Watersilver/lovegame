@@ -47,6 +47,10 @@ shaderPcall("redTunic", "red_tunic")
 shaderPcall("mauveTunic", "mauve_tunic")
 -- shdrs.customTunic = love.graphics.newShader("Shaders/custom_tunic.fs")
 shaderPcall("customTunic", "custom_tunic")
+
+-- Freeze, stone and plant shaders
+shaderPcall("frozenShader", "frozen_shader")
+
 --
 -- shdrs.grayscale = love.graphics.newShader("Shaders/grayscale.fs")
 shaderPcall("grayscale")

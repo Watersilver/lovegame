@@ -1,55 +1,78 @@
 local ps = require "physics_settings"
 local p = require "GameObjects.prototype"
 local im = require "image"
+local shdrs = require "Shaders.shaders"
 local trans = require "transitions"
 local o = require "GameObjects.objects"
 local u = require "utilities"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local expl = require "GameObjects.explode"
 local snd = require "sound"
+local sh = require "GameObjects.shadow"
+local ebh = require "enemy_behaviours"
+local game = require "game"
 
 local lp = love.physics
 
 local bt = {}
 
 function bt.initialize(instance)
-  instance.sprite_info = {im.spriteSettings.playerMbox}
+  instance.sprite_info = {im.spriteSettings.liftableRock}
   instance.floorTiles = {role = "thrownFloorTilesIndex"}
   instance.physical_properties = {
     bodyType = "dynamic",
-    density = 40,
+    density = 200,
     gravityScaleFactor = 0,
     shape = ps.shapes.circleAlmost1,
     restitution = 0,
-    linearDamping = 40,
+    linearDamping = 1,
     fixedRotation = true,
     categories = {1, FLOORCOLLIDECAT}
   }
   instance.ballbreaker = true
+  instance.pushback = true
   instance.image_index = 0
-  instance.image_speed = 0.25
+  instance.myShader = shdrs.frozenShader
+  instance.gravity = 350
+  instance.zvel = 35
+  instance.zo = 0
+  instance.forceSwordSound = true
+  instance.swordForceMod = 0.1
+  instance.missileForceMod = 0.1
+  instance.thrownForceMod = 0.1
+  instance.bombsplosionForceMod = 0.5
+  instance.bullrushForceMod = 0.5
   -- instance.pushback = true
   -- instance.liftable = true
 end
 
 bt.functions = {
   update = function(self, dt)
-    self.x, self.y = self.body:getPosition()
-    self.image_index = (self.image_index + dt*60*self.image_speed)
-    local frames = self.sprite.frames
-    if self.image_index >= frames then
-      self.image_index = frames - 0.1
-    end
-    if not self.creator then
+    -- Remove if out of bounds
+    if self.x + 8 < 0 or self.x - 8 > game.room.width then
       o.removeFromWorld(self)
-      local disappearEffect = expl:new{
-        x = self.x, y = self.y,
-        layer = self.layer,
-        image_speed = 0.2,
-        explosion_sprite = im.spriteSettings.playerDissapearMbox,
-        sound = glsounds.appearVanish
-      }
-      o.addToWorld(disappearEffect)
+    elseif self.y < -8 or self.y > game.room.height then
+      o.removeFromWorld(self)
+    end
+
+    self.x, self.y = self.body:getPosition()
+    -- Handle zaxis
+    self.zo = self.zo - self.zvel * dt
+    if self.zo >= 0 then
+      self.gravity = 0
+      self.zvel = 0
+      self.zo = 0
+      if self.shadow then o.removeFromWorld(self.shadow) end
+      self.shadow = nil
+    else
+      self.zvel = self.zvel - self.gravity * dt
+      if not self.shadow then
+        self.shadow = sh:new{
+          caster = self, layer = self.layer-1,
+          xstart = self.x, ystart = self.y
+        }
+        o.addToWorld(self.shadow)
+      end
     end
 
     if self.floorTiles[1] then
@@ -68,9 +91,9 @@ bt.functions = {
       self.xClosestTile = closestTile.xstart
       self.yClosestTile = closestTile.ystart
       if closestTile.water then
-        self.creator = nil
+        expl.sink(self)
       elseif closestTile.gap then
-        self.creator = nil
+        expl.plummet(self)
       end
     end
 
@@ -85,10 +108,13 @@ bt.functions = {
 
     local sprite = self.sprite
     local frame = sprite[math.floor(self.image_index)]
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
     love.graphics.draw(
-    sprite.img, frame, x, y, 0,
+    sprite.img, frame, x, y + self.zo, 0,
     sprite.res_x_scale, sprite.res_y_scale,
     sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
   end,
 
   trans_draw = function(self)
@@ -96,16 +122,25 @@ bt.functions = {
     self:draw(true)
   end,
 
-  load = function(self)
-    snd.play(glsounds.appearVanish)
-  end,
-
   beginContact = function(self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
     if other.immasword then
-      self.creator = nil
+      self.lastHit = "sword"
+      ebh.propelledByHit(self, other, myF, otherF)
+    elseif other.immamissile then
+      self.lastHit = "missile"
+      ebh.propelledByHit(self, other, myF, otherF)
+    elseif other.immathrown and not other.iAmBomb then
+      self.lastHit = "thrown"
+      ebh.propelledByHit(self, other, myF, otherF)
+    elseif other.immabombsplosion then
+      self.lastHit = "bombsplosion"
+      ebh.propelledByHit(self, other, myF, otherF)
+    elseif not otherF:isSensor() and other.immasprint then
+      self.lastHit = "bullrush"
+      ebh.propelledByHit(self, other, myF, otherF)
     end
 
     -- remember tiles
@@ -125,8 +160,6 @@ bt.functions = {
 
     if other.gap or other.water then
       coll:setEnabled(false)
-    elseif other.immasprint then
-      self.creator = nil
     end
   end,
 }

@@ -64,21 +64,9 @@ local function touchGround(self)
   end
 end
 
-local sink_sprite = im.spriteSettings.rockSink
-local sink_sound = {"Effects/Oracle_Link_Wade"}
-local function sink(self)
-  self.explosionSpeed = 0.4
-  expl.commonExplosion(self, sink_sprite, sink_sound)
-  o.removeFromWorld(self)
-end
+local sink = expl.sink
 
-local plummet_sprite = im.spriteSettings.rockPlummet
-local plummet_sound = {"Effects/Oracle_Block_Fall"}
-local function plummet(self)
-  self.explosionSpeed = 0.2
-  expl.commonExplosion(self, plummet_sprite, plummet_sound, self.xClosestTile, self.yClosestTile)
-  o.removeFromWorld(self)
-end
+local plummet = expl.plummet
 
 function Thrown.initialize(instance)
 
@@ -128,7 +116,7 @@ Thrown.functions = {
         local previousClosestDistance
         for _, floorTile in ipairs(self.floorTiles) do
           previousClosestDistance = closestDistance
-          -- Magic number to account for player height
+          -- Magic number to account for thrown height
           closestDistance = math.min(u.distanceSqared2d(x, y+3, floorTile.xstart, floorTile.ystart), closestDistance)
           if closestDistance < previousClosestDistance then
             closestTile = floorTile

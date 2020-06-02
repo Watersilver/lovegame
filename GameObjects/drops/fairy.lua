@@ -21,6 +21,7 @@ function Fairy.initialize(instance)
   instance.physical_properties.masks = {FLOORCOLLIDECAT, ENEMYATTACKCAT}
   instance.t = 0
   instance.attackDodger = true
+  instance.inertiaDuration = 0
 end
 
 Fairy.functions = {
@@ -29,6 +30,7 @@ Fairy.functions = {
   end,
 
   healPlaya = function (self, player, coll)
+    if self.inertiaDuration > self.t then return end
     if self.healedPlaya then return end
     o.removeFromWorld(self)
     self.healedPlaya = true

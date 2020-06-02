@@ -80,7 +80,7 @@ Decoy.functions = {
 
     -- love.graphics.setShader(self.myShader)
     local cr, cg, cb, ca = love.graphics.getColor()
-    love.graphics.setColor(cr, cg, cb, self.alpha * COLORCONST)
+    love.graphics.setColor(cr * self.alpha, cg * self.alpha, cb * self.alpha, self.alpha * COLORCONST)
     love.graphics.draw(
     sprite.img, frame, x, y, 0,
     sprite.res_x_scale*self.x_scale,

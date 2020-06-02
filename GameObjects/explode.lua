@@ -34,6 +34,22 @@ function Explode.commonExplosion(instance, explosion_sprite, explosion_sound, xd
   o.addToWorld(explOb)
 end
 
+local sink_sprite = im.spriteSettings.rockSink
+local sink_sound = {"Effects/Oracle_Link_Wade"}
+function Explode.sink(instance)
+  instance.explosionSpeed = 0.4
+  Explode.commonExplosion(instance, sink_sprite, sink_sound)
+  o.removeFromWorld(instance)
+end
+
+local plummet_sprite = im.spriteSettings.rockPlummet
+local plummet_sound = {"Effects/Oracle_Block_Fall"}
+function Explode.plummet(instance)
+  instance.explosionSpeed = 0.2
+  Explode.commonExplosion(instance, plummet_sprite, plummet_sound, instance.xClosestTile, instance.yClosestTile)
+  o.removeFromWorld(instance)
+end
+
 function Explode.initialize(instance)
   instance.sprite_info = {im.spriteSettings.testsplosion}
   instance.image_speed = 0.5
@@ -91,12 +107,16 @@ Explode.functions = {
           sprite_info = self.sprite_info,
           explosion_sprite = self.explosion_sprite,
           nosound = self.nosound,
-          normalDrop = self.normalDrop
+          normalDrop = self.normalDrop,
+          drop = self.drop,
+          createOnExplEnd = self.createOnExplEnd
         }
         o.addToWorld(nextplosion)
       else
         if self.drop then
           drops[self.drop](self.xexplode or self.xstart, self.yexplode or self.ystart)
+        elseif self.onExplEnd then
+          self:onExplEnd()
         end
       end
       self.image_indexfloat = frames - 1

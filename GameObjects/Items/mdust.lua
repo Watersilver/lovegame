@@ -35,10 +35,12 @@ function MagicDust.initialize(instance)
     categories = {PLAYERATTACKCAT}
   }
   instance.seeThrough = true
-  if session.save.nayrusWisdom then
+  instance.poweredUp = session.save.nayrusWisdom
+  if instance.poweredUp then
     instance.myShader = shdrs["itemBlueShader"]
     instance.chargedShader = shdrs.swordChargeShader
   end
+  instance.lvl = session.save.magicLvl
   instance.chargedShaderFreq = 1 / 30
   instance.chargedShaderPhase = instance.chargedShaderFreq
 end
@@ -95,6 +97,73 @@ MagicDust.functions = {
     o.addToWorld(decoy)
   end,
 
+  createFire = function (self)
+    local decoy = (require "GameObjects.fire"):new{
+      x = self.x, y = self.y,
+      layer = self.creator and self.creator.layer - 1 or self.layer + 1,
+      fuel = self
+    }
+    o.addToWorld(decoy)
+  end,
+
+  conjureHeart = function (appearEffect)
+    local heart = (require "GameObjects.drops.heart"):new{
+      xstart = appearEffect.x, ystart = appearEffect.y,
+    }
+    o.addToWorld(heart)
+  end,
+
+  conjureFairy = function (appearEffect)
+    local fairy = (require "GameObjects.drops.fairy"):new{
+      xstart = appearEffect.x, ystart = appearEffect.y,
+      inertiaDuration = 0.5
+    }
+    o.addToWorld(fairy)
+  end,
+
+  create = function (self, something)
+    local appearEffect = (require "GameObjects.explode"):new{
+      x = self.x, y = self.y,
+      layer = self.layer,
+      image_speed = 0.3,
+      explosion_sprite = im.spriteSettings.playerAppearEffect,
+      sound = glsounds.appearVanish,
+      onExplEnd = something
+    }
+    o.addToWorld(appearEffect)
+  end,
+
+  createHeart = function (target) MagicDust.functions.create(target, MagicDust.functions.conjureHeart) end,
+  createFairy = function (target) MagicDust.functions.create(target, MagicDust.functions.conjureFairy) end,
+
+  createFrozenBlock = function (freezee)
+    snd.play(glsounds.ice)
+    local frBlock = (require "GameObjects.frozenBox"):new{
+      xstart = freezee.x,
+      ystart = freezee.y,
+      x = freezee.x,
+      y = freezee.y,
+      layer = freezee.layer + 1,
+      sprite_info = freezee.sprite_info,
+      image_index = math.floor(freezee.image_index),
+    }
+    if freezee.fixture then
+      frBlock.physical_properties.shape = freezee.fixture:getShape()
+    end
+    o.addToWorld(frBlock)
+  end,
+
+  vanish = function (self)
+    local appearEffect = (require "GameObjects.explode"):new{
+      x = self.x, y = self.y,
+      layer = self.layer,
+      image_speed = 0.2,
+      explosion_sprite = im.spriteSettings.playerDissapearMbox,
+      sound = glsounds.appearVanish,
+    }
+    o.addToWorld(appearEffect)
+  end,
+
   update = function (self, dt)
 
     if self.fixture then
@@ -107,8 +176,12 @@ MagicDust.functions = {
       -- Make an untargeted reaction
       local reaction = u.chooseFromChanceTable{
         -- If you have nayrusWisdom, no explosions
-        {value = self.explode, chance = session.save.nayrusWisdom and 0 or 0.08},
-        {value = self.chainReaction, chance = session.save.nayrusWisdom and 0 or 0.02},
+        {value = self.explode, chance = self.poweredUp and 0 or 0.08},
+        {value = self.chainReaction, chance = self.poweredUp and 0 or 0.02},
+        -- If you have nayrusWisdom, you may get healing instead
+        {value = self.createHeart, chance = self.poweredUp and 0.04 or 0},
+        {value = self.createFairy, chance = self.poweredUp and 0.01 or 0},
+        {value = self.createFire, chance = 0.1},
         -- If you hit a wall, no magic block
         {value = self.createBlock, chance = not self.hitSolid and 0.4 or 0},
         -- If you hit a wall, no decoy
@@ -116,8 +189,6 @@ MagicDust.functions = {
         -- If none of the above happens, nothing happens
         {value = u.emptyFunc, chance = 1},
       }
-      if not self.hitSolid then
-      end
       reaction(self)
       self.hasReacted = true
     end

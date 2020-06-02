@@ -7,8 +7,13 @@ local expl = require "GameObjects.explode"
 local o = require "GameObjects.objects"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local snd = require "sound"
+local u = require "utilities"
+local mdust = require "GameObjects.Items.mdust"
 local drops = require "GameObjects.drops.drops"
 
+local function myDrops(x, y)
+  drops.cheap(x, y)
+end
 
 local function throw_collision(self)
   local explOb = expl:new{
@@ -20,7 +25,7 @@ local function throw_collision(self)
     sounds = snd.load_sounds({explode = self.explosionSound})
   }
   o.addToWorld(explOb)
-  drops.cheap(self.x, self.y)
+  myDrops(self.x, self.y)
 end
 
 local Brick = {}
@@ -50,9 +55,31 @@ function Brick.initialize(instance)
   instance.throw_collision = throw_collision
   instance.explLayer = 25
   instance.lifterSpeedMod = 0.8
+  instance.freezable = true
 end
 
 Brick.functions = {
+
+onMdustTouch = function (self, other)
+  local reaction = u.chooseFromChanceTable{
+    -- chance of freezing
+    {value = other.createFrozenBlock, chance = 10.5},
+    -- chance of burning
+    {value = other.createFire, chance = 0.5},
+    -- If none of the above happens, nothing happens
+    -- {value = nil, chance = 1},
+  }
+  if not reaction then return end
+  if reaction == other.createFire then self.onMdustTouch = nil
+  elseif reaction == other.createFrozenBlock then o.removeFromWorld(self) end
+  reaction(self)
+end,
+
+onFireEnd = function (self)
+  myDrops(self.x, self.y)
+  o.removeFromWorld(self)
+end,
+
 draw = function (self)
   local x, y = self.body and self.body:getPosition() or self.xstart, self.ystart
   local sprite = self.sprite
@@ -100,6 +127,9 @@ beginContact = function(self, a, b, coll, aob, bob)
     self:throw_collision()
     o.removeFromWorld(self)
     self.beginContact = nil
+  elseif other.immamdust and not other.hasReacted and self.onMdustTouch then
+    other.hasReacted = true
+    self.onMdustTouch(self, other)
   end
 end
 }

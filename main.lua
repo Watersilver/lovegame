@@ -301,7 +301,9 @@ glsounds = snd.load_sounds{
   bombDrop = {"Effects/Oracle_Bomb_Drop"},
   magicDust = {"Effects/Oracle_MakuTree_Leaves"},
   appearVanish = {"Effects/Oracle_AppearVanish"},
-  decoy = {"Effects/OOA_Veran_Shapeshift"}
+  decoy = {"Effects/OOA_Veran_Shapeshift"},
+  fire = {"Effects/Oracle_EmberSeed"},
+  ice = {"Effects/Oracle_SwordShimmer"},
 }
 
 -- Set up cameras

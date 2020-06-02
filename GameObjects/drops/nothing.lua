@@ -26,10 +26,20 @@ local pp = {
 local function onPlayerTouch()
 end
 
+local function onMdustTouch(instance, other)
+  local reaction = instance:reactWith(other)
+  if not reaction then return end
+  instance.onPlayerTouch = u.emptyFunc
+  instance.onMdustTouch = nil
+  o.removeFromWorld(instance)
+  reaction(instance)
+end
+
 function Drop.initialize(instance)
   instance.physical_properties = pp
   instance.sprite_info = spriteInfo
   instance.onPlayerTouch = onPlayerTouch
+  instance.onMdustTouch = onMdustTouch
   instance.image_speed = 0
   instance.seeThrough = true
   instance.layer = 21
@@ -49,6 +59,15 @@ Drop.functions = {
 load = function (self)
   self.x = self.xstart
   self.y = self.ystart
+end,
+
+reactWith = function (self, other)
+  return u.chooseFromChanceTable{
+    -- chance of vanishing
+    {value = other.vanish, chance = 0.75},
+    -- If none of the above happens, nothing happens
+    {value = nil, chance = 1},
+  }
 end,
 
 update = function (self, dt)
@@ -77,6 +96,11 @@ beginContact = function(self, a, b, coll, aob, bob)
   if other.immasword then
     self.touchedBySword = other
   end
+
+  if other.immamdust and not other.hasReacted and self.onMdustTouch then
+    other.hasReacted = true
+    self:onMdustTouch(other)
+  end
 end,
 
 endContact = function(self, a, b, coll, aob, bob)
@@ -96,6 +120,7 @@ preSolve = function(self, a, b, coll, aob, bob)
       other.triggers.posingForItem = true
       self:onPlayerTouch()
       self.onPlayerTouch = u.emptyFunc
+      self.onMdustTouch = nil
       return
     end
   end

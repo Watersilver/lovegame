@@ -195,6 +195,9 @@ im.spriteSettings = {
   playerMdust = {'Inventory/UseSprinkle', 6, padding = 2, width = 24, height = 10},
   playerMbox = {'Inventory/UseMagicBox', 4, padding = 2, width = 16, height = 16},
   playerDissapearMbox = {'Inventory/DissapearEffect', 3, padding = 2, width = 16, height = 16},
+  playerAppearEffect = {'Inventory/AppearEffect', 3, padding = 2, width = 16, height = 16},
+  -- Mystery effects
+  fire = {'Fire', 4, padding = 2, width = 14, height = 16},
   -- Enemy sprites
   bullKnight = {
     {'Enemies/BullKnight/walk_left', 2, padding = 2, width = 16, height = 16},
@@ -359,6 +362,7 @@ im.load_sprite(im.spriteSettings.walls)
 im.load_sprite(im.spriteSettings.portals)
 im.load_sprite(im.spriteSettings.edges)
 im.load_sprite(im.spriteSettings.clutter)
+im.load_sprite(im.spriteSettings.fire)
 -- im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15, height = 31}
 -- im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32, height = 50}
 -- im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44, height = 70}

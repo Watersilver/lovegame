@@ -319,9 +319,10 @@ Enemy.functions = {
     end
 
     -- Check if hit by magic dust
-    if other.immamdust == true and not self.invulnerable and not self.undamageable then
+    if other.immamdust == true and not other.hasReacted and not self.invulnerable and not self.undamageable then
       self.lastHit = "mdust"
       self.attacked = true
+      other.hasReacted = true
       self:hitByMdust(other, myF, otherF)
     end
   end,

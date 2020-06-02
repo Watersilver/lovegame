@@ -423,7 +423,7 @@ Sword.functions = {
       end
       cr.body:applyLinearImpulse(px, py)
       self.hitWall = true
-      if other.static and not (other.breakableByUpgradedSword and session.save.dinsPower) then
+      if (other.static and not (other.breakableByUpgradedSword and session.save.dinsPower)) or other.forceSwordSound then
         local exoff, eyoff
         if self.spin then
           exoff, eyoff = u.polarToCartesian(15, self.angle - pi * 0.25 + (love.math.random() * pi * 0.25 - pi * 0.125))
