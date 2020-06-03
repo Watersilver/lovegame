@@ -304,6 +304,8 @@ glsounds = snd.load_sounds{
   decoy = {"Effects/OOA_Veran_Shapeshift"},
   fire = {"Effects/Oracle_EmberSeed"},
   ice = {"Effects/Oracle_SwordShimmer"},
+  stone = {"Effects/Oracle_Rumble2b"},
+  plant = {"Effects/Oracle_ScentSeed_Shot"},
 }
 
 -- Set up cameras

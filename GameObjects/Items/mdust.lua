@@ -186,6 +186,7 @@ MagicDust.functions = {
   end,
 
   createStone = function (stonee)
+    snd.play(glsounds.stone)
     local layer
     if pl1 and pl1.exists then
       layer = math.min(stonee.layer + 1, pl1.layer - 1)
@@ -210,6 +211,7 @@ MagicDust.functions = {
   end,
 
   createPlant = function (plantee)
+    snd.play(glsounds.plant)
     local layer
     if pl1 and pl1.exists then
       layer = math.min(plantee.layer + 1, pl1.layer - 1)
