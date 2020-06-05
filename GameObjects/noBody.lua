@@ -8,7 +8,7 @@ local NoBody = {}
 
 function NoBody.initialize(instance)
   instance.sprite_info = {
-    {'Tiles/TestTiles', 4, 4}
+    {'Tiles/TestTiles', 4, 7}
   }
   instance.image_speed = 0
   instance.image_index = 0

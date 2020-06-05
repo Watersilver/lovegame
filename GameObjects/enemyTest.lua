@@ -32,7 +32,7 @@ function Enemy.initialize(instance)
     gravityScaleFactor = 0,
     restitution = 0,
     friction = 0,
-    masks = {ENEMYATTACKCAT},
+    masks = {ENEMYATTACKCAT, FLOORCOLLIDECAT},
     categories = {DEFAULTCAT, FLOORCOLLIDECAT, ROOMEDGECOLLIDECAT}
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
@@ -72,14 +72,18 @@ function Enemy.initialize(instance)
   instance.deathSound = deathSound
   instance.explosionSprite = im.spriteSettings.enemyExplosion
   -- instance.side = "up"
+  instance.vx = 0
+  instance.vy = 0
 end
 
 Enemy.functions = {
   load = function (self)
     self.x = self.xstart
     self.y = self.ystart
-    self.vx = 0
-    self.vy = 0
+    self:enemyLoad()
+  end,
+
+  enemyLoad = function (self)
   end,
 
   enemyUpdate = function (self, dt)
@@ -219,7 +223,11 @@ Enemy.functions = {
     -- end
   end,
 
+  enemyBeginContact = function(other, myF, otherF, coll)
+  end,
+
   beginContact = function(self, a, b, coll, aob, bob)
+
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
@@ -312,7 +320,7 @@ Enemy.functions = {
     end
 
     -- Check if hit by sprint
-    if not otherF:isSensor() and other.immasprint == true and self.canBeBullrushed and not self.invulnerable and not self.undamageable then
+    if not otherF:isSensor() and other.immasprint == true and self.canBeBullrushed and not self.attackDodger and not self.invulnerable and not self.undamageable then
       self.lastHit = "bullrush"
       self.attacked = true
       self:hitByBullrush(other, myF, otherF)
@@ -325,17 +333,18 @@ Enemy.functions = {
       other.hasReacted = true
       self:hitByMdust(other, myF, otherF)
     end
+
+    self:enemyBeginContact(other, myF, otherF, coll)
   end,
 
   preSolve = function(self, a, b, coll, aob, bob)
+    -- Find which fixture belongs to whom
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
     if self.flying then
-      -- Find which fixture belongs to whom
-      local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
       if self.canLeaveRoom and other.roomEdge then coll:setEnabled(false) end
       if not other.roomEdge then coll:setEnabled(false) end
     else
-      -- Find which fixture belongs to whom
-      local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
       if self.canLeaveRoom and other.roomEdge then coll:setEnabled(false) end
       if other.floor then
         if self.levitating then

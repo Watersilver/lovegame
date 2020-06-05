@@ -113,7 +113,7 @@ function ebh.damagedByHit(object, other, myF, otherF)
       damageMod = object.swordDamageMod or 1
     elseif object.lastHit == "missile" then
       -- if missile is hit by sword, raise damage
-      baseDamage = session.save.nayrusWisdom and (other.hitBySword and 3 or 2) or (other.hitBySword and 2 or 1)
+      baseDamage = session.save.nayrusWisdom and (other.deflected and 3 or 2) or (other.deflected and 2 or 1)
       damageMod = object.missileDamageMod or 1
     elseif object.lastHit == "thrown" then
       baseDamage = session.save.dinsPower and 5 or 4
@@ -152,7 +152,7 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
     attackForceMod = object.swordForceMod or 1
   elseif object.lastHit == "missile" then
     -- if missile is hit by sword, raise force
-    baseForceMod = session.save.nayrusWisdom and (other.hitBySword and 2 or 1) or (other.hitBySword and 1 or 0.5)
+    baseForceMod = session.save.nayrusWisdom and (other.deflected and 2 or 1) or (other.deflected and 1 or 0.5)
     attackForceMod = object.missileForceMod or 1
   elseif object.lastHit == "thrown" then
     baseForceMod = session.save.dinsPower and 3 or 2
@@ -164,7 +164,7 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
     baseForceMod = session.save.faroresCourage and 4 or 3
     attackForceMod = object.bullrushForceMod or 1
   end
-  local forceMod = baseForceMod * attackForceMod
+  local forceMod = baseForceMod * attackForceMod * (object.universalForceMod or 1)
 
   -- Physics
   if not object.shieldWall or piercedShield then

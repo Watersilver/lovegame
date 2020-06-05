@@ -218,6 +218,12 @@ im.spriteSettings = {
   crow = {
     {'Enemies/Crow/crow', 2, padding = 2, width = 16, height = 16}
   },
+  zora = {
+    {'Enemies/Zora/zora', 4, padding = 2, width = 16, height = 16}
+  },
+  fireMissile = {
+    {'Enemies/FireMissile/fireMissile', 2, padding = 2, width = 10, height = 10}
+  },
 
   -- HUD
   clock = {"clock", 1, padding = 0, width = 19, height = 19},

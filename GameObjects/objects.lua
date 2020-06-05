@@ -29,6 +29,20 @@ function o.change_layer(object, newLayer)
   object[o.draw_layers[newLayer].role] = u.push(o.draw_layers[newLayer], object)
 end
 
+function o.removeFromIdentifiable(object)
+  -- Free for ALL ids
+  for id, index_in_identified_table in pairs(object.identifiable) do
+    -- Can't use free function, because "identifiable" is more than a number
+    local array, index = o.identified[id], index_in_identified_table
+    array[index], array[#array] = array[#array], array[index]
+    -- Teach the array's element its new index
+    array[index].identifiable[id] = index
+    table.remove(array)
+    if #array == 0 then o.identified[id] = nil end
+  end
+  object.identifiable = nil
+end
+
 -- Table to hold objects pending to be deleted from the world
 o.to_be_deleted = {}
 -- Function to delete them
@@ -67,17 +81,18 @@ function o.to_be_deleted:remove_all()
       object.noCamDrawable = nil
     end
     if object.identifiable then
-      -- Free for ALL ids
-      for id, index_in_identified_table in pairs(object.identifiable) do
-        -- Can't use free function, because "identifiable" is more than a number
-        local array, index = o.identified[id], index_in_identified_table
-        array[index], array[#array] = array[#array], array[index]
-        -- Teach the array's element its new index
-        array[index].identifiable[id] = index
-        table.remove(array)
-        if #array == 0 then o.identified[id] = nil end
-      end
-      object.identifiable = nil
+      -- -- Free for ALL ids
+      -- for id, index_in_identified_table in pairs(object.identifiable) do
+      --   -- Can't use free function, because "identifiable" is more than a number
+      --   local array, index = o.identified[id], index_in_identified_table
+      --   array[index], array[#array] = array[#array], array[index]
+      --   -- Teach the array's element its new index
+      --   array[index].identifiable[id] = index
+      --   table.remove(array)
+      --   if #array == 0 then o.identified[id] = nil end
+      -- end
+      -- object.identifiable = nil
+      o.removeFromIdentifiable(object)
     end
     -- Runs no matter what way I was destroyed
     if object.delete then object:delete(); object.delete = nil end

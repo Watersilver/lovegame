@@ -2,10 +2,10 @@ local ps = require "physics_settings"
 local p = require "GameObjects.prototype"
 local im = require "image"
 local trans = require "transitions"
-local expl = require "GameObjects.explode"
 local o = require "GameObjects.objects"
 local snd = require "sound"
 local drops = require "GameObjects.drops.drops"
+local WR = require ("GameObjects.FloorDetectors.waterRockMarker")
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
@@ -17,13 +17,20 @@ function rt.initialize(instance)
   instance.sprite_info = sprite_info
   instance.physical_properties = {
     shape = ps.shapes.circleAlmost1,
-    masks = {PLAYERJUMPATTACKCAT}
+    masks = {PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
   }
   instance.pushback = true
   instance.ballbreaker = true
 end
 
 rt.functions = {
+  load = function (self)
+    self.image_speed = 0
+    local x, y = self.body:getPosition()
+    local myWr = WR:new{x = x, y = y}
+    o.addToWorld(myWr)
+  end,
+
   draw = function (self)
     local x, y = self.xstart, self.ystart
     local sprite = self.sprite
@@ -45,10 +52,6 @@ rt.functions = {
     sprite.img, frame, xtotal, ytotal, 0,
     sprite.res_x_scale, sprite.res_y_scale,
     sprite.cx, sprite.cy)
-  end,
-
-  load = function(self)
-    self.image_speed = 0
   end,
 }
 

@@ -84,6 +84,34 @@ function Missile.initialize(instance)
   end
 end
 
+
+function Missile.getDeflected(self, deflector, sword)
+  local speed = 200
+  -- local prevvx, prevvy = self.body:getLinearVelocity()
+  self.deflected = true
+
+  if deflector and deflector.exists then
+    snd.play(deflector.sounds.swordShoot)
+
+    local xadjust, yadjust
+    local side = sword.side
+    if side == "left" or side == "right" then
+      xadjust, yadjust = 0, 4
+    elseif side == "up" then
+      xadjust, yadjust = -3, 0
+    else
+      xadjust, yadjust = 3, 0
+    end
+
+    local adj, opp = self.x - deflector.x - xadjust, self.y - deflector.y - yadjust
+    local hyp = sqrt(adj*adj + opp*opp)
+
+    self.body:setLinearVelocity(speed*adj/hyp, speed*opp/hyp)
+  end
+
+end
+
+
 Missile.functions = {
   load = function (self)
     self.sox, self.soy = calculate_offset(self.side)
@@ -197,7 +225,7 @@ Missile.functions = {
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
 
-    if self.hitBySword and self.image_index >= 4 then
+    if self.deflected and self.image_index >= 4 then
       local outlineSprite = self.outlineSprite
       love.graphics.draw(
       outlineSprite.img, outlineSprite[0], x, y, 0,
@@ -254,27 +282,8 @@ Missile.functions = {
     end
 
     -- Check if propelled by sword
-    if other.sword == true then
-      local speed = 200
-      -- local prevvx, prevvy = self.body:getLinearVelocity()
-      self.hitBySword = true
-
-      if cr and cr.exists then snd.play(cr.sounds.swordShoot) end
-
-      local xadjust, yadjust
-      local side = other.side
-      if side == "left" or side == "right" then
-        xadjust, yadjust = 0, 4
-      elseif side == "up" then
-        xadjust, yadjust = -3, 0
-      else
-        xadjust, yadjust = 3, 0
-      end
-
-      local adj, opp = self.x - cr.x - xadjust, self.y - cr.y - yadjust
-      local hyp = sqrt(adj*adj + opp*opp)
-
-      self.body:setLinearVelocity(speed*adj/hyp, speed*opp/hyp)
+    if other.immasword then
+      Missile.getDeflected(self, cr, other)
     end
   end,
 

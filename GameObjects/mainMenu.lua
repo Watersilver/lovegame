@@ -994,7 +994,6 @@ update = function (self, dt)
         currMenu.cursor.items[currMenu.cursor.pos]:action(self)
         -- Make it nil to make sure that next menu doesn't also get activated
         self.enterPressed = nil
-        -- fuck = fuck + 1
       end
     end
 

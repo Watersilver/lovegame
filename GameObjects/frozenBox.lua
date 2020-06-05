@@ -51,7 +51,7 @@ bt.functions = {
     -- Remove if out of bounds
     if self.x + 8 < 0 or self.x - 8 > game.room.width then
       o.removeFromWorld(self)
-    elseif self.y < -8 or self.y > game.room.height then
+    elseif self.y < -8 or self.y > game.room.height + 8 then
       o.removeFromWorld(self)
     end
 
