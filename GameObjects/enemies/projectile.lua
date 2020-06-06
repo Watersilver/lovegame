@@ -77,6 +77,9 @@ Projectile.functions = {
   end,
 
   hitByMissile = function (self, other, myF, otherF)
+    if session.save.nayrusWisdom then
+      o.removeFromWorld(self)
+    end
   end,
 
   hitByThrown = function (self, other, myF, otherF)

@@ -1226,17 +1226,4 @@ room.gameObjects = {
 { x = 472, y = 264, n = {l = 11}, t = 5, i = 7},
 ----------End of gameObjects----------
 }
-
-room.manuallyPlacedObjects = {
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
-}
 return room

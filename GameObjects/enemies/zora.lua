@@ -61,7 +61,7 @@ Zora.functions = {
     elseif self.timer > self.duration * 0.87 then
       self.image_index = 2
     elseif self.timer > self.duration * 0.80 then
-      if self.target and self.zoraFire and not self.zoraFire.fired then
+      if self.target and self.zoraFire and self.zoraFire.exists and not self.zoraFire.fired then
         -- Shoot at target
         -- Get target direction
         local _, dir = u.cartesianToPolar(self.target.x - self.x, self.target.y - self.y)

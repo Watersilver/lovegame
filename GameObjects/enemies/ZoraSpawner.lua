@@ -13,7 +13,7 @@ function ZS.initialize(instance)
   instance.zoras = 1 -- If they die, destroy self.
   instance.radius = 32
   instance.layer = 18
-  instance.detectorShape = love.physics.newCircleShape(32)
+  instance.detectorShape = love.physics.newCircleShape(160)
 end
 
 ZS.functions = {
