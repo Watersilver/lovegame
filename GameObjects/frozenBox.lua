@@ -94,6 +94,8 @@ bt.functions = {
         expl.sink(self)
       elseif closestTile.gap then
         expl.plummet(self)
+      elseif closestTile.floorViscosity == "ladder" then
+        self.body:applyForce(0, 200 * self.body:getMass())
       end
     end
 

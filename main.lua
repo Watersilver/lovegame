@@ -966,7 +966,7 @@ local function hudDraw(l,t,w,h)
       else
         healthFrame = hpspr[0]
       end
-      love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5, 0, hpspr.res_x_scale, hpspr.res_y_scale)
+      love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5, 0, hpspr.res_x_scale, hpspr.res_y_scale, hpspr.cx, hpspr.cy)
     end
 
     local pr, pg, pb, pa = love.graphics.getColor()
