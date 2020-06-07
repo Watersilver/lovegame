@@ -281,8 +281,18 @@ MagicDust.functions = {
         -- If none of the above happens, nothing happens
         {value = u.emptyFunc, chance = 1},
       }
+      if session.focus == "decoy" then
+        reaction = self.createDecoy
+      end
       reaction(self)
       self.hasReacted = true
+    else
+      if not self.usedFocus then
+        -- Focus doesn't work after reaction, whether it helped or not
+        session.focus = nil
+        -- Mark because other wise I'll keep deliting focus as long as I exist
+        self.usedFocus = true
+      end
     end
 
     -- determine shader

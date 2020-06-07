@@ -36,10 +36,9 @@ local function useFood(type, bonus, duration, eatComment, notIdleComment)
       pl1.item_use_duration = duration
       pl1.movement_state:change_state(pl1, "noDt", "using_item")
       pl1.animation_state:change_state(pl1, "noDt", "downeating")
-      snd.play(glsounds.useItem)
     else
       session.usedItemComment = notIdleComment
-      snd.play(glsounds.error)
+      return "error"
     end
   end
 end
@@ -65,10 +64,85 @@ items.testi2 = {
   end
 }
 
--- Somatic
-items.somaBlastSeed = {
+-- Key
+items.keySpellbook = {
+  name = "Spellbook",
+  description =
+  "A Book on how to use\n\z
+  focuses to control\n\z
+  the effects of the\n\z
+  magic dust.",
+  limit = 1
+}
+
+-- Material
+items.mateBlastSeed = {
   name = "Blast seed",
   description = "Used to cast magic blast",
+  limit = 10
+}
+
+-- Focuses
+items.focusDoll = {
+  name = "Doll",
+  description = function()
+    local desc =
+    "Dolls like this were\n\z
+    placed in kids' rooms,\n\z
+    to confuse nightmares."
+    if session.save.keySpellbook then
+      desc = desc .. "\n\nSpell focus for Decoy"
+    end
+    return desc
+  end,
+  use = function()
+    if session.save.keySpellbook then
+      session.usedItemComment =
+      "You say the magic words\n\z
+      and it disintegrates in\n\z
+      a flash of light!\n\z
+      \n\z
+      Decoy charged"
+      session.removeItem("focusDoll")
+      session.focus = "decoy"
+    else
+      session.save.dollFail = session.save.dollFail and session.save.dollFail + 1 or 0
+      if session.save.dollFail < 10 or session.save.dollFail > 20 then
+        session.usedItemComment = "You can't use it like that"
+      elseif session.save.dollFail < 11 then
+        session.usedItemComment = "You can't use it like that\n\nHow many times do I need\nto tell you?"
+      elseif session.save.dollFail < 12 then
+        session.usedItemComment = "You chew on it. Still\ndoesn't work"
+      elseif session.save.dollFail < 13 then
+        session.usedItemComment = "You play with the doll.\nNothing happens"
+      elseif session.save.dollFail < 14 then
+        session.usedItemComment = "You keep playing with the\nuntil the world blows up.\nYou are dead now.\n\nGame Over"
+      elseif session.save.dollFail < 15 then
+        session.usedItemComment = "It eats your face off"
+      elseif session.save.dollFail < 16 then
+        session.usedItemComment = "It consumes your soul.\n\nGame Over"
+      elseif session.save.dollFail < 17 then
+        session.usedItemComment = "You can't fit it there"
+      elseif session.save.dollFail < 18 then
+        session.usedItemComment = "Some kids come and ask to\n\z
+        play with you.\nYou make your dolls\nfight and yours wins.\n\z
+        The kids are so angry\nthey kill you.\n\nGame Over"
+      elseif session.save.dollFail < 19 then
+        session.usedItemComment = "You choke on it"
+      elseif session.save.dollFail < 20 then
+        session.usedItemComment = "It WILL blow up and\nyou WILL be sorry!!"
+      else
+        session.usedItemComment = "BOOM"
+        session.forceCloseInv = true
+        if pl1 then
+          local mdust = require "GameObjects.Items.mdust"
+          mdust.functions.chainReaction(pl1)
+          session.removeItem("focusDoll")
+        end
+      end
+      return "error"
+    end
+  end,
   limit = 10
 }
 
@@ -77,9 +151,8 @@ items.foodFrittata = {
   name = "Frittata",
   description = "It's not a verb.",
   use = function()
-    useFood("foodFrittata", 1, 4, "It was Italian omelette\nwith diced meat\nand vegetables")
+    return useFood("foodFrittata", 1, 4, "It was Italian omelette\nwith diced meat\nand vegetables")
   end,
-  handleUseSound = true
 }
 
 -- Rings

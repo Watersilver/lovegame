@@ -212,9 +212,13 @@ local logicFuncs = {
     local itemid = session.save.items[pam.left.itemCursor]
     if inp.enterPressed then
       if items[itemid] and items[itemid].use then
-        items[itemid].use()
+        local glsound = items[itemid].use()
         if not items[itemid].handleUseSound then
-          snd.play(glsounds.useItem)
+          if glsound then
+            snd.play(glsounds[glsound])
+          else
+            snd.play(glsounds.useItem)
+          end
         end
       else
         snd.play(glsounds.error)
@@ -365,7 +369,12 @@ local tooltipFuncs = {
       pam.left.tooltip = session.usedItemComment
     elseif itemid then
       if items[itemid] and items[itemid].description then
-        pam.left.tooltip = items[itemid].description
+        local desc = items[itemid].description
+        if type(desc) == "function" then
+          pam.left.tooltip = desc()
+        else
+          pam.left.tooltip = desc
+        end
       else
         pam.left.tooltip = "No data..."
       end

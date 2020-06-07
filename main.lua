@@ -1025,8 +1025,8 @@ local function hudDraw(l,t,w,h)
     -- Draw bombs
     if session.save.hasBomb then
       love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-      local maxBombs = session.checkItemLim("somaBlastSeed")
-      local bombs = string.format("%02d", (session.save.somaBlastSeed or 0))
+      local maxBombs = session.checkItemLim("mateBlastSeed")
+      local bombs = string.format("%02d", (session.save.mateBlastSeed or 0))
       local bspr = im.sprites["Drops/blastSeed"]
       love.graphics.draw(bspr.img, bspr[0], 2, h-9,  0, bspr.res_x_scale, bspr.res_y_scale)
       love.graphics.setColor(0, 0, 0, COLORCONST)
@@ -1036,7 +1036,7 @@ local function hudDraw(l,t,w,h)
       love.graphics.print(bombs, bombOffset - rno, bombYBase, 0, 0.255)
       love.graphics.print(bombs, bombOffset, bombYBase + rno, 0, 0.255)
       love.graphics.print(bombs, bombOffset, bombYBase - rno, 0, 0.255)
-      if maxBombs == session.save.somaBlastSeed then
+      if maxBombs == session.save.mateBlastSeed then
         love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST * 0.2, COLORCONST)
       else
         love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
