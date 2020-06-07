@@ -74,6 +74,10 @@ function Enemy.initialize(instance)
   -- instance.side = "up"
   instance.vx = 0
   instance.vy = 0
+  -- Drops examples
+  -- instance.drops = {{value = "fairy", chance = 1}}
+  -- OR
+  -- instance.drop = "cheap"
 end
 
 Enemy.functions = {

@@ -22,7 +22,8 @@ function ebh.die(object)
     sounds = snd.load_sounds({explode = object.deathSound}),
     enexploshaders = true,
     onlySoundOnce = true,
-    drop = object.drop or "normal"
+    drop = object.drop or "normal",
+    drops = object.drops -- Objects custom droptable
   }
   o.addToWorld(explOb)
   o.removeFromWorld(object)

@@ -166,6 +166,22 @@ session = {
   getSwordSpeed = function()
     return inv.sword.time - session.save.swordLvl * 0.05
   end,
+  getPohChance = function(dropValue)
+    -- Chance of piece of heart as drop
+    local rpoh = (session.save.randomPiecesOfHeart or 0)
+    if dropValue == "cheapest" then
+      return rpoh < 1 and 0.001 or 0
+    elseif dropValue == "cheap" then
+      return rpoh < 2 and 0.003 or 0
+    elseif dropValue == "normal" then
+      return rpoh < 4 and 0.005 or 0
+    elseif dropValue == "rich" then
+      return rpoh < GCON.maxPOHs and 0.01 or 0
+    else
+      -- Custom chance, check only if there are any left here
+      return rpoh < GCON.maxPOHs and 1 or 0
+    end
+  end,
   getMagicCooldown = function()
     -- 0.3 was default
     return 0.4 - session.save.magicLvl * 0.05

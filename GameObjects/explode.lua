@@ -113,9 +113,14 @@ Explode.functions = {
         }
         o.addToWorld(nextplosion)
       else
-        if self.drop then
+        if self.drops then
+          -- If I have custom drops, use them to determine drop
+          drops.custom(self.xexplode or self.xstart, self.yexplode or self.ystart, self.drops)
+        elseif self.drop then
+          -- Else use one of the drop tables
           drops[self.drop](self.xexplode or self.xstart, self.yexplode or self.ystart)
         elseif self.onExplEnd then
+          -- For more specific stuff, use custom method
           self:onExplEnd()
         end
       end
