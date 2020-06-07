@@ -68,17 +68,17 @@ function trans.player_target_coords(plax, play)
   local ytarget
 
   if side == "left" then
-    xtarget = game.room.width - ps.shapes.plshapeWidth * 0.5 + game.transitioning.xmod
+    xtarget = game.room.width - ps.shapes.plshapeWidth * 0.5 + game.transitioning.xmod - gvar.screenEdgeThreshold
     ytarget = play + game.transitioning.ymod
   elseif side == "right" then
-    xtarget = ps.shapes.plshapeWidth * 0.5 + game.transitioning.xmod
+    xtarget = ps.shapes.plshapeWidth * 0.5 + game.transitioning.xmod + gvar.screenEdgeThreshold
     ytarget = play + game.transitioning.ymod
   elseif side == "up" then
     xtarget = plax + game.transitioning.xmod
-    ytarget = game.room.height - ps.shapes.plshapeHeight + game.transitioning.ymod
+    ytarget = game.room.height - ps.shapes.plshapeHeight + game.transitioning.ymod - gvar.screenEdgeThreshold
   elseif side == "down" then
     xtarget = plax + game.transitioning.xmod
-    ytarget = ps.shapes.plshapeHeight + game.transitioning.ymod
+    ytarget = ps.shapes.plshapeHeight + game.transitioning.ymod + gvar.screenEdgeThreshold
   end
 
   return xtarget, ytarget

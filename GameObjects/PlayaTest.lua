@@ -127,6 +127,7 @@ function Playa.initialize(instance)
   instance.jo = 0 -- drawing offsets due to jumping
   instance.zvel = 0 -- z axis velocity
   instance.gravity = 350
+  instance.defaultGravity = instance.gravity
   instance.image_speed = 0
   instance.image_index = 0
   instance.image_index_prev = 0
@@ -1958,6 +1959,9 @@ function Playa.initialize(instance)
     end,
 
     start_state = function(instance, dt)
+      -- Change threshold to avoid screen transitions that get triggered
+      -- prematurely because of noVelTrans
+      gvar.screenEdgeThreshold = 2
       instance.noVelTrans = true
       instance.respawnCounter = 0
       instance.respawnCounterMax = 0.4
@@ -1971,6 +1975,7 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
+      gvar.screenEdgeThreshold = GCON.defaultScreenEdgeThreshold
       instance.noVelTrans = false
       instance.disableTransitions = false
       instance.body:setPosition(instance.xLastSteppable, instance.yLastSteppable)

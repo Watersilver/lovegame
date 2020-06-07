@@ -116,6 +116,22 @@ items.ringRubber = {
   end
 }
 
+items.ringGlide = {
+  name = "R. Glide Ring",
+  description = "Double jump!",
+  equip = function()
+    session.usedItemComment = "Equipped Glide Ring!"
+    session.jumpL2 = true
+  end,
+  unequip = function()
+    session.usedItemComment = "Unequipped Glide Ring!"
+    session.jumpL2 = nil
+  end,
+  use = function()
+    useRing("ringGlide")
+  end
+}
+
 -- Skins
 items.ringMage = {
   name = "R. Mage Ring",

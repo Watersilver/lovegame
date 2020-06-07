@@ -71,11 +71,12 @@ inv.jump = {
   name = "jump",
   powerUp = "nayrusWisdom",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgJumpL1.png"),
+  invImageL2 = love.graphics.newImage("Sprites/Inventory/InvImgJumpL2.png"),
   check_trigger = function(object, keyheld)
     if keyheld == 0 then
       return "jump"
     else
-      return "none"
+      return "hold_jump"
     end
   end
 }
@@ -424,7 +425,11 @@ function inv.draw(l,t,w,h)
         itemShader = shdrs[powToShad[powUp]]
       end
       love.graphics.setShader(itemShader)
-      love.graphics.draw(contents.item.invImage, x+1, y+1)
+      if session[contents.item.name .. "L2"] then
+        love.graphics.draw(contents.item.invImageL2, x+1, y+1)
+      else
+        love.graphics.draw(contents.item.invImage, x+1, y+1)
+      end
       love.graphics.setShader(worldShader)
     end
     local pr, pg, pb, pa = love.graphics.getColor()

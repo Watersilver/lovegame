@@ -261,9 +261,16 @@ player_states.end_hold = function(instance, dt, side)
 end
 
 player_states.start_jump = function(instance, dt, side)
-  instance.zvel = 110
+  if instance.triggers.hold_jump then
+    instance.zvel = 33
+    snd.play(instance.sounds.throw)
+    instance.gravity = 100
+    instance.double_jumping = true
+  else
+    instance.zvel = 110
+    snd.play(instance.sounds.jump)
+  end
   instance.animation_state:change_state(instance, dt, side .. "fall")
-  snd.play(instance.sounds.jump)
 end
 
 player_states.run_fall = function(instance, dt, side)
@@ -291,6 +298,8 @@ player_states.check_fall = function(instance, dt, side)
   if pddp(instance, trig, side, dt) then
   elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
+  elseif trig.hold_jump and session.jumpL2 and not instance.double_jumping and instance.zvel < 0 and instance.zo > -7 and instance.zo < 0 then
+    instance.animation_state:change_state(instance, dt, side .. "jump")
   elseif instance.zo == 0 then
     instance.animation_state:change_state(instance, dt, side .. "still")
   end
@@ -300,11 +309,20 @@ player_states.start_fall = function(instance, dt, side)
   instance.triggers.animation_end = false
   instance.image_index = 0
   instance.image_speed = 0.11
-  if side ~= "right" then
-    instance.sprite = im.sprites["Witch/jump_" .. side]
+  if instance.triggers.hold_jump and instance.double_jumping then
+    if side ~= "right" then
+      instance.sprite = im.sprites["Witch/cape_" .. side]
+    else
+      instance.sprite = im.sprites["Witch/cape_left"]
+      instance.x_scale = -1
+    end
   else
-    instance.sprite = im.sprites["Witch/jump_left"]
-    instance.x_scale = -1
+    if side ~= "right" then
+      instance.sprite = im.sprites["Witch/jump_" .. side]
+    else
+      instance.sprite = im.sprites["Witch/jump_left"]
+      instance.x_scale = -1
+    end
   end
 end
 
@@ -312,6 +330,8 @@ player_states.end_fall = function(instance, dt, side)
   if side == "right" then
     instance.x_scale = 1
   end
+  instance.gravity = instance.defaultGravity
+  instance.double_jumping = nil
 end
 
 player_states.run_missile = function(instance, dt, side)

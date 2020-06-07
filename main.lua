@@ -28,12 +28,15 @@ GCON = {
     fadeToSilenceSpeed = 0.2
   },
   -- How many rooms to remember?
-  rtr = 20
+  rtr = 20,
+  defaultScreenEdgeThreshold = 0.1,
 }
 
 -- global variables
 gvar = {
-  t = 0
+  t = 0,
+  -- Threshold before screen transitions are triggered
+  screenEdgeThreshold = GCON.defaultScreenEdgeThreshold,
 }
 
 -- Load stuff from save directory
@@ -342,9 +345,6 @@ sh.calculate_total_scale{game_scale=1}
 if not fuck then fuck = 0 end
 -- love.keyboard.setTextInput(false)
 
--- Threshold before screen transitions are triggered
-local screenEdgeThreshold = 0.1
-
 -- rupee number outline
 local rno = 0.6
 
@@ -603,6 +603,7 @@ function love.update(dt)
         if game.transitioning.type == "scrolling" then
           playa.body:setPosition(trans.player_target_coords(playa.x, playa.y))
         else -- White Screen
+          -- screenEdgeThreshold
           playa.body:setPosition(game.transitioning.desx, game.transitioning.desy)
           -- Also set spritebody to avoid funkyness
           playa.spritebody:setPosition(game.transitioning.desx, game.transitioning.desy)
@@ -748,7 +749,7 @@ function love.update(dt)
       -- check if a screen edge transition will happen
       local canTrans = (not playa.disableTransitions) and (not inp.shift)
       -- left
-      if playax - halfw < l - screenEdgeThreshold then
+      if playax - halfw < l - gvar.screenEdgeThreshold then
         if (playa.vx < 0 or playa.noVelTrans) and canTrans then
           playa.noVelTrans = false
           local transed = false
@@ -780,7 +781,7 @@ function love.update(dt)
           end
         end
       -- right
-      elseif playax + halfw > w + screenEdgeThreshold then
+      elseif playax + halfw > w + gvar.screenEdgeThreshold then
         if (playa.vx > 0 or playa.noVelTrans) and canTrans then
           playa.noVelTrans = false
           local transed = false
@@ -812,7 +813,7 @@ function love.update(dt)
           end
         end
       -- down
-      elseif playay + fullh > h + screenEdgeThreshold then
+      elseif playay + fullh > h + gvar.screenEdgeThreshold then
         if (playa.vy > 0 or playa.noVelTrans) and canTrans then
           playa.noVelTrans = false
           local transed = false
@@ -841,7 +842,7 @@ function love.update(dt)
           end
         end
       -- up
-      elseif playay - fullh < t - screenEdgeThreshold then
+      elseif playay - fullh < t - gvar.screenEdgeThreshold then
         if (playa.vy < 0 or playa.noVelTrans) and canTrans then
           playa.noVelTrans = false
           local transed = false
