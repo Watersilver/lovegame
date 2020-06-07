@@ -71,11 +71,16 @@ onMdustTouch = function (self, other)
     {value = other.createFrozenBlock, chance = 0.25},
     -- chance of burning
     {value = other.createFire, chance = 0.25},
+    -- chance of getting blown
+    {value = other.createWind, chance = 0.25},
     -- If none of the above happens, nothing happens
     -- {value = nil, chance = 1},
   }
   if not reaction then return end
   if reaction == other.createFire then self.onMdustTouch = nil
+  elseif reaction == other.createWind then
+    self:throw_collision()
+    o.removeFromWorld(self)
   else o.removeFromWorld(self) end
   reaction(self)
 end,

@@ -98,12 +98,20 @@ MagicDust.functions = {
   end,
 
   createFire = function (self)
-    local decoy = (require "GameObjects.fire"):new{
+    local fire = (require "GameObjects.fire"):new{
       x = self.x, y = self.y,
       layer = self.creator and self.creator.layer - 1 or self.layer + 1,
       fuel = self
     }
-    o.addToWorld(decoy)
+    o.addToWorld(fire)
+  end,
+
+  createWind = function (self)
+    local wind = (require "GameObjects.whirlwind"):new{
+      x = self.x, y = self.y,
+      layer = self.creator and self.creator.layer - 1 or self.layer + 1,
+    }
+    o.addToWorld(wind)
   end,
 
   conjureHeart = function (appearEffect)
@@ -263,7 +271,9 @@ MagicDust.functions = {
         -- If you have nayrusWisdom, you may get healing instead
         {value = self.createHeart, chance = self.poweredUp and 0.04 or 0},
         {value = self.createFairy, chance = self.poweredUp and 0.01 or 0},
+        -- Inconsequential
         {value = self.createFire, chance = 0.1},
+        {value = self.createWind, chance = 0.1},
         -- If you hit a wall, no magic block
         {value = self.createBlock, chance = not self.hitSolid and 0.4 or 0},
         -- If you hit a wall, no decoy

@@ -51,12 +51,15 @@ local function onMdustTouch(instance, other)
     -- chance of burning
     {value = freeze, chance = 0.25},
     -- chance of burning
-    {value = other.createFire, chance = 0.5},
+    {value = other.createFire, chance = 0.3},
+    -- chance of blown
+    {value = other.createWind, chance = 0.25},
     -- If none of the above happens, nothing happens
     -- {value = nil, chance = 1},
   }
   if not reaction then return end
-  if reaction == other.createFire then instance.onMdustTouch = nil end
+  if reaction == other.createFire then instance.onMdustTouch = nil
+  elseif reaction == other.createWind then getDestroyed(instance, nil, instance.fixture) end
   reaction(instance)
 end
 

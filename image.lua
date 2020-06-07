@@ -201,6 +201,7 @@ im.spriteSettings = {
   playerAppearEffect = {'Inventory/AppearEffect', 3, padding = 2, width = 16, height = 16},
   -- Mystery effects
   fire = {'Fire', 4, padding = 2, width = 14, height = 16},
+  whirlwind = {'Whirlwind', 1, padding = 2, width = 16, height = 16},
   -- Enemy sprites
   bullKnight = {
     {'Enemies/BullKnight/walk_left', 2, padding = 2, width = 16, height = 16},
