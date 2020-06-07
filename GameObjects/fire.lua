@@ -4,6 +4,7 @@ local o = require "GameObjects.objects"
 local im = require "image"
 local snd = require "sound"
 local trans = require "transitions"
+local ls = require "lightSources"
 
 local Fire = {}
 
@@ -15,6 +16,9 @@ function Fire.initialize(instance)
   instance.fuel = nil -- Object that is burning
   instance.image_index = 0
   instance.image_speed = 0.3
+  instance.lightSource = {kind = "playerTorch"}
+  instance.flickerTick = 0
+  instance.flickerPeriod = 1 / 30 -- in secs
 end
 
 Fire.functions = {
@@ -51,6 +55,14 @@ Fire.functions = {
     end
     self.xlast = self.x
     self.ylast = self.y
+
+    -- Light source stuff
+    self.flickerTick = self.flickerTick + dt
+    if self.flickerTick > self.flickerPeriod then
+      self.flickerTick = self.flickerTick - self.flickerPeriod
+      self.lightSource.image_index = love.math.random(0, 2)
+      if self.lightSource.image_index == 2 then self.lightSource.image_index = nil end
+    end
 
     -- See how long fire lasts
     if self.timer > self.duration then
@@ -89,6 +101,10 @@ Fire.functions = {
     sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
     -- love.graphics.setShader(worldShader)
+
+    -- Draw lightsource
+    self.lightSource.x, self.lightSource.y = x, y
+    ls.drawSource(self.lightSource)
   end,
 
   trans_draw = function(self)
