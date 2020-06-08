@@ -32,6 +32,17 @@ function Knight.initialize(instance)
   instance.chargeSound = snd.load_sound({"Effects/Oracle_Link_LandRun"})
   instance.drop = "rich"
   instance.attackDmg = 2
+  instance.blowUpForce = 111
+end
+
+local function setFacingSprite(self)
+  if self.facing ~= "right" then
+    self.sprite = im.sprites["Enemies/BullKnight/walk_" .. self.facing]
+    self.x_scale = 1
+  else
+    self.sprite = im.sprites["Enemies/BullKnight/walk_left"]
+    self.x_scale = -1
+  end
 end
 
 Knight.functions = {
@@ -39,6 +50,16 @@ Knight.functions = {
 
     -- Get ticked by decoy
     local target = session.decoy or pl1
+
+    -- Blow player up if running
+    local speed = u.magnitude2d(self.body:getLinearVelocity())
+    if speed > 22 then
+      self.explosive = true
+      self.impact = 5
+    else
+      self.explosive = nil
+      self.impact = nil
+    end
 
     -- Look for player
     if self.lookFor then self.canSeePlayer = self:lookFor(target) end
@@ -49,15 +70,6 @@ Knight.functions = {
     end
     -- do stuff depending on state
     if self.state == "wander" then
-      if self.canSeePlayer then
-        self.state = "notice"
-        snd.play(self.noticeSound)
-        self.noticeTimer = 0.1
-        local dx, dy = target.x - self.x, target.y - self.y
-        -- self.direction = math.atan2(dy, dx)
-        self._, self.direction = u.cartesianToPolar(dx, dy)
-        -- figure out direction
-      end
       -- Movement behaviour
       local vx, vy = self.body:getLinearVelocity()
       -- local x, y = self.body:getPosition()
@@ -73,20 +85,22 @@ Knight.functions = {
         end
       end
       td.walk(self, dt)
-      -- Set sprite
-      local fac = self.facing
-      if fac ~= "right" then
-        self.sprite = im.sprites["Enemies/BullKnight/walk_" .. fac]
-        self.x_scale = 1
-      else
-        self.sprite = im.sprites["Enemies/BullKnight/walk_left"]
-        self.x_scale = -1
-      end
+      setFacingSprite(self)
       if self.speed > 0.1 then
         self.image_speed = 0.13 * 0.5
       else
         self.image_speed = 0
         self.image_index = 0
+      end
+      -- Check if I'll change state due to seeing (what I think is) the player
+      if self.canSeePlayer then
+        self.state = "notice"
+        snd.play(self.noticeSound)
+        self.noticeTimer = 0.1
+        local dx, dy = target.x - self.x, target.y - self.y
+        -- self.direction = math.atan2(dy, dx)
+        self._, self.direction = u.cartesianToPolar(dx, dy)
+        -- figure out direction
       end
     elseif self.state == "notice" then
       self.image_speed = 0.13 * 1.5
@@ -98,6 +112,19 @@ Knight.functions = {
       end
       td.stand_still(self, dt)
     elseif self.state == "charge" then
+      local _, dir = u.cartesianToPolar(self.body:getLinearVelocity())
+      local bigSlice = math.pi * 0.75
+      local smallSlice = math.pi * 0.25
+      if dir > bigSlice or dir < -bigSlice then
+        self.facing = "left"
+      elseif dir < smallSlice and dir > -smallSlice then
+        self.facing = "right"
+      elseif dir > -bigSlice and dir < -smallSlice then
+        self.facing = "up"
+      elseif dir < bigSlice and dir > smallSlice then
+        self.facing = "down"
+      end
+      setFacingSprite(self)
       if self.chargeTime > self.maxChargeTime then
         self.shieldDown = false
         self.shieldWall = true

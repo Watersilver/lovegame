@@ -18,6 +18,7 @@ if not success then love.errhand("Failed to create save directory") end
 GCON = {
   -- pieces of heart in world:
   -- 4 random
+  maxRandomPOHs = 4,
   maxPOHs = 4,
   -- Day and night music breaking points
   music = {
@@ -176,10 +177,10 @@ session = {
     elseif dropValue == "normal" then
       return rpoh < 4 and 0.005 or 0
     elseif dropValue == "rich" then
-      return rpoh < GCON.maxPOHs and 0.01 or 0
+      return rpoh < GCON.maxRandomPOHs and 0.01 or 0
     else
       -- Custom chance, check only if there are any left here
-      return rpoh < GCON.maxPOHs and 1 or 0
+      return rpoh < GCON.maxRandomPOHs and 1 or 0
     end
   end,
   getMagicCooldown = function()

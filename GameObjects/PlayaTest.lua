@@ -2142,6 +2142,13 @@ Playa.functions = {
       local _, myBrakes = session.getAthlectics()
       local clbrakes = u.clamp(0, myBrakes, self.brakesLim)
       local ipct = other.impact or 10
+      if not mainCamera.shaking then
+        -- Shake camera when taking damage
+        -- Change stuff here to customize it more
+        -- to amount of damage and enemy causing it
+        -- Only works if not already shaking
+        gsh.newShake(mainCamera, "displacement")
+      end
       if other.immabombsplosion or other.explosive then
         self.zvel = other.blowUpForce or 177
         self.triggers.damCounter = other.damCounter or 1.5
@@ -2168,6 +2175,7 @@ Playa.functions = {
     self.speed = sqrt(vx*vx + vy*vy)
     self.vx, self.vy = vx, vy
     self.x, self.y = x, y
+
     -- Track position for debugging
     -- fuck = "x = " .. floor(x) .. ", y = " .. floor(y) .. "\n\z
     --         xSquare = " .. floor(x/16)*16 .. ", ySquare = " .. floor(y/16)*16 .. "\n\z
