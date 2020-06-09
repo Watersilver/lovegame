@@ -1045,6 +1045,28 @@ local function hudDraw(l,t,w,h)
       love.graphics.print(bombs, bombOffset, bombYBase, 0, 0.255)
     end
 
+    -- Draw magic dust
+    if session.save.hasMystery then
+      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      local maxDust = session.checkItemLim("mateMagicDust")
+      local dust = string.format("%02d", (session.save.mateMagicDust or 0))
+      local dupr = im.sprites["Drops/magicDust"]
+      love.graphics.draw(dupr.img, dupr[0], 2, h-27,  0, dupr.res_x_scale, dupr.res_y_scale)
+      love.graphics.setColor(0, 0, 0, COLORCONST)
+      local dustOffset = 12
+      local dustYBase = h-20.4
+      love.graphics.print(dust, dustOffset + rno, dustYBase, 0, 0.255)
+      love.graphics.print(dust, dustOffset - rno, dustYBase, 0, 0.255)
+      love.graphics.print(dust, dustOffset, dustYBase + rno, 0, 0.255)
+      love.graphics.print(dust, dustOffset, dustYBase - rno, 0, 0.255)
+      if maxDust == session.save.mateMagicDust then
+        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST * 0.2, COLORCONST)
+      else
+        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      end
+      love.graphics.print(dust, dustOffset, dustYBase, 0, 0.255)
+    end
+
     love.graphics.setColor(pr, pg, pb, pa)
 
 

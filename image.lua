@@ -351,6 +351,7 @@ end
 im.load_sprite{'health', 5, padding = 2, width = 7, height = 7}
 im.load_sprite{'rupees', 1, padding = 0, width = 7, height = 7}
 im.load_sprite{'Drops/blastSeed', 1, padding = 0, width = 8, height = 8}
+im.load_sprite{'Drops/magicDust', 1, padding = 0, width = 8, height = 14}
 im.load_sprite{'Test', 1, padding = 0}
 im.load_sprite(im.spriteSettings.floorOutside)
 im.load_sprite(im.spriteSettings.solidsOutside)

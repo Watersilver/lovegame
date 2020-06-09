@@ -266,6 +266,13 @@ function Playa.initialize(instance)
               elseif trig.recall then
                 instance.movement_state:change_state(instance, dt, "using_recall")
               elseif trig.mystery then
+                local removeResult = session.removeItem("mateMagicDust")
+                if removeResult == "don't have any" then return end
+                -- Animation state gets checked after this
+                -- so mark a new trigger here to also change animation
+                -- because I can't removeItem again to check removeResult
+                -- for animation state...
+                trig.usingMdust = true
                 instance.movement_state:change_state(instance, dt, "using_mdust")
               end
             end

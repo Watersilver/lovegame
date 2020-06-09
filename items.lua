@@ -82,6 +82,12 @@ items.mateBlastSeed = {
   limit = 10
 }
 
+items.mateMagicDust = {
+  name = "Magic dust",
+  description = "Sprinkle for variety of\neffects\n\n\n\n\n\n*Highly volatile and\nunpredictable",
+  limit = 20
+}
+
 -- Focuses
 items.focusDoll = {
   name = "Doll",

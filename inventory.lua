@@ -291,7 +291,7 @@ function inv.check_use(instance, trig, side, dt)
   elseif trig.gripping and instance.sensors[side .. "Touch"] then
     instance.animation_state:change_state(instance, dt, side .. "gripping")
     returnValue = true
-  elseif trig.mystery then
+  elseif trig.usingMdust then
     instance.animation_state:change_state(instance, dt, side .. "mdust")
     returnValue = true
   elseif trig.mark then
