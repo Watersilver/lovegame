@@ -122,7 +122,7 @@ items.focusDoll = {
       elseif session.save.dollFail < 13 then
         session.usedItemComment = "You play with the doll.\nNothing happens"
       elseif session.save.dollFail < 14 then
-        session.usedItemComment = "You keep playing with the\nuntil the world blows up.\nYou are dead now.\n\nGame Over"
+        session.usedItemComment = "You keep playing with the\ndoll until the world blows\nup. You are dead now.\n\nGame Over"
       elseif session.save.dollFail < 15 then
         session.usedItemComment = "It eats your face off"
       elseif session.save.dollFail < 16 then

@@ -625,6 +625,7 @@ player_states.start_damaged = function(instance, dt, side)
   if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
     instance:addHealth(-(instance.triggers.damaged or 1))
   end
+  if instance.triggers.damaged == 0 then instance.noInvShader = true end
   inp.disable_controller(instance.player)
   instance.invulnerable = 1
   instance.damCounter = instance.triggers.damCounter or 0.5

@@ -2350,11 +2350,12 @@ Playa.functions = {
       -- It's here because it's only relevant if I'm alive
       if self.invulnerable then
         self.invulnerable = self.invulnerable - dt
-        if floor(7 * self.invulnerable % 2) == 1 then
+        if not self.noInvShader and floor(7 * self.invulnerable % 2) == 1 then
           trig.enableHitShader = true
         end
         if self.invulnerable < 0 then
           self.invulnerable = nil
+          self.noInvShader = nil
         end
       end
     end
