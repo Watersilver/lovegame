@@ -228,6 +228,11 @@ im.spriteSettings = {
   fireMissile = {
     {'Enemies/FireMissile/fireMissile', 2, padding = 2, width = 10, height = 10}
   },
+  mimic = {
+    {'Enemies/Mimic/walk_left', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Mimic/walk_up', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Mimic/walk_down', 2, padding = 2, width = 16, height = 16},
+  },
 
   -- HUD
   clock = {"clock", 1, padding = 0, width = 19, height = 19},
