@@ -1,15 +1,10 @@
 local ps = require "physics_settings"
 local im = require "image"
-local snd = require "sound"
 local p = require "GameObjects.prototype"
 local et = require "GameObjects.enemyTest"
-local ebh = require "enemy_behaviours"
 local td = require "movement"; td = td.top_down
-local sh = require "GameObjects.shadow"
 local sm = require "state_machine"
 local u = require "utilities"
-local game = require "game"
-local o = require "GameObjects.objects"
 
 local cos = math.cos
 local abs = math.abs
@@ -53,9 +48,9 @@ local states = {
       local _, dir = u.cartesianToPolar(instance.body:getLinearVelocity())
       local bigSlice = math.pi * 0.75
       local smallSlice = math.pi * 0.25
-      if dir > bigSlice or dir < -bigSlice then
+      if dir >= bigSlice or dir <= -bigSlice then
         instance.facing = "left"
-      elseif dir < smallSlice and dir > -smallSlice then
+      elseif dir <= smallSlice and dir >= -smallSlice then
         instance.facing = "right"
       elseif dir > -bigSlice and dir < -smallSlice then
         instance.facing = "up"

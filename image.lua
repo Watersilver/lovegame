@@ -222,6 +222,9 @@ im.spriteSettings = {
   crow = {
     {'Enemies/Crow/crow', 2, padding = 2, width = 16, height = 16}
   },
+  jumpy = {
+    {'Enemies/Jumpy/jumpy', 2, padding = 2, width = 16, height = 16}
+  },
   zora = {
     {'Enemies/Zora/zora', 4, padding = 2, width = 16, height = 16}
   },

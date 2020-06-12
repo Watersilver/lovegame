@@ -1088,4 +1088,8 @@ room.gameObjects = {
 { x = 136, y = 8, n = {l = 10}, t = 1, i = 179},
 ----------End of gameObjects----------
 }
+
+room.manuallyPlacedObjects = {
+  {x = 252, y = 282, blueprint = "enemies.jumpy"},
+}
 return room

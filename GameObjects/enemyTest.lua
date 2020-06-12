@@ -46,6 +46,7 @@ function Enemy.initialize(instance)
   instance.damager = 1 -- how much damage I cause
   instance.grounded = true -- can be jumped over
   instance.flying = false -- can go through walls
+  instance.jumping = false -- can go over player and other non solids
   instance.levitating = false -- can go through over hazardous floor
   instance.actAszo0 = false -- move in regards to floor friction etc as if grounded
   instance.controlledFlight = false -- Floor doesn't affect me at all, but I still have breaks on air
@@ -248,7 +249,7 @@ Enemy.functions = {
 
     -- If I'm levitating, skip if appropriate
     if other.floor then
-      if self.levitating or self.flying then
+      if self.levitating or self.flying or self.jumping then
         return
       end
     end
@@ -345,11 +346,16 @@ Enemy.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    if self.canLeaveRoom and other.roomEdge then
+      coll:setEnabled(false)
+      return
+    end
+
     if self.flying then
-      if self.canLeaveRoom and other.roomEdge then coll:setEnabled(false) end
-      if not other.roomEdge then coll:setEnabled(false) end
+      coll:setEnabled(false)
+    elseif self.jumping then
+      if other.body:getType() ~= "static" then coll:setEnabled(false) end
     else
-      if self.canLeaveRoom and other.roomEdge then coll:setEnabled(false) end
       if other.floor then
         if self.levitating then
           coll:setEnabled(false)
