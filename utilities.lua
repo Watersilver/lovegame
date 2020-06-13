@@ -130,6 +130,17 @@ function u.distanceSqared2d(x0, y0, x1, y1)
   return xd * xd + yd * yd
 end
 
+function u.reflect(dx, dy, nx, ny)
+
+-- How to get reflected vector
+-- r=d−2(d*n)n
+-- (d*n) is dot product
+-- d is pre bounce, n is normal, r is reflected
+local dot = dx * nx + dy * ny
+return dx - 2 * dot * nx, dy - 2 * dot * ny
+
+end
+
 function u.sign(x)
   return x>0 and 1 or x<0 and -1 or 0
 end

@@ -135,7 +135,10 @@ Enemy.functions = {
   hitPlayer = function (self, other, myF, otherF)
   end,
 
-  hitSolidStatic = function (self, other, myF, otherF)
+  hitSolidStatic = function (self, other, myF, otherF, coll)
+  end,
+
+  hitStatic = function (self, other, myF, otherF, coll)
   end,
 
   die = function (self)
@@ -247,6 +250,11 @@ Enemy.functions = {
       self.avoidDir = nil
     end
 
+    -- Check if hit static (before I check for floor, because some floors are static)
+    if otherF:getBody():getType() == "static" and not otherF:isSensor() then
+      self:hitStatic(other, myF, otherF, coll)
+    end
+
     -- If I'm levitating, skip if appropriate
     if other.floor then
       if self.levitating or self.flying or self.jumping then
@@ -259,9 +267,9 @@ Enemy.functions = {
       self:hitPlayer(other, myF, otherF)
     end
 
-    -- Check if hit static
+    -- Check if hit solid static
     if otherF:getBody():getType() == "static" and not otherF:isSensor() and not other.notSolidStatic then
-      self:hitSolidStatic(other, myF, otherF)
+      self:hitSolidStatic(other, myF, otherF, coll)
     end
 
     -- Force next direction to avoid further collisions

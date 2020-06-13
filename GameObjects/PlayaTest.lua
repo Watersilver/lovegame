@@ -2739,8 +2739,12 @@ Playa.functions = {
               other.beginContact = nil
             end
             if session.bounceRing then
-              self._, self.sprintDir = u.cartesianToPolar(nx, ny)
-              snd.play(glsounds.bombDrop)
+              -- self._, self.sprintDir = u.cartesianToPolar(nx, ny)
+              if not self.triggers.rrBounce then
+                self.triggers.rrBounce = true
+                self._, self.sprintDir = u.cartesianToPolar(u.reflect(self.vx, self.vy, nx, ny))
+                snd.play(glsounds.bombDrop)
+              end
             else
               -- if unsuccesfull bullrush on enemy that can
               -- be bullrushed, take already calculated damage

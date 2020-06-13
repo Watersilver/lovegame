@@ -129,7 +129,31 @@ Jumpy.functions = {
     td.zAxis(self, dt)
 
     sh.handleShadow(self)
+
+    self.bounced = false
   end,
+
+  hitStatic = function (self, other, myF, otherF, coll)
+
+    -- only bounce once per frame
+    if self.bounced then return end
+
+    -- Get vector perpendicular to collision
+    local nx, ny = coll:getNormal()
+
+    -- Make sure it points AWAY from obstacle if applied to jumpy
+    local dx, dy = self.x - other.x, self.y - other.y
+    if nx * dx < 0 or ny * dy < 0 then -- checks if they have different signs
+      nx, ny = -nx, -ny
+    end
+
+    -- My velocity coords
+    local vx, vy = self.body:getLinearVelocity()
+    local rx, ry = u.reflect(vx, vy, nx, ny)
+    self.body:setLinearVelocity(rx, ry)
+
+    self.bounced = true
+  end
 }
 
 function Jumpy:new(init)
