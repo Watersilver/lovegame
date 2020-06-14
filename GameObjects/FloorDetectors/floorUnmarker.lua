@@ -13,29 +13,19 @@ function Detector.initialize(instance)
     gravityScaleFactor = 0,
     sensor = true,
     density = 0,
-    -- Make shape on init args when making instance
-    -- shape = love.physics.newCircleShape(1)
+    shape = ps.shapes.missile,
     categories = {FLOORCOLLIDECAT},
-    masks = {
-      SPRITECAT,
-      PLAYERATTACKCAT,
-      ENEMYATTACKCAT,
-      FLOORCOLLIDECAT,
-      PLAYERJUMPATTACKCAT,
-      PLAYERCAT,
-      ROOMEDGECOLLIDECAT
-    }
   }
   instance.seeThrough = true
 end
 
 Detector.functions = {
   load = function (self)
-    -- Set x and y on init
     self.body:setPosition(self.x, self.y)
+    self.updatedOnce = nil
   end,
 
-  update = function (self)
+  update = function (self, dt)
     if self.updatedOnce then
       o.removeFromWorld(self)
     end
@@ -45,19 +35,11 @@ Detector.functions = {
   beginContact = function(self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-    if other.water and not other.occupied then
-      -- Set creator on init
-      table.insert(self.creator.waterTiles, other)
+    if other.occupied and other.floor then
+      other.occupied = other.occupied - 1
+      if other.occupied < 1 then other.occupied = nil end
     end
   end,
-
-  -- draw = function (self)
-  --   love.graphics.circle("line", self.x, self.y, self.fixture:getShape():getRadius())
-  -- end,
-
-  delete = function(self)
-    self.creator:onTilesFilled()
-  end
 }
 
 function Detector:new(init)

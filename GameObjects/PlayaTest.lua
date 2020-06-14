@@ -2633,6 +2633,11 @@ Playa.functions = {
       -- Remember Floor tiles
       u.rememberFloorTile(self, other)
 
+      -- Occupy tile
+      if other.floor then
+        other.occupied = other.occupied and other.occupied + 1 or 1
+      end
+
       if otherF:isSensor() then
         self:takeDamage(other)
       end
@@ -2677,6 +2682,12 @@ Playa.functions = {
 
       -- Forget Floor tiles
       u.forgetFloorTile(self, other)
+
+      -- Unoccupy tile
+      if other.occupied then
+        other.occupied = other.occupied - 1
+        if other.occupied < 1 then other.occupied = nil end
+      end
     end
 
   end,

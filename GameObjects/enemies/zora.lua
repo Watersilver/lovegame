@@ -53,7 +53,7 @@ Zora.functions = {
   end,
 
   enemyUpdate = function (self, dt)
-    self.target = pl1 or session.decoy
+    self.target = session.decoy or pl1
 
     if self.timer > self.duration then
       self.sank = true
@@ -99,15 +99,16 @@ Zora.functions = {
   enemyBeginContact = function (self, other)
 
     if other.water then
-      other.occupied = true
+      other.occupied = other.occupied and other.occupied + 1 or 1
     end
   end,
 
   endContact = function(self, a, b, coll, aob, bob)
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-    if other.water then
-      other.occupied = nil
+    if other.water and other.occupied then
+      other.occupied = other.occupied - 1
+      if other.occupied < 1 then other.occupied = nil end
     end
   end,
 

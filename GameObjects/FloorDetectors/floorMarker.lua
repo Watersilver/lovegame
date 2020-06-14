@@ -22,14 +22,21 @@ end
 Detector.functions = {
   load = function (self)
     self.body:setPosition(self.x, self.y)
+    self.updatedOnce = nil
+  end,
+
+  update = function (self, dt)
+    if self.updatedOnce then
+      o.removeFromWorld(self)
+    end
+    self.updatedOnce = true
   end,
 
   beginContact = function(self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-    if other.water then
-      other.occupied = true
-      o.removeFromWorld(self)
+    if other.floor then
+      other.occupied = other.occupied and other.occupied + 1 or 1
     end
   end,
 }

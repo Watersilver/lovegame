@@ -5,7 +5,7 @@ local trans = require "transitions"
 local o = require "GameObjects.objects"
 local snd = require "sound"
 local drops = require "GameObjects.drops.drops"
-local WR = require ("GameObjects.FloorDetectors.waterRockMarker")
+local FM = require ("GameObjects.FloorDetectors.floorMarker")
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
@@ -27,8 +27,8 @@ rt.functions = {
   load = function (self)
     self.image_speed = 0
     local x, y = self.body:getPosition()
-    local myWr = WR:new{x = x, y = y}
-    o.addToWorld(myWr)
+    local myFm = FM:new{x = x, y = y}
+    o.addToWorld(myFm)
   end,
 
   draw = function (self)

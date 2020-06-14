@@ -45,9 +45,9 @@ Detector.functions = {
   beginContact = function(self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-    if other.water and not other.occupied then
+    if other.floor and not other.water and not other.gap and not other.occupied then
       -- Set creator on init
-      table.insert(self.creator.waterTiles, other)
+      table.insert(self.creator.landTiles, other)
     end
   end,
 

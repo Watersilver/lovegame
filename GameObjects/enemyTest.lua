@@ -56,6 +56,7 @@ function Enemy.initialize(instance)
   instance.shieldDown = false -- shield temporarily disabled
   instance.shieldWall = false -- can be propelled by force
   instance.weakShield = false -- shield can be broken with dins power and bombs
+  instance.attackDodger = false -- weapon that hit me doesn't react
   instance.hp = love.math.random(3)
   instance.maxspeed = 20
   instance.behaviourTimer = 0

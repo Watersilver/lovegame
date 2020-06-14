@@ -8,6 +8,8 @@ local o = require "GameObjects.objects"
 local snd = require "sound"
 local drops = require "GameObjects.drops.drops"
 local u = require "utilities"
+local FM = require ("GameObjects.FloorDetectors.floorMarker")
+local FU = require ("GameObjects.FloorDetectors.floorUnmarker")
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
@@ -61,11 +63,19 @@ rt.functions = {
     reaction(self)
   end,
 
-  load = function(self)
+  load = function (self)
     self.image_speed = 0
     if self.petrified then
       self.myShader = shdrs.stoneShader
     end
+    local x, y = self.body:getPosition()
+    local myFm = FM:new{x = x, y = y}
+    o.addToWorld(myFm)
+  end,
+
+  destroy = function (self)
+    local myFu = FU:new{x = self.x, y = self.y}
+    o.addToWorld(myFu)
   end,
 
   draw = function (self)

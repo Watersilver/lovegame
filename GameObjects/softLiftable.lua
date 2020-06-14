@@ -11,6 +11,8 @@ local u = require "utilities"
 local mdust = require "GameObjects.Items.mdust"
 local drops = require "GameObjects.drops.drops"
 local shdrs = require "Shaders.shaders"
+local FM = require ("GameObjects.FloorDetectors.floorMarker")
+local FU = require ("GameObjects.FloorDetectors.floorUnmarker")
 
 local function myDrops(x, y)
   drops.cheap(x, y)
@@ -95,6 +97,14 @@ load = function(self)
   if self.plantified then
     self.myShader = shdrs.plantShader
   end
+  local x, y = self.body:getPosition()
+  local myFm = FM:new{x = x, y = y}
+  o.addToWorld(myFm)
+end,
+
+destroy = function (self)
+  local myFu = FU:new{x = self.x, y = self.y}
+  o.addToWorld(myFu)
 end,
 
 draw = function (self)

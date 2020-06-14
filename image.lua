@@ -228,6 +228,10 @@ im.spriteSettings = {
   zora = {
     {'Enemies/Zora/zora', 4, padding = 2, width = 16, height = 16}
   },
+  leever = {
+    {'Enemies/Leever/leever', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Leever/digging', 2, padding = 2, width = 16, height = 16},
+  },
   fireMissile = {
     {'Enemies/FireMissile/fireMissile', 2, padding = 2, width = 10, height = 10}
   },
