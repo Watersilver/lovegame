@@ -1090,6 +1090,22 @@ room.gameObjects = {
 }
 
 room.manuallyPlacedObjects = {
-  {x = 252, y = 282, blueprint = "enemies.LeeverSpawner"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
+  {x = 252, y = 282, blueprint = "enemies.bat"},
 }
 return room

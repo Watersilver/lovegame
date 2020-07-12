@@ -355,8 +355,10 @@ Enemy.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-    if self.canLeaveRoom and other.roomEdge then
-      coll:setEnabled(false)
+    if other.roomEdge then
+      if self.canLeaveRoom then
+        coll:setEnabled(false)
+      end
       return
     end
 
