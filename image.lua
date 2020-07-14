@@ -238,6 +238,13 @@ im.spriteSettings = {
     {'Enemies/Leever/leever', 2, padding = 2, width = 16, height = 16},
     {'Enemies/Leever/digging', 2, padding = 2, width = 16, height = 16},
   },
+  jellyfish = {
+    {'Enemies/Jellyfish/float', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Jellyfish/shock', 2, padding = 2, width = 16, height = 15},
+  },
+  jellysmall = {
+    {'Enemies/Jellyfish/small', 1, padding = 2, width = 8, height = 10}
+  },
   fireMissile = {
     {'Enemies/FireMissile/fireMissile', 2, padding = 2, width = 10, height = 10}
   },

@@ -2140,6 +2140,7 @@ Playa.functions = {
         (other.attackDmg or 1) *
         (0.5 + (session.save.nayrusWisdom and 0 or 0.25) +
         (0.25 - session.getArmorDamageReduction() * 0.25))
+      self.triggers.altHurtSound = other.altHurtSound
       local mybod = self.body
       local mymass = mybod:getMass()
       local lvx, lvy = mybod:getLinearVelocity()
@@ -2154,7 +2155,7 @@ Playa.functions = {
         -- Change stuff here to customize it more
         -- to amount of damage and enemy causing it
         -- Only works if not already shaking
-        gsh.newShake(mainCamera, "displacement")
+        gsh.newShake(mainCamera, "displacement", other.attackShakeMagn, nil, other.attackShakeDur)
       end
       if other.immabombsplosion or other.explosive then
         self.zvel = other.blowUpForce or 177

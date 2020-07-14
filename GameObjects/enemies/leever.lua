@@ -49,8 +49,6 @@ Zora.functions = {
   destroy = function (self)
     self.creator.pause = false
     self.creator:resetTimer(self.duration - self.timer)
-    if not self.sank then
-      fuck = fuck + 1 self.creator.leevers = self.creator.leevers - 1 end
   end,
 
   enemyUpdate = function (self, dt)

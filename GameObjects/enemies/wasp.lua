@@ -9,10 +9,10 @@ local sh = require "GameObjects.shadow"
 local Wasp = {}
 
 function Wasp.initialize(instance)
-  instance.flying = true -- can go through walls
   instance.maxspeed = 80
   instance.sprite_info = im.spriteSettings.wasp
   instance.zo = - 2
+  instance.flying = true -- can go through walls
   instance.controlledFlight = true
   instance.lowFlight = true
   instance.hp = 3 --love.math.random(3)

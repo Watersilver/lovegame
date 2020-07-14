@@ -1090,15 +1090,6 @@ room.gameObjects = {
 }
 
 room.manuallyPlacedObjects = {
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
-  {x = 252, y = 282, blueprint = "enemies.beetle"},
+  {x = 252, y = 282, blueprint = "enemies.jellyfish"},
 }
 return room
