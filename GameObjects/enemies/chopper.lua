@@ -86,7 +86,7 @@ local states = {
         if instance.risePrecentage > 1 then instance.risePrecentage = 1 end
 
         -- Initiate dodge maneuver
-        if instance.attemtedToBeAttacked and not instance.dodgeTimer and not instance.attacked then
+        if instance.attemtedToBeAttacked and instance.attemtedToBeAttacked ~= "mdust" and not instance.dodgeTimer and not instance.attacked then
           instance.dodgeTimer = 0
         end
       else

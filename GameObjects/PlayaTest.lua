@@ -2132,7 +2132,8 @@ Playa.functions = {
   takeDamage = function (self, other)
     if self.body:getType() ~= "static" and
     not (dlg.enable or dlg.enabled) and
-    other.damager and not self.invulnerable and
+    other.damager and
+    not self.invulnerable and
     not other.harmless and
     not self:successfullyBullrushed(other)
     then

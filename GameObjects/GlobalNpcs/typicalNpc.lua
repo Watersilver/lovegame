@@ -4,6 +4,7 @@ local p = require "GameObjects.prototype"
 local inp = require "input"
 local dlg = require "dialogue"
 local npcTest = require "GameObjects.npcTest"
+local game = require "game"
 
 
 local floor = math.floor
@@ -86,6 +87,7 @@ end
 NPC.functions = {
   activate = function (self, dt)
     if self.activated then
+      if self.pauseWhenTalkedTo then game.cutscenePause(true) end
       -- Only play when there's no selection involved and at dialogue start
       if not self.noLetterSound[self.counter] and not self.altLetterSound[self.counter] and ((type(self.next) ~= "table") or self.counter == 1) then snd.play(glsounds.letter) end
       if self.altLetterSound[self.counter] then
@@ -102,6 +104,7 @@ NPC.functions = {
       if self.activator then
         if self.activator.body then self.activator.body:setType("dynamic") end
         if self.activator.player then inp.enable_controller(self.activator.player) end
+        if self.pauseWhenTalkedTo then game.cutscenePause(false) end
         if self.onDialogueRealEnd then
           self:onDialogueRealEnd()
         end

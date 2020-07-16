@@ -18,7 +18,7 @@ local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDr
 local floor = math.floor
 local random = math.random
 
-local emptyfunc = function() end
+local emptyFunc = function() end
 
 local player_states = {}
 
@@ -467,7 +467,7 @@ player_states.start_gripping = function(instance, dt, side)
         explosionSpeed = other.explosionSpeed,
         explosionSound = other.explosionSound,
         lifterSpeedMod = other.lifterSpeedMod or 0.5,
-        throw_collision = other.throw_collision or emptyfunc,
+        throw_collision = other.throw_collision or emptyFunc,
         inheritedShader = other.myShader
       }
       o.addToWorld(instance.liftedOb)
