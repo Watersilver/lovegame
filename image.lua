@@ -225,6 +225,9 @@ im.spriteSettings = {
   crow = {
     {'Enemies/Crow/crow', 2, padding = 2, width = 16, height = 16}
   },
+  chopper = {
+    {'Enemies/Chopper/chopper', 2, padding = 2, width = 16, height = 16}
+  },
   beetle = {
     {'Enemies/Beetle/beetle', 2, padding = 2, width = 16, height = 11}
   },
