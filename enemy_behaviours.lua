@@ -29,8 +29,8 @@ function ebh.die(object)
   o.removeFromWorld(object)
 end
 
-function ebh.randomizeAnalogue(object, setTimer)
-  if object.direction then
+function ebh.randomizeAnalogue(object, setTimer, nonStop)
+  if object.direction and not nonStop then
     object.direction = nil
     if setTimer then
       object.behaviourTimer = love.math.random(4)
@@ -44,10 +44,10 @@ function ebh.randomizeAnalogue(object, setTimer)
   end
 end
 
-function ebh.randomize4dir(object, setTimer)
+function ebh.randomize4dir(object, setTimer, nonStop)
   -- returns facing direction, if I want to.
   local myinp = object.input
-  if object.moving then
+  if object.moving and not nonStop then
     if setTimer then
       object.behaviourTimer = love.math.random(4)
     end
@@ -126,6 +126,8 @@ function ebh.damagedByHit(object, other, myF, otherF)
       baseDamage = session.save.faroresCourage and 1 or 0.5
       damageMod = object.bullrushDamageMod or 1
     end
+    -- Weaker strikes if shaking (can't check trigger because it might get reset before we get here)
+    if pl1 and (pl1.shakex ~= 0 or pl1.shakey ~= 0) then baseDamage = baseDamage * 0.5 end
     local damage = baseDamage * damageMod
 
     -- Apply damage
@@ -165,6 +167,8 @@ function ebh.propelledByHit(object, other, myF, otherF, damage, forceMod, invfra
     baseForceMod = session.save.faroresCourage and 4 or 3
     attackForceMod = object.bullrushForceMod or 1
   end
+  -- Weaker strikes if shaking (can't check trigger because it might get reset before we get here)
+  if pl1 and (pl1.shakex ~= 0 or pl1.shakey ~= 0) then baseForceMod = baseForceMod * 0.5 end
   local forceMod = baseForceMod * attackForceMod * (object.universalForceMod or 1)
 
   -- Physics

@@ -231,6 +231,9 @@ im.spriteSettings = {
   beetle = {
     {'Enemies/Beetle/beetle', 2, padding = 2, width = 16, height = 11}
   },
+  mummy = {
+    {'Enemies/Mummy/mummy', 2, padding = 2, width = 16, height = 16}
+  },
   bat = {
     {'Enemies/Bat/bat', 2, padding = 2, width = 16, height = 10}
   },

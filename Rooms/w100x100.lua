@@ -1090,6 +1090,8 @@ room.gameObjects = {
 }
 
 room.manuallyPlacedObjects = {
+  {x = 222, y = 282, blueprint = "enemies.mummy"},
   {x = 252, y = 282, blueprint = "enemies.blob"},
+  {x = 282, y = 282, blueprint = "enemies.chopper"},
 }
 return room

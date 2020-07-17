@@ -130,6 +130,12 @@ local universalWalk = function(object, dt, inputForceFunc)
   if object.player then
     mobility, brakes = session.getAthlectics()
     maxspeed = session.getMaxSpeed()
+    -- Fear affects movement
+    if object.triggers.shaking then
+      maxspeed = maxspeed * 0.5
+      mobility = mobility * 0.5
+      brakes = brakes * 0.5
+    end
     if object.animation_state.state == "sprint" then
       maxspeed = maxspeed * 2
       mobility = mobility * 100

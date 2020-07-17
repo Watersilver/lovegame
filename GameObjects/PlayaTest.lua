@@ -121,6 +121,8 @@ function Playa.initialize(instance)
   instance.y_scale = 1
   instance.iox = 0 -- drawing offsets due to item use (eg sword swing)
   instance.ioy = 0
+  instance.shakex = 0 -- drawing offsets due to shaking
+  instance.shakey = 0
   instance.zo = 0 -- drawing offsets due to z axis
   instance.zoPrev = instance.zo
   instance.fo = 0 -- drawing offsets due to falling
@@ -2427,6 +2429,13 @@ Playa.functions = {
       end
     end
 
+    -- Shake if scared, or cold, etc
+    if self.triggers.shaking then
+      self.shakex, self.shakey = 1 - love.math.random() * 2, 1 - love.math.random() * 2
+    else
+      self.shakex, self.shakey = 0, 0
+    end
+
     -- Turn off triggers
     triggersdebug = {}
     for trigger, _ in pairs(self.triggers) do
@@ -2465,13 +2474,14 @@ Playa.functions = {
     end
     local frame = sprite[floor(self.image_index)]
     local prevBm = love.graphics.getBlendMode()
+    -- Shader effect if decoy exists
     if session.decoy then
       love.graphics.setBlendMode("subtract")
     end
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.playerShader)
     love.graphics.draw(
-    sprite.img, frame, xtotal, ytotal, self.angle,
+    sprite.img, frame, xtotal + self.shakex, ytotal + self.shakey, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
     love.graphics.setShader(worldShader)
