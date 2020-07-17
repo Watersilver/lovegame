@@ -1,12 +1,16 @@
 local u = require "utilities"
 local ps = require "physics_settings"
 local im = require "image"
+local snd = require "sound"
 local p = require "GameObjects.prototype"
 local et = require "GameObjects.enemyTest"
 local ebh = require "enemy_behaviours"
 local td = require "movement"; td = td.top_down
 local sh = require "GameObjects.shadow"
 local gsh = require "gamera_shake"
+local o = require "GameObjects.objects"
+
+local skel = require "GameObjects.enemies.skeleton"
 
 local Mummy = {}
 
@@ -23,6 +27,11 @@ function Mummy.initialize(instance)
   -- Weaker if you are brave
   instance.hp = session.save.faroresCourage and 15 or 30
   instance.attackDmg = session.save.faroresCourage and 2 or 4
+  instance.stepSounds = {
+    [0] = snd.load_sound({"Effects/step1"}),
+    [1] = snd.load_sound({"Effects/step2"})
+  }
+  instance.behaviourTimer = love.math.random() * 1.3
 end
 
 Mummy.functions = {
@@ -77,9 +86,12 @@ Mummy.functions = {
           imdiry = u.sign(toPly)
           self.movingAxis = "ver"
         end
+
+        -- If chasing, steps make sound
+        snd.play(self.stepSounds[self.image_index])
       else
         -- Move randomly
-        self.behaviourTimer = 1.3
+        self.behaviourTimer = 1.3 + love.math.random() * 0.1
 
         -- Determine which axis to move on
         local moveOnAxis
@@ -119,9 +131,20 @@ Mummy.functions = {
     self.unmovingAxis = self.movingAxis
   end,
 
-  -- draw = function (self)
-  --   et.functions.draw(self)
-  -- end
+  hitByMdust = function (self, other, myF, otherF)
+    self.hitByMdust = u.emptyFunc
+    other.createFire(self)
+  end,
+
+  onFireEnd = function (self)
+    o.removeFromWorld(self)
+    local newSkel = skel:new{
+      xstart = self.x, ystart = self.y,
+      x = self.x, y = self.y,
+      layer = self.layer
+    }
+    o.addToWorld(newSkel)
+  end,
 }
 
 function Mummy:new(init)

@@ -234,6 +234,9 @@ im.spriteSettings = {
   mummy = {
     {'Enemies/Mummy/mummy', 2, padding = 2, width = 16, height = 16}
   },
+  skeleton = {
+    {'Enemies/Skeleton/skeleton', 2, padding = 2, width = 16, height = 16}
+  },
   bat = {
     {'Enemies/Bat/bat', 2, padding = 2, width = 16, height = 10}
   },
