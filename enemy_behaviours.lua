@@ -94,9 +94,11 @@ end
 local function checkIfShieldPierced(object)
   return (
     -- Shield gets pierced if it's weak and I get attacked by bomb or empowered sword
-    object.weakShield and
+    (object.weakShield and
     ((session.save.dinsPower and object.lastHit == "sword") or
-    object.lastHit == "bombsplosion")
+    object.lastHit == "bombsplosion")) or
+    (object.mediumShield and
+    (session.save.dinsPower and object.lastHit == "bombsplosion"))
   )
 end
 

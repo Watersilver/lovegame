@@ -41,8 +41,16 @@ function si.lookFor(seer, target, seeDead)
       if not (sy < ty and math.abs(sx - tx) < sw) then return false end
     elseif seer.facing == "left" then
       if not (sx > tx and math.abs(sy - ty) < sw) then return false end
-    else
+    elseif seer.facing == "right" then
       if not (sx < tx and math.abs(sy - ty) < sw) then return false end
+    else
+      -- Check all four directions at the same time
+      if not (sy > ty and math.abs(sx - tx) < sw) and
+        not (sy < ty and math.abs(sx - tx) < sw) and
+        not (sx > tx and math.abs(sy - ty) < sw) and
+        not (sx < tx and math.abs(sy - ty) < sw) then
+          return false
+      end
     end
   end
   if seer.canSeeThroughWalls then return true end

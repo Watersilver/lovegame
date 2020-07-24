@@ -228,6 +228,10 @@ im.spriteSettings = {
   chopper = {
     {'Enemies/Chopper/chopper', 2, padding = 2, width = 16, height = 16}
   },
+  chaser = {
+    {'Enemies/Chaser/chasing', 3, padding = 2, width = 16, height = 16},
+    {'Enemies/Chaser/waiting', 1, padding = 2, width = 14, height = 15},
+  },
   beetle = {
     {'Enemies/Beetle/beetle', 2, padding = 2, width = 16, height = 11}
   },

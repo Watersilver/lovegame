@@ -20,9 +20,9 @@ local function belowGround(instance, bool)
   instance.underground = bool
 end
 
-local Zora = {}
+local Leever = {}
 
-function Zora.initialize(instance)
+function Leever.initialize(instance)
   instance.maxspeed = 80
   instance.sprite_info = im.spriteSettings.leever
   instance.hp = 3 --love.math.random(3)
@@ -39,7 +39,7 @@ function Zora.initialize(instance)
   belowGround(instance, true)
 end
 
-Zora.functions = {
+Leever.functions = {
   enemyLoad = function (self)
     self.timer = 0
     self.sprite = im.sprites["Enemies/Leever/digging"]
@@ -165,11 +165,11 @@ Zora.functions = {
   end,
 }
 
-function Zora:new(init)
+function Leever:new(init)
   local instance = p:new() -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields
-  p.new(Zora, instance, init) -- add own functions and fields
+  p.new(Leever, instance, init) -- add own functions and fields
   return instance
 end
 
-return Zora
+return Leever

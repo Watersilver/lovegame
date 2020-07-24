@@ -19,12 +19,22 @@ function Skeleton.initialize(instance)
 end
 
 Skeleton.functions = {
+  enemyUpdate = function (self, dt)
+    -- Movement behaviour
+    if self.behaviourTimer < 0 then
+      self.direction = math.pi * 2 * love.math.random()
+      self.behaviourTimer = love.math.random(2)
+    end
+
+    td.analogueWalk(self, dt)
+  end,
+
   enemyBeginContact = function (self, other, myF, otherF, coll)
 
     -- Get vector perpendicular to collision
     local nx, ny = coll:getNormal()
 
-    -- make sure it points AWAY from obstacle if applied to player
+    -- make sure it points AWAY from obstacle if applied to object
     local dx, dy = self.x - other.x, self.y - other.y
     if nx * dx < 0 or ny * dy < 0 then -- checks if they have different signs
       nx, ny = -nx, -ny
@@ -33,12 +43,10 @@ Skeleton.functions = {
   end,
 }
 
-local beetle = require "GameObjects.enemies.beetle"
 
 function Skeleton:new(init)
   local instance = p:new() -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields
-  p.new(beetle, instance) -- add parent functions and fields
   p.new(Skeleton, instance, init) -- add own functions and fields
   return instance
 end
