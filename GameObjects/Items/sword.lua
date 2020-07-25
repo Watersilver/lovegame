@@ -441,7 +441,7 @@ Sword.functions = {
         }
         o.addToWorld(explOb)
         snd.play(cr.sounds.swordTap1)
-      elseif other.shieldWall and other.shielded and not (other.weakShield and session.save.dinsPower) then
+      elseif other.shieldWall and other.shielded and not ((other.weakShield or other.mediumShield) and session.save.dinsPower) then
         local exoff, eyoff
         if self.spin then
           exoff, eyoff = u.polarToCartesian(15, self.angle - pi * 0.25 + (love.math.random() * pi * 0.25 - pi * 0.125))

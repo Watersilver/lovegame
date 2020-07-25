@@ -55,7 +55,9 @@ function Enemy.initialize(instance)
   instance.shielded = false -- can be damaged
   instance.shieldDown = false -- shield temporarily disabled
   instance.shieldWall = false -- can be propelled by force
-  instance.weakShield = false -- shield can be broken with dins power and bombs
+  instance.weakShield = false -- shield can be broken with empowered sword and bombs
+  instance.mediumShield = false -- shield can be broken with empowered sword and empowered bombs
+  instance.hardShield = false -- shield can be broken with empowered bombs
   instance.attackDodger = false -- weapon that hit me doesn't react
   instance.hp = love.math.random(3)
   instance.maxspeed = 20
@@ -316,6 +318,7 @@ Enemy.functions = {
       self.attemtedToBeAttacked = "sword"
       if not self.invulnerable and not self.undamageable then
         self.lastHit = "sword"
+        self.lastHitEmpowered = other.poweredUp
         self.attacked = true
         self:hitBySword(other, myF, otherF)
       end
@@ -326,6 +329,7 @@ Enemy.functions = {
       self.attemtedToBeAttacked = "missile"
       if not self.invulnerable and not self.undamageable then
         self.lastHit = "missile"
+        self.lastHitEmpowered = other.poweredUp
         self.attacked = true
         self:hitByMissile(other, myF, otherF)
       end
@@ -336,6 +340,7 @@ Enemy.functions = {
       self.attemtedToBeAttacked = "thrown"
       if not self.invulnerable and not self.undamageable then
         self.lastHit = "thrown"
+        self.lastHitEmpowered = other.poweredUp
         self.attacked = true
         self:hitByThrown(other, myF, otherF)
       end
@@ -346,6 +351,7 @@ Enemy.functions = {
       self.attemtedToBeAttacked = "bombsplosion"
       if not self.invulnerable and (not self.undamageable or self.damageableByBombsplosion) then
         self.lastHit = "bombsplosion"
+        self.lastHitEmpowered = other.poweredUp
         self.attacked = true
         self:hitByBombsplosion(other, myF, otherF)
       end
@@ -356,6 +362,7 @@ Enemy.functions = {
       self.attemtedToBeAttacked = "bullrush"
       if self.canBeBullrushed and not self.attackDodger and not self.invulnerable and not self.undamageable then
         self.lastHit = "bullrush"
+        self.lastHitEmpowered = other.poweredUp
         self.attacked = true
         self:hitByBullrush(other, myF, otherF)
       end
@@ -366,6 +373,7 @@ Enemy.functions = {
       self.attemtedToBeAttacked = "mdust"
       if not self.invulnerable and not self.undamageable then
         self.lastHit = "mdust"
+        self.lastHitEmpowered = other.poweredUp
         self.attacked = true
         other.hasReacted = true
         self:hitByMdust(other, myF, otherF)

@@ -17,16 +17,16 @@ local function withdraw(instance, bool)
   instance.harmless = bool
   instance.canBeBullrushed = bool
   instance.withdrawn = bool
-  -- instance.weakShield = not bool
+  instance.hardShield = not bool
   instance.startedMoving = not bool
   if not bool then
     instance.withdrawTimer = 0.3
     snd.play(instance.moveSound)
     local xMintx, yMinty = instance.target.x - instance.x, instance.target.y - instance.y
     if math.abs(xMintx) > math.abs(yMinty) then
-      instance.fx = instance.mass * 50 * u.sign(xMintx)
+      instance.fx = instance.mass * 150 * u.sign(xMintx)
     else
-      instance.fy = instance.mass * 50 * u.sign(yMinty)
+      instance.fy = instance.mass * 150 * u.sign(yMinty)
     end
     instance.image_speed = 0.5
   else
@@ -40,11 +40,10 @@ end
 local Chaser = {}
 
 function Chaser.initialize(instance)
-  instance.maxspeed = 50
   instance.sprite_info = im.spriteSettings.chaser
   instance.physical_properties.density = 4000
   instance.stillDamping = 40
-  instance.movingDamping = 0.5
+  instance.movingDamping = 1
   instance.hp = 1 --love.math.random(3)
   instance.physical_properties.shape = ps.shapes.rectThreeFourths
   instance.sightWidth = 12
@@ -54,7 +53,7 @@ function Chaser.initialize(instance)
   instance.shieldWall = true
   instance.shielded = true
   instance.pushback = true
-  instance.mediumShield = true
+  instance.attackDmg = 1.5
   instance.moveSound = snd.load_sound({"Effects/Oracle_Block_Push"})
 end
 
