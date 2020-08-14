@@ -253,6 +253,9 @@ im.spriteSettings = {
   zora = {
     {'Enemies/Zora/zora', 4, padding = 2, width = 16, height = 16}
   },
+  robe = {
+    {'Enemies/Robe/robe', 4, padding = 2, width = 16, height = 16}
+  },
   leever = {
     {'Enemies/Leever/leever', 2, padding = 2, width = 16, height = 16},
     {'Enemies/Leever/digging', 2, padding = 2, width = 16, height = 16},
@@ -266,6 +269,9 @@ im.spriteSettings = {
   },
   fireMissile = {
     {'Enemies/FireMissile/fireMissile', 2, padding = 2, width = 10, height = 10}
+  },
+  robeMissile = {
+    {'Enemies/Robe/attack', 4, padding = 2, width = 12, height = 12}
   },
   mimic = {
     {'Enemies/Mimic/walk_left', 2, padding = 2, width = 16, height = 16},

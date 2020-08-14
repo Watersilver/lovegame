@@ -48,6 +48,7 @@ Leever.functions = {
 
   destroy = function (self)
     self.creator.pause = false
+    if not self.sank then self.creator.leevers = self.creator.leevers - 1 end
     self.creator:resetTimer(self.duration - self.timer)
   end,
 

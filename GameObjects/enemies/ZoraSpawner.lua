@@ -65,11 +65,13 @@ ZS.functions = {
         self.waterTiles[i] = nil
       end
 
-      local myWd = WD:new{
-        x = self.target.x, y = self.target.y, creator = self
-      }
-      myWd.physical_properties.shape = self.detectorShape
-      o.addToWorld(myWd)
+      if self.target then
+        local myWd = WD:new{
+          x = self.target.x, y = self.target.y, creator = self
+        }
+        myWd.physical_properties.shape = self.detectorShape
+        o.addToWorld(myWd)
+      end
       self.pause = true
       self:resetTimer()
     end

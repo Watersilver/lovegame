@@ -29,12 +29,6 @@ function Projectile.initialize(instance)
 end
 
 local function fireUpdate(self, dt)
-  -- Remove if out of bounds
-  if self.x + 5 < 0 or self.x - 5 > game.room.width then
-    o.removeFromWorld(self)
-  elseif self.y < -5 or self.y > game.room.height + 5 then
-    o.removeFromWorld(self)
-  end
   -- Swap x scale for effect
   self.fireTimer = self.fireTimer + dt * 30
   self.x_scale = u.sign(math.sin(self.fireTimer))
@@ -48,7 +42,7 @@ Projectile.functions = {
       self:fire()
     end
     if self.enemFire then
-      self.enemyUpdate = fireUpdate
+      self.fireUpdate = fireUpdate
       self.image_speed = 0.25
     end
   end,
@@ -57,7 +51,15 @@ Projectile.functions = {
     self.body:setLinearVelocity(u.polarToCartesian(self.maxspeed, self.direction))
   end,
 
-  enemyUpdate = u.emptyFunc,
+  enemyUpdate = function (self, dt)
+    -- Remove if out of bounds
+    if self.x + 5 < 0 or self.x - 5 > game.room.width then
+      o.removeFromWorld(self)
+    elseif self.y < -5 or self.y > game.room.height + 5 then
+      o.removeFromWorld(self)
+    end
+    if self.fireUpdate then self.fireUpdate(self, dt) end
+  end,
 
   -- draw = function (self)
   --   et.functions.draw(self)
