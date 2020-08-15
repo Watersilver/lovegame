@@ -6,6 +6,8 @@ local zora = require "GameObjects.enemies.zora"
 
 local lp = love.physics
 
+local defaultDetectorShape = love.physics.newCircleShape(160)
+
 local ZS = {}
 
 function ZS.initialize(instance)
@@ -13,7 +15,7 @@ function ZS.initialize(instance)
   instance.zoras = 1 -- If they die, destroy self.
   instance.radius = 32
   instance.layer = 18
-  instance.detectorShape = love.physics.newCircleShape(160)
+  instance.detectorShape = defaultDetectorShape
 end
 
 ZS.functions = {

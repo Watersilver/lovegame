@@ -2,28 +2,28 @@ local ps = require "physics_settings"
 local p = require "GameObjects.prototype"
 local o = require "GameObjects.objects"
 local LD = require "GameObjects.FloorDetectors.landDetector"
-local robe = require "GameObjects.enemies.robe"
+local blueHand = require "GameObjects.enemies.blueHand"
 
 local lp = love.physics
 
 local detShape = love.physics.newCircleShape(48)
 
-local RS = {}
+local BHS = {}
 
-function RS.initialize(instance)
-  instance.avgRobeTime = 1 --sec
-  instance.robes = 1 -- If they die, destroy self.
+function BHS.initialize(instance)
+  instance.avgBlueHandTime = 1 --sec
+  instance.blueHands = 1 -- If they die, destroy self.
   instance.radius = 32
   instance.layer = 18
   instance.detectorShape = detShape
 end
 
-RS.functions = {
+BHS.functions = {
   resetTimer = function (self, extraTime)
     extraTime = extraTime or 0
     -- +- 20%
     local variance = extraTime + 0.4 * love.math.random() - 0.2
-    self.timer = self.avgRobeTime * (variance + 1)
+    self.timer = self.avgBlueHandTime * (variance + 1)
   end,
 
   load = function (self)
@@ -34,14 +34,16 @@ RS.functions = {
   onTilesFilled = function (self)
     if self.landTiles[1] then
       local randomTile = self.landTiles[love.math.random(1, #self.landTiles)]
-      self.spawnedRobe = robe:new{
+      self.spawnedBlueHand = blueHand:new{
         xstart = randomTile.x, ystart = randomTile.y,
         x = randomTile.x, y = randomTile.y,
-        layer = self.layer, creator = self
+        layer = self.layer, creator = self,
+        destination = self.destination, -- Rooms/w100x100.lua for testing
+        desx = self.desx, desy = self.desy -- 257 for testing
       }
-      o.addToWorld(self.spawnedRobe)
+      o.addToWorld(self.spawnedBlueHand)
     else
-      -- If no land available, unpause and try again later
+      -- If no water available, unpause and try again later
       self:resetTimer()
       self.pause = false
     end
@@ -49,7 +51,7 @@ RS.functions = {
 
   update = function (self, dt)
 
-    if self.robes < 1 then o.removeFromWorld(self) end
+    if self.blueHands < 1 then o.removeFromWorld(self) end
     if self.pause then return end
     self.timer = self.timer - dt
     -- Get tricked by decoy
@@ -57,7 +59,7 @@ RS.functions = {
 
     if self.timer < 0 then
 
-      -- Empty tiles, so the new object can use the table
+      -- Empty water tiles, so the new object can use the table
       for i in ipairs(self.landTiles) do
         self.landTiles[i] = nil
       end
@@ -75,10 +77,10 @@ RS.functions = {
   end,
 }
 
-function RS:new(init)
+function BHS:new(init)
   local instance = p:new() -- add parent functions and fields
-  p.new(RS, instance, init) -- add own functions and fields
+  p.new(BHS, instance, init) -- add own functions and fields
   return instance
 end
 
-return RS
+return BHS

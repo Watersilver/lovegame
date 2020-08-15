@@ -64,6 +64,7 @@ ps.shapes = {
   -- EdgeBrick16.u:setNextVertex(24, -8)
   edgeDown = love.physics.newEdgeShape(-7, 1, 7, 1),
   missile = love.physics.newCircleShape(2),
+  point = love.physics.newCircleShape(1),
   -- thrown = love.physics.newRectangleShape(0, 5, 7, 6), -- old plshape
   thrown = love.physics.newRectangleShape(0, 5, 6, 5),
   portal = love.physics.newRectangleShape(4,4),

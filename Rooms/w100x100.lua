@@ -1090,7 +1090,6 @@ room.gameObjects = {
 }
 
 room.manuallyPlacedObjects = {
-  {x = 299, y = 282, blueprint = "enemies.robeSpawner"},
-    {x = 299, y = 282, blueprint = "enemies.leeverSpawner"},
+  {x = 299, y = 282, blueprint = "enemies.BlueHandSpawner"},
 }
 return room
