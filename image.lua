@@ -264,6 +264,9 @@ im.spriteSettings = {
     {'Enemies/BlueHand/hand', 2, padding = 2, width = 16, height = 16},
     {'Enemies/BlueHand/digging', 2, padding = 2, width = 16, height = 16},
   },
+  redHand = {
+    {'Enemies/RedHand/hand', 2, padding = 2, width = 16, height = 16},
+  },
   jellyfish = {
     {'Enemies/Jellyfish/float', 2, padding = 2, width = 16, height = 16},
     {'Enemies/Jellyfish/shock', 2, padding = 2, width = 16, height = 15},

@@ -326,7 +326,8 @@ glsounds = snd.load_sounds{
   ice = {"Effects/Oracle_SwordShimmer"},
   stone = {"Effects/Oracle_Rumble2b"},
   plant = {"Effects/Oracle_ScentSeed_Shot"},
-  wind = {"Effects/Oracle_GaleSeed"}
+  wind = {"Effects/Oracle_GaleSeed"},
+  blockFall = {"Effects/Oracle_Block_Fall"}
 }
 
 -- Set up cameras

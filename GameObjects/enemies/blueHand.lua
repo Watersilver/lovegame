@@ -28,13 +28,11 @@ local BlueHand = {}
 function BlueHand.initialize(instance)
   instance.sprite_info = im.spriteSettings.blueHand
   instance.hp = 7 --love.math.random(3)
-  instance.resetBehaviour = 0.5
   instance.physical_properties.shape = ps.shapes.point
   -- instance.physical_properties.categories = {FLOORCOLLIDECAT}
   instance.duration = 3 + love.math.random() * 10
   instance.universalForceMod = 0
   instance.untouchable = true
-  instance.giveChase = false -- Chase player
   instance.maxSpeed = 22
   instance.turnSpeed = 77
   instance.flying = true
@@ -46,7 +44,6 @@ function BlueHand.initialize(instance)
   instance.initDir = (love.math.random() * 2 - 1) * math.pi
 
   -- determine initial facing
-  fuck = instance.initDir
   if instance.initDir > - math.pi * 0.5 and instance.initDir < math.pi * 0.5 then
     instance.x_scale = -1
   else
@@ -228,7 +225,7 @@ BlueHand.functions = {
   end,
 
   hitPlayer = function (self, other, myF, otherF)
-    self.grabbedPlayer = other.zo == 0 and other.body:getType() == "dynamic" and not other.deathState
+    self.grabbedPlayer = other.zo == 0 and other.animation_state.state ~= "dontdraw" and other.body:getType() == "dynamic" and not other.deathState
     if self.grabbedPlayer then
       other.animation_state:change_state(other, dt, "dontdraw")
       self.grabbedPlayer = other
