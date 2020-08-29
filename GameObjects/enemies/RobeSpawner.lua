@@ -2,6 +2,7 @@ local ps = require "physics_settings"
 local p = require "GameObjects.prototype"
 local o = require "GameObjects.objects"
 local LD = require "GameObjects.FloorDetectors.landDetector"
+local ALD = require "GameObjects.FloorDetectors.alignedLandDetector"
 local robe = require "GameObjects.enemies.robe"
 
 local lp = love.physics
@@ -16,6 +17,7 @@ function RS.initialize(instance)
   instance.radius = 32
   instance.layer = 18
   instance.detectorShape = detShape
+  instance.detector = LD
 end
 
 RS.functions = {
@@ -63,9 +65,18 @@ RS.functions = {
       end
 
       if self.target then
-        local myLd = LD:new{
-          x = self.target.x, y = self.target.y, creator = self
-        }
+        local myLd
+
+        if self.alignWithPlayer then
+          myLd = ALD:new{
+            x = self.target.x, y = self.target.y, creator = self,
+            target = self.target
+          }
+        else
+          myLd = LD:new{
+            x = self.target.x, y = self.target.y, creator = self
+          }
+        end
         myLd.physical_properties.shape = self.detectorShape
         o.addToWorld(myLd)
       end

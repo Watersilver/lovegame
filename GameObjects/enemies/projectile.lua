@@ -30,6 +30,7 @@ function Projectile.initialize(instance)
   instance.fireTimer = 0
   instance.dpDeflectable = true
   instance.doesntGoThroughSolids = false
+  instance.getDestroyed = o.removeFromWorld;
 end
 
 local function fireUpdate(self, dt)
@@ -48,11 +49,14 @@ local function boneUpdate(self, dt)
   end
 end
 
-local function boneBreak(self)
+local function boneBreak(self, howIGotDestroyed)
 
   bnd.quickBnD(self, {init = {xscaleReversalFreq = 0.1} })
   o.removeFromWorld(self)
   self.broken = true
+  if howIGotDestroyed ~= "wall" then
+    snd.play(glsounds.shieldDeflect)
+  end
 
 end
 
@@ -99,7 +103,7 @@ Projectile.functions = {
     if other.roomEdge then return end
     if self.doesntGoThroughSolids and not self.broken then
 
-      self:getDestroyed();
+      self:getDestroyed("wall");
 
     end
   end,
@@ -117,21 +121,14 @@ Projectile.functions = {
       end
     elseif self.dpBreakable and (not self.broken and session.save.dinsPower) then
 
-      self:getDestroyed();
-      snd.play(glsounds.shieldDeflect)
+      self:getDestroyed("sword");
 
     end
   end,
 
   hitByMissile = function (self, other, myF, otherF)
     if session.save.nayrusWisdom then
-      if self.enemBone then
-
-        self:getDestroyed();
-        snd.play(glsounds.shieldDeflect)
-      else
-        o.removeFromWorld(self)
-      end
+      self:getDestroyed("missile");
     end
   end,
 
