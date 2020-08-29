@@ -242,7 +242,8 @@ im.spriteSettings = {
     {'Enemies/Mummy/mummy', 2, padding = 2, width = 16, height = 16}
   },
   skeleton = {
-    {'Enemies/Skeleton/skeleton', 2, padding = 2, width = 16, height = 16}
+    {'Enemies/Skeleton/skeleton', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Skeleton/jump', 1, padding = 2, width = 16, height = 16}
   },
   bat = {
     {'Enemies/Bat/bat', 2, padding = 2, width = 16, height = 10}
@@ -276,6 +277,9 @@ im.spriteSettings = {
   },
   fireMissile = {
     {'Enemies/FireMissile/fireMissile', 2, padding = 2, width = 10, height = 10}
+  },
+  bone = {
+    {'Enemies/Bone/bone', 1, padding = 2, width = 10, height = 10}
   },
   robeMissile = {
     {'Enemies/Robe/attack', 4, padding = 2, width = 12, height = 12}

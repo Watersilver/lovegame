@@ -327,7 +327,9 @@ glsounds = snd.load_sounds{
   stone = {"Effects/Oracle_Rumble2b"},
   plant = {"Effects/Oracle_ScentSeed_Shot"},
   wind = {"Effects/Oracle_GaleSeed"},
-  blockFall = {"Effects/Oracle_Block_Fall"}
+  blockFall = {"Effects/Oracle_Block_Fall"},
+  enemyJump = {"Effects/Oracle_Enemy_Jump"},
+  shieldDeflect = {"Effects/Oracle_Shield_Deflect"},
 }
 
 -- Set up cameras
@@ -973,20 +975,21 @@ local function hudDraw(l,t,w,h)
     -- Draw as many filled hearts as player has health
     for i = 1, pl1.maxHealth do
       local healthFrame
-      if pl1.health < i then
-        if pl1.health <= i - 1 then
-          healthFrame = hpspr[4]
-        elseif pl1.health <= i - 0.75 then
-          healthFrame = hpspr[3]
-        elseif pl1.health <= i - 0.5 then
-          healthFrame = hpspr[2]
-        elseif pl1.health <= i - 0.25 then
-          healthFrame = hpspr[1]
-        end
+
+      if pl1.health <= i - 1 then
+        healthFrame = hpspr[4]
+      elseif pl1.health <= i - 0.75 then
+        healthFrame = hpspr[3]
+      elseif pl1.health <= i - 0.5 then
+        healthFrame = hpspr[2]
+      elseif pl1.health <= i - 0.25 then
+        healthFrame = hpspr[1]
       else
         healthFrame = hpspr[0]
       end
+
       love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5, 0, hpspr.res_x_scale, hpspr.res_y_scale, hpspr.cx, hpspr.cy)
+
     end
 
     local pr, pg, pb, pa = love.graphics.getColor()

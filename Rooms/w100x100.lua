@@ -1094,9 +1094,13 @@ room.manuallyPlacedObjects = {
   --   x = 299, y = 282, blueprint = "enemies.BlueHandSpawner",
   --   n = {destination = "Rooms/w100x100.lua", desx = 257, desy = 257}
   -- },
+  -- {
+  --   x = 299, y = 282, blueprint = "enemies.RedHandSpawner",
+  --   n = {destination = "Rooms/w100x100.lua", desx = 257, desy = 257},
+  --   -- giveChase = true
+  -- },
   {
-    x = 299, y = 282, blueprint = "enemies.RedHandSpawner",
-    n = {destination = "Rooms/w100x100.lua", desx = 257, desy = 257},
+    x = 299, y = 282, blueprint = "enemies.skeleton",
     -- giveChase = true
   },
 }

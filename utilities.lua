@@ -132,12 +132,12 @@ end
 
 function u.reflect(dx, dy, nx, ny)
 
--- How to get reflected vector
--- r=d−2(d*n)n
--- (d*n) is dot product
--- d is pre bounce, n is normal, r is reflected
-local dot = dx * nx + dy * ny
-return dx - 2 * dot * nx, dy - 2 * dot * ny
+  -- How to get reflected vector
+  -- r=d−2(d*n)n
+  -- (d*n) is dot product
+  -- d is pre bounce, n is normal, r is reflected
+  local dot = dx * nx + dy * ny
+  return dx - 2 * dot * nx, dy - 2 * dot * ny
 
 end
 

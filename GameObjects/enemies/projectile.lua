@@ -1,5 +1,6 @@
 local ps = require "physics_settings"
 local im = require "image"
+local snd = require "sound"
 local p = require "GameObjects.prototype"
 local et = require "GameObjects.enemyTest"
 local ebh = require "enemy_behaviours"
@@ -10,6 +11,7 @@ local game = require "game"
 local o = require "GameObjects.objects"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
+local bnd = require "GameObjects.bounceAndDie"
 
 local Projectile = {}
 
@@ -26,6 +28,8 @@ function Projectile.initialize(instance)
   instance.canBeRolledThrough = false
   instance.canBeBullrushed = false
   instance.fireTimer = 0
+  instance.dpDeflectable = true
+  instance.doesntGoThroughSolids = false
 end
 
 local function fireUpdate(self, dt)
@@ -35,6 +39,23 @@ local function fireUpdate(self, dt)
   if self.x_scale == 0 then self.x_scale = 1 end
 end
 
+local function boneUpdate(self, dt)
+  if self.fired then
+    self.angle = self.angleAfterDeflection
+    self.xtraUpdate = nil
+  else
+    self.angle = self.angle + self.aVel
+  end
+end
+
+local function boneBreak(self)
+
+  bnd.quickBnD(self, {init = {xscaleReversalFreq = 0.1} })
+  o.removeFromWorld(self)
+  self.broken = true
+
+end
+
 Projectile.functions = {
   load = function (self)
     et.functions.load(self)
@@ -42,8 +63,16 @@ Projectile.functions = {
       self:fire()
     end
     if self.enemFire then
-      self.fireUpdate = fireUpdate
+      self.xtraUpdate = fireUpdate
       self.image_speed = 0.25
+    elseif self.enemBone then
+      self.xtraUpdate = boneUpdate
+      self.getDestroyed = boneBreak
+      self.aVel = math.pi * 0.1
+      self.angleAfterDeflection = u.choose(0, math.pi * 0.5)
+      self.doesntGoThroughSolids = true
+      self.dpDeflectable = false
+      self.dpBreakable = true
     end
   end,
 
@@ -58,7 +87,7 @@ Projectile.functions = {
     elseif self.y < -5 or self.y > game.room.height + 5 then
       o.removeFromWorld(self)
     end
-    if self.fireUpdate then self.fireUpdate(self, dt) end
+    if self.xtraUpdate then self.xtraUpdate(self, dt) end
   end,
 
   -- draw = function (self)
@@ -66,21 +95,43 @@ Projectile.functions = {
   --   -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   -- end,
 
+  hitSolidStatic = function (self, other, myF, otherF, coll)
+    if other.roomEdge then return end
+    if self.doesntGoThroughSolids and not self.broken then
+
+      self:getDestroyed();
+
+    end
+  end,
+
   hitBySword = function (self, other, myF, otherF)
-    if not self.deflected and session.save.dinsPower then
+    if self.dpDeflectable and (not self.deflected and session.save.dinsPower) then
       local msl = require "GameObjects.Items.missile"
       msl.getDeflected(self, other.creator, other)
       self.fired = true
-      self.deflected = true
+
+      -- Can only hit enemies with the deflected
+      -- msl if you have nayru's wisdom
       if session.save.nayrusWisdom then
         self.immamissile = true
       end
+    elseif self.dpBreakable and (not self.broken and session.save.dinsPower) then
+
+      self:getDestroyed();
+      snd.play(glsounds.shieldDeflect)
+
     end
   end,
 
   hitByMissile = function (self, other, myF, otherF)
     if session.save.nayrusWisdom then
-      o.removeFromWorld(self)
+      if self.enemBone then
+
+        self:getDestroyed();
+        snd.play(glsounds.shieldDeflect)
+      else
+        o.removeFromWorld(self)
+      end
     end
   end,
 

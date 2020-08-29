@@ -70,6 +70,7 @@ function Enemy.initialize(instance)
   instance.ignoreFloorMovementModifiers = true
   instance.lookFor = si.lookFor
   instance.layer = 20
+  instance.angle = 0
   instance.sounds = snd.load_sounds({
     hitSound = hitSound
   })
@@ -202,7 +203,7 @@ Enemy.functions = {
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.myShader)
     love.graphics.draw(
-    sprite.img, frame, xtotal, ytotal, 0,
+    sprite.img, frame, xtotal, ytotal, self.angle,
     self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
     sprite.cx, sprite.cy)
     love.graphics.setShader(worldShader)
@@ -227,7 +228,7 @@ Enemy.functions = {
 
     love.graphics.draw(
     sprite.img, frame,
-    xtotal, ytotal, 0,
+    xtotal, ytotal, self.angle,
     self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
     sprite.cx, sprite.cy)
     -- if self.body then
