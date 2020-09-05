@@ -162,6 +162,7 @@ function Playa.initialize(instance)
   instance.lowGlow = {}
   instance.flickerPeriod = 1 / 30 -- in secs
   instance.flickerTick = 0
+  instance.doesntForceDir = true
   instance.sounds = snd.load_sounds({
     swordSlash1 = {"Effects/Oracle_Sword_Slash1"},
     swordSlash2 = {"Effects/Oracle_Sword_Slash2"},
