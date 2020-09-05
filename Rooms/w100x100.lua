@@ -1100,7 +1100,7 @@ room.manuallyPlacedObjects = {
   --   -- giveChase = true
   -- },
   {
-    x = 299, y = 282, blueprint = "enemies.RobeSpawner",
+    x = 299, y = 282, blueprint = "enemies.shooters.redRockBug",
     -- giveChase = true
   },
 }

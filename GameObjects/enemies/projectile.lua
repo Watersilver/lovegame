@@ -16,6 +16,7 @@ local bnd = require "GameObjects.bounceAndDie"
 local Projectile = {}
 
 function Projectile.initialize(instance)
+  instance.doesntForceDir = true
   instance.levitating = true
   instance.maxspeed = 80
   instance.physical_properties.shape = ps.shapes.missile
@@ -30,7 +31,8 @@ function Projectile.initialize(instance)
   instance.fireTimer = 0
   instance.dpDeflectable = true
   instance.doesntGoThroughSolids = false
-  instance.getDestroyed = o.removeFromWorld;
+  instance.getDestroyed = o.removeFromWorld
+  instance.seeThrough = true
 end
 
 local function fireUpdate(self, dt)
@@ -63,9 +65,7 @@ end
 Projectile.functions = {
   load = function (self)
     et.functions.load(self)
-    if not self.holdFire then
-      self:fire()
-    end
+
     if self.enemFire then
       self.xtraUpdate = fireUpdate
       self.image_speed = 0.25
@@ -77,10 +77,34 @@ Projectile.functions = {
       self.doesntGoThroughSolids = true
       self.dpDeflectable = false
       self.dpBreakable = true
+    elseif self.enemRock then
+      self.doesntGoThroughSolids = true
+      self.dpDeflectable = false
+      self.breakable = true
+      self.getDestroyed = boneBreak
+      self.maxspeed = 100
+    end
+
+    if not self.holdFire then
+      self:fire()
     end
   end,
 
   fire = function (self)
+
+    -- Determine direction if fed facing
+    if self.facing then
+      if self.facing == "up" then
+        self.direction = -math.pi * 0.5
+      elseif self.facing == "down" then
+        self.direction = math.pi * 0.5
+      elseif self.facing == "left" then
+        self.direction = math.pi
+      elseif self.facing == "right" then
+        self.direction = 0
+      end
+    end
+
     self.body:setLinearVelocity(u.polarToCartesian(self.maxspeed, self.direction))
   end,
 
@@ -119,7 +143,7 @@ Projectile.functions = {
       if session.save.nayrusWisdom then
         self.immamissile = true
       end
-    elseif self.dpBreakable and (not self.broken and session.save.dinsPower) then
+    elseif self.breakable or (self.dpBreakable and (not self.broken and session.save.dinsPower)) then
 
       self:getDestroyed("sword");
 

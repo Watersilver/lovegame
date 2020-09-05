@@ -281,6 +281,9 @@ im.spriteSettings = {
   bone = {
     {'Enemies/Bone/bone', 1, padding = 2, width = 10, height = 10}
   },
+  bullet = {
+    {'Enemies/Bullet/bullet', 1, padding = 2, width = 10, height = 10}
+  },
   robeMissile = {
     {'Enemies/Robe/attack', 4, padding = 2, width = 12, height = 12}
   },
@@ -288,6 +291,11 @@ im.spriteSettings = {
     {'Enemies/Mimic/walk_left', 2, padding = 2, width = 16, height = 16},
     {'Enemies/Mimic/walk_up', 2, padding = 2, width = 16, height = 16},
     {'Enemies/Mimic/walk_down', 2, padding = 2, width = 16, height = 16},
+  },
+  redRockBug = {
+    {'Enemies/RedRockBug/walk_left', 2, padding = 2, width = 15, height = 16},
+    {'Enemies/RedRockBug/walk_up', 2, padding = 2, width = 16, height = 15},
+    {'Enemies/RedRockBug/walk_down', 2, padding = 2, width = 16, height = 15},
   },
   blob = {
     {'Enemies/Blob/walk', 4, padding = 2, width = 14, height = 16},
@@ -396,8 +404,9 @@ end
 
 function im.reloadPlSprites()
   if session.save.saveName and session.save.saveName:upper() == "ZELDA" then
+    local altSkins = require "altSkins"
     for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
-      im.replace_sprite(plSprite[1], require ("altSkins").zeldaPlayerSprites[i])
+      im.replace_sprite(plSprite[1], altSkins.zeldaPlayerSprites[i])
     end
   else
     for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
