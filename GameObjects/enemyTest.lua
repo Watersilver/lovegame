@@ -173,6 +173,7 @@ Enemy.functions = {
     end
     self.x, self.y = self.body:getPosition()
     self.vx, self.vy = self.body:getLinearVelocity()
+    self.speed = u.magnitude2d(self.vx, self.vy)
     if self.image_speed then
       self.image_index = (self.image_index + dt*60*self.image_speed)
     end
@@ -278,7 +279,7 @@ Enemy.functions = {
     end
 
     -- Force next direction to avoid further collisions
-    if not otherF:isSensor() then
+    if not otherF:isSensor() and not other.doesntForceDir then
       if math.abs(self.vx) > math.abs(self.vy) then
         if self.vx > 0 then
           self.forcedDir = "left"
