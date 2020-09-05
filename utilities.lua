@@ -150,6 +150,7 @@ function u.choose(x, y, chanceToPickX)
   return random()<chanceToPickX and x or y
 end
 
+-- Remember unpack() function when I want to pass table as second arg
 -- ... is keys to avoid
 function u.chooseKeyFromTable(tbl, ...)
   local returnKey
@@ -172,12 +173,28 @@ function u.chooseKeyFromTable(tbl, ...)
   return returnKey
 end
 
--- will work correctly only if sum of chances is <= 1
+-- Will work correctly only if sum of chances is <= 1
+-- By design. Might be a stupid design
 function u.chooseFromChanceTable(cTbl)
   local choiceNumber = random()
   for key, valChanceTbl in pairs(cTbl) do
     if choiceNumber < valChanceTbl.chance then return valChanceTbl.value end
     choiceNumber = choiceNumber - valChanceTbl.chance
+  end
+  return
+end
+
+function u.chooseFromWeightTable(wTbl)
+  local totalWeight = 0
+  for _, val in ipairs(wTbl) do
+    totalWeight = totalWeight + val.weight
+  end
+
+  local choiceNumber = random() * totalWeight
+  for _, val in ipairs(wTbl) do
+    local chance = val.weight
+    if choiceNumber < chance then return val.value end
+    choiceNumber = choiceNumber - chance
   end
   return
 end
@@ -263,6 +280,12 @@ function u.forgetFloorTile(self, other)
     end
 
   end
+end
+
+function u.isOutsideGamera(position, cam)
+  local l,t,w,h = cam:getVisible()
+  return (position.x + 8 < l) or (position.x - 8 > l + w)
+  or (position.y + 8 < t) or (position.y - 8 > t + h)
 end
 
 return u
