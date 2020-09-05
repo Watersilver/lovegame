@@ -43,6 +43,11 @@ local states = {
       local mass = instance.body:getMass()
       local imx, imy = u.polarToCartesian(love.math.random(10, 100) * mass, dir)
       instance.body:applyLinearImpulse(imx, imy)
+
+      -- Make jump sound
+      if not u.isOutsideGamera(self, mainCamera) then
+        snd.play(glsounds.enemyJump)
+      end
     end,
     check_state = function(instance, dt)
       if instance.zo >= 0 then
