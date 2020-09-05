@@ -87,7 +87,7 @@ Knight.functions = {
       td.walk(self, dt)
       setFacingSprite(self)
       if self.speed > 0.1 then
-        self.image_speed = 0.13 * 0.5
+        self.image_speed = 0.065
       else
         self.image_speed = 0
         self.image_index = 0
@@ -143,7 +143,7 @@ Knight.functions = {
       self.chargeSoundTimer = self.chargeSoundTimer + dt
     elseif self.state == "stunned" then
       self.sprite = im.sprites["Enemies/BullKnight/stun_down"]
-      self.image_speed = 0.13 * 0.5
+      self.image_speed = 0.065
       td.stand_still(self, dt)
       if self.behaviourTimer < 0 then
         self.shieldDown = false
