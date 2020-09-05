@@ -47,11 +47,11 @@ end
 function ebh.randomize4dir(object, setTimer, nonStop)
   -- returns facing direction, if I want to.
   local myinp = object.input
+  myinp.left = 0; myinp.right = 0; myinp.up = 0; myinp.down = 0
   if object.moving and not nonStop then
     if setTimer then
       object.behaviourTimer = love.math.random(4)
     end
-    myinp.left = 0; myinp.right = 0; myinp.up = 0; myinp.down = 0
     object.moving = false
   else
     if setTimer then
