@@ -45,7 +45,7 @@ local states = {
       instance.body:applyLinearImpulse(imx, imy)
 
       -- Make jump sound
-      if not u.isOutsideGamera(self, mainCamera) then
+      if not u.isOutsideGamera(instance, mainCamera) then
         snd.play(glsounds.enemyJump)
       end
     end,
