@@ -2376,15 +2376,15 @@ Playa.functions = {
 
     local ms = self.movement_state
     -- Check movement state
-    ms[ms.state].check_state(self, dt)
+    ms.states[ms.state].check_state(self, dt)
     -- Run movement state
-    ms[ms.state].run_state(self, dt)
+    ms.states[ms.state].run_state(self, dt)
 
     local as = self.animation_state
     -- Check animation state
-    as[as.state].check_state(self, dt)
+    as.states[as.state].check_state(self, dt)
     -- Run animation state
-    as[as.state].run_state(self, dt)
+    as.states[as.state].run_state(self, dt)
 
     -- Check if landing sound should be played
     if trig.land and self.landedTileSound ~= "none" then

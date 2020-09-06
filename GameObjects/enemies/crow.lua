@@ -173,9 +173,9 @@ Crow.functions = {
     -- do stuff depending on state
     local state = self.state
     -- Check animation state
-    state[state.state].check_state(self, dt)
+    state.states[state.state].check_state(self, dt)
     -- Run animation state
-    state[state.state].run_state(self, dt)
+    state.states[state.state].run_state(self, dt)
 
     -- Check when to make wing sound
     if self.image_index_prev < 1 and self.image_index > 1 then

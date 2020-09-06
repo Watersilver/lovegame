@@ -244,9 +244,9 @@ ShooterTemplate.functions = {
     -- do stuff depending on state
     local state = self.state
     -- Check state
-    state[state.state].check_state(self, dt)
+    state.states[state.state].check_state(self, dt)
     -- Run state
-    state[state.state].run_state(self, dt)
+    state.states[state.state].run_state(self, dt)
   end,
 
   setStateTimer = function (self, wt)
