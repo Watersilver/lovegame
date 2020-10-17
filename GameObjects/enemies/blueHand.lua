@@ -69,6 +69,7 @@ BlueHand.functions = {
 
   enemyUpdate = function (self, dt)
     if self.grabbedPlayer then
+      fuck = fuck + 1
       self.body:setLinearVelocity(0, 0)
 
       if self.grabTimer > 5 then
@@ -225,6 +226,7 @@ BlueHand.functions = {
   end,
 
   hitPlayer = function (self, other, myF, otherF)
+    if self.grabbedPlayer then return end
     self.grabbedPlayer = other.zo == 0 and other.animation_state.state ~= "dontdraw" and other.body:getType() == "dynamic" and not other.deathState
     if self.grabbedPlayer then
       other.animation_state:change_state(other, dt, "dontdraw")

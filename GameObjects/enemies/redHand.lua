@@ -72,6 +72,7 @@ RedHand.functions = {
     -- If I'm not close enough to player to grab them I can't grab
     if u.distance2d(self.x, self.y, self.target.x, self.target.y) > self.grabRadius then return end
 
+    if self.grabbedPlayer then return end
     self.grabbedPlayer = self.target.animation_state.state ~= "dontdraw" and self.target.body:getType() == "dynamic" and not self.target.deathState
     if self.grabbedPlayer then
       -- Force land player
