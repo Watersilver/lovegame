@@ -132,6 +132,26 @@ local shspot = {
   }
 }
 
+local function hitEffect(self)
+  local cr = self.creator
+  local exoff, eyoff
+  if self.spin then
+    exoff, eyoff = u.polarToCartesian(15, self.angle - pi * 0.25 + (love.math.random() * pi * 0.25 - pi * 0.125))
+  else
+    local explOffset = shspot[self.side][self.phase]
+    exoff, eyoff = explOffset.xoff, explOffset.yoff
+  end
+  local explOb = expl:new{
+    x = cr.x + exoff, y = cr.y + cr.zo + eyoff,
+    layer = self.layer,
+    explosionNumber = self.explosionNumber or 1,
+    explosion_sprite = self.hitWallSprite or im.spriteSettings.swordHitWall,
+    image_speed = self.hitWallImageSpeed or 0.5,
+    nosound = true
+  }
+  o.addToWorld(explOb)
+end
+
 function Sword.initialize(instance)
 
   instance.transPersistent = true
@@ -424,40 +444,10 @@ Sword.functions = {
       cr.body:applyLinearImpulse(px, py)
       self.hitWall = true
       if (other.static and not (other.breakableByUpgradedSword and session.save.dinsPower)) or other.forceSwordSound then
-        local exoff, eyoff
-        if self.spin then
-          exoff, eyoff = u.polarToCartesian(15, self.angle - pi * 0.25 + (love.math.random() * pi * 0.25 - pi * 0.125))
-        else
-          local explOffset = shspot[self.side][self.phase]
-          exoff, eyoff = explOffset.xoff, explOffset.yoff
-        end
-        local explOb = expl:new{
-          x = cr.x + exoff, y = cr.y + cr.zo + eyoff,
-          layer = self.layer,
-          explosionNumber = self.explosionNumber or 1,
-          explosion_sprite = self.hitWallSprite or im.spriteSettings.swordHitWall,
-          image_speed = self.hitWallImageSpeed or 0.5,
-          nosound = true
-        }
-        o.addToWorld(explOb)
+        hitEffect(self)
         snd.play(cr.sounds.swordTap1)
       elseif other.shieldWall and other.shielded and not ((other.weakShield or other.mediumShield) and session.save.dinsPower) then
-        local exoff, eyoff
-        if self.spin then
-          exoff, eyoff = u.polarToCartesian(15, self.angle - pi * 0.25 + (love.math.random() * pi * 0.25 - pi * 0.125))
-        else
-          local explOffset = shspot[self.side][self.phase]
-          exoff, eyoff = explOffset.xoff, explOffset.yoff
-        end
-        local explOb = expl:new{
-          x = cr.x + exoff, y = cr.y + cr.zo + eyoff,
-          layer = self.layer,
-          explosionNumber = self.explosionNumber or 1,
-          explosion_sprite = self.hitWallSprite or im.spriteSettings.swordHitWall,
-          image_speed = self.hitWallImageSpeed or 0.5,
-          nosound = true
-        }
-        o.addToWorld(explOb)
+        hitEffect(self)
         snd.play(cr.sounds.swordTap2)
       end
     end
