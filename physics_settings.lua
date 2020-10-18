@@ -23,6 +23,7 @@ ps.shapes = {
   rectHalfxHalf = love.physics.newRectangleShape(8, 8),
   rectThreeFourths = love.physics.newRectangleShape(12, 12),
   rect13x16 = love.physics.newRectangleShape(13, 16),
+  enemySword = love.physics.newRectangleShape(0, -2, 1, 10),
   edge10hor = love.physics.newEdgeShape(0, 0, 160, 0),
   edge10ver = love.physics.newEdgeShape(0, 0, 0, 160),
   -- edge10x10 = love.physics.newRectangleShape(160, 160),

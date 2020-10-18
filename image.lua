@@ -287,6 +287,14 @@ im.spriteSettings = {
   robeMissile = {
     {'Enemies/Robe/attack', 4, padding = 2, width = 12, height = 12}
   },
+  enemySword = {
+    {'Enemies/Sword/sword', 1, padding = 2, width = 6, height = 15}
+  },
+  hoodedSkeleton = {
+    {'Enemies/HoodedSkeleton/walk_left', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/HoodedSkeleton/walk_up', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/HoodedSkeleton/walk_down', 2, padding = 2, width = 16, height = 16},
+  },
   mimic = {
     {'Enemies/Mimic/walk_left', 2, padding = 2, width = 16, height = 16},
     {'Enemies/Mimic/walk_up', 2, padding = 2, width = 16, height = 16},
