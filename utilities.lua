@@ -98,6 +98,59 @@ function u.perpendicularRightTurn2d(x, y)
   return y, -x
 end
 
+function u.posFromSide(distanceKept, xdiff, ydiff, targetingSide)
+  if targetingSide == "up" then
+    return xdiff, ydiff - distanceKept, targetingSide
+  elseif targetingSide == "down" then
+    return xdiff, ydiff + distanceKept, targetingSide
+  elseif targetingSide == "left" then
+    return xdiff - distanceKept, ydiff, targetingSide
+  elseif targetingSide == "right" then
+    return xdiff + distanceKept, ydiff, targetingSide
+  else
+    return xdiff, ydiff, targetingSide
+  end
+end
+
+function u.realToBinary(index, binArr)
+  binArr = binArr or {true, false}
+  if index > 0 then
+    return binArr[1]
+  else
+    return binArr[2]
+  end
+end
+
+function u.getClosePosAndSide(distanceKept, selfx, selfy, targetx, targety)
+  local xdiff = targetx - selfx
+  local ydiff = targety - selfy
+  local targetingSide
+
+  if math.abs(xdiff) > math.abs(ydiff) then
+    targetingSide = u.realToBinary(xdiff, {"left", "right"})
+  else
+    targetingSide = u.realToBinary(ydiff, {"up", "down"})
+  end
+
+  return u.posFromSide(distanceKept, xdiff, ydiff, targetingSide)
+end
+
+function u.getPosAndSideInFrontOfMovingObj(distanceKept, selfx, selfy, targetx, targety, targetvx, targetvy)
+
+  local targetingSide
+
+  if math.abs(targetvx) > math.abs(targetvy) then
+    targetingSide = u.realToBinary(targetvx, {"right", "left"})
+  else
+    targetingSide = u.realToBinary(targetvy, {"down", "up"})
+  end
+
+  local xdiff = targetx - selfx
+  local ydiff = targety - selfy
+
+  return u.posFromSide(distanceKept, xdiff, ydiff, targetingSide)
+end
+
 function u.projection2d(x, y, xdir, ydir)
   -- local projectionMagnitude = (x*xdir + y*ydir) / u.magnitude2d(xdir, ydir)
   -- local uvx, uvy = u.normalize2d(xdir, ydir)
