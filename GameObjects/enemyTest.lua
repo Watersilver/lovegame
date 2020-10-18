@@ -136,6 +136,24 @@ Enemy.functions = {
   hitByMdust = function (self, other, myF, otherF)
   end,
 
+  touchedBySword = function (self, other, myF, otherF)
+  end,
+
+  touchedByMissile = function (self, other, myF, otherF)
+  end,
+
+  touchedByThrown = function (self, other, myF, otherF)
+  end,
+
+  touchedByBombsplosion = function (self, other, myF, otherF)
+  end,
+
+  touchedByBullrush = function (self, other, myF, otherF)
+  end,
+
+  touchedByMdust = function (self, other, myF, otherF)
+  end,
+
   hitPlayer = function (self, other, myF, otherF)
   end,
 
@@ -318,6 +336,7 @@ Enemy.functions = {
     -- end
     if other.immasword == true then
       self.attemtedToBeAttacked = "sword"
+      self:touchedBySword(other, myF, otherF)
       if not self.invulnerable and not self.undamageable then
         self.lastHit = "sword"
         self.lastHitEmpowered = other.poweredUp
@@ -329,6 +348,7 @@ Enemy.functions = {
     -- Check if hit by missile
     if other.immamissile == true then
       self.attemtedToBeAttacked = "missile"
+      self:touchedByMissile(other, myF, otherF)
       if not self.invulnerable and not self.undamageable then
         self.lastHit = "missile"
         self.lastHitEmpowered = other.poweredUp
@@ -340,6 +360,7 @@ Enemy.functions = {
     -- Check if hit by thrown object
     if other.immathrown == true and not other.iAmBomb then
       self.attemtedToBeAttacked = "thrown"
+      self:touchedByThrown(other, myF, otherF)
       if not self.invulnerable and not self.undamageable then
         self.lastHit = "thrown"
         self.lastHitEmpowered = other.poweredUp
@@ -351,6 +372,7 @@ Enemy.functions = {
     -- Check if hit by bombsplosion
     if other.immabombsplosion == true then
       self.attemtedToBeAttacked = "bombsplosion"
+      self:touchedByBombsplosion(other, myF, otherF)
       if not self.invulnerable and (not self.undamageable or self.damageableByBombsplosion) then
         self.lastHit = "bombsplosion"
         self.lastHitEmpowered = other.poweredUp
@@ -362,6 +384,7 @@ Enemy.functions = {
     -- Check if hit by sprint
     if not otherF:isSensor() and other.immasprint == true then
       self.attemtedToBeAttacked = "bullrush"
+      self:touchedByBullrush(other, myF, otherF)
       if self.canBeBullrushed and not self.attackDodger and not self.invulnerable and not self.undamageable then
         self.lastHit = "bullrush"
         self.lastHitEmpowered = other.poweredUp
@@ -373,6 +396,7 @@ Enemy.functions = {
     -- Check if hit by magic dust
     if other.immamdust == true and not other.hasReacted then
       self.attemtedToBeAttacked = "mdust"
+      self:touchedByMdust(other, myF, otherF)
       if not self.invulnerable and not self.undamageable then
         self.lastHit = "mdust"
         self.lastHitEmpowered = other.poweredUp
