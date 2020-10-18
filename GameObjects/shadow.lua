@@ -36,7 +36,7 @@ trans_draw = function (self)
   local sprite = self.sprite
   local frame = sprite[self.image_index]
 
-  local x, y = self.x , self.y
+  local x, y = self.x, self.y
 
   if self.playershadow then
     x = x + game.transitioning.xmod + trans.xtransform - game.transitioning.progress * trans.xadjust
@@ -53,6 +53,7 @@ trans_draw = function (self)
 end,
 
 load = function (self)
+  self.x, self.y = self.xstart, self.ystart
 end,
 
 delete = function (self)

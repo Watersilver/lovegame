@@ -22,6 +22,10 @@ function Wasp.initialize(instance)
 end
 
 Wasp.functions = {
+  enemyLoad = function (self)
+    sh.handleShadow(self)
+  end,
+
   enemyUpdate = function (self, dt)
     -- Movement behaviour
     ebh.bounceOffScreenEdge(self)
