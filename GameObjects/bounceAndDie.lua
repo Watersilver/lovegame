@@ -4,6 +4,7 @@ local o = require "GameObjects.objects"
 local im = require "image"
 local snd = require "sound"
 local td = require "movement"; td = td.top_down
+local trans = require "transitions"
 
 local sh = require "GameObjects.shadow"
 
@@ -16,6 +17,7 @@ function BnD.initialize(instance)
   instance.image_index = 0
   instance.image_speed = 0
   instance.zo = 0
+  instance.angle = 0
   instance.zvel = 15
   instance.gravity = 45
   instance.hasShadow = false
@@ -68,6 +70,10 @@ BnD.functions = {
       self.xscaleReversalTimer = self.xscaleReversalTimer + dt
     end
 
+    if self.angularVel then
+      self.angle = self.angle + self.angularVel * dt
+    end
+
     td.zAxis(self, dt)
 
     if self.hasShadow then
@@ -91,7 +97,7 @@ BnD.functions = {
 
     -- love.graphics.setShader(self.myShader)
     love.graphics.draw(
-    sprite.img, frame, x, y + self.zo, 0,
+    sprite.img, frame, x, y + self.zo, self.angle,
     sprite.res_x_scale*self.x_scale,
     sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
