@@ -11,7 +11,7 @@ p.functions = {
     local pp = self.physical_properties
     if not pp then return end
 
-    self.static = pp.bodyType ~= "dynamic"
+    self.static = pp.bodyType ~= "dynamic" and pp.bodyType ~= "kinematic"
 
     --Check if tile
     if pp.tile then
