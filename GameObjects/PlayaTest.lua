@@ -137,6 +137,7 @@ function Playa.initialize(instance)
   instance.input = {}
   instance.previnput = {}
   instance.triggers = {}
+  instance.stateTriggers = {}
   instance.sideTable = {"down", "right", "left", "up"}
   instance.sensors = {downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={}}
   instance.item_use_counter = 0 -- Counts how long you're still while using item
@@ -1807,6 +1808,7 @@ function Playa.initialize(instance)
           instance.sounds.recallStart:stop()
           snd.play(instance.sounds.recall)
           instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
+          instance.stateTriggers.poof = true
         else
           -- fail
         end
@@ -2374,6 +2376,13 @@ Playa.functions = {
 
     sh.handleShadow(self, true)
 
+    -- Handle states
+    -- Turn off state triggers
+    -- (they are triggers enabled in states)
+    for trigger, _ in pairs(self.stateTriggers) do
+      self.stateTriggers[trigger] = nil
+    end
+
     local ms = self.movement_state
     -- Check movement state
     ms.states[ms.state].check_state(self, dt)
@@ -2390,6 +2399,12 @@ Playa.functions = {
     if trig.land and self.landedTileSound ~= "none" then
       snd.play(self.sounds[self.landedTileSound])
     end
+
+    -- Trigger sudden disappearance if decoy disappeared
+    if self.decoyPrev and not session.decoy then
+      self.stateTriggers.poof = true
+    end
+    self.decoyPrev = session.decoy
 
     self.db.downcol = 255
     self.db.upcol = 255
@@ -2438,10 +2453,11 @@ Playa.functions = {
     end
 
     -- Turn off triggers
-    triggersdebug = {}
+    -- triggersdebug = {}
     for trigger, _ in pairs(self.triggers) do
-      if self.triggers[trigger] then triggersdebug[trigger] = true end
-      self.triggers[trigger] = false
+      -- if self.triggers[trigger] then triggersdebug[trigger] = true end
+      -- self.triggers[trigger] = false
+      self.triggers[trigger] = nil
     end
 
   end,
