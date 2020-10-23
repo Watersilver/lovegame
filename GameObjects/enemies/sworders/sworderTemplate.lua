@@ -206,7 +206,7 @@ local states = {
 
       if instance.jump and instance.zo == 0 and instance.zvel == 0 then
         instance.timeOnGround = instance.timeOnGround + dt
-        if instance.timeOnGround > 0 then
+        if instance.timeOnGround > instance.maxTimeOnGround then
           instance.zvel = instance.jump
           instance.timeOnGround = 0
         end
@@ -314,6 +314,7 @@ local SworderTemplate = {}
 function SworderTemplate.initialize(instance)
   instance.sprite_info = im.spriteSettings.hoodedSkeleton
   instance.spritePathNoFacing = "Enemies/HoodedSkeleton/walk_"
+  instance.maxTimeOnGround = 0
   instance.zo = 0
   instance.zvel = 0
   instance.gravity = 350
