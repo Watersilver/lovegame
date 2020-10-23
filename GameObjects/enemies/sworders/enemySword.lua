@@ -92,7 +92,7 @@ Sword.functions = {
     et.functions.load(self)
 
     Sword.functions.early_update(self, 0)
-    if not (self.creator or self.creator.exists) then return end
+    if (not self.creator) or (not self.creator.exists) then return end
     self.x, self.y = self.determinePosition(self.creator.x, self.creator.y, self.facing, self.creator.image_index)
     self.zo = self.creator.zo
   end,
@@ -102,8 +102,8 @@ Sword.functions = {
   end,
 
   early_update = function (self, dt)
-    if not (self.creator or self.creator.exists) then
-      -- self:flyOff()
+    if (not self.creator) or (not self.creator.exists) then
+      self:flyOff()
       return
     end
     self.facing = self.creator.facing
@@ -127,7 +127,7 @@ Sword.functions = {
   -- end,
 
   touchedBySword = function (self, other, myF, otherF)
-    if not (self.creator or self.creator.exists) then return end
+    if (not self.creator) or (not self.creator.exists) then return end
     self.creator.triggers.swordRecoil = true
     if other.spin and other.creator and love.math.random() > self.creator.gripStrength then
       self.creator.triggers.bigRecoil = true
@@ -146,7 +146,7 @@ Sword.functions = {
   end,
 
   touchedByBombsplosion = function (self, other, myF, otherF)
-    if not (self.creator or self.creator.exists) then return end
+    if (not self.creator) or (not self.creator.exists) then return end
     if love.math.random() > self.creator.gripStrength * 0.5 then
       self:flyOff()
     end
