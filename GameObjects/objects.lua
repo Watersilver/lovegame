@@ -10,6 +10,7 @@ o.lateUpdaters = {role = "lateUpdater"} -- List of objects with late_update func
 o.colliders = {role = "collider"} -- List of objects that can collide
 o.persistents = {role = "persistent"} -- List of objects that survive room trans
 o.draw_layers = {} -- List of layers(Lists of objects to be drawn)
+o.overlays = {role = "overlay"} -- objects always drawn over all layers with draw_overlay functions
 o.noCamDrawables = {role = "noCamDrawable"} -- List of objects to be drawn out of gamera
 
 -- Function to change layer
@@ -75,6 +76,10 @@ function o.to_be_deleted:remove_all()
     if object.drawable then
       u.free(o.draw_layers[object.layer], object.drawable)
       object.drawable = nil
+    end
+    if object.overlay then
+      u.free(o.overlays, object.overlay)
+      object.overlay = nil
     end
     if object.noCamDrawable then
       u.free(o.noCamDrawables, object.noCamDrawable)
@@ -171,6 +176,9 @@ function o.to_be_added:add_all()
     -- Add to noCamDrawables if noCamDrawable and if not already there
     if object.noCamDraw and not object.noCamDrawable then
       object[o.noCamDrawables.role] = u.push(o.noCamDrawables, object)
+    end
+    if object.draw_overlay and not object.overlay then
+      object[o.overlays.role] = u.push(o.overlays, object)
     end
     -- Add to objects that will be drawn if not already there
     if object.draw and not object.drawable then

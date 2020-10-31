@@ -1099,9 +1099,9 @@ room.manuallyPlacedObjects = {
   --   n = {destination = "Rooms/w100x100.lua", desx = 257, desy = 257},
   --   -- giveChase = true
   -- },
-  -- {
-    -- x = 299, y = 282, blueprint = "enemies.shooters.redRockBug",
-    -- giveChase = true
-  -- },
+  {
+    x = 111, y = 111, blueprint = "enemies.sworders.sworderTemplate",
+    giveChase = true
+  },
 }
 return room

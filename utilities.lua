@@ -341,4 +341,26 @@ function u.isOutsideGamera(position, cam)
   or (position.y + 8 < t) or (position.y - 8 > t + h)
 end
 
+local coloursEnum = {
+  white = {r = COLORCONST, g = COLORCONST, b = COLORCONST},
+  black = {r = 0, g = 0, b = 0}
+}
+function u.changeColour(cTable)
+  local colour = cTable.colour or cTable[1]
+  local rgb = colour and coloursEnum[colour] or cTable
+  love.graphics.setColor(rgb.r, rgb.g, rgb.b, cTable.a)
+end
+
+function u.getComplementaryColourList(cTable)
+  local colour = cTable.colour or cTable[1]
+  local rgb = colour and coloursEnum[colour] or cTable
+  return {COLORCONST - rgb.r, COLORCONST - rgb.g, COLORCONST - rgb.b, cTable.a}
+end
+
+function u.storeColour()
+  local r, g, b, a = love.graphics.getColor()
+  local prevColour = { r = r, g = g, b = b, a = a }
+  return function() u.changeColour(prevColour) end
+end
+
 return u

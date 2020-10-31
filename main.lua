@@ -935,6 +935,13 @@ local function mainCameraDraw(l,t,w,h)
         end
       end
 
+      local onum = #o.overlays
+      if onum > 0 then
+        for i = 1, onum do
+          o.overlays[i]:draw_overlay(cam)
+        end
+      end
+
     -- Transition drawing mode
     elseif game.transitioning.type == "scrolling" then
 
@@ -1170,6 +1177,7 @@ function love.draw()
     end
   end
 
+  -- debug
   love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
   if currentEnemyName then love.graphics.print(currentEnemyName, 0, 177+88) end
   if fuck then love.graphics.print(fuck, 0, 177+120) end
@@ -1236,6 +1244,13 @@ function love.mousepressed(x, y, button, isTouch)
   else
     if currentEnemyName then
       local enemClass = assert(love.filesystem.load(currentEnemyName))()
+      local enem = enemClass:new()
+      local wx, wy = cam:toWorld(x, y)
+      enem.x, enem.y = wx, wy
+      enem.xstart, enem.ystart = enem.x, enem.y
+      o.addToWorld(enem)
+    else
+      local enemClass = assert(love.filesystem.load("/GameObjects/Npc.lua"))()
       local enem = enemClass:new()
       local wx, wy = cam:toWorld(x, y)
       enem.x, enem.y = wx, wy
