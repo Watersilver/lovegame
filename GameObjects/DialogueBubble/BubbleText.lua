@@ -89,7 +89,7 @@ local methods = {
   end,
 
   getOffsetAfterScrollingOneLine = function (self)
-    return self:getNextHeight() - 2 * self:getLineHeight()
+    return self:getNextHeight() - 2 * self:getLineHeight() + 0.01 -- Last line is to fix occasional floating point error
   end,
 
   updateLength = function (self, newLength)

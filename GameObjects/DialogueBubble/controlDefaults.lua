@@ -119,7 +119,7 @@ private.proximityTriggerTemplate = function (interactive, triggerType)
         if dlgControl.indicatorCooldown < 0 then
           dlgControl.speechIndicator = bubble.addNew("...", dlgControl, {widthDelayMod = 0.125, noXOffset = true, ellipse = true, duration = 0.2})
           dlgControl.speechIndicator.timeBetweenLetters = 0.5
-          dlgControl.speechIndicator.timer = dlgControl.speechIndicator.timeBetweenLetters
+          dlgControl.speechIndicator.timer = 0.1
         end
       else
         local cont = dlgControl.speechIndicator.content
