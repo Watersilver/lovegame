@@ -343,6 +343,7 @@ end
 
 local coloursEnum = {
   white = {r = COLORCONST, g = COLORCONST, b = COLORCONST},
+  red = {r = COLORCONST, g = 0, b = 0},
   black = {r = 0, g = 0, b = 0}
 }
 function u.changeColour(cTable)
@@ -354,7 +355,7 @@ end
 function u.getComplementaryColourList(cTable)
   local colour = cTable.colour or cTable[1]
   local rgb = colour and coloursEnum[colour] or cTable
-  return {COLORCONST - rgb.r, COLORCONST - rgb.g, COLORCONST - rgb.b, cTable.a}
+  return {COLORCONST - rgb.r, COLORCONST - rgb.g, COLORCONST - rgb.b, cTable.a or COLORCONST}
 end
 
 function u.storeColour()

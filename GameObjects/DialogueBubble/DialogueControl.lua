@@ -1,9 +1,10 @@
+local inp = require "input"
 local ps = require "physics_settings"
 local im = require "image"
 local p = require "GameObjects.prototype"
 local trans = require "transitions"
-local bubble = require "GameObjects.DialogueBubble.DialogueBubble"
 local ls = require "lightSources"
+local cd = require "GameObjects.DialogueBubble.controlDefaults"
 
 local floor = math.floor
 
@@ -14,7 +15,7 @@ function NPC.initialize(instance)
   instance.physical_properties = {
     bodyType = "static",
     fixedRotation = true,
-    density = 160, --160 is 50 kg when combined with plshape dimensions(w 10, h 8)
+    density = 160, -- 160 is 50 kg when combined with plshape dimensions(w 10, h 8)
     shape = ps.shapes.plshape,
     gravityScaleFactor = 0,
     restitution = 0,
@@ -30,18 +31,45 @@ function NPC.initialize(instance)
   instance.layer = 20
   instance.zo = 0
   instance.zvel = 0
+  instance.height = 0
   instance.gravity = 350
   instance.unpushable = true
+  instance.content = "yes this is what I am looking for, you stupid piece of crap. Exactly this"
 end
 -- 7, 17
 NPC.functions = {
+  getInterruptedDlg = function (self)
+    return "See ya!"
+  end,
+
+  determineUpdateHook = function (self)
+    if not (pl1 and pl1.exists) then return end
+    self.silent = not self.silent
+    if self.silent then
+      -- self.blockInput = false
+      self.indicatorCooldown = 0.5
+      self.updateHook = cd.interactiveProximityTrigger
+    else
+      -- self.blockInput = true
+      self.updateHook = cd.closeInteractiveBubble
+    end
+  end,
+
   load = function (self)
-    -- bubble
-    self.maBubble = bubble.addNew("yes this is what I am looking for you stupid piece of crap. Exactly this", self)
+    self.height = self.sprite.height
   end,
 
   unpausable_update = function (self, dt)
-    -- we'll see
+  end,
+
+  early_update = function (self, dt)
+    if not (pl1 and pl1.exists) then return end
+    if self.blockInput then
+      for keyname, _ in pairs(inp.current[pl1.player]) do
+        inp.current[pl1.player][keyname] = 0
+        inp.previous[pl1.player][keyname] = 0
+      end
+    end
   end,
 
   update = function (self, dt)
@@ -50,6 +78,13 @@ NPC.functions = {
       self.image_index = self.image_index - self.sprite.frames
     end
     self.x, self.y = self.body:getPosition()
+
+    -- Dialogue control
+    if self.updateHook then
+      self:updateHook(dt)
+    else
+      self:determineUpdateHook()
+    end
   end,
 
   draw = function (self, td)

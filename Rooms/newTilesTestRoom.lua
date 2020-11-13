@@ -382,7 +382,7 @@ room_part.init = {}
 table.insert(room.room_parts, room_part)
 ---
 local room_part = {
-blueprint = "Npc"
+blueprint = "DialogueBubble.DialogueControl"
 }
 room_part.x_that_I_start = 7 * 16
 room_part.y_that_I_start = 17 * 16

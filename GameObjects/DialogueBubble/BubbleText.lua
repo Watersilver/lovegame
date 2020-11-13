@@ -7,8 +7,13 @@ local transparentColour = {0, 0, 0, 0}
 local BubbleText = {}
 
 local methods = {
-  setLength = function (self, length)
-    bubbleText.length = math.floor(length)
+
+  getLength = function (self)
+    return self.length
+  end,
+
+  getMaxLength = function (self)
+    return #self.string
   end,
 
   getWraplimit = function (self)
@@ -19,63 +24,86 @@ local methods = {
     return math.min(self.text:getWidth() * self.scale, self.maxWidth)
   end,
 
+  getLineHeight = function (self)
+    return self.font:getHeight() * self.font:getLineHeight() * self.scale
+  end,
+
   getHeight = function (self)
-    return math.min(self.text:getHeight() * self.scale, self.maxHeight * self.font:getHeight() * self.font:getLineHeight() * self.scale)
+    return math.min(self.text:getHeight() * self.scale, self.maxHeight * self:getLineHeight())
   end,
 
   getNextHeight = function (self)
-    return self.lengthPlus1Text:getHeight() * self.scale
+    return self.heightText:getHeight() * self.scale
   end,
 
-  updateLength = function (self, newLength)
-    if self.length == newLength then return end
-    self.length = newLength
-    self.colouredString[1] = self.textRGBA
-    self.colouredString[2] = string.sub(self.string, 0, self.length)
-    self.colouredString[3] = transparentColour
-    self.colouredString[4] = string.sub(self.string, self.length + 1)
-    self.text:setf(self.colouredString, self:getWraplimit(), self.alignmode)
+  getNextVisibleHeight = function (self)
+    return self.heightText:getHeight() * self.scale - self.yOffset
+  end,
 
+  updateHeightTextLength = function (self, length)
     -- Update visible text
-    local lengthPlus1 = self.length + 1
-    if lengthPlus1 > #self.string then
-      if self.lp1length == #self.string then return end
-      self.lp1length = #self.string
-      self.lengthPlus1Text:setf(self.string, self:getWraplimit(), self.alignmode)
+    local maxLength = self:getMaxLength()
+    if length > maxLength then
+      if self.htLength == maxLength then return end
+      self.htLength = maxLength
+      self.heightText:setf(self.string, self:getWraplimit(), self.alignmode)
       return
     end
-    local c = self.string:sub(lengthPlus1, lengthPlus1)
+    if length < 0 then length = 0 end
+    local c = self.string:sub(length, length)
     if c == "" then
-      if self.lp1length == 0 then return end
-      self.lp1length = 0
-      self.lengthPlus1Text:setf("", self:getWraplimit(), self.alignmode)
+      if self.htLength == 0 then return end
+      self.htLength = 0
+      self.heightText:setf("", self:getWraplimit(), self.alignmode)
       return
     elseif string.match(c, "%S") == nil then
-      for i = lengthPlus1, 1, -1 do
+      for i = length, 1, -1 do
         local c = self.string:sub(i,i)
         if string.match(c, "%S") ~= nil then
-          if self.lp1length == i then return end
-          self.lp1length = i
-          self.lengthPlus1Text:setf(string.sub(self.string, 0, i), self:getWraplimit(), self.alignmode)
+          if self.htLength == i then return end
+          self.htLength = i
+          self.heightText:setf(string.sub(self.string, 0, i), self:getWraplimit(), self.alignmode)
           return
         end
       end
-      if self.lp1length == 0 then return end
-      self.lp1length = 0
-      self.lengthPlus1Text:setf("", self:getWraplimit(), self.alignmode)
+      if self.htLength == 0 then return end
+      self.htLength = 0
+      self.heightText:setf("", self:getWraplimit(), self.alignmode)
     end
-    for i = lengthPlus1, #self.string do
+    for i = length, #self.string do
       local c = self.string:sub(i,i)
       if string.match(c, "%S") == nil then
-        if self.lp1length == i then return end
-        self.lp1length = i
-        self.lengthPlus1Text:setf(string.sub(self.string, 0, i - 1), self:getWraplimit(), self.alignmode)
+        if self.htLength == i then return end
+        self.htLength = i
+        self.heightText:setf(string.sub(self.string, 0, i - 1), self:getWraplimit(), self.alignmode)
         return
       end
     end
-    if self.lp1length == #self.string then return end
-    self.lp1length = #self.string
-    self.lengthPlus1Text:setf(self.string, self:getWraplimit(), self.alignmode)
+    if self.htLength == #self.string then return end
+    self.htLength = #self.string
+    self.heightText:setf(self.string, self:getWraplimit(), self.alignmode)
+  end,
+
+  setYOffset = function (self, newOffset)
+    self.yOffset = newOffset
+  end,
+
+  getOffsetAfterScrollingOneLine = function (self)
+    return self:getNextHeight() - 2 * self:getLineHeight()
+  end,
+
+  updateLength = function (self, newLength)
+    local maxLength = self:getMaxLength()
+    if newLength >= maxLength then newLength = maxLength end
+    if self.length == newLength then return end
+    self.length = newLength
+    self.colouredString[1] = self.textRGBA
+    local visibleStr = string.sub(self.string, 0, self.length)
+    self.colouredString[2] = visibleStr
+    self.colouredString[3] = transparentColour
+    self.colouredString[4] = string.sub(self.string, self.length + 1)
+    self.text:setf(self.colouredString, self:getWraplimit(), self.alignmode)
+    return visibleStr:sub(#visibleStr, #visibleStr)
   end,
 
   draw = function (self, x, y, cam)
@@ -86,16 +114,17 @@ local methods = {
     local sw, sh = cam:toScreen(left + width, top + height)
     sw, sh = sw - sl, sh - st
     love.graphics.setScissor(sl, st, sw, sh)
+    -- This color gets combined with text colour
+    -- SEt to white to no modify text colour
     u.changeColour{"white"}
     local prevFont = love.graphics.getFont()
     love.graphics.setFont(self.font)
     -- love.graphics.clear(123, 0, 0, COLORCONST)
     -- Draw string loop
-    love.graphics.draw(self.text, left, top + 0.5, 0, self.scale)
+    love.graphics.draw(self.text, left, top + 0.5 - self.yOffset, 0, self.scale)
     love.graphics.setFont(prevFont)
     love.graphics.setScissor( )
     resetColour()
-    -- fuck = self:getNextHeight() .. " / " .. height
   end,
 }
 
@@ -109,9 +138,10 @@ function BubbleText.new(string, options)
     options.maxWidth, options.maxHeight,
     options.font, options.textRGBA
   bubbleText.font = fonts[font] or fonts.prstart
+  bubbleText.yOffset = 0
   bubbleText.string = string
   bubbleText.text = love.graphics.newText(bubbleText.font)
-  bubbleText.lengthPlus1Text = love.graphics.newText(bubbleText.font)
+  bubbleText.heightText = love.graphics.newText(bubbleText.font)
   bubbleText.scale = options.scale or 0.2
   bubbleText.maxWidth = maxWidth or 100
   -- Height measured in lines

@@ -11,12 +11,11 @@ local DialogueBubble = {}
 
 function DialogueBubble.addNew(string, anchor, options)
   local init = options or {}
-  -- options:
-  -- Stays on screen
-  -- Avoids player
-  -- self playing?
   init.anchor = anchor
   init.string = string
+  init.position = init.position or "up"
+  init.staysOnScreen = init.staysOnScreen
+  init.noXOffset = init.noXOffset
   -- textRGBA
   local newBubble = DialogueBubble:new(init)
   o.addToWorld(newBubble)
@@ -131,52 +130,21 @@ local states = {
     start_state = function(instance, dt)
     end,
     check_state = function(instance, dt)
-      instance.state:change_state(instance, dt, "setUp")
+      instance.state:change_state(instance, dt, "nothing")
     end,
     end_state = function(instance, dt)
     end
   },
 
-  setUp = {
+  nothing = {
     run_state = function(instance, dt)
     end,
     start_state = function(instance, dt)
-      -- instance.content = BubbleText.new(instance.string, instance)
-      instance:setContent()
+      -- instance:setContent()
     end,
     check_state = function(instance, dt)
-      if instance.triggers.resizeReady then
-        instance.state:change_state(instance, dt, "test")
-      end
     end,
     end_state = function(instance, dt)
-    end
-  },
-
-  test = {
-    run_state = function(instance, dt)
-      if instance.timer < 0 then
-        instance.content:updateLength(instance.content.length + 1)
-        instance.timer = instance.timeBetweenLetters
-      end
-      instance.timer = instance.timer - dt
-
-      if instance.changeTimer < 0 then
-        instance.changeTimer = 99999
-        instance:setContent{string = "Happy now?"}
-      end
-      instance.changeTimer = instance.changeTimer - dt
-    end,
-    start_state = function(instance, dt)
-      instance.timeBetweenLetters = 0.1
-      instance.timer = instance.timeBetweenLetters
-      instance.changeTimer = 3
-    end,
-    check_state = function(instance, dt)
-      -- instance.state:change_state(instance, dt, "resize")
-    end,
-    end_state = function(instance, dt)
-      instance.timeBetweenLetters = nil
     end
   }
 }
@@ -202,6 +170,7 @@ function DialogueBubble.initialize(instance)
   instance.heightVel = 0
   instance.duration = 1
   instance.widthDelayMod = 1
+  -- instance.widthDelayMod = 0.5
   -- dampingRatio ζ = c / 2 * sqrt(k*m)
   instance.dampingRatio = 0.5 -- if > 1 it's overdamped
   instance.anchor = defaultAnchor
@@ -212,6 +181,9 @@ function DialogueBubble.initialize(instance)
 end
 
 DialogueBubble.functions = {
+  remove = function (self)
+    o.removeFromWorld(self)
+  end,
 
   setContent = function (self, options)
     options = options or {}
@@ -225,21 +197,47 @@ DialogueBubble.functions = {
     self.targetHeight = self.content:getHeight()
   end,
 
+  toggleNextButton = function (self, bool)
+    self.nextExists = bool
+  end,
+
+  toggleFinishButton = function (self, bool)
+    self.finishExists = bool
+  end,
+
   load = function (self)
     self.radius = 2
     self.triggers = {}
+    self.positionMod = self.position == "up" and 1 or -1
+    self.posModSpeed = 11
+    self:setContent()
+    self.buttonTimer = 0
   end,
 
   update = function (self, dt)
+    -- Update timer
+    self.buttonTimer = self.buttonTimer + dt * 5
+
     local anchor = self.anchor
     if not anchor or not anchor.exists then return end
-    self.x = anchor.x
-    self.y = anchor.y - self.height * 0.5 - self.padding - self.triangleHeight
-    if anchor.zo then
-      self.y = self.y + anchor.zo
+    if self.position == "up" then
+      self.positionMod = self.positionMod + dt * self.posModSpeed
+      if self.positionMod > 1 then self.positionMod = 1 end
+    else
+      self.positionMod = self.positionMod - dt * self.posModSpeed
+      if self.positionMod < -1 then self.positionMod = -1 end
     end
-    if anchor.sprite then
-      self.y = self.y - anchor.sprite.height * 0.5
+
+    self.x = anchor.x
+    self.y = anchor.y -
+    self.positionMod *
+    (
+      self.height * 0.5
+      + self.padding
+      + self.triangleHeight * math.abs(self.positionMod)
+    )
+    if anchor.height then
+     self.y = self.y - anchor.height * 0.5 * self.positionMod
     end
 
     -- do stuff depending on state
@@ -265,35 +263,132 @@ DialogueBubble.functions = {
     local wdivtw = self.stabilizedOnce and 1 or math.min(self.width / self.targetWidth, 1)
     local hdivth = self.stabilizedOnce and 1 or math.min(self.height / self.targetHeight, 1)
     u.changeColour{self.color}
+
+    -- Adjust x to camera position
+    -- Determine side bubble is leaning towards
+    local camMiddle = cam:getPosition()
+    local side
+    if self.x > camMiddle then
+      side = -1
+    else
+      side = 1
+    end
+
+    -- Determine xOffset
+    local l, t, w, h = cam:getVisible()
+    local edgeDist = 0.5 * w - 16
+    local xPercent = math.abs(self.x - camMiddle) / edgeDist
+    if xPercent > 1 then xPercent = 1 end
+    local maxXOffset = self.width * 0.47
+    local xOffset = side * xPercent * maxXOffset
+    xOffset = self.noXOffset and 0 or xOffset
+
+    local x, y = self.x + xOffset, self.y
+
+    -- Make sure to stay in camera if I must
+    local totalWidth = self.width + 2 * self.padding * wdivtw
+    local totalHeight = self.height + 2 * self.padding * hdivth
+    if self.staysOnScreen then
+      -- Check x axis
+      if l + 3 > x - 0.5 * totalWidth then
+        -- beyond left edge
+        x = l + 3 + 0.5 * totalWidth
+      elseif l + w - 3 < x + 0.5 * totalWidth then
+        -- beyond right edge
+        x = l + w - 3 - 0.5 * totalWidth
+      end
+      -- Check y axis
+      local triangleOffset = self.positionMod * self.triangleHeight
+      local topTrigOffset = 0
+      local bottomTrigOffset = 0
+      if self.positionMod < 0 then
+        topTrigOffset = triangleOffset
+      else
+        bottomTrigOffset = triangleOffset
+      end
+      if t + 3 > y - 0.5 * totalHeight + topTrigOffset then
+        -- beyond top edge
+        y = t + 3 + 0.5 * totalHeight - topTrigOffset
+      elseif t + h - 3 < y + 0.5 * totalHeight + bottomTrigOffset then
+        -- beyond bottom edge
+        y = t + h - 3 - 0.5 * totalHeight - bottomTrigOffset
+      end
+    end
+
     -- Draw bubble
-    roundedRect.draw(
-      self.x, self.y,
-      self.width + 2 * self.padding * wdivtw,
-      self.height + 2 * self.padding * hdivth,
-      self.radius
-    )
     if anchor and anchor.exists then
+      local triangleX = anchor.x
+      triangleX = u.clamp(x - maxXOffset, triangleX, x + maxXOffset)
       -- Draw little triangle
       -- If above anchor
-      bubbleTriangle.draw(
-        anchor.x,
-        self.y + 0.5 * self.height + self.padding * hdivth,
-        self.triangleHeight,
-        wdivtw,
-        hdivth,
-        "down"
-      )
-      -- If below anchor
-      -- bubbleTriangle.draw(
-      --   anchor.x,
-      --   self.y - 0.5 * self.height - self.padding * self.height / self.targetHeight,
-      --   self.triangleHeight,
-      --   self.width / self.targetWidth,
-      --   self.height / self.targetHeight,
-      --   "up"
-      -- )
+      if self.positionMod > 0 then
+        bubbleTriangle.draw(
+          triangleX,
+          y + 0.5 * self.height + self.padding * hdivth * self.positionMod,
+          self.triangleHeight,
+          wdivtw,
+          hdivth * self.positionMod,
+          "down"
+        )
+      else
+        -- If below anchor
+        bubbleTriangle.draw(
+          triangleX,
+          y - 0.5 * self.height + self.padding * hdivth * self.positionMod,
+          self.triangleHeight,
+          wdivtw,
+          - hdivth * self.positionMod,
+          "up"
+        )
+      end
     end
-    self.content:draw(self.x, self.y - self.bottomPadding, cam);
+    -- Textbox
+    if self.ellipse then
+      love.graphics.ellipse("fill", x, y + 1, totalWidth * 0.5, totalHeight * 0.5)
+      y = y + 2 -- Correct content height
+    else
+      roundedRect.draw(
+        x, y,
+        totalWidth,
+        totalHeight,
+        self.radius
+      )
+    end
+    -- Text content
+    self.content:draw(x, y - self.bottomPadding, cam)
+
+    -- Buttons
+    if self.finishExists then
+      -- u.changeColour{"white"}
+      local baseRad = 2
+      local nbx = x + 0.5 * self.width - baseRad
+      local nby = y + 0.5 * self.height
+      u.changeColour{"red"}
+      local rad = baseRad - math.sin(self.buttonTimer) * 0.2
+      love.graphics.circle("fill", nbx, nby, 2 - math.sin(self.buttonTimer) * 0.2)
+      u.changeColour{"black"}
+      local rad2 = baseRad * 0.9 + math.sin(self.buttonTimer) * 0.5
+      love.graphics.circle("fill", nbx, nby, rad2)
+    elseif self.nextExists then
+      local timeMod = math.sin(self.buttonTimer) * 0.2
+      u.changeColour{"red"}--, a = (timeMod * 2.5 + 0.5) * COLORCONST}
+      local nbtw2 = 2
+      local nbth2 = 1 + timeMod
+      local nbrw2 = 0.75
+      local nbrh = 1.2 + timeMod
+      local nbx = x + 0.5 * self.width - nbtw2
+      local nby = y + 0.5 * self.height + 1
+      love.graphics.polygon("fill",
+        nbx, nby + nbth2,
+        nbx + nbtw2, nby - nbth2,
+        nbx + nbrw2, nby - nbth2,
+        nbx + nbrw2, nby - nbth2 - nbrh,
+        nbx - nbrw2, nby - nbth2 - nbrh,
+        nbx - nbrw2, nby - nbth2,
+        nbx - nbtw2, nby - nbth2
+      )
+    end
+
     resetColour()
   end,
 }
