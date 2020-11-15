@@ -75,6 +75,14 @@ local resize = {
       end
     end
 
+    if math.abs(self.widthVel) < 1 and
+    math.abs(self.height - self.targetHeight) < 5 and
+    math.abs(self.width - self.targetWidth) < 5 then
+      self.writable = true
+    else
+      self.writable = false
+    end
+
     -- Se duration 1 / k to amplitude tha einai self.targetHeight / e
     -- Thelw Amp < 1
     -- Amp = self.targetHeight * e ^ (-k * dur) =>

@@ -43,16 +43,34 @@ NPC.functions = {
     return "See ya!"
   end,
 
+  getDlg = function (self)
+    return self.content
+  end,
+
+  handleHookReturn = function (self)
+    if not self.hookReturn then
+      self.dlgState = "waiting"
+    elseif self.hookReturn == "ssbDone" then
+      -- Clean up
+      cd.cleanSsb(self)
+      self.dlgState = "waiting"
+    elseif self.hookReturn == "ssbFar" then
+      self.dlgState = "interrupted"
+    elseif self.hookReturn == "ptTriggered" then
+      self.dlgState = "talking"
+    end
+  end,
+
   determineUpdateHook = function (self)
-    if not (pl1 and pl1.exists) then return end
-    self.silent = not self.silent
-    if self.silent then
+    if self.dlgState == "waiting" then
       -- self.blockInput = false
       self.indicatorCooldown = 0.5
       self.updateHook = cd.interactiveProximityTrigger
-    else
+    elseif self.dlgState == "talking" then
       -- self.blockInput = true
-      self.updateHook = cd.closeInteractiveBubble
+      self.updateHook = cd.nearInteractiveBubble
+    elseif self.dlgState == "interrupted" then
+      cd.ssbInterrupted(self)
     end
   end,
 
@@ -84,6 +102,7 @@ NPC.functions = {
     if self.updateHook then
       self:updateHook(dt)
     else
+      self:handleHookReturn()
       self:determineUpdateHook()
     end
   end,

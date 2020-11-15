@@ -28,21 +28,21 @@ local private = {}
 private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar)
 
   return function(dlgControl, dt)
-    if not dlgControl.singleSimpleBubble then
+    if not dlgControl.speechBubble then
       local options = {}
       local startingPos = determinePosFromPlayer(dlgControl)
       if startingPos then options.position = startingPos end
-      dlgControl.singleSimpleBubble = bubble.addNew(dlgControl.content, dlgControl, options)
-      local inst = dlgControl.singleSimpleBubble
+      dlgControl.speechBubble = bubble.addNew(dlgControl:getDlg(), dlgControl, options)
+      local inst = dlgControl.speechBubble
       inst.timeBetweenLetters = 0.055
       inst.timer = inst.timeBetweenLetters
       inst.persistence = dlgControl.persistence or 1.5
     else
-      local instance = dlgControl.singleSimpleBubble
+      local instance = dlgControl.speechBubble
 
       instance.position = determinePosFromPlayer(dlgControl) or instance.position
 
-      if instance.stable then
+      if instance.writable then
         if not instance.scrollingUp and (instance.content:getNextVisibleHeight() > instance.content:getHeight()) then
           instance.waitForKeyPress = true
         end
@@ -51,9 +51,10 @@ private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar)
           else instance.persistence = instance.persistence - dt end
           if (interactive and input.enterPressed) or (not interactive and instance.persistence < 0) then
             if interactive and input.enterPressed then snd.play(glsounds.textDone) end
-            dlgControl.singleSimpleBubble:remove()
-            dlgControl.singleSimpleBubble = nil
+            -- Disable hook
             dlgControl.updateHook = nil
+            -- Set return value
+            dlgControl.hookReturn = "ssbDone"
           end
         elseif instance.waitForKeyPress then
           instance.nextExists = true
@@ -90,19 +91,32 @@ private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar)
     end
 
     if stopWhenFar and not closeEnoughToPlayer(dlgControl) then
-      local instance = dlgControl.singleSimpleBubble
-      local newContent = dlgControl:getInterruptedDlg()
-      dlgControl.updateHook = cd.singleSimpleSelfPlayingBubble
-      instance:setContent{string = newContent}
-      instance.waitForKeyPress = nil
-      instance.waitForLastKeyPress = nil
-      instance.nextExists = nil
-      instance.finishExists = nil
-      instance.scrollingUp = nil
+      dlgControl.hookReturn = "ssbFar"
+      dlgControl.updateHook = nil
     end
 
   end
 end
+
+cd.cleanSsb = function (dlgControl)
+  dlgControl.speechBubble:remove()
+  dlgControl.speechBubble = nil
+end
+
+cd.ssbInterrupted = function (dlgControl)
+  local instance = dlgControl.speechBubble
+  local newContent = dlgControl:getInterruptedDlg()
+  dlgControl.updateHook = cd.singleSimpleSelfPlayingBubble
+  instance:setContent{string = newContent}
+  instance.waitForKeyPress = nil
+  instance.waitForLastKeyPress = nil
+  instance.nextExists = nil
+  instance.finishExists = nil
+  instance.scrollingUp = nil
+  -- Make stable to do proper blobby effect
+  instance.stable = true
+end
+
 
 private.proximityTriggerTemplate = function (interactive, triggerType)
 
@@ -111,6 +125,7 @@ private.proximityTriggerTemplate = function (interactive, triggerType)
     if closeEnoughToPlayer(dlgControl) then
       if not interactive or input.enterPressed then
         dlgControl.updateHook = nil
+        dlgControl.hookReturn = "ptTriggered"
         if dlgControl.speechIndicator then
           dlgControl.speechIndicator:remove()
           dlgControl.speechIndicator = nil
@@ -144,7 +159,7 @@ private.proximityTriggerTemplate = function (interactive, triggerType)
 end
 
 cd.singleSimpleInteractiveBubble = private.singleSimpleBubbleTemplate(true)
-cd.closeInteractiveBubble = private.singleSimpleBubbleTemplate(true, false, true)
+cd.nearInteractiveBubble = private.singleSimpleBubbleTemplate(true, false, true)
 cd.singleSimpleSelfPlayingBubble = private.singleSimpleBubbleTemplate(false, true)
 cd.interactiveProximityTrigger = private.proximityTriggerTemplate(true)
 
