@@ -129,7 +129,7 @@ end
 cd.ssbInterrupted = private.ssbChange("getInterruptedDlg", "singleSimpleSelfPlayingBubble")
 cd.ssbToNib = private.ssbChange("getDlg", "nearInteractiveBubble")
 
-private.proximityTriggerTemplate = function (interactive, triggerType)
+private.proximityTriggerTemplate = function (interactive)
 
   return function(dlgControl, dt)
     dlgControl.indicatorCooldown = dlgControl.indicatorCooldown - dt

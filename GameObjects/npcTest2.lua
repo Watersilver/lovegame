@@ -33,12 +33,16 @@ function NPC.initialize(instance)
 end
 
 NPC.functions = {
+  load = function (self)
+    dlgCtrl.functions.load(self)
+  end,
+
   update = function (self, dt)
+    dlgCtrl.functions.update(self, dt)
     self.image_index = (self.image_index + dt*60*self.image_speed)
     while self.image_index >= self.sprite.frames do
       self.image_index = self.image_index - self.sprite.frames
     end
-    dlgCtrl.functions.update(self, dt)
   end,
 
   draw = function (self)

@@ -8,6 +8,9 @@ local ebh = require "enemy_behaviours"
 local td = require "movement"; td = td.top_down
 local sh = require "GameObjects.shadow"
 local gsh = require "gamera_shake"
+local dlgCtrl = require "GameObjects.DialogueBubble.DialogueControl"
+local cd = require "GameObjects.DialogueBubble.controlDefaults"
+local o = require "GameObjects.objects"
 
 local function shock(self, player)
   if player and player.takeDamage then
@@ -39,55 +42,6 @@ end
 
 local Blob = {}
 
-local cc = COLORCONST
-
--- Write the text
-local myText = {
-  {
-    {{{cc,cc,cc,cc},"I'm a blob"},-1, "left"},
-    {{{cc,cc,cc,cc},"And I have stuff to say"},-1, "left"},
-  },
-  {
-    {{{cc,cc,cc,cc},"You're not a blob"},-1, "left"},
-    {{{cc,cc,cc,cc},"Heh"},-1, "left"},
-    {{{cc,cc,cc,cc},"Or are you!"},-1, "left"},
-  },
-}
-
--- do the funcs
-local activateFuncs = {
-  {
-    function (self, dt, textIndex)
-      self.typical_activate(self, dt, textIndex)
-      self.next = 2
-    end,
-    function (self, dt, textIndex)
-      self.typical_activate(self, dt, textIndex)
-      self.next = "end"
-    end,
-  },
-  {
-    function (self, dt, textIndex)
-      self.typical_activate(self, dt, textIndex)
-      self.next = 2
-    end,
-    function (self, dt, textIndex)
-      self.typical_activate(self, dt, textIndex)
-      self.next = 3
-    end,
-    function (self, dt, textIndex)
-      self.typical_activate(self, dt, textIndex)
-      self.next = "end"
-    end,
-  },
-}
-
-local function randomizeDialogue(self)
-  local randomIndex = love.math.random(1, 2)
-  self.myText = myText[randomIndex]
-  self.activateFuncs = activateFuncs[randomIndex]
-end
-
 function Blob.initialize(instance)
   instance.sprite_info = im.spriteSettings.blob
   instance.hp = 3
@@ -101,19 +55,56 @@ function Blob.initialize(instance)
   instance.shockSound = snd.load_sound({"Effects/Oracle_Link_Shock"})
   instance.walkSprite = "walk"
   instance.unpushable = false
-  instance.unactivatable = true
-  instance.pauseWhenTalkedTo = true
+end
 
-  randomizeDialogue(instance)
+local dlgMethods = {}
+dlgMethods.getDlg = function (self)
+  return u.chooseFromWeightTable{
+    {weight = 1, value = "I'm a blob, And I have stuff to say"},
+    {weight = 1, value = "You're not a blob. Heh. Or are you!"},
+  }
+end
+
+dlgMethods.waitingHook = function (self, dt)
+  if self.canTalk then
+    cd.interactiveProximityTrigger(self, dt)
+  end
+end
+
+dlgMethods.determineUpdateHook = function (self)
+  if self.dlgState == "waiting" then
+    -- self.blockInput = false
+    self.indicatorCooldown = 0.5
+    self.updateHook = dlgMethods.waitingHook
+  elseif self.dlgState == "talking" then
+    -- self.blockInput = true
+    self.updateHook = cd.singleSimpleSelfPlayingBubble
+  elseif self.dlgState == "interrupted" then
+    cd.ssbInterrupted(self)
+  end
 end
 
 Blob.functions = {
+  delete = function (self)
+    o.removeFromWorld(self.dlgControl)
+  end,
 
   enemyLoad = function (self)
     self.shockTimer = 0
+    self.dlgControl = dlgCtrl:new{
+      height = self.sprite.height,
+      x = self.x, y = self.y,
+      xstart = self.x, ystart = self.y,
+      canTalk = false,
+      getDlg = dlgMethods.getDlg,
+      determineUpdateHook = dlgMethods.determineUpdateHook
+    }
+    o.addToWorld(self.dlgControl)
   end,
 
   enemyUpdate = function (self, dt)
+    self.dlgControl.x = self.x
+    self.dlgControl.y = self.y
     if session.bounceRing then
       self.sprintThrough = false
     else
@@ -176,12 +167,9 @@ Blob.functions = {
     self.walkSprite = "transwalk"
     self.transformed = true
     self.harmless = true
+    self.dlgControl.canTalk = true
     self.unactivatable = nil
     self.hitByMdust = u.emptyFunc
-  end,
-
-  onDialogueRealEnd = function (self)
-    randomizeDialogue(self)
   end,
 }
 
@@ -190,8 +178,6 @@ local typicalNpc = require "GameObjects.GlobalNpcs.typicalNpc"
 
 function Blob:new(init)
   local instance = p:new() -- add parent functions and fields
-  p.new(npcTest, instance, init) -- add parent functions and fields
-  p.new(typicalNpc, instance, init) -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields
   p.new(Blob, instance, init) -- add own functions and fields
   return instance

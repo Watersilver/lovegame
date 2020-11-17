@@ -24,6 +24,7 @@ function ChoiceList.initialize(instance)
   instance.padding = 2
   instance.animationDur = 0.1
   instance.yOffset = 24
+  instance.choicesSpacing = 11
 end
 
 ChoiceList.functions = {
@@ -110,14 +111,14 @@ ChoiceList.functions = {
       local anti = 1 - self.animationProgress
       if self.animation == "up" then
         -- Choice above
-        self:drawChoice(x, y - self.yOffset * 0.6,
+        self:drawChoice(x, y - self.choicesSpacing,
           self:getCursorAt(self.cursor - 1),
           0.7 - 0.2 * anti,
           0.5 - 0.25 * anti,
           -0.2
         )
         -- Choice Below
-        self:drawChoice(x, y + self.yOffset * 0.6,
+        self:drawChoice(x, y + self.choicesSpacing,
           self:getCursorAt(self.cursor + 1),
           0.7 + 0.2 * anti,
           0.5 + 0.25 * anti,
@@ -135,14 +136,14 @@ ChoiceList.functions = {
         self:drawCursor(x, y)
       elseif self.animation == "down" then
         -- Choice above
-        self:drawChoice(x, y - self.yOffset * 0.6,
+        self:drawChoice(x, y - self.choicesSpacing,
           self:getCursorAt(self.cursor - 1),
           0.7 + 0.2 * anti,
           0.5 + 0.25 * anti,
           -0.2
         )
         -- Choice Below
-        self:drawChoice(x, y + self.yOffset * 0.6,
+        self:drawChoice(x, y + self.choicesSpacing,
           self:getCursorAt(self.cursor + 1),
           0.7 - 0.2 * anti,
           0.5 - 0.25 * anti,
@@ -160,11 +161,11 @@ ChoiceList.functions = {
         self:drawCursor(x, y)
       else
         -- Choice above
-        self:drawChoice(x, y - self.yOffset * 0.6,
+        self:drawChoice(x, y - self.choicesSpacing,
           self:getCursorAt(self.cursor - 1), 0.7 * prog, 0.5 * prog, -0.2
         )
         -- Choice Below
-        self:drawChoice(x, y + self.yOffset * 0.6,
+        self:drawChoice(x, y + self.choicesSpacing,
           self:getCursorAt(self.cursor + 1), 0.7 * prog, 0.5 * prog, -0.2
         )
         -- Current Choice
@@ -173,11 +174,11 @@ ChoiceList.functions = {
       end
     else
       -- Choice above
-      self:drawChoice(x, y - self.yOffset * 0.6,
+      self:drawChoice(x, y - self.choicesSpacing,
         self:getCursorAt(self.cursor - 1), 0.7, 0.5, -0.2
       )
       -- Choice Below
-      self:drawChoice(x, y + self.yOffset * 0.6,
+      self:drawChoice(x, y + self.choicesSpacing,
         self:getCursorAt(self.cursor + 1), 0.7, 0.5, -0.2
       )
       -- Current Choice
@@ -215,7 +216,7 @@ ChoiceList.functions = {
     u.changeColour{"black", a = alpha}
     local l, t = x - w * 0.5, y - h * 0.5
     local p = self.padding
-    love.graphics.rectangle("fill", l - p, t - p, w + 2 * p, h + 2 * p, 2)
+    love.graphics.rectangle("fill", l - p, t - p, w + 2 * p, h + 2 * p, 0.5)
     u.changeColour{"white", a = alpha}
     -- love.graphics.print(choice, x, y, 0, s, s, w * 0.5, h * 0.5, sear or 0)
     love.graphics.print(choice, l, t, 0, s, s, 0, 0, sear)
