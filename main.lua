@@ -1251,7 +1251,7 @@ function love.mousepressed(x, y, button, isTouch)
       o.addToWorld(enem)
     else
       -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
-      local enemClass = assert(love.filesystem.load("/GameObjects/NpcChoiceTest.lua"))()
+      local enemClass = assert(love.filesystem.load("/GameObjects/npcTest3.lua"))()
       local enem = enemClass:new()
       local wx, wy = cam:toWorld(x, y)
       enem.x, enem.y = wx, wy
