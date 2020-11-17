@@ -1,6 +1,7 @@
 local input = require "input"
 local snd = require "sound"
 local bubble = require "GameObjects.DialogueBubble.DialogueBubble"
+local cl = require "GameObjects.DialogueBubble.ChoiceList"
 local u = require "utilities"
 
 local cd = {}
@@ -25,7 +26,7 @@ end
 
 local private = {}
 
-private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar)
+private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar, waitOnEnd)
 
   return function(dlgControl, dt)
     if not dlgControl.speechBubble then
@@ -47,14 +48,21 @@ private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar)
           instance.waitForKeyPress = true
         end
         if instance.waitForLastKeyPress then
-          if interactive then instance.finishExists = true
-          else instance.persistence = instance.persistence - dt end
-          if (interactive and input.enterPressed) or (not interactive and instance.persistence < 0) then
-            if interactive and input.enterPressed then snd.play(glsounds.textDone) end
+          if not waitOnEnd then
+            if interactive then instance.finishExists = true
+            else instance.persistence = instance.persistence - dt end
+            if (interactive and input.enterPressed) or (not interactive and instance.persistence < 0) then
+              if interactive and input.enterPressed then snd.play(glsounds.textDone) end
+              -- Disable hook
+              dlgControl.updateHook = nil
+              -- Set return value
+              dlgControl.hookReturn = "ssbDone"
+            end
+          else
             -- Disable hook
             dlgControl.updateHook = nil
             -- Set return value
-            dlgControl.hookReturn = "ssbDone"
+            dlgControl.hookReturn = "ssbWaiting"
           end
         elseif instance.waitForKeyPress then
           instance.nextExists = true
@@ -90,9 +98,8 @@ private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar)
       end
     end
 
-    if stopWhenFar and not closeEnoughToPlayer(dlgControl) then
-      dlgControl.hookReturn = "ssbFar"
-      dlgControl.updateHook = nil
+    if stopWhenFar then
+      cd.closenessChecker(dlgControl)
     end
 
   end
@@ -103,20 +110,24 @@ cd.cleanSsb = function (dlgControl)
   dlgControl.speechBubble = nil
 end
 
-cd.ssbInterrupted = function (dlgControl)
-  local instance = dlgControl.speechBubble
-  local newContent = dlgControl:getInterruptedDlg()
-  dlgControl.updateHook = cd.singleSimpleSelfPlayingBubble
-  instance:setContent{string = newContent}
-  instance.waitForKeyPress = nil
-  instance.waitForLastKeyPress = nil
-  instance.nextExists = nil
-  instance.finishExists = nil
-  instance.scrollingUp = nil
-  -- Make stable to do proper blobby effect
-  instance.stable = true
+private.ssbChange = function (contentFunc, updateHook)
+  return function (dlgControl)
+    local instance = dlgControl.speechBubble
+    local newContent = dlgControl[contentFunc](dlgControl)
+    dlgControl.updateHook = cd[updateHook]
+    instance:setContent{string = newContent}
+    instance.waitForKeyPress = nil
+    instance.waitForLastKeyPress = nil
+    instance.nextExists = nil
+    instance.finishExists = nil
+    instance.scrollingUp = nil
+    -- Make stable to do proper blobby effect
+    instance.stable = true
+  end
 end
 
+cd.ssbInterrupted = private.ssbChange("getInterruptedDlg", "singleSimpleSelfPlayingBubble")
+cd.ssbToNib = private.ssbChange("getDlg", "nearInteractiveBubble")
 
 private.proximityTriggerTemplate = function (interactive, triggerType)
 
@@ -158,8 +169,40 @@ private.proximityTriggerTemplate = function (interactive, triggerType)
 
 end
 
+cd.closenessChecker = function (dlgControl)
+  if not closeEnoughToPlayer(dlgControl) then
+    dlgControl.hookReturn = "ssbFar"
+    dlgControl.updateHook = nil
+  end
+end
+
+cd.choiceChecker = function (dlgControl)
+  local instance = dlgControl.speechBubble
+  if not instance.choiceList then
+    instance.choiceList = cl.addNew(dlgControl:getChoices(), instance)
+  end
+  if input.escapePressed then
+    dlgControl.hookReturn = "ssbFar"
+    dlgControl.updateHook = nil
+  end
+  if input.enterPressed then
+    snd.play(glsounds.select)
+    dlgControl.choiceReturn = {
+      q = instance.string,
+      a = instance.choiceList.choices[instance.choiceList.cursor]
+    }
+    dlgControl.hookReturn = "ssbChose"
+    dlgControl.updateHook = nil
+  end
+  cd.closenessChecker(dlgControl)
+  if not dlgControl.updateHook then
+    instance.choiceList:remove()
+  end
+end
+
 cd.singleSimpleInteractiveBubble = private.singleSimpleBubbleTemplate(true)
 cd.nearInteractiveBubble = private.singleSimpleBubbleTemplate(true, false, true)
+cd.nearInteractiveChoiceBubble = private.singleSimpleBubbleTemplate(true, false, true, true)
 cd.singleSimpleSelfPlayingBubble = private.singleSimpleBubbleTemplate(false, true)
 cd.interactiveProximityTrigger = private.proximityTriggerTemplate(true)
 

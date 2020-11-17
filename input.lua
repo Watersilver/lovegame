@@ -28,7 +28,7 @@ function input.check_input()
   for playername, controller in pairs(controllers) do
     -- use following if statement if I want to disable controller while transing
     -- if (not controller.disabled) and (not input.transing) then -- WARNING !!!MUST BE NIL, NOT FALSE!!!
-    if (not controller.disabled) then -- WARNING !!!MUST BE NIL, NOT FALSE!!!
+    if (not controller.disabled and not controller.blocked) then -- WARNING !!!MUST BE NIL, NOT FALSE!!!
       -- Handle controller if not disabled
       local player = input.current[playername]
       -- Store previous input
@@ -59,6 +59,7 @@ function input.check_input()
         player[name] = 0
       end
     end
+    controller.blocked = nil
   end
 
   -- Check stuff independent of specific player input
@@ -69,10 +70,12 @@ function input.check_input()
   input.escapePrevious = input.escape
   input.escape = love.keyboard.isDown("escape")
   input.escapePressed = input.escape and not input.escapePrevious
+  input.escapeBlocked = nil
 
   input.backspacePrevious = input.backspace
   input.backspace = love.keyboard.isDown("backspace")
   input.backspacePressed = input.backspace and not input.backspacePrevious
+  input.backspaceBlocked = nil
 
   input.cancel = input.escape or input.backspace
   input.cancelPressed = input.escapePressed or input.backspacePressed

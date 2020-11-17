@@ -47,6 +47,10 @@ NPC.functions = {
     return self.content
   end,
 
+  getChoices = function (self)
+    return self.choices
+  end,
+
   handleHookReturn = function (self)
     if not self.hookReturn then
       self.dlgState = "waiting"

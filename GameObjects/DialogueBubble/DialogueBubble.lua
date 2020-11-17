@@ -8,7 +8,6 @@ local BubbleText = require "GameObjects.DialogueBubble.BubbleText"
 
 local DialogueBubble = {}
 
-
 function DialogueBubble.addNew(string, anchor, options)
   local init = options or {}
   init.anchor = anchor
@@ -292,6 +291,7 @@ DialogueBubble.functions = {
     xOffset = self.noXOffset and 0 or xOffset
 
     local x, y = self.x + xOffset, self.y
+    self.xOffset = xOffset
 
     -- Make sure to stay in camera if I must
     local totalWidth = self.width + 2 * self.padding * wdivtw
