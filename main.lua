@@ -935,13 +935,6 @@ local function mainCameraDraw(l,t,w,h)
         end
       end
 
-      local onum = #o.overlays
-      if onum > 0 then
-        for i = 1, onum do
-          o.overlays[i]:draw_overlay(cam)
-        end
-      end
-
     -- Transition drawing mode
     elseif game.transitioning.type == "scrolling" then
 
@@ -952,28 +945,29 @@ local function mainCameraDraw(l,t,w,h)
         end
       end
 
-    else -- White screen
-
-      -- for layer = 1, layers do
-      --   local drawnum = #o.draw_layers[layer]
-      --   for i = 1, drawnum do
-      --     local obj = o.draw_layers[layer][i]
-      --     if obj.onPreviousRoom then
-      --       obj:draw()
-      --     end
-      --   end
-      -- end
-      love.graphics.setColor(COLORCONST*0.9, COLORCONST*0.9, COLORCONST*0.9, COLORCONST)
-      -- love.graphics.rectangle("fill", 0, 0, 800, 450)
-      local wl, lt = cam:toWorld(0, 0)
-      local ww, wh = cam:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
-      love.graphics.rectangle("fill", wl, lt, ww-wl, wh-lt)
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-
     end
 
   end -- if layers > 0
 
+end
+local function afterScreenEffects(l,t,w,h)
+  if not game.transitioning or
+  (game.transitioning and not game.transitioning.startedTransition) then
+    local onum = #o.overlays
+    if onum > 0 then
+      for i = 1, onum do
+        o.overlays[i]:draw_overlay(cam)
+      end
+    end
+  elseif game.transitioning.type == "whiteScreen" then
+    -- Draw Whitescreen
+    love.graphics.setColor(COLORCONST*0.9, COLORCONST*0.9, COLORCONST*0.9, COLORCONST)
+    -- love.graphics.rectangle("fill", 0, 0, 800, 450)
+    local wl, lt = cam:toWorld(0, 0)
+    local ww, wh = cam:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
+    love.graphics.rectangle("fill", wl, lt, ww-wl, wh-lt)
+    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  end
 end
 local function hudDraw(l,t,w,h)
   local transing = game.transitioning
@@ -1113,6 +1107,8 @@ function love.draw()
     -- Draw screen effect due to game time
     dtse.draw()
 
+    cam:draw(afterScreenEffects)
+
     -- delete following lines and the setting of canvas above to disable drug canvas
     love.graphics.setCanvas()
 
@@ -1148,6 +1144,8 @@ function love.draw()
 
     -- Draw screen effect due to game time
     dtse.draw()
+
+    cam:draw(afterScreenEffects)
 
     -- delete following lines and the setting of canvas above to disable drug canvas
     love.graphics.setCanvas()
