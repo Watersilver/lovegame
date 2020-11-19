@@ -113,6 +113,7 @@ function Playa.initialize(instance)
 
 
   instance.ids[#instance.ids+1] = "PlayaTest"
+  instance.timeFlow = 1
   instance.angle = 0
   instance.angvel = 0 -- angular velocity
   instance.width = ps.shapes.plshapeWidth
@@ -2175,6 +2176,12 @@ Playa.functions = {
     -- -- float
     -- self.fo = -2
     -- self.zvel = 0
+    if session.ringTimeflow then
+      self.timeFlow = session.ringTimeflow
+    else
+      self.timeFlow = 1
+    end
+    dt = dt * self.timeFlow
 
     -- Make see through if there's a decoy
     if session.decoy then

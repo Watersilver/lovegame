@@ -491,6 +491,9 @@ function love.update(dt)
   local drugSlomo
   if session.drug then drugSlomo = session.drug.slomo end
   dt = dt * (drugSlomo or session.ringSlomo or 1)
+  if pl1 and pl1.exists and pl1.timeFlow then
+    dt = dt / pl1.timeFlow
+  end
 
   -- update timers
   gvar.t = gvar.t + dt

@@ -163,6 +163,22 @@ items.foodFrittata = {
 
 -- Rings
 -- Gameplay
+items.ringTimeflow = {
+  name = "R. Timeflow Ring",
+  description = "Helps with reflexes\na lot!",
+  equip = function()
+    session.usedItemComment = "Equipped Timeflow Ring!"
+    session.ringTimeflow = 1.2
+  end,
+  unequip = function()
+    session.usedItemComment = "Unequipped Timeflow Ring!"
+    session.ringTimeflow = nil
+  end,
+  use = function()
+    useRing("ringTimeflow")
+  end
+}
+
 items.ringFocus = {
   name = "R. Focus Ring",
   description = "Helps with reflexes!",

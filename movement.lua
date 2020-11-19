@@ -117,14 +117,15 @@ local iff = {
 }
 
 local universalWalk = function(object, dt, inputForceFunc)
+  local tf = object.timeFlow or 1
   local myinput = object.input
   local direction = object.direction
   local mass = object.body:getMass()
-  local mobility = object.mobility or 600
-  local brakes = object.brakes or 6
+  local mobility = (object.mobility or 600) * tf
+  local brakes = (object.brakes or 6) * tf
   local brakesLim = object.brakesLim or 10
   local floorFriction = object.floorFriction or 1 -- How slippery the floor is.
-  local normalisedSpeed = object.normalisedSpeed or 1
+  local normalisedSpeed = (object.normalisedSpeed or 1) * tf
   local maxspeed = object.maxspeed or 50
 
   if object.player then
@@ -284,7 +285,8 @@ local mo = {}
 
     image_speed = function(object, dt, speedMod)
       local floorFriction = object.floorFriction or 1
-      local image_speed = 0.13 * object.speed/80--100 looks alright too.
+      local objSpeed = object.speed / (object.timeFlow or 1)
+      local image_speed = 0.13 * objSpeed/80--100 looks alright too.
       -- take into account different number of frames (assume there are four frames)
       -- local framemod = speedMod or (object.sprite.frames)*0.25
       -- image_speed = image_speed * framemod
