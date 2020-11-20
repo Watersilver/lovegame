@@ -117,6 +117,7 @@ session = {
     session.clockAngleTarget = session.getClockAngleTarget()
     session.clockAngle = session.clockAngleTarget
     session.clockHandAngle = session.save.time
+    session.timescale = 1
   end,
   updateTime = function(hoursPassed)
     local preUpdate = session.checkTimeOfDayForMusic()
@@ -687,7 +688,7 @@ function love.update(dt)
     -- Update time
     if not game.room.timeDoesntPass then
       -- dt * 0.08333 = ocarina of time
-      session.updateTime(dt * 0.08333)
+      session.updateTime(dt * 0.08333 * session.timescale)
       -- fuck = session.save.time
     end
 
