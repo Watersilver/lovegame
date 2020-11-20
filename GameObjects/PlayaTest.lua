@@ -393,6 +393,23 @@ function Playa.initialize(instance)
     end_state = function(instance, dt)
       instance.item_use_counter = 0
     end
+    },
+
+
+    stand_still = {
+    run_state = function(instance, dt)
+      -- Apply movement table
+      td.stand_still(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+    end,
+
+    start_state = function(instance, dt)
+    end,
+
+    end_state = function(instance, dt)
+    end
     }
   }
   instance.animation_state = sm.new_state_machine{
@@ -1906,6 +1923,119 @@ function Playa.initialize(instance)
       instance.image_speed = 0
       instance.item_health_bonus = nil
       inp.enable_controller(instance.player)
+    end
+    },
+
+
+    downharp = {
+    run_state = function(instance, dt)
+      local inin = instance.input
+      local inpr = instance.previnput
+      local up = inin.up == 1
+      local down = inin.down == 1
+      local z = inin.z == 1 and inpr.z == 0
+      local x = inin.x == 1 and inpr.x == 0
+      local c = inin.c == 1 and inpr.c == 0
+      local a = inin.a == 1 and inpr.a == 0
+      local s = inin.s == 1 and inpr.s == 0
+      local d = inin.d == 1 and inpr.d == 0
+      local q = inin.q == 1 and inpr.q == 0
+      local w = inin.w == 1 and inpr.w == 0
+      local e = inin.e == 1 and inpr.e == 0
+      if z or x or c or a or s or d or q or w or e then
+        instance.harpTimer = 0.5
+        if instance.noteTimer <= 0 then
+          instance.noteTimer = 0.25
+          local xstart = instance.x
+          local ystart = instance.y
+          local dir = math.pi * 0.5 * (- 1 - love.math.random())
+          local xmod, ymod = u.polarToCartesian(instance.height, dir)
+          xstart = xstart + xmod
+          ystart = ystart + ymod
+          local note = instance.noteObj:new{
+            x = xstart, y = ystart,
+            xstart = xstart, ystart = ystart,
+            layer = instance.layer,
+            randomize = true
+          }
+          o.addToWorld(note)
+        end
+      end
+      if up then
+        if z then snd.play(glsounds.harpdd) end
+        if x then snd.play(glsounds.harpfd) end
+        if c then snd.play(glsounds.harpadB) end
+        if a then snd.play(glsounds.harpbd) end
+        if s then snd.play(glsounds.harpdm) end
+        if d then snd.play(glsounds.harpfm) end
+        if q then snd.play(glsounds.harpamB) end
+        if w then snd.play(glsounds.harpbm) end
+        if e then snd.play(glsounds.harpdu) end
+      elseif down then
+        if z then snd.play(glsounds.harpcd) end
+        if x then snd.play(glsounds.harpedB) end
+        if c then snd.play(glsounds.harpfdS) end
+        if a then snd.play(glsounds.harpad) end
+        if s then snd.play(glsounds.harpcm) end
+        if d then snd.play(glsounds.harpemB) end
+        if q then snd.play(glsounds.harpfmS) end
+        if w then snd.play(glsounds.harpam) end
+        if e then snd.play(glsounds.harpcu) end
+      else
+        if z then snd.play(glsounds.harpddB) end
+        if x then snd.play(glsounds.harped) end
+        if c then snd.play(glsounds.harpgd) end
+        if a then snd.play(glsounds.harpbdB) end
+        if s then snd.play(glsounds.harpdmB) end
+        if d then snd.play(glsounds.harpem) end
+        if q then snd.play(glsounds.harpgm) end
+        if w then snd.play(glsounds.harpbmB) end
+        if e then snd.play(glsounds.harpduB) end
+      end
+      if instance.harpTimer > 0 then
+        instance.image_speed = 0.05
+        if instance.prevHarpTimer == 0 then
+          instance.image_index = 1
+        end
+      else
+        instance.image_speed = 0
+        instance.image_index = 0
+      end
+      instance.prevHarpTimer = instance.harpTimer
+      instance.harpTimer = instance.harpTimer - dt
+      if instance.harpTimer < 0 then instance.harpTimer = 0 end
+      instance.noteTimer = instance.noteTimer - dt
+      if instance.noteTimer < 0 then instance.noteTimer = 0 end
+    end,
+
+    check_state = function(instance, dt)
+      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+      if trig.damaged then
+        instance.animation_state:change_state(instance, dt, "downdamaged")
+      end
+    end,
+
+    start_state = function(instance, dt)
+      instance.noteObj = require "GameObjects.note"
+      instance.image_index = 0
+      instance.image_speed = 0
+      instance.harpTimer = 0
+      instance.noteTimer = 0
+      instance.prevHarpTimer = 0
+      instance.sprite = im.sprites["Witch/harp_down"]
+      instance.movement_state:change_state(pl1, dt, "stand_still")
+      snd.bgmV2.overrideAndLoad{previousFadeOut = 1}
+    end,
+
+    end_state = function(instance, dt)
+      instance.image_index = 0
+      instance.image_speed = 0
+      instance.harpTimer = nil
+      instance.noteTimer = nil
+      instance.prevHarpTimer = nil
+      instance.noteObj = nil
+      instance.movement_state:change_state(pl1, dt, "normal")
+      snd.bgmV2.overrideAndLoad()
     end
     },
 

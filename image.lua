@@ -181,6 +181,7 @@ im.spriteSettings = {
     {'Witch/recall_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/display_down', 2, padding = 2, width = 16, height = 16},
     {'Witch/eating_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/harp_down', 2, padding = 2, width = 20, height = 16},
     {'Witch/drown_down', 2, padding = 2, width = 16, height = 16},
     {'Witch/climb_up', 2, padding = 2, width = 16, height = 16},
     {'Witch/plummet', 3, padding = 2, width = 16, height = 16},
@@ -189,6 +190,7 @@ im.spriteSettings = {
     {'Witch/defaultGrass', 2, padding = 2, width = 16, height = 16},
     {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6}
   },
+  note = {'note', 1, padding = 0, width = 7, height = 12},
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
   playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4},
   playerMissileOutline = {'Inventory/UseMissileOutlineL1', 1, padding = 2, width = 6, height = 6},
@@ -436,6 +438,7 @@ im.load_sprite{'rupees', 1, padding = 0, width = 7, height = 7}
 im.load_sprite{'Drops/blastSeed', 1, padding = 0, width = 8, height = 8}
 im.load_sprite{'Drops/magicDust', 1, padding = 0, width = 8, height = 14}
 im.load_sprite{'Test', 1, padding = 0}
+im.load_sprite(im.spriteSettings.note)
 im.load_sprite(im.spriteSettings.floorOutside)
 im.load_sprite(im.spriteSettings.solidsOutside)
 im.load_sprite(im.spriteSettings.zeldarip)

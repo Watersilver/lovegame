@@ -43,6 +43,22 @@ local function useFood(type, bonus, duration, eatComment, notIdleComment)
   end
 end
 
+local function useWhenStill(useCallback, failedToUseCallback)
+  if pl1 then
+    if pl1.movement_state.state == "normal" and
+    pl1.animation_state.state:find("still")
+    then
+      session.forceCloseInv = true
+      session.usedItemComment = ""
+      if useCallback then useCallback() end
+    else
+      session.usedItemComment = "You must stand idle\nto do that."
+      if failedToUseCallback then return failedToUseCallback() end
+      return "error"
+    end
+  end
+end
+
 
 items.testi = {
   name = "Ganon's penis",
@@ -73,6 +89,32 @@ items.keySpellbook = {
   the effects of the\n\z
   magic dust.",
   limit = 1
+}
+
+items.keyLyre = {
+  name = "Lyre",
+  description = "wat",
+  limit = 1,
+  useCallback = function()
+    if pl1 then
+      pl1.animation_state:change_state(pl1, "noDt", "downharp")
+    end
+  end,
+  failedToUseCallback = function()
+    if pl1 and pl1.animation_state.state == "downharp" then
+      session.forceCloseInv = true
+      session.usedItemComment = ""
+      pl1.animation_state:change_state(pl1, "noDt", "downstill")
+    else
+      return "error"
+    end
+  end,
+  use = function()
+    return useWhenStill(
+      items.keyLyre.useCallback,
+      items.keyLyre.failedToUseCallback
+    )
+  end
 }
 
 -- Material

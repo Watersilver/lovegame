@@ -331,6 +331,36 @@ glsounds = snd.load_sounds{
   blockFall = {"Effects/Oracle_Block_Fall"},
   enemyJump = {"Effects/Oracle_Enemy_Jump"},
   shieldDeflect = {"Effects/Oracle_Shield_Deflect"},
+  -- Harpsounds
+  harpad = {"Effects/harp/ad"},
+  harpadB = {"Effects/harp/adB"},
+  harpbd = {"Effects/harp/bd"},
+  harpbdB = {"Effects/harp/bdB"},
+  harpcd = {"Effects/harp/cd"},
+  harpdd = {"Effects/harp/dd"},
+  harpddB = {"Effects/harp/ddB"},
+  harped = {"Effects/harp/ed"},
+  harpedB = {"Effects/harp/edB"},
+  harpfd = {"Effects/harp/fd"},
+  harpfdS = {"Effects/harp/fdS"},
+  harpgd = {"Effects/harp/gd"},
+
+  harpam = {"Effects/harp/am"},
+  harpamB = {"Effects/harp/amB"},
+  harpbm = {"Effects/harp/bm"},
+  harpbmB = {"Effects/harp/bmB"},
+  harpcm = {"Effects/harp/cm"},
+  harpdm = {"Effects/harp/dm"},
+  harpdmB = {"Effects/harp/dmB"},
+  harpem = {"Effects/harp/em"},
+  harpemB = {"Effects/harp/emB"},
+  harpfm = {"Effects/harp/fm"},
+  harpfmS = {"Effects/harp/fmS"},
+  harpgm = {"Effects/harp/gm"},
+  
+  harpcu = {"Effects/harp/cu"},
+  harpdu = {"Effects/harp/du"},
+  harpduB = {"Effects/harp/duB"},
 }
 
 -- Set up cameras
