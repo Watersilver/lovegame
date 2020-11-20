@@ -2006,6 +2006,10 @@ function Playa.initialize(instance)
       if instance.harpTimer < 0 then instance.harpTimer = 0 end
       instance.noteTimer = instance.noteTimer - dt
       if instance.noteTimer < 0 then instance.noteTimer = 0 end
+      if gs.musicOn then
+        instance.wasMusicOn = gs.musicOn
+        gs.musicOn = false
+      end
     end,
 
     check_state = function(instance, dt)
@@ -2024,18 +2028,20 @@ function Playa.initialize(instance)
       instance.prevHarpTimer = 0
       instance.sprite = im.sprites["Witch/harp_down"]
       instance.movement_state:change_state(pl1, dt, "stand_still")
-      snd.bgmV2.overrideAndLoad{previousFadeOut = 1}
+      instance.wasMusicOn = gs.musicOn
+      gs.musicOn = false
     end,
 
     end_state = function(instance, dt)
+      if instance.wasMusicOn then gs.musicOn = true end
       instance.image_index = 0
       instance.image_speed = 0
+      instance.wasMusicOn = nil
       instance.harpTimer = nil
       instance.noteTimer = nil
       instance.prevHarpTimer = nil
       instance.noteObj = nil
       instance.movement_state:change_state(pl1, dt, "normal")
-      snd.bgmV2.overrideAndLoad()
     end
     },
 
