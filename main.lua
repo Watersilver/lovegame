@@ -287,6 +287,60 @@ session = {
   barrierBounce = function(plaObj, horDir, verDir)
     plaObj.body:setLinearVelocity(200 * horDir, 200 * verDir)
   end,
+  saveGame = function()
+    -- because Imma moron
+    local saveKeysToBeIgnored = {
+      hasSword = true, hasJump = true,
+      hasMissile = true, hasMark = true,
+      hasRecall = true, hasGrip = true,
+      swordKey = true, jumpKey = true,
+      missileKey = true, markKey = true,
+      recallKey = true, gripKey = true,
+      playerX = true, playerY = true,
+      playerHealth = true
+    }
+    local saveContent = "local save = {}"
+    local saveName = "Saves/" .. session.save.saveName .. ".lua"
+    -- write save (except spell slots and coordinates)
+    for key, value in pairs(session.save) do
+      if not saveKeysToBeIgnored[key] then
+        if type(value) == "string" then value = '"' .. value .. '"' end
+        if type(value) == "boolean" then value = value and "true" or "false" end
+
+        -- Quests are in a table in session.save. Get them out and save them with a prefix
+        if key == "quests" then
+          for qindex, questid in ipairs(value) do
+            saveContent = saveContent .. "\nsave.__quest__" .. qindex .. ' = "' .. questid .. '"'
+          end
+        -- Items are in a table in session.save. Get them out and save them with a prefix
+        elseif key == "items" then
+          for iindex, itemid in ipairs(value) do
+            saveContent = saveContent .. "\nsave.__item__" .. iindex .. ' = "' .. itemid .. '"'
+          end
+        else
+        -- Just write the value
+          saveContent = saveContent .. "\nsave." .. key .. " = " .. value
+        end
+      end
+    end
+    -- write coordinates and roomName
+    saveContent = saveContent .. '\nsave.room = "' .. session.latestVisitedRooms[session.latestVisitedRooms.last] .. '"'
+    if pl1 then
+      saveContent = saveContent .. "\nsave.playerX = " .. pl1.x
+      saveContent = saveContent .. "\nsave.playerY = " .. pl1.y
+      -- write health
+      saveContent = saveContent .. "\nsave.playerHealth = " .. pl1.health
+    end
+    -- write spel slots
+    for i, slot in ipairs(inv.slots) do
+      if slot.item then
+        saveContent = saveContent .. "\nsave." .. "has" .. u.capitalise(slot.item.name) .. " = " .. '"' .. slot.item.name .. '"'
+        saveContent = saveContent .. "\nsave." .. slot.item.name .. "Key = " .. '"' .. slot.key .. '"'
+      end
+    end
+    saveContent = saveContent .. "\nreturn save"
+    local success = love.filesystem.write(saveName, saveContent)
+  end,
 }
 local session = session
 
@@ -357,7 +411,7 @@ glsounds = snd.load_sounds{
   harpfm = {"Effects/harp/fm"},
   harpfmS = {"Effects/harp/fmS"},
   harpgm = {"Effects/harp/gm"},
-  
+
   harpcu = {"Effects/harp/cu"},
   harpdu = {"Effects/harp/du"},
   harpduB = {"Effects/harp/duB"},

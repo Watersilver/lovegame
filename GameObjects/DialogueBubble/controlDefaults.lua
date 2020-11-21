@@ -128,6 +128,7 @@ end
 
 cd.ssbInterrupted = private.ssbChange("getInterruptedDlg", "singleSimpleSelfPlayingBubble")
 cd.ssbToNib = private.ssbChange("getDlg", "nearInteractiveBubble")
+cd.ssbToSsspb = private.ssbChange("getDlg", "singleSimpleSelfPlayingBubble")
 
 private.proximityTriggerTemplate = function (interactive)
 
