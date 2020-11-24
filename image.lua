@@ -181,6 +181,7 @@ im.spriteSettings = {
     {'Witch/recall_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/display_down', 2, padding = 2, width = 16, height = 16},
     {'Witch/eating_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/sleeping_down', 2, padding = 2, width = 16, height = 16},
     {'Witch/harp_down', 2, padding = 2, width = 20, height = 16},
     {'Witch/drown_down', 2, padding = 2, width = 16, height = 16},
     {'Witch/climb_up', 2, padding = 2, width = 16, height = 16},

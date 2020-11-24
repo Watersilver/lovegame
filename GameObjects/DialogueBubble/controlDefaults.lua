@@ -40,6 +40,10 @@ private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar,
       inst.persistence = dlgControl.persistence or 1.5
     else
       local instance = dlgControl.speechBubble
+      if instance.nextTextDelay and instance.nextTextDelay > 0 then
+        instance.nextTextDelay = instance.nextTextDelay - dt
+        return
+      end
 
       instance.position = determinePosFromPlayer(dlgControl) or instance.position
 
@@ -52,16 +56,21 @@ private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar,
             if interactive then instance.finishExists = true
             else instance.persistence = instance.persistence - dt end
             if (interactive and input.enterPressed) or (not interactive and instance.persistence < 0) then
-              if interactive and input.enterPressed then snd.play(glsounds.textDone) end
+              if interactive and input.enterPressed then
+                snd.play(glsounds.textDone)
+                instance.enterPressed = true
+              end
               -- Disable hook
               dlgControl.updateHook = nil
               -- Set return value
+              dlgControl.textReturn = instance.string
               dlgControl.hookReturn = "ssbDone"
             end
           else
             -- Disable hook
             dlgControl.updateHook = nil
             -- Set return value
+            dlgControl.textReturn = instance.string
             dlgControl.hookReturn = "ssbWaiting"
           end
         elseif instance.waitForKeyPress then
@@ -130,6 +139,20 @@ cd.ssbInterrupted = private.ssbChange("getInterruptedDlg", "singleSimpleSelfPlay
 cd.ssbToNib = private.ssbChange("getDlg", "nearInteractiveBubble")
 cd.ssbToSsspb = private.ssbChange("getDlg", "singleSimpleSelfPlayingBubble")
 
+cd.ssbChange = function (dlgControl)
+  local instance = dlgControl.speechBubble
+  local newContent = dlgControl:getDlg()
+  instance:setContent{string = newContent}
+  instance.waitForKeyPress = nil
+  instance.waitForLastKeyPress = nil
+  instance.nextExists = nil
+  instance.finishExists = nil
+  instance.scrollingUp = nil
+  -- Make stable to do proper blobby effect
+  instance.stable = true
+  instance.nextTextDelay = 0.5
+end
+
 private.proximityTriggerTemplate = function (interactive)
 
   return function(dlgControl, dt)
@@ -172,6 +195,12 @@ end
 
 cd.closenessChecker = function (dlgControl)
   if not closeEnoughToPlayer(dlgControl) then
+    local instance = dlgControl.speechBubble
+    if instance then
+      dlgControl.textReturn = instance.string
+    else
+      dlgControl.textReturn = nil
+    end
     dlgControl.hookReturn = "ssbFar"
     dlgControl.updateHook = nil
   end

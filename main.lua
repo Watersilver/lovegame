@@ -31,6 +31,16 @@ GCON = {
   -- How many rooms to remember?
   rtr = 20,
   defaultScreenEdgeThreshold = 0.1,
+
+  -- Names n stuff
+  money = "rupee",
+  moneys = "rupees",
+  heroWorld = "Hyrule",
+  lakeVillage = "Kidwy",
+  shidun = "Shidun",
+  npcNames = {
+    rescuer = "Lyde"
+  }
 }
 
 -- global variables
@@ -204,6 +214,32 @@ session = {
     if session.save[questid] then return end
     table.insert(session.save.quests, questid)
     session.save[questid] = startingStage or "stage1"
+    if session.save.gotFirstQuest then return end
+    session.save.gotFirstQuest = true
+    local cc = COLORCONST
+    local ctable = {cc * 0.4,cc,cc * 0.6,cc}
+    local myText = {
+      {{ctable,"You've got your first quest."},-1, "left"},
+      {{ctable,"Pause and navigate to the quest tag to see it."},-1, "left"},
+      {{ctable,"Consult the quest tag if you forget what you're supposed to be doing."},-1, "left"},
+    }
+    -- do the funcs
+    local activateFuncs = {}
+    local textsNum = #myText
+    for i = 1,textsNum do
+      activateFuncs[i] = function (self, dt, textIndex)
+        self.typical_activate(self, dt, textIndex)
+        self.next = i + 1
+        if self.next > textsNum then self.next = "end" end
+      end
+    end
+    local tutDlg = (require "GameObjects.GlobalNpcs.autoActivatedDlg"):new{
+      pauseWhenTalkedTo = true,
+      keepControllerDisabled = true,
+      myText = myText,
+      activateFuncs = activateFuncs
+    }
+    o.addToWorld(tutDlg)
   end,
   updateQuest = function(questid, newStage)
     if newStage then session.save[questid] = newStage end
@@ -467,7 +503,7 @@ function love.load()
   snd.bgmV2.getMusicAndload()
   game.clockInactive = game.room.timeDoesntPass
 
-  -- Room Creator
+  -- -- Room Creator
   -- game.room = assert(love.filesystem.load("RoomBuilding/room_editor.lua"))()
   -- sh.calculate_total_scale{game_scale=game.room.game_scale}
   -- session.initialize()
@@ -775,6 +811,7 @@ function love.update(dt)
       session.updateTime(dt * 0.08333 * session.timescale)
       -- fuck = session.save.time
     end
+    game.clockInactive = game.room.timeDoesntPass
 
     -- Update drugs
     if session.drug then
@@ -1317,34 +1354,34 @@ function love.mousepressed(x, y, button, isTouch)
   -- end
   -- u.push(o.to_be_added, p:new{xstart=x, ystart=y})
 
-  if button == 2 then
-    if cursor then
-      cursor = cursor + 1
-    else
-      cursor = startingCursor
-    end
-    if cursor > #enemyPaths then
-      cursor = 1
-    end
-    currentEnemyName = enemyPaths[cursor]
-  else
-    if currentEnemyName then
-      local enemClass = assert(love.filesystem.load(currentEnemyName))()
-      local enem = enemClass:new()
-      local wx, wy = cam:toWorld(x, y)
-      enem.x, enem.y = wx, wy
-      enem.xstart, enem.ystart = enem.x, enem.y
-      o.addToWorld(enem)
-    else
-      -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
-      local enemClass = assert(love.filesystem.load("/GameObjects/npcTest3.lua"))()
-      local enem = enemClass:new()
-      local wx, wy = cam:toWorld(x, y)
-      enem.x, enem.y = wx, wy
-      enem.xstart, enem.ystart = enem.x, enem.y
-      o.addToWorld(enem)
-    end
-  end
+  -- if button == 2 then
+  --   if cursor then
+  --     cursor = cursor + 1
+  --   else
+  --     cursor = startingCursor
+  --   end
+  --   if cursor > #enemyPaths then
+  --     cursor = 1
+  --   end
+  --   currentEnemyName = enemyPaths[cursor]
+  -- else
+  --   if currentEnemyName then
+  --     local enemClass = assert(love.filesystem.load(currentEnemyName))()
+  --     local enem = enemClass:new()
+  --     local wx, wy = cam:toWorld(x, y)
+  --     enem.x, enem.y = wx, wy
+  --     enem.xstart, enem.ystart = enem.x, enem.y
+  --     o.addToWorld(enem)
+  --   else
+  --     -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
+  --     local enemClass = assert(love.filesystem.load("/GameObjects/npcTest3.lua"))()
+  --     local enem = enemClass:new()
+  --     local wx, wy = cam:toWorld(x, y)
+  --     enem.x, enem.y = wx, wy
+  --     enem.xstart, enem.ystart = enem.x, enem.y
+  --     o.addToWorld(enem)
+  --   end
+  -- end
 
   moub[button] = true
 end

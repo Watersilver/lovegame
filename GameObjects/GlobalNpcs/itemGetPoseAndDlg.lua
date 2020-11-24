@@ -25,7 +25,8 @@ local cc = COLORCONST
 -- write the text
 local myText = {
   {{{cc,cc,cc,cc}, nil},-1, "left"},
-  {{{cc,cc,cc,cc}, nil},-1, "left"}
+  {{{cc,cc,cc,cc}, nil},-1, "left"},
+  {{{cc * 0.4,cc,cc * 0.6,cc}, "You got your first item! Pause and navigate to the item tag to see it. You can use some items by selecting them and pressing Enter."},-1, "left"}
 }
 
 -- do the funcs
@@ -45,6 +46,11 @@ activateFuncs[1] = function (self, dt, textIndex)
   self.next = 2
 end
 activateFuncs[2] = function (self, dt, textIndex)
+  self.typical_activate(self, dt, textIndex)
+  self.next = session.save.gotFirstItem and "end" or 3
+end
+activateFuncs[3] = function (self, dt, textIndex)
+  session.save.gotFirstItem = true
   self.typical_activate(self, dt, textIndex)
   self.next = "end"
 end

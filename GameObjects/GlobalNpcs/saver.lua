@@ -10,20 +10,6 @@ local choiceCtrl = require "GameObjects.DialogueBubble.BasicChoiceControl"
 
 local NPC = {}
 
--- do the funcs
-local activateFuncs = {}
-activateFuncs[1] = function (self, dt, textIndex)
-  self.typical_activate(self, dt, textIndex)
-  dlg.simpleBinaryChoice.setUp()
-  self.next = {2, "end"}
-end
-activateFuncs[2] = function (self, dt, textIndex)
-  self.image_index = 1
-  session.saveGame()
-  self.typical_activate(self, dt, textIndex)
-  self.next = "end"
-end
-
 function NPC.initialize(instance)
   instance.choicesDict = {
     yes = "Yes",

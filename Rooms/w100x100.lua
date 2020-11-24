@@ -706,7 +706,15 @@ room.gameObjects = {
 { x = 296, y = 200, n = {l = 10}, t = 2, i = 209},
 { x = 280, y = 200, n = {l = 10}, t = 2, i = 216},
 { x = 264, y = 200, n = {l = 10}, t = 2, i = 208},
-{ x = 280, y = 232, n = {l = 10}, t = 3, i = 8},
+
+-- Starting house portal
+{ x = 280, y = 232, n = {
+  l = 10,
+  destination = "Rooms/LakeVillage/startingHouse.lua",
+  desx = 72,
+  desy = 120,
+}, t = 3, i = 8},
+
 { x = 248, y = 232, n = {l = 10}, t = 1, i = 0},
 { x = 232, y = 232, n = {l = 10}, t = 1, i = 0},
 { x = 232, y = 216, n = {l = 10}, t = 1, i = 0},

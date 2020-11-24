@@ -2217,6 +2217,25 @@ function Playa.initialize(instance)
     },
 
 
+    cutscene = {
+      run_state = function(instance, dt)
+      end,
+
+      check_state = function(instance, dt)
+      end,
+
+      start_state = function(instance, dt)
+        inp.disable_controller(instance.player)
+        instance:setGhost(true)
+      end,
+
+      end_state = function(instance, dt)
+        inp.enable_controller(instance.player)
+        instance:setGhost(false)
+      end
+    },
+
+
     dontdraw = {
     run_state = function(instance, dt)
       if instance.dontdrawRun then instance:dontdrawRun(dt) end
@@ -2435,8 +2454,13 @@ Playa.functions = {
     self.input = inp.current[self.player]
     self.previnput = inp.previous[self.player]
     if (self.input.start == 1 and self.previnput.start == 0)
-    or (inp.escapePressed and not inp.escapeBlocked)
-    or (inp.backspacePressed and not inp.backspaceBlocked)
+      or (
+        ((not inp.controllers[self.player].disabled)
+        and (not inp.controllers[self.player].blocked))
+        and
+        ((inp.escapePressed and not inp.escapeBlocked)
+        or (inp.backspacePressed and not inp.backspaceBlocked))
+      )
     then
       game.pause(self)
     end

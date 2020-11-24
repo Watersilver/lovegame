@@ -106,7 +106,7 @@ tilesets_to_symbols['Tiles/Clutter'] = {
   'b', 'b', 'b', 'b', 'w', 'w', 'b', 'rT',
   'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
   'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
-  'rW', 'rW', 'rW2', 'rW', 'rW2', 'ptl', 'b', 'b',
+  'rW', 'rW', 'rW2', 'rW', 'rW2', 'ptl', 'rW', 'w',
   'sL', 'sL', 'sL', 'sL', 'b', 'b', 'b', 'b',
 }
 tilesets_to_symbols['Tiles/Clutter'].initFields = {

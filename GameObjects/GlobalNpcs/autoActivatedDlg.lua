@@ -46,6 +46,7 @@ function NPC.initialize(instance)
   instance.update = nil -- update only does image speed for now, activate stuff is on early update
   instance.draw = nil -- is invisible
   instance.trans_draw = nil -- is invisible
+  if pl1 then instance.ctrlWasDis = inp.controllers[pl1.player].disabled end
 end
 
 NPC.functions = {
@@ -54,7 +55,13 @@ NPC.functions = {
       self.activator = o.identified.PlayaTest[1]
     end
     self.activated = true
-  end
+    if self.pauseWhenTalkedTo then game.cutscenePause(true) end
+  end,
+
+  onDialogueRealEnd = function (self)
+    if self.pauseWhenTalkedTo then game.cutscenePause(false) end
+    if self.keepControllerDisabled and self.ctrlWasDis then inp.disable_controller(pl1.player) end
+  end,
 }
 
 function NPC:new(init)

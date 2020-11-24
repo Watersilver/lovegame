@@ -1,4 +1,5 @@
 local ps = require "physics_settings"
+local u = require "utilities"
 local im = require "image"
 local p = require "GameObjects.prototype"
 local trans = require "transitions"
@@ -30,20 +31,41 @@ function NPC.initialize(instance)
   instance.y_scale = 1
   instance.layer = 20
   instance.zo = 0
+  instance.zvel = 0
+  instance.gravity = 350
   instance.unpushable = true
 end
 
 NPC.functions = {
-  update = function (self, dt)
-    self.image_index = (self.image_index + dt*60*self.image_speed)
-    while self.image_index >= self.sprite.frames do
-      self.image_index = self.image_index - self.sprite.frames
+  turn = function (self, side)
+    if self.facing == side then return end
+    self.facing = side
+    self.x_scale = 1
+    self.sprite = im.sprites[self.spritepath .. side]
+    -- self.sprite = im.sprites["NPCs/ResqueGirl/" .. side]
+    if side == "right" then
+      self.x_scale = -1
+      self.sprite = im.sprites[self.spritepath .. "left"]
+      -- self.sprite = im.sprites["NPCs/ResqueGirl/left"]
+    end
+  end,
+
+  faceTowards = function (self, other)
+    if other and other.exists then
+      local xdis = other.x - self.x
+      local ydis = other.y - self.y
+      if math.abs(xdis) > math.abs(ydis) then
+        if xdis > 0 then self:turn("right") else self:turn("left") end
+      else
+        if ydis > 0 then self:turn("down") else self:turn("up") end
+      end
     end
   end,
 
   draw = function (self)
     local xtotal, ytotal = self.body:getPosition()
     self.x, self.y = xtotal, ytotal
+    ytotal = ytotal + self.zo
 
     if self.lightSource then
       -- After done with coords draw light source (gets drawn later, this just sets it up)
@@ -86,6 +108,7 @@ NPC.functions = {
     self.x, self.y = self.body:getPosition()
 
     local xtotal, ytotal = trans.moving_objects_coords(self)
+    ytotal = ytotal + self.zo
 
     if self.lightSource then
       -- After done with coords draw light source (gets drawn later, this just sets it up)

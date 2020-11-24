@@ -292,6 +292,9 @@ function u.newQueue()
       self.first = first + 1
       self.length = self.length - 1
       return value
+    end,
+    get = function (self, index)
+      return self[self.first + index]
     end
   }
 end
