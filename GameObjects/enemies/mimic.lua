@@ -29,7 +29,7 @@ local states = {
   mimicing = {
     run_state = function(instance, dt)
       -- Mimic movement
-      if instance.target.body then
+      if instance.target and instance.target.body then
         local vx, vy = instance.target.body:getLinearVelocity()
         instance.body:setLinearVelocity(instance.xMirrorDir * vx, instance.yMirrorDir * vy)
       else
