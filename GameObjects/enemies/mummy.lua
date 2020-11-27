@@ -56,7 +56,6 @@ Mummy.functions = {
         if u.distanceSqared2d(self.lastx, self.lasty, self.x, self.y) < 15 then
           self.unmovingAxis = self.movingAxis
         end
-        fuck = self.unmovingAxis
       end
 
       self.image_index = 1 - self.image_index

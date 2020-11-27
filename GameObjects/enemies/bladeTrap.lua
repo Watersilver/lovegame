@@ -81,7 +81,6 @@ local states = {
       instance.vx, instance.vy = newVx, newVy
     end,
     check_state = function(instance, dt)
-      fuck = math.abs(instance.vx) .. " / " .. math.abs(instance.vy)
       if (math.abs(instance.vx) < 5 and math.abs(instance.vy) < 5) or instance.collided then
         instance.state:change_state(instance, dt, "returning")
       end

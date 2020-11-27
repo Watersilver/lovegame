@@ -69,7 +69,6 @@ BlueHand.functions = {
 
   enemyUpdate = function (self, dt)
     if self.grabbedPlayer then
-      fuck = fuck + 1
       self.body:setLinearVelocity(0, 0)
 
       if self.grabTimer > 5 then
