@@ -411,19 +411,19 @@ local tooltipFuncs = {
           pam.left.tooltip = "???"
         end
       elseif setting == "sword" then
-        if session.save.customTunicAvailable then
+        if session.save.customSwordAvailable then
           pam.left.tooltip = "Customise " .. setting .. " colour."
         else
           pam.left.tooltip = "???"
         end
       elseif setting == "missile" then
-        if session.save.customTunicAvailable then
+        if session.save.customMissileAvailable then
           pam.left.tooltip = "Customise " .. setting .. " colour."
         else
           pam.left.tooltip = "???"
         end
       elseif setting == "mark" then
-        if session.save.customTunicAvailable then
+        if session.save.customMarkAvailable then
           pam.left.tooltip = "Customise " .. setting .. " colour."
         else
           pam.left.tooltip = "???"
@@ -606,25 +606,25 @@ local drawFuncs = {
           love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
         end
       elseif setting == "tunic" then
-        if session.save.playerGlowAvailable then
+        if session.save.customTunicAvailable then
           love.graphics.print("Tunic Colour", paddingHor, paddingVert + t, 0, textScale)
         else
           love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
         end
       elseif setting == "sword" then
-        if session.save.playerGlowAvailable then
+        if session.save.customSwordAvailable then
           love.graphics.print("Sword Colour", paddingHor, paddingVert + t, 0, textScale)
         else
           love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
         end
       elseif setting == "missile" then
-        if session.save.playerGlowAvailable then
+        if session.save.customMissileAvailable then
           love.graphics.print("Missile Colour", paddingHor, paddingVert + t, 0, textScale)
         else
           love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
         end
       elseif setting == "mark" then
-        if session.save.playerGlowAvailable then
+        if session.save.customMarkAvailable then
           love.graphics.print("Mark Colour", paddingHor, paddingVert + t, 0, textScale)
         else
           love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
