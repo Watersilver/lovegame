@@ -49,6 +49,8 @@ Laser.functions = {
     end
   end,
 
+  hitByMissile = function () end,
+
   draw = function (self)
     gsh.newShake(mainCamera, "displacement", 0.2, 0.05, 0.5)
     if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
