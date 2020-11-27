@@ -110,7 +110,7 @@ Zora.functions = {
       if self.zo > self.lowestZo then
         self.zvel = 8
         local _, dir
-        if love.math.random() < self.giveChaseChance then
+        if self.target and love.math.random() < self.giveChaseChance then
           -- Vector pointing to target
           local dx, dy = self.target.x - self.x, self.target.y - self.y
           -- Get direction to target
