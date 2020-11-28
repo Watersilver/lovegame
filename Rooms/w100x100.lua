@@ -912,7 +912,14 @@ room.gameObjects = {
 { x = 312, y = 376, n = {l = 10}, t = 2, i = 197},
 { x = 328, y = 376, n = {l = 10}, t = 2, i = 197},
 { x = 344, y = 376, n = {l = 10}, t = 2, i = 197},
-{ x = 312, y = 392, n = {l = 10}, t = 3, i = 8},
+
+{ x = 312, y = 392, n = {
+  l = 10,
+  destination = "Rooms/TestRoomBoss.lua",
+  desx = 72,
+  desy = 120,
+}, t = 3, i = 8},
+
 { x = 56, y = 136, n = {l = 10}, t = 2, i = 204},
 { x = 88, y = 136, n = {l = 10}, t = 2, i = 204},
 { x = 56, y = 120, n = {l = 10}, t = 2, i = 202},
@@ -1107,9 +1114,13 @@ room.manuallyPlacedObjects = {
   --   n = {destination = "Rooms/w100x100.lua", desx = 257, desy = 257},
   --   -- giveChase = true
   -- },
-  {
-    x = 111, y = 111, blueprint = "enemies.sworders.sworderTemplate",
-    giveChase = true
-  },
+  {x = 111, y = 111, blueprint = "enemies.sworders.sworderTemplate"},
+  {x = 360, y = 248, blueprint = "GlobalNpcs.saver"},
+  {x = 328, y = 104, blueprint = "GlobalNpcs.debug.spellGiver2"},
+  {x = 104, y = 344, blueprint = "GlobalNpcs.debug.skillGiver2"},
+  {x = 56, y = 152, blueprint = "GlobalNpcs.debug.specialGiver2"},
+  {x = 232, y = 216, blueprint = "GlobalNpcs.test.debugItemContainer"},
+
+  -- 312, 392 -- Boss
 }
 return room

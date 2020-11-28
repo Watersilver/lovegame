@@ -10,9 +10,9 @@ local itemGetFunc = function ()
     pl1:readSave()
     pl1.health = pl1.maxHealth
   end
-  session.addItem("testi")
-  session.addItem("testi2")
-  session.addItem("testi2")
+  -- session.addItem("testi")
+  -- session.addItem("testi2")
+  -- session.addItem("testi2")
   session.addItem("ringFocus")
   session.addItem("ringMage")
   session.addItem("ringOld")
@@ -48,7 +48,7 @@ end
 gottenItem.itemInfo = {
   itemSprite = sprite,
   information = "You got several stuff!",
-  comment = "Well done " .. session.save.saveName .. ", you piece of shit. You piece of SHIT!",
+  comment = "Well done " .. session.save.saveName .. "!",
   itemGetEffect = itemGetFunc,
 }
 

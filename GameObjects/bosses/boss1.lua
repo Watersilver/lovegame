@@ -124,7 +124,7 @@ local states = {
 
   laserAttack = {
   run_state = function(instance, dt)
-    if instance.laser then
+    if instance.laser and instance.laser.body then
       instance.laser.body:setPosition(instance.x, instance.y + 15)
       instance.sxtarget, instance.sytarget = instance.x, instance.y+instance.soy+10
       instance.staffTargetAngle = u.gradualAdjust(dt, instance.staffAngle, -135, 15)
@@ -428,9 +428,9 @@ Boss1.functions = {
   destroy = function (self)
     local ptl = require "GameObjects.portal"
     o.addToWorld(ptl:new{
-      destination = "Rooms/newTilesTestRoom.lua",
-      desx = 217,
-      desy = 282,
+      destination = session.save.startCutsceneDone and "Rooms/w100x100.lua" or "Rooms/newTilesTestRoom.lua",
+      desx = session.save.startCutsceneDone and 312 or 217,
+      desy = session.save.startCutsceneDone and 408 or 282,
       grounded = true,
       xstart = 32+8,
       ystart = 80+8,

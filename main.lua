@@ -643,7 +643,7 @@ function love.update(dt)
   -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
   -- local wmrx, wmry = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
   -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
-  -- --
+  --
   -- -- display room
   -- fuck = fuck .. "\n" .. session.latestVisitedRooms[session.latestVisitedRooms.last]
 
@@ -1302,7 +1302,7 @@ function love.draw()
 
   -- debug
   love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
-  if currentEnemyName then love.graphics.print(currentEnemyName, 0, 177+88) end
+  if currentEnemyName then love.graphics.print(currentEnemyName, 0, love.graphics.getHeight()-77) end
   if fuck then love.graphics.print(fuck, 0, 177+120) end
   local debiter = 0
   if triggersdebug then
@@ -1322,21 +1322,33 @@ function love.draw()
 end
 
 -- Get enemy list
+-- Avoid enemies that crash if they don't have a creator
+local avoid = {
+  ["shooterTemplate.lua"] = true,
+  ["blueHand.lua"] = true,
+  ["redHand.lua"] = true,
+  ["robe.lua"] = true,
+  ["leever.lua"] = true,
+  ["zora.lua"] = true,
+  -- ["swarm.lua"] = true,
+}
 local enemyPaths = {}
 local enemiesSubfolders = {}
 local enemiesPath = "/GameObjects/enemies/"
 local enemyNames = love.filesystem.getDirectoryItems(enemiesPath)
 for _, name in ipairs(enemyNames) do
-  if string.sub(name, -4) == ".lua" then
-    table.insert(enemyPaths, enemiesPath .. name)
-  else
-    table.insert(enemiesSubfolders, enemiesPath .. name .. "/")
+  if not avoid[name] then
+    if string.sub(name, -4) == ".lua" then
+      table.insert(enemyPaths, enemiesPath .. name)
+    else
+      table.insert(enemiesSubfolders, enemiesPath .. name .. "/")
+    end
   end
 end
 for _, path in ipairs(enemiesSubfolders) do
   local names = love.filesystem.getDirectoryItems(path)
   for _, name in ipairs(names) do
-    table.insert(enemyPaths, path .. name)
+    if not avoid[name] then table.insert(enemyPaths, path .. name) end
   end
 end
 local cursor
@@ -1354,34 +1366,34 @@ function love.mousepressed(x, y, button, isTouch)
   -- end
   -- u.push(o.to_be_added, p:new{xstart=x, ystart=y})
 
-  -- if button == 2 then
-  --   if cursor then
-  --     cursor = cursor + 1
-  --   else
-  --     cursor = startingCursor
-  --   end
-  --   if cursor > #enemyPaths then
-  --     cursor = 1
-  --   end
-  --   currentEnemyName = enemyPaths[cursor]
-  -- else
-  --   if currentEnemyName then
-  --     local enemClass = assert(love.filesystem.load(currentEnemyName))()
-  --     local enem = enemClass:new()
-  --     local wx, wy = cam:toWorld(x, y)
-  --     enem.x, enem.y = wx, wy
-  --     enem.xstart, enem.ystart = enem.x, enem.y
-  --     o.addToWorld(enem)
-  --   else
-  --     -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
-  --     local enemClass = assert(love.filesystem.load("/GameObjects/npcTest3.lua"))()
-  --     local enem = enemClass:new()
-  --     local wx, wy = cam:toWorld(x, y)
-  --     enem.x, enem.y = wx, wy
-  --     enem.xstart, enem.ystart = enem.x, enem.y
-  --     o.addToWorld(enem)
-  --   end
-  -- end
+  if button == 2 then
+    if cursor then
+      cursor = cursor + 1
+    else
+      cursor = startingCursor
+    end
+    if cursor > #enemyPaths then
+      cursor = 1
+    end
+    currentEnemyName = enemyPaths[cursor]
+  else
+    if currentEnemyName then
+      local enemClass = assert(love.filesystem.load(currentEnemyName))()
+      local enem = enemClass:new()
+      local wx, wy = cam:toWorld(x, y)
+      enem.x, enem.y = wx, wy
+      enem.xstart, enem.ystart = enem.x, enem.y
+      o.addToWorld(enem)
+    else
+      -- -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
+      -- local enemClass = assert(love.filesystem.load("/GameObjects/npcTest3.lua"))()
+      -- local enem = enemClass:new()
+      -- local wx, wy = cam:toWorld(x, y)
+      -- enem.x, enem.y = wx, wy
+      -- enem.xstart, enem.ystart = enem.x, enem.y
+      -- o.addToWorld(enem)
+    end
+  end
 
   moub[button] = true
 end
