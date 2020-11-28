@@ -15,7 +15,7 @@ quests.testq2 = {
 }
 
 quests.main = {
-  title = "Shidun",
+  title = GCON.shidun,
   description = {
     stage1 = "A mage northeast of "..GCON.lakeVillage.."\n\z
     may know how I ended\nup here."
