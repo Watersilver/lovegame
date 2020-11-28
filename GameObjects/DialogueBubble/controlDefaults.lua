@@ -236,4 +236,12 @@ cd.nearInteractiveChoiceBubble = private.singleSimpleBubbleTemplate(true, false,
 cd.singleSimpleSelfPlayingBubble = private.singleSimpleBubbleTemplate(false, true)
 cd.interactiveProximityTrigger = private.proximityTriggerTemplate(true)
 
+cd.ssb = {
+  auto = {
+    sound = {
+      func = private.singleSimpleBubbleTemplate()
+    }
+  }
+}
+
 return cd

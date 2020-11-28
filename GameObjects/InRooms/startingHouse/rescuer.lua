@@ -132,7 +132,8 @@ local updateHookTable = {
     self.updateHook = cd.nearInteractiveBubble
   end,
   auto = function (self)
-    self.updateHook = cd.singleSimpleSelfPlayingBubble
+    -- self.updateHook = cd.singleSimpleSelfPlayingBubble
+    self.updateHook = cd.ssb.auto.sound.func
   end,
   mute = function (self)
     self.updateHook = muteHook
