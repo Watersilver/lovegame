@@ -26,7 +26,7 @@ local cc = COLORCONST
 local myText = {
   {{{cc,cc,cc,cc}, nil},-1, "left"},
   {{{cc,cc,cc,cc}, nil},-1, "left"},
-  {{{cc * 0.4,cc,cc * 0.6,cc}, "You got your first item! Pause and navigate to the item tag to see it. You can use some items by selecting them and pressing Enter."},-1, "left"}
+  {{{cc * 0.4,cc,cc * 0.6,cc}, "You got your first item! Most items can be seen by navigating to the items tag of the pause menu. You can use some items by selecting them and pressing Enter."},-1, "left"}
 }
 
 -- do the funcs
