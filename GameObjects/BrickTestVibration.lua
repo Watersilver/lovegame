@@ -4,6 +4,8 @@ local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local game = require "game"
 local parent = require "GameObjects.BrickTest"
+local tl = require "GameObjects.torchLight"
+local o = require "GameObjects.objects"
 
 local Brick = {}
 
@@ -27,6 +29,13 @@ load = function(self)
   self.image_speed = 3
   self.imagePhase = 0
   self.imageIndexStart = self.image_index
+  if self.light then
+    local light = tl:new{
+      xstart = self.xstart, ystart = self.ystart,
+      x = self.xstart, y = self.ystart,
+    }
+    o.addToWorld(light)
+  end
 end,
 }
 

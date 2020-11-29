@@ -37,6 +37,19 @@ local function radialGradient(radius, kwargs)
   return {img = love.graphics.newImage(data), centerOffset = radius + 0.5, scale = 1}
 end
 
+local function squareGradient(side, kwargs)
+  local data = love.image.newImageData(side, side)
+  kwargs = kwargs or {}
+
+  data:mapPixel(function(x, y)
+    -- local alpha = (y / side) * (kwargs.a or 1) * COLORCONST
+    local alpha = (1 - 3 / (y + 3)) * (kwargs.a or 1) * COLORCONST
+    return (kwargs.r or 1) * COLORCONST, (kwargs.g or 1) * COLORCONST, (kwargs.b or 1) * COLORCONST, alpha
+  end)
+
+  return {img = love.graphics.newImage(data), centerOffset = side * 0.5, scale = 1}
+end
+
 local lights = {
   -- player
   playerTorch = {sprite = im.load_sprite({'flickeringLight', 2, padding = 1, width = 48, height = 48})},
@@ -51,7 +64,9 @@ local lights = {
   testGlow = radialGradient(8, {gradFunc = "linear", a = 1}),
   missile = radialGradient(8, {gradFunc = "elipseQuadrant", a = 0.75, r = 0, g = 0.5}),
   owlStatue = radialGradient(24, {r = 0, g = 0.7, b = 1}),
-  flickerTorch = {sprite = im.load_sprite({'flickeringLight', 2, padding = 1, width = 48, height = 48})}
+  flickerTorch = {sprite = im.load_sprite({'flickeringLight', 2, padding = 1, width = 48, height = 48})},
+
+  downEntranceLight = squareGradient(16, {a = 1}),
 }
 
 local sources = {}

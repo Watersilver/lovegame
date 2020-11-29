@@ -27,6 +27,8 @@ Fire.functions = {
     self.timer = 0
     self.xstart = self.x
     self.ystart = self.y
+    self.xlast = self.x
+    self.ylast = self.y
   end,
 
   destroy = function (self)

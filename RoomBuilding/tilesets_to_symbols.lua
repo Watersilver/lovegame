@@ -67,10 +67,10 @@ tilesets_to_symbols['Tiles/Walls'] = {
   'w', 'w', 'w', 'w', 'w', 'w', 'w',
   'w', 'w', 'w', 'w', 'w', 'w', 'w',
   -- torch
-  'deR', 'deL', 'wV', 'n', 'n', 'n', 'w',
-  'w', 'w', 'wV', 'n', 'n', 'n', 'w',
-  'w', 'w', 'wV', 'n', 'n', 'n', 'w',
-  'deR', 'deL', 'wV', 'n', 'n', 'n', 'w',
+  'deR', 'deL', 'torch', 'n', 'n', 'n', 'w',
+  'w', 'w', 'torch', 'n', 'n', 'n', 'w',
+  'w', 'w', 'torch', 'n', 'n', 'n', 'w',
+  'deR', 'deL', 'torch', 'n', 'n', 'n', 'w',
   'w', 'w', 'deD', 'w', 'w', 'w', 'w',
   'w', 'w', 'deU', 'w', 'w', 'w', 'w',
   'w', 'w', 'w', 'twu', 'w', 'w', 'w',
@@ -87,7 +87,7 @@ tilesets_to_symbols['Tiles/Walls'] = {
 }
 tilesets_to_symbols['Tiles/Walls'].initFields = {}
 tilesets_to_symbols['Tiles/Portals'] = {
-  [0] = 'ptl', 'ptl', 'ptl', 'ptl', 'ptl',
+  [0] = 'ptlToOutside', 'ptl', 'ptl', 'ptl', 'ptl',
   'ptl', 'ptl', 'ptl', 'ptl', 'ptl',
   'ptl', 'ptl', 'ptl', 'ptl', 'ptl',
 }

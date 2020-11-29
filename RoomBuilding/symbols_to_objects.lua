@@ -32,16 +32,32 @@ local thickWallDown = require("GameObjects.ThickWall.thickWallDown")
 local thickWallLeft = require("GameObjects.ThickWall.thickWallLeft")
 local thickWallRight = require("GameObjects.ThickWall.thickWallRight")
 local thickWallUp = require("GameObjects.ThickWall.thickWallUp")
+local wallVibration = require("GameObjects.BrickTestVibration")
 local NpcTest = require("GameObjects.npcTest")
 local portal = require("GameObjects.portal")
 local mainMenu = require("GameObjects.mainMenu")
+
+local torch = {
+  new = function (_, init)
+    init.light = true
+    return wallVibration:new(init)
+  end
+}
+
+local ptlToOutside = {
+  new = function (_, init)
+    init.light = true
+    return portal:new(init)
+  end
+}
 
 local symbols_to_objects_default = {
   w = Wall,
   rW = require("GameObjects.roundWall"),
   rW2 = require("GameObjects.roundWall2"),
   w1234 = require("GameObjects.BrickTest1234"),
-  wV = require("GameObjects.BrickTestVibration"),
+  wV = wallVibration,
+  torch = torch,
   sL = softLiftable,
   rT = rockTest,
   f = floorTile,
@@ -57,6 +73,7 @@ local symbols_to_objects_default = {
   aF = animatedFloorTile1213,
   aF2 = animatedFloorTile1234,
   ptl = portal,
+  ptlToOutside = ptlToOutside,
   b = noBody,
   e = edge,
   eL = edgeLeft,

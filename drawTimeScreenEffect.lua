@@ -145,6 +145,16 @@ local seFuncs = {
     currentToTarget(dt)
   end,
 
+  dull = function(curTime, dt)
+    tr, tg, tb, ta = cc * 0.4, cc * 0.7, cc * 0.55, cc
+    currentToTarget(dt)
+  end,
+
+  black = function(curTime, dt)
+    tr, tg, tb, ta = 0, 0, 0, cc
+    currentToTarget(dt)
+  end,
+
   midnight = function(curTime, dt)
     tr, tg, tb, ta = cc * 0.2, cc * 0.3, cc * 0.5, cc
     currentToTarget(dt)

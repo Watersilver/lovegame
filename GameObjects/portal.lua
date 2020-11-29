@@ -3,6 +3,8 @@ local p = require "GameObjects.prototype"
 local ps = require "physics_settings"
 local trans = require "transitions"
 local snd = require "sound"
+local nfl = require "GameObjects.nonFlickeringLight"
+local o = require "GameObjects.objects"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
@@ -26,6 +28,16 @@ function Portal.initialize(instance)
 end
 
 Portal.functions = {
+  load = function (self)
+    if self.light then
+      local light = nfl:new{
+        xstart = self.xstart, ystart = self.ystart,
+        x = self.xstart, y = self.ystart,
+      }
+      o.addToWorld(light)
+    end
+  end,
+
   draw = function (self)
     local sprite = self.sprite
     local frame = sprite[self.image_index]
