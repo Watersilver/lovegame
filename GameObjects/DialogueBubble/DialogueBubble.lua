@@ -1,7 +1,6 @@
 local p = require "GameObjects.prototype"
 local o = require "GameObjects.objects"
 local u = require "utilities"
-local sm = require "state_machine"
 local roundedRect = require "GameObjects.DialogueBubble.roundedRect"
 local bubbleTriangle = require "GameObjects.DialogueBubble.bubbleTriangle"
 local BubbleText = require "GameObjects.DialogueBubble.BubbleText"
@@ -67,7 +66,6 @@ local resize = {
       math.abs(self.height - self.targetHeight) < 0.01 and
       math.abs(self.width - self.targetWidth) < 0.01 then
         self.stable = true
-        -- self.widthMoveState = "wait"
         self.triggers.resizeReady = true
         self.height = self.targetHeight
         self.width = self.targetWidth
@@ -92,6 +90,7 @@ local resize = {
     -- An Amp = 1 tote:
     -- k = ln(self.targetHeight) / dur =>
     -- h targetWidth
+    -- Ta gamhsa ola edw anti na pollaplasiasw me dt stis diaforikes...
     local k = dt * logthdivdur
 
     -- dampingRatio ζ = c / 2 * sqrt(k*m) if >= 1 it's overdamped
@@ -125,38 +124,6 @@ local resize = {
   end,
 }
 
-local function resetPeriod(self)
-end
-
-
-local states = {
-  -- WARNING STARTING STATE IN INITIALIZE!!!
-  start = {
-    run_state = function(instance, dt)
-    end,
-    start_state = function(instance, dt)
-    end,
-    check_state = function(instance, dt)
-      instance.state:change_state(instance, dt, "nothing")
-    end,
-    end_state = function(instance, dt)
-    end
-  },
-
-  nothing = {
-    run_state = function(instance, dt)
-    end,
-    start_state = function(instance, dt)
-      -- instance:setContent()
-    end,
-    check_state = function(instance, dt)
-    end,
-    end_state = function(instance, dt)
-    end
-  }
-}
-
-
 local defaultAnchor = {x = 0, y = 0, exists = true}
 function DialogueBubble.initialize(instance)
   instance.x = 0
@@ -183,8 +150,6 @@ function DialogueBubble.initialize(instance)
   instance.anchor = defaultAnchor
   instance.color = "black"
   instance.string = "string"
-  instance.state = sm.new_state_machine(states)
-  instance.state.state = "start"
 end
 
 DialogueBubble.functions = {
@@ -247,18 +212,10 @@ DialogueBubble.functions = {
      self.y = self.y - anchor.height * 0.5 * self.positionMod
     end
 
-    -- do stuff depending on state
-    local state = self.state
-    -- Check state
-    state.states[state.state].check_state(self, dt)
-
     -- Nilify triggers
     for trigger in pairs(self.triggers) do
       self.triggers[trigger] = nil
     end
-
-    -- Run state
-    state.states[state.state].run_state(self, dt)
 
     -- Resize
     resize[self.resizeFunc](self, dt)
@@ -324,7 +281,7 @@ DialogueBubble.functions = {
     end
 
     -- Draw bubble
-    if anchor and anchor.exists then
+    if anchor and anchor.exists and not self.noTriangle then
       local triangleX = anchor.x
       triangleX = u.clamp(x - maxXOffset, triangleX, x + maxXOffset)
       -- Draw little triangle
