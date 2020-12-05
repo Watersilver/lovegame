@@ -26,13 +26,19 @@ end
 
 local private = {}
 
-private.singleSimpleBubbleTemplate = function(interactive, noSound, stopWhenFar, waitOnEnd)
+private.singleSimpleBubbleTemplate = function(settings)
+  settings = settings or {}
+  local interactive, noSound, stopWhenFar, waitOnEnd =
+    settings.interactive or settings[1], settings.noSound or settings[2],
+    settings.stopWhenFar or settings[3], settings.waitOnEnd or settings[4]
 
   return function(dlgControl, dt)
     if not dlgControl.speechBubble then
-      local options = {}
+      local options = {} or settings.options
       local startingPos = determinePosFromPlayer(dlgControl)
       if startingPos then options.position = startingPos end
+      if dlgControl.nossbTriangle then options.noTriangle = true end
+      if dlgControl.ssbStayOnScreen then options.staysOnScreen = true end
       dlgControl.speechBubble = bubble.addNew(dlgControl:getDlg(), dlgControl, options)
       local inst = dlgControl.speechBubble
       inst.timeBetweenLetters = 0.055
@@ -230,10 +236,10 @@ cd.choiceChecker = function (dlgControl)
   end
 end
 
-cd.singleSimpleInteractiveBubble = private.singleSimpleBubbleTemplate(true)
-cd.nearInteractiveBubble = private.singleSimpleBubbleTemplate(true, false, true)
-cd.nearInteractiveChoiceBubble = private.singleSimpleBubbleTemplate(true, false, true, true)
-cd.singleSimpleSelfPlayingBubble = private.singleSimpleBubbleTemplate(false, true)
+cd.singleSimpleInteractiveBubble = private.singleSimpleBubbleTemplate({true})
+cd.nearInteractiveBubble = private.singleSimpleBubbleTemplate({true, false, true})
+cd.nearInteractiveChoiceBubble = private.singleSimpleBubbleTemplate({true, false, true, true})
+cd.singleSimpleSelfPlayingBubble = private.singleSimpleBubbleTemplate({false, true})
 cd.interactiveProximityTrigger = private.proximityTriggerTemplate(true)
 
 cd.ssb = {

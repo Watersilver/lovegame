@@ -11,7 +11,7 @@ function NPC.initialize(instance)
   instance.content = defaultCont
   -- instance.content = "Welcome to Reflecting Day! The one day a month we're free to drop the punchline shield and just be earnest and honest with you. Free to wax philosophical about the state of the hotdog (strong), and occasionally dive off into tangents (long and weird) that confuse and alienate our readers (sexy; you). I've got one prepared about how the Internet should have never moved on from the GIF stage, and the ability to see and hear people in real time is directly responsible for the downfall of western civilization. But there's no time for that today! Today we have to be all business, because we have a lot of business."
 end
-local defaultInterrupted = "See ya!"
+local defaultInterrupted = "..."
 -- 7, 17
 NPC.functions = {
   getInterruptedDlg = function (self)
