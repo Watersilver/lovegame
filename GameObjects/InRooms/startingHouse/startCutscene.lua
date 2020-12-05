@@ -203,7 +203,7 @@ local states = {
   end_state = function(instance, dt)
     session.save.startCutsceneDone = true
     instance.playa.animation_state:change_state(instance.playa, dt, "rightstill")
-    session.startQuest("main")
+    session.startQuest("mainQuest1")
   end
   },
 

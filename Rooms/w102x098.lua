@@ -530,8 +530,17 @@ room.gameObjects = {
 { x = 280, y = 248, n = {l = 10}, t = 2, i = 197},
 { x = 296, y = 248, n = {l = 10}, t = 2, i = 197},
 { x = 312, y = 248, n = {l = 10}, t = 2, i = 197},
-{ x = 280, y = 264, n = {l = 10}, t = 3, i = 3},
-{ x = 296, y = 264, n = {l = 10}, t = 3, i = 4},
+
+-- Mage lab
+{ x = 280, y = 264, n = {l = 10,
+destination = "Rooms/MageLab/lab.lua",
+desx = 80,
+desy = 88,}, t = 3, i = 3},
+{ x = 296, y = 264, n = {l = 10,
+destination = "Rooms/MageLab/lab.lua",
+desx = 80,
+desy = 88,}, t = 3, i = 4},
+
 { x = 344, y = 120, n = {l = 10}, t = 1, i = 1},
 { x = 344, y = 136, n = {l = 10}, t = 1, i = 1},
 { x = 344, y = 152, n = {l = 10}, t = 1, i = 1},

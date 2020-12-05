@@ -219,9 +219,9 @@ session = {
     local cc = COLORCONST
     local ctable = {cc * 0.4,cc,cc * 0.6,cc}
     local myText = {
-      {{ctable,"You've got your first quest."},-1, "left"},
-      {{ctable,"Pause and navigate to the quest tag to see it."},-1, "left"},
-      {{ctable,"Consult the quest tag if you forget what you're supposed to be doing."},-1, "left"},
+      {{ctable,"You've got your first note."},-1, "left"},
+      {{ctable,"Pause and navigate to the journal tag to see it."},-1, "left"},
+      {{ctable,"Consult the journal tag if you forget what you're supposed to be doing."},-1, "left"},
     }
     -- do the funcs
     local activateFuncs = {}

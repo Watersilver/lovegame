@@ -225,7 +225,7 @@ local logicFuncs = {
       end
     end
   end,
-  quests = function()
+  journal = function()
     basicListLogic("questCursor", session.save.quests)
   end,
   customise = function()
@@ -381,7 +381,7 @@ local tooltipFuncs = {
     end
   end,
 
-  quests = function()
+  journal = function()
     local questid = session.save.quests[pam.left.questCursor]
     local queststage = session.save[questid]
     if questid then
@@ -536,7 +536,7 @@ local drawFuncs = {
     end
   end,
 
-  quests = function(w, h, pamleft)
+  journal = function(w, h, pamleft)
     local textScale = 0.2
     local padding = 2
     local scrollBarWidth = 5
@@ -574,7 +574,7 @@ local drawFuncs = {
       love.graphics.setColor(pr, pg, pb, pa)
       love.graphics.rectangle("fill", w-5, h*scrollBarPos, 5, h*questNumInv)
     else
-      love.graphics.print("No quests.", padding, padding, 0, textScale)
+      love.graphics.print("No notes.", padding, padding, 0, textScale)
     end
   end,
 
@@ -676,8 +676,8 @@ end
 -- Left menu (quest list, settings, item list)
 pam.left = {
   headerCursor = 1,
-  headers = {"items", "quests", "customise"},
-  headerDesc = {items = "List of items\nin your possession", quests = "A list of active quests", customise = "Visual customisation\noptions"},
+  headers = {"items", "journal", "customise"},
+  headerDesc = {items = "List of items\nin your possession", journal = "A list of notes in\nchronological order", customise = "Visual customisation\noptions"},
   selectedHeader = false,
   questCursor = 1,
   questTop = 0,
