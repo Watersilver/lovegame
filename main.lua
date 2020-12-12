@@ -32,14 +32,25 @@ GCON = {
   rtr = 20,
   defaultScreenEdgeThreshold = 0.1,
 
+  -- First spell message
+  fsm = "You found your first spell! You \z
+  can see all known spells and their \z
+  key bindings in the pause menu. \z
+  You can also swap spell key bindings in the pause menu.",
+
   -- Names n stuff
   money = "rupee",
   moneys = "rupees",
   heroWorld = "Hyrule",
   lakeVillage = "Kidwy",
+  flowerVillage = "Anima",
+  refugeeVillage = "Ancora",
   shidun = "Shidun",
   npcNames = {
-    rescuer = "Lyde"
+    rescuer = "Tutela",
+    mage = "Lacuna",
+    warrior = "Esmen",
+    oracle = "Farore" -- clementia
   }
 }
 
@@ -91,7 +102,6 @@ session = {
     swordSpeed = nil
   },
   mslQueue = u.newQueue(),
-  latestVisitedRooms = u.newQueue(),
   initialize = function()
     -- Menu cursors
     pam.left.initCursors()
@@ -128,6 +138,7 @@ session = {
     session.clockAngle = session.clockAngleTarget
     session.clockHandAngle = session.save.time
     session.timescale = 1
+    session.latestVisitedRooms = u.newQueue()
   end,
   updateTime = function(hoursPassed)
     local preUpdate = session.checkTimeOfDayForMusic()

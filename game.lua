@@ -30,9 +30,11 @@ function game.change_room(roomTarget)
 
   -- placed above assert so it doesn't get messed up in the first room (room0)
   -- If below, game will think last room visited is room0
-  session.latestVisitedRooms:add(roomTarget)
-  if session.latestVisitedRooms.length > GCON.rtr then
-    session.latestVisitedRooms:remove()
+  if session.latestVisitedRooms then
+    session.latestVisitedRooms:add(roomTarget)
+    if session.latestVisitedRooms.length > GCON.rtr then
+      session.latestVisitedRooms:remove()
+    end
   end
   local newRoom = assert(love.filesystem.load(roomTarget))()
   return newRoom
