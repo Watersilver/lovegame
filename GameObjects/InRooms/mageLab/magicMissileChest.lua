@@ -7,9 +7,9 @@ local floor = math.floor
 local Chest = {}
 
 function Chest.initialize(instance)
-  instance.chestId = "debugTest"
+  instance.chestId = "magicMissileChest"
   instance.chestContentsInit =
-    (require "GameObjects.GlobalNpcs.fanfareGottenItems.debug").itemInfo
+    (require "GameObjects.GlobalNpcs.fanfareGottenItems.magicMissile").itemInfo
 end
 
 Chest.functions = {}

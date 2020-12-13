@@ -26,7 +26,8 @@ local cc = COLORCONST
 local myText = {
   {{{cc,cc,cc,cc}, nil},-1, "left"},
   {{{cc,cc,cc,cc}, nil},-1, "left"},
-  {{{cc * 0.4,cc,cc * 0.6,cc}, "You got your first item! Most items can be seen by navigating to the items tag of the pause menu. You can use some items by selecting them and pressing Enter."},-1, "left"}
+  {{{cc * 0.4,cc,cc * 0.6,cc}, "You found your first item! Most items can be seen by navigating to the items tag of the pause menu. You can use some items by selecting them and pressing Enter."},-1, "left"},
+  {{{cc * 0.4,cc,cc * 0.6,cc}, GCON.fsm},-1, "left"}
 }
 
 -- do the funcs
@@ -47,10 +48,20 @@ activateFuncs[1] = function (self, dt, textIndex)
 end
 activateFuncs[2] = function (self, dt, textIndex)
   self.typical_activate(self, dt, textIndex)
-  self.next = session.save.gotFirstItem and "end" or 3
+  -- session.save.gotFirstSpell
+  if self.type == "spell" then
+    self.next = session.save.gotFirstSpell and "end" or 4
+  else
+    self.next = session.save.gotFirstItem and "end" or 3
+  end
 end
 activateFuncs[3] = function (self, dt, textIndex)
   session.save.gotFirstItem = true
+  self.typical_activate(self, dt, textIndex)
+  self.next = "end"
+end
+activateFuncs[4] = function (self, dt, textIndex)
+  session.save.gotFirstSpell = true
   self.typical_activate(self, dt, textIndex)
   self.next = "end"
 end

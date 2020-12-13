@@ -48,8 +48,8 @@ GCON = {
   shidun = "Shidun",
   npcNames = {
     rescuer = "Tutela",
-    mage = "Lacuna",
-    warrior = "Esmen",
+    mage = "Lethe",
+    warrior = "Aite", -- Esmen
     oracle = "Farore" -- clementia
   }
 }

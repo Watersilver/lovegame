@@ -25,9 +25,10 @@ quests.mainQuest1 = {
   title = GCON.shidun,
   description = {
     stage1 =
-    "A mage living northeast\n\z
-    of "..GCON.lakeVillage.." may know\n\z
-    how I ended up here."
+    GCON.npcNames.mage.. " the mage living\n\z
+    northeast of "..GCON.lakeVillage.."\n\z
+    may know how I\n\z
+    ended up here."
   }
 }
 
@@ -36,8 +37,8 @@ quests.mainQuest2 = {
   description = {
     stage1 =
     "There was no one but a\n\z
-    skelleton in the mage's\n\z
-    lab...\n\zI think it was the mage."
+    skelleton in "..GCON.npcNames.mage.."'s\n\z
+    lab..."
   }
 }
 
@@ -45,7 +46,7 @@ quests.mainQuest3 = {
   title = GCON.shidun,
   description = {
     stage1 =
-    "The mage summoned me here\n\z
+    GCON.npcNames.mage.." summoned me here\n\z
     so I can cast the 'Seal'\n\z
     in the Shrine of Secrets.\n\z
     I need the Nine Mystical\n\z

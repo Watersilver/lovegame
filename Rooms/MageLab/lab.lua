@@ -115,6 +115,7 @@ desy = 280,}, t = 3, i = 0},
 }
 
 room.manuallyPlacedObjects = {
-  {x = 24, y = 24, blueprint = "InRooms.mageLab.mageNoteLab"}
+  {x = 24, y = 24, blueprint = "InRooms.mageLab.mageNoteLab"},
+  {x = 80, y = 32, blueprint = "InRooms.mageLab.magicMissileChest"}
 }
 return room

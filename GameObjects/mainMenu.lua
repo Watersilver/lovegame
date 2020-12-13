@@ -239,7 +239,7 @@ function MainMenu.initialize(instance)
   instance.sprite_info = {
     {'Menu/SimpleMenuBox', 4, 3, padding = 2, width = 16, height = 16},
     {'Menu/SimpleSliderNTickbox', 6, padding = 2, width = 16, height = 16},
-    {'Inventory/InvMissileL1'}
+    {'cursor'}
   }
   Hud.visible = false
 end
@@ -344,7 +344,7 @@ load = function (self)
       },
       cursor = {
         pos = 1,
-        sprite = "Inventory/InvMissileL1"
+        sprite = "cursor"
       }
     },
     -- Menu2: Save files
@@ -415,7 +415,7 @@ load = function (self)
           self.menu.globalYOffset = (1 - self.pos) * 50
         end,
         pos = 1,
-        sprite = "Inventory/InvMissileL1"
+        sprite = "cursor"
       }
     },
     -- Menu3: Confirm New Game/Name new save file
@@ -559,7 +559,7 @@ load = function (self)
       },
       cursor = {
         pos = 1,
-        sprite = "Inventory/InvMissileL1"
+        sprite = "cursor"
       }
     },
     -- Menu5: Game Settings
@@ -852,7 +852,7 @@ load = function (self)
           self.menu.globalYOffset = (1 - self.pos) * 50
         end,
         pos = 1,
-        sprite = "Inventory/InvMissileL1"
+        sprite = "cursor"
       }
     },
     -- Menu6: Key config

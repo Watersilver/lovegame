@@ -17,7 +17,7 @@ local texts = {
   tri = "...",
   qua = "I see. So you're ".. session.save.saveName .." from the land of " .. GCON.heroWorld .. " and it was a strange portal that brought you here...",
   cin = "I've never heard of your land. I'm afraid you're very far from it... Our land is called " .. GCON.shidun .. " and it's a very troubled place. We here at "..GCON.lakeVillage.." stick together and survive though.",
-  six = "A mage lives close to where you were found... Maybe you'll find out more about what happened to you if you go there.",
+  six = "The mage "..GCON.npcNames.mage.." lives close to where you were found... Maybe you'll find out more about what happened to you if you go there.",
   -- six = "I'm sorry you got caught up in our troubles, " .. session.save.saveName .. ".",
 }
 local s_info = {
