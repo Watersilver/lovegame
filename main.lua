@@ -220,9 +220,16 @@ session = {
     -- Modifier due to temp speedBoosts or penalties
     return maxSpeed
   end,
+  journalEntryNotification = function()
+    local Txtx = assert(love.filesystem.load("GameObjects/overlayText/newNote.lua"))()
+    local txtx = Txtx:new()
+    o.addToWorld(txtx)
+    snd.play(glsounds.journalEntry)
+  end,
   startQuest = function(questid, startingStage)
     -- Only start quests that are not active or finished
     if session.save[questid] then return end
+    session.journalEntryNotification()
     table.insert(session.save.quests, questid)
     session.save[questid] = startingStage or "stage1"
     if session.save.gotFirstQuest then return end
@@ -253,7 +260,10 @@ session = {
     o.addToWorld(tutDlg)
   end,
   updateQuest = function(questid, newStage)
-    if newStage then session.save[questid] = newStage end
+    if newStage then
+      session.save[questid] = newStage
+      session.journalEntryNotification()
+    end
   end,
   finishQuest = function(questid, result)
     -- Set resulting stage and remove from active quests table
@@ -432,6 +442,7 @@ glsounds = snd.load_sounds{
   blockFall = {"Effects/Oracle_Block_Fall"},
   enemyJump = {"Effects/Oracle_Enemy_Jump"},
   shieldDeflect = {"Effects/Oracle_Shield_Deflect"},
+  journalEntry = {"Effects/journalEntry"},
   -- Harpsounds
   harpad = {"Effects/harp/ad"},
   harpadB = {"Effects/harp/adB"},
@@ -1377,34 +1388,34 @@ function love.mousepressed(x, y, button, isTouch)
   -- end
   -- u.push(o.to_be_added, p:new{xstart=x, ystart=y})
 
-  if button == 2 then
-    if cursor then
-      cursor = cursor + 1
-    else
-      cursor = startingCursor
-    end
-    if cursor > #enemyPaths then
-      cursor = 1
-    end
-    currentEnemyName = enemyPaths[cursor]
-  else
-    if currentEnemyName then
-      local enemClass = assert(love.filesystem.load(currentEnemyName))()
-      local enem = enemClass:new()
-      local wx, wy = cam:toWorld(x, y)
-      enem.x, enem.y = wx, wy
-      enem.xstart, enem.ystart = enem.x, enem.y
-      o.addToWorld(enem)
-    else
-      -- -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
-      -- local enemClass = assert(love.filesystem.load("/GameObjects/npcTest3.lua"))()
-      -- local enem = enemClass:new()
-      -- local wx, wy = cam:toWorld(x, y)
-      -- enem.x, enem.y = wx, wy
-      -- enem.xstart, enem.ystart = enem.x, enem.y
-      -- o.addToWorld(enem)
-    end
-  end
+  -- if button == 2 then
+  --   if cursor then
+  --     cursor = cursor + 1
+  --   else
+  --     cursor = startingCursor
+  --   end
+  --   if cursor > #enemyPaths then
+  --     cursor = 1
+  --   end
+  --   currentEnemyName = enemyPaths[cursor]
+  -- else
+  --   if currentEnemyName then
+  --     local enemClass = assert(love.filesystem.load(currentEnemyName))()
+  --     local enem = enemClass:new()
+  --     local wx, wy = cam:toWorld(x, y)
+  --     enem.x, enem.y = wx, wy
+  --     enem.xstart, enem.ystart = enem.x, enem.y
+  --     o.addToWorld(enem)
+  --   else
+  --     -- -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
+  --     -- local enemClass = assert(love.filesystem.load("/GameObjects/npcTest3.lua"))()
+  --     -- local enem = enemClass:new()
+  --     -- local wx, wy = cam:toWorld(x, y)
+  --     -- enem.x, enem.y = wx, wy
+  --     -- enem.xstart, enem.ystart = enem.x, enem.y
+  --     -- o.addToWorld(enem)
+  --   end
+  -- end
 
   moub[button] = true
 end

@@ -19,4 +19,9 @@ text.inputLim = 10
 
 text.key = ""
 
+text.storeFont = function()
+  local storedFont = love.graphics.getFont()
+  return function() love.graphics.setFont(storedFont) end
+end
+
 return text
