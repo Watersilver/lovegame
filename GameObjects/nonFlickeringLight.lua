@@ -30,12 +30,6 @@ Light.functions = {
   draw = function(self, td)
     local x, y = self.x, self.y
 
-    if td then
-      x, y = trans.moving_objects_coords(self)
-    end
-
-    self.x, self.y = x, y
-
     -- Draw lightsource
     self.lightSource.x, self.lightSource.y = x, y
     ls.drawSource(self.lightSource)
@@ -43,7 +37,12 @@ Light.functions = {
 
   trans_draw = function(self)
     self.x, self.y = self.xlast, self.ylast
-    self:draw(true)
+
+    x, y = trans.moving_objects_coords(self)
+
+    -- Draw lightsource
+    self.lightSource.x, self.lightSource.y = x, y
+    ls.drawSource(self.lightSource)
   end,
 }
 
