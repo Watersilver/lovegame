@@ -10,13 +10,19 @@ local emptyFunc = u.emptyFunc
 local trans = {}
 
 function trans.remove_from_world_previous_room()
-  for _, object in ipairs(o.updaters) do o.transRemoveFromWorld(object) end
-  for _, object in ipairs(o.earlyUpdaters) do o.transRemoveFromWorld(object) end
-  for _, object in ipairs(o.lateUpdaters) do o.transRemoveFromWorld(object) end
-  for _, object in ipairs(o.colliders) do o.transRemoveFromWorld(object) end
+  local removeType;
+  if game.transitioning.purge then
+    removeType = "removeFromWorld"
+  else
+    removeType = "transRemoveFromWorld"
+  end
+  for _, object in ipairs(o.updaters) do o[removeType](object) end
+  for _, object in ipairs(o.earlyUpdaters) do o[removeType](object) end
+  for _, object in ipairs(o.lateUpdaters) do o[removeType](object) end
+  for _, object in ipairs(o.colliders) do o[removeType](object) end
   for _, layer in ipairs(o.draw_layers) do
     for _, object in ipairs(layer) do
-      o.transRemoveFromWorld(object)
+      o[removeType](object)
       object.onPreviousRoom = true
       -- if replacing object.destroy here is not enough, also replace it in the trans coords funcs
       object.destroy = object.trans_destroy or emptyFunc

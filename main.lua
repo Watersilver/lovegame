@@ -330,15 +330,13 @@ session = {
     session.musicOverride = override_info
   end,
   toMainMenu = function()
-    if o.identified.PlayaTest and o.identified.PlayaTest[1] then
-      o.identified.PlayaTest[1].transPersistent = nil
-    end
     session.drug = nil
     session.ringShader = nil
     game.transition{
       type = "whiteScreen",
       progress = 0,
-      roomTarget = "Rooms/main_menu.lua"
+      roomTarget = "Rooms/main_menu.lua",
+      purge = true
     }
   end,
   barrierBounce = function(plaObj, horDir, verDir)
