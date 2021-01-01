@@ -63,8 +63,13 @@ NPC.functions = {
   end,
 
   draw = function (self)
-    local xtotal, ytotal = self.body:getPosition()
-    self.x, self.y = xtotal, ytotal
+    local xtotal, ytotal
+    if self.body then
+      xtotal, ytotal = self.body:getPosition()
+      self.x, self.y = xtotal, ytotal
+    else
+      xtotal, ytotal = self.x, self.y
+    end
     ytotal = ytotal + self.zo
 
     if self.lightSource then
@@ -76,7 +81,7 @@ NPC.functions = {
     if self.spritebody then
       if self.spritejoint then self.spritejoint:destroy() end
       self.spritebody:setPosition(xtotal, ytotal)
-      self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+      if self.body then self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0) end
     end
 
     local sprite = self.sprite
@@ -105,7 +110,9 @@ NPC.functions = {
 
   trans_draw = function (self)
 
-    self.x, self.y = self.body:getPosition()
+    if self.body then
+      self.x, self.y = self.body:getPosition()
+    end
 
     local xtotal, ytotal = trans.moving_objects_coords(self)
     ytotal = ytotal + self.zo
