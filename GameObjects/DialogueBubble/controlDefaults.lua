@@ -9,9 +9,18 @@ local cd = {}
 local closeEnoughToPlayer = function (self)
   if not (pl1 and pl1.exists) then return end
   local playa = pl1
-  if u.distance2d(playa.x, playa.y, self.x, self.y) < (self.closenessThresh or 22) then
+  if u.distance2d(playa.x, playa.y, self.x, self.y + (self.yProxOffset or 0)) < (self.closenessThresh or 22) then
     return true
   end
+end
+
+local plHasCorrectFacing = function (self)
+  if self.forceFacing then
+    if pl1 and pl1.exists then
+      if pl1:getFacing() ~= self.forceFacing then return false end
+    end
+  end
+  return true
 end
 
 local determinePosFromPlayer = function (self)
@@ -115,6 +124,7 @@ private.singleSimpleBubbleTemplate = function(settings)
 
     if stopWhenFar then
       cd.closenessChecker(dlgControl)
+      cd.facingChecker(dlgControl)
     end
 
   end
@@ -163,7 +173,7 @@ private.proximityTriggerTemplate = function (interactive)
 
   return function(dlgControl, dt)
     dlgControl.indicatorCooldown = dlgControl.indicatorCooldown - dt
-    if closeEnoughToPlayer(dlgControl) then
+    if closeEnoughToPlayer(dlgControl) and plHasCorrectFacing(dlgControl) then
       if not interactive or input.enterPressed then
         dlgControl.updateHook = nil
         dlgControl.hookReturn = "ptTriggered"
@@ -212,6 +222,19 @@ cd.closenessChecker = function (dlgControl)
   end
 end
 
+cd.facingChecker = function (dlgControl)
+  if not plHasCorrectFacing(dlgControl) then
+    local instance = dlgControl.speechBubble
+    if instance then
+      dlgControl.textReturn = instance.string
+    else
+      dlgControl.textReturn = nil
+    end
+    dlgControl.hookReturn = "ssbLookedAway"
+    dlgControl.updateHook = nil
+  end
+end
+
 cd.choiceChecker = function (dlgControl)
   local instance = dlgControl.speechBubble
   if not instance.choiceList then
@@ -231,6 +254,7 @@ cd.choiceChecker = function (dlgControl)
     dlgControl.updateHook = nil
   end
   cd.closenessChecker(dlgControl)
+  cd.facingChecker(dlgControl)
   if not dlgControl.updateHook then
     instance.choiceList:remove()
   end

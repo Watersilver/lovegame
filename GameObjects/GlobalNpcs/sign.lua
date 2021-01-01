@@ -8,7 +8,6 @@ local expl = require "GameObjects.explode"
 local inp = require "input"
 local game = require "game"
 local dc = require "GameObjects.Helpers.determine_colliders"
-local itemGetPoseAndDlg = require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"
 local o = require "GameObjects.objects"
 
 local npcTest = require "GameObjects.npcTest"

@@ -2286,6 +2286,15 @@ Playa.functions = {
     end
   end,
 
+  getFacing = function (self)
+    local as = self.animation_state.state
+    if as:find("up") then return "up"
+    elseif as:find("left") then return "left"
+    elseif as:find("right") then return "right"
+    elseif as:find("down") then return "down"
+    else return "down" end
+  end,
+
   successfullyBullrushed = function (self, other)
     return self.immasprint and other.canBeBullrushed and (not other.shielded or other.shieldDown)
   end,
