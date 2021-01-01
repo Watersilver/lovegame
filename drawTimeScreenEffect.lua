@@ -165,6 +165,11 @@ local seFuncs = {
     currentToTarget(dt)
   end,
 
+  forestCurse1 = function(curTime, dt)
+    tr, tg, tb, ta = cc * 0.5, cc * 0.3, cc * 0.5, cc
+    currentToTarget(dt)
+  end,
+
   default = function(curTime, dt)
     tr, tg, tb, ta = defaultScreenEffects.run(curTime)
     currentToTarget(dt)

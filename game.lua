@@ -17,6 +17,7 @@ end
 function game.transition(trans)
   game.paused = true
   game.transitioning = trans
+  game.lastSide = trans.side or "up"
 end
 
 function game.cutscenePause(pause)
