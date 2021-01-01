@@ -344,6 +344,11 @@ function u.isOutsideGamera(position, cam)
   or (position.y + 8 < t) or (position.y - 8 > t + h)
 end
 
+function u.isOutsideRoom(position, room)
+  return (position.x + 8 < 0) or (position.x - 8 > room.width)
+  or (position.y < -8) or (position.y + (position.zo or 0) - 8 > room.height)
+end
+
 local coloursEnum = {
   white = {r = COLORCONST, g = COLORCONST, b = COLORCONST},
   red = {r = COLORCONST, g = 0, b = 0},
