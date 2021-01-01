@@ -295,6 +295,9 @@ function u.newQueue()
     end,
     get = function (self, index)
       return self[self.first + index]
+    end,
+    getLast = function (self)
+      return self[self.last]
     end
   }
 end
