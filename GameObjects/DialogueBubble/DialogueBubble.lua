@@ -191,7 +191,7 @@ DialogueBubble.functions = {
     self.buttonTimer = self.buttonTimer + dt * 5
 
     local anchor = self.anchor
-    if not anchor or not anchor.exists then return end
+    if not anchor or not anchor.exists then return self:remove() end
     if self.position == "up" then
       self.positionMod = self.positionMod + dt * self.posModSpeed
       if self.positionMod > 1 then self.positionMod = 1 end
@@ -201,7 +201,7 @@ DialogueBubble.functions = {
     end
 
     self.x = anchor.x
-    self.y = anchor.y -
+    self.y = anchor.y + (anchor.zo or 0) -
     self.positionMod *
     (
       self.height * 0.5
