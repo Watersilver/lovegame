@@ -247,7 +247,7 @@ Cutscene.functions = {
     self.rescuer.body:setPosition(self.rescuer.x, self.rescuer.y)
 
     -- Stop time from going too far
-    if session.save.time - self.startingTime > 1 then
+    if session.save.time - self.startingTime > 1.5 then
       game.room.timeDoesntPass = true
     end
   end,
