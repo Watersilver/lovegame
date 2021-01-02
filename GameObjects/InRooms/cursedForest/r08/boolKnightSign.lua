@@ -7,12 +7,13 @@ local Sign = require "GameObjects.GlobalNpcs.sign2"
 local NPC = {}
 
 function NPC.initialize(instance)
+  instance.image_index = 1
 end
 
 NPC.functions = {
   getDlg = function (self)
-    return "one's words are lies, one's words are true\n\z
-    unprovoked violence will show you who's who."
+    return "One's words are lies, one's words are true\n\z
+    Unprovoked violence will show you who's who."
   end,
 }
 

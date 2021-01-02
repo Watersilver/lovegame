@@ -30,7 +30,7 @@ room.rightTrans = {
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/Crossroads.lua",
+    roomTarget = "Rooms/cursedForest/r05.lua", -- DONE -- Or maybe not
     yupper = 201, ylower = 328,
     xmod = 0, ymod = 0
   },
@@ -47,7 +47,7 @@ room.leftTrans = {
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/r05.lua", -- DONE -- Or maybe not
+    roomTarget = "Rooms/cursedForestTemplate1.lua",
     yupper = 201, ylower = 328,
     xmod = 0, ymod = 0
   },

@@ -50,7 +50,6 @@ NPC.functions = {
   end,
 
   handleHookReturn = function (self)
-    self.image_index = 0
     if not self.hookReturn then
       self.dlgState = "waiting"
     elseif self.hookReturn == "ptTriggered" then

@@ -6,7 +6,6 @@ local u = require "utilities"
 local Curse = {}
 
 function Curse.initialize(instance)
-  instance.rightWay = love.math.random() > 0.5 and 1 or 2
 end
 
 Curse.functions = {
@@ -23,29 +22,33 @@ Curse.functions = {
     self.transRan = true
     self.TransRanAtLeastOnce = true
 
-    local bKnights = o.identified.boolKnight
-    if bKnights then
-      if love.math.random() > 0.5 then
-        bKnights[1].liar = true
-      else
-        bKnights[2].liar = true
-      end
-      bKnights[1].rightWay = self.rightWay
-      bKnights[2].rightWay = self.rightWay
-    end
-
-    local rightRoom = "Rooms/w096x102.lua"
-    local wrongRoom = "Rooms/cursedForest/Trap.lua"
+    local previousRoomName = session.latestVisitedRooms:get(session.latestVisitedRooms.length - 2)
 
     game.room.upTrans = {
       {
-        roomTarget = self.rightWay == 1 and rightRoom or wrongRoom,
-        xleftmost = 0, xrightmost = 264,
+        roomTarget = previousRoomName,
+        xleftmost = 0, xrightmost = 520,
         xmod = 0, ymod = 0
-      },
+      }
+    }
+    game.room.downTrans = {
       {
-        roomTarget = self.rightWay == 2 and rightRoom or wrongRoom,
-        xleftmost = 265, xrightmost = 520,
+        roomTarget = previousRoomName,
+        xleftmost = 0, xrightmost = 520,
+        xmod = 0, ymod = 0
+      }
+    }
+    game.room.leftTrans = {
+      {
+        roomTarget = previousRoomName,
+        yupper = 0, ylower = 520,
+        xmod = 0, ymod = 0
+      }
+    }
+    game.room.rightTrans = {
+      {
+        roomTarget = previousRoomName,
+        yupper = 0, ylower = 520,
         xmod = 0, ymod = 0
       }
     }

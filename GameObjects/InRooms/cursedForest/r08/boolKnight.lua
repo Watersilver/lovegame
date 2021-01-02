@@ -21,7 +21,7 @@ local BoolKnight = {}
 
 function BoolKnight.initialize(instance)
   instance.sprite_info = s_info
-  instance.hp = 1
+  instance.hp = 0.01
   instance.image_speed = 0.05
   instance.physical_properties.bodyType = "static"
   instance.physical_properties.shape = ps.shapes.plshape
