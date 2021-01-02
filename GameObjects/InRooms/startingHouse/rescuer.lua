@@ -187,7 +187,7 @@ NPC.functions = {
 
     td.zAxis(self, dt)
 
-    sh.handleShadow(self, true)
+    sh.handleShadow(self)
   end,
 }
 
