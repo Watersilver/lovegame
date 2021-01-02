@@ -775,8 +775,14 @@ function love.update(dt)
         end
         -- reset player veolocity after transition if necessary
         -- playa.body:setLinearVelocity(u.sign(playa.vx), u.sign(playa.vy))
-        local xtransvel = u.sign(playa.vx) * u.clamp(math.abs(horside * 10), math.abs(playa.vx * 0.25), 25)
-        local ytransvel = u.sign(playa.vy) * u.clamp(math.abs(verside * 10), math.abs(playa.vy * 0.25), 25)
+        local sd = game.transitioning.side
+        local xsign, ysign
+        if sd == "left" then xsign = -1
+        elseif sd == "right" then xsign = 1
+        elseif sd == "up" then ysign = -1
+        elseif sd == "down" then ysign = 1 end
+        local xtransvel = u.sign(xsign or playa.vx) * u.clamp(math.abs(horside * 10), math.abs(playa.vx * 0.25), 25)
+        local ytransvel = u.sign(ysign or playa.vy) * u.clamp(math.abs(verside * 10), math.abs(playa.vy * 0.25), 25)
         playa.body:setLinearVelocity(xtransvel, ytransvel)
         -- playa.body:setLinearVelocity(playa.vx * 0.25, playa.vy * 0.25)
         playa.zvel = 0

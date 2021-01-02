@@ -2089,6 +2089,10 @@ function Playa.initialize(instance)
 
     respawn = {
     run_state = function(instance, dt)
+      if not instance.noVelTrans and not instance.transed then
+        instance.transed = true
+        instance.transvx, instance.transvy = instance.body:getLinearVelocity()
+      end
       instance.body:setLinearVelocity(0, 0)
       local rmod = instance.respawnCounter / instance.respawnCounterMax
       instance.body:setPosition(
@@ -2110,8 +2114,10 @@ function Playa.initialize(instance)
     start_state = function(instance, dt)
       -- Change threshold to avoid screen transitions that get triggered
       -- prematurely because of noVelTrans
+      instance.transvx, instance.transvy = nil, nil
       gvar.screenEdgeThreshold = 2
       instance.noVelTrans = true
+      instance.transed = false
       instance.respawnCounter = 0
       instance.respawnCounterMax = 0.4
       instance.invisible = true
@@ -2126,12 +2132,16 @@ function Playa.initialize(instance)
     end_state = function(instance, dt)
       gvar.screenEdgeThreshold = GCON.defaultScreenEdgeThreshold
       instance.noVelTrans = false
+      instance.transed = nil
       instance.disableTransitions = false
       instance.body:setPosition(instance.xLastSteppable, instance.yLastSteppable)
       instance.invisible = false
       inp.enable_controller(instance.player)
       instance:setGhost(false)
       instance.invulnerable = 1
+      if instance.transvx and instance.transvy then
+        instance.body:setLinearVelocity(instance.transvx, instance.transvy)
+      end
     end
     },
 
