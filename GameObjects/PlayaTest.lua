@@ -2092,6 +2092,22 @@ function Playa.initialize(instance)
       if not instance.noVelTrans and not instance.transed then
         instance.transed = true
         instance.transvx, instance.transvy = instance.body:getLinearVelocity()
+        local sd = instance.lastTransSide
+        local xsign, ysign
+        if sd == "left" then xsign = -1
+        elseif sd == "right" then xsign = 1
+        elseif sd == "up" then ysign = -1
+        elseif sd == "down" then ysign = 1 end
+        if xsign then
+          if u.sign(xsign) ~= u.sign(instance.transvx) then
+            instance.transvx = xsign * math.max(math.abs(instance.transvx), 10)
+          end
+        end
+        if ysign then
+          if u.sign(ysign) ~= u.sign(instance.transvy) then
+            instance.transvy = ysign * math.max(math.abs(instance.transvy), 10)
+          end
+        end
       end
       instance.body:setLinearVelocity(0, 0)
       local rmod = instance.respawnCounter / instance.respawnCounterMax

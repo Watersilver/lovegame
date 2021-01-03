@@ -784,6 +784,7 @@ function love.update(dt)
         local xtransvel = u.sign(xsign or playa.vx) * u.clamp(math.abs(horside * 10), math.abs(playa.vx * 0.25), 25)
         local ytransvel = u.sign(ysign or playa.vy) * u.clamp(math.abs(verside * 10), math.abs(playa.vy * 0.25), 25)
         playa.body:setLinearVelocity(xtransvel, ytransvel)
+        playa.lastTransSide = sd
         -- playa.body:setLinearVelocity(playa.vx * 0.25, playa.vy * 0.25)
         playa.zvel = 0
       end
