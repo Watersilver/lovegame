@@ -314,6 +314,15 @@ im.spriteSettings = {
     {'Enemies/Blob/shock', 4, padding = 2, width = 13, height = 16},
   },
 
+  -- Misc
+  torch = {
+    {'Misc/Torch/out', 1, padding = 2, width = 16, height = 16},
+    {'Misc/Torch/lit', 4, padding = 2, width = 16, height = 16},
+  },
+  eyeStatue = {
+    {'Misc/EyeStatue/statue', 10, padding = 2, width = 16, height = 16},
+  },
+
   -- HUD
   clock = {"clock", 1, padding = 0, width = 19, height = 19},
   clockHand = {"clockHand", 2, padding = 2, width = 7, height = 26},
