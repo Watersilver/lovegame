@@ -138,6 +138,7 @@ local silentSource = {
 -- bgm with intro
 local bgmV2Source = {
   setLooping = function(self, bool)
+    self.shouldBeLooping = bool
     self.main:setLooping(bool)
   end,
   isPlaying = function(self)
@@ -145,11 +146,13 @@ local bgmV2Source = {
   end,
   play = function(self)
     self[self.section]:play()
+    self.shouldBePlaying = true
     self.stopped = false
   end,
   stop = function(self)
     self[self.section]:stop()
     self.section = self.intro and "intro" or "main"
+    self.shouldBePlaying = false
     self.stopped = true
   end,
   setVolume = function(self, vol)
@@ -167,6 +170,8 @@ bgmV2Source.new = function(sourceInfo)
     bgmV2Source.intro = nil
     bgmV2Source.section = "main"
   end
+  bgmV2Source.shouldBePlaying = false
+  bgmV2Source.shouldBeLooping = false
   bgmV2Source.main = love.audio.newSource( sourceInfo.folder .. sourceInfo.name .. sourceInfo.extension, "stream" )
   return bgmV2Source
 end
@@ -205,9 +210,9 @@ local function playNextSource(bgmv2)
     -- bgm with intro
     bgmv2.source = bgmV2Source.new( bgmv2.next )
 
-    bgmv2.source:setLooping(true)
     bgmv2.source:setVolume(0)
     bgmv2.source:play()
+    bgmv2.source:setLooping(true)
   else
     bgmv2.source = silentSource
   end
@@ -270,6 +275,10 @@ function snd.bgmV2:update(dt)
     elseif self.source:getVolume() ~= self.current.targetVolume then
       -- Fade to target volume
       fadeToVolume(self.source, self.current.targetVolume, self.current.fadeSpeed, dt)
+    elseif not self.source:isPlaying() and self.source.shouldBeLooping and self.source.shouldBePlaying then
+      -- Hatchet job but fixes looping main stopping for no reason....
+      self.source.main:rewind()
+      self.source.main:play()
     end
   else
     self.source:setVolume(0)
