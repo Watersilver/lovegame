@@ -322,6 +322,25 @@ im.spriteSettings = {
   eyeStatue = {
     {'Misc/EyeStatue/statue', 10, padding = 2, width = 16, height = 16},
   },
+  -- chesspieces
+  pawn = {
+    {'Misc/Chess/pawn', 5, padding = 2, width = 11, height = 16},
+  },
+  bishop = {
+    {'Misc/Chess/bishop', 1, padding = 2, width = 13, height = 24},
+  },
+  knight = {
+    {'Misc/Chess/knight', 2, padding = 2, width = 16, height = 20},
+  },
+  rook = {
+    {'Misc/Chess/rook', 2, padding = 2, width = 16, height = 20},
+  },
+  queen = {
+    {'Misc/Chess/queen', 1, padding = 2, width = 16, height = 39},
+  },
+  king = {
+    {'Misc/Chess/king', 1, padding = 2, width = 16, height = 41},
+  },
 
   -- HUD
   clock = {"clock", 1, padding = 0, width = 19, height = 19},

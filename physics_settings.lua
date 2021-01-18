@@ -53,6 +53,12 @@ ps.shapes = {
     r = love.physics.newEdgeShape(1, -8, 1, 8), -- right side
     d = love.physics.newEdgeShape(-8, 1, 8, 1) -- down side
   },
+  -- Chess spritefixtures
+  kingSprite = love.physics.newRectangleShape(16, 41),
+  queenSprite = love.physics.newRectangleShape(16, 39),
+  rookSprite = love.physics.newRectangleShape(16, 20),
+  bishopSprite = love.physics.newRectangleShape(13, 24),
+
   swordSprite = love.physics.newRectangleShape(16, 15),
   -- swordIgniting = love.physics.newRectangleShape(0, 7, 2, 7+7),
   swordIgniting = love.physics.newRectangleShape(0, -2, 2, 7),
