@@ -592,6 +592,8 @@ function preSolve(a, b, coll)
         apos = apos - aob.zo
         bpos = bpos - bob.zo
       end
+      if aob.spriteOffset then apos = apos + aob.spriteOffset end
+      if bob.spriteOffset then bpos = bpos + bob.spriteOffset end
       if aob.layer == bob.layer and (apos > bpos and aob.drawable < bob.drawable) or
       (apos < bpos and aob.drawable > bob.drawable) then
         u.swap(o.draw_layers[aob.layer], aob.drawable, bob.drawable)
@@ -665,7 +667,13 @@ function love.update(dt)
   -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
   --
   -- -- display room
-  -- fuck = fuck .. "\n" .. session.latestVisitedRooms[session.latestVisitedRooms.last]
+  -- fuck = fuck .. "\n" .. (session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or "")
+  -- if not fook then fook = {} end
+  -- fook[session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or ""] = true
+  -- fuck = ""
+  -- for room in pairs(fook) do
+  --   fuck = fuck .. room .. "\n"
+  -- end
 
   if o.to_be_added[1] then
     o.to_be_added:add_all()
@@ -1387,11 +1395,6 @@ for i, path in ipairs(enemyPaths) do
 end
 function love.mousepressed(x, y, button, isTouch)
   -- x, y = cam:toWorld(x, y)
-  -- if button == 2 then
-  --   o.removeFromWorld(o.updaters[2])
-  --   return
-  -- end
-  -- u.push(o.to_be_added, p:new{xstart=x, ystart=y})
 
   -- if button == 2 then
   --   if cursor then
@@ -1411,14 +1414,14 @@ function love.mousepressed(x, y, button, isTouch)
   --     enem.x, enem.y = wx, wy
   --     enem.xstart, enem.ystart = enem.x, enem.y
   --     o.addToWorld(enem)
-  --   else
-  --     -- -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
-  --     -- local enemClass = assert(love.filesystem.load("/GameObjects/npcTest3.lua"))()
-  --     -- local enem = enemClass:new()
-  --     -- local wx, wy = cam:toWorld(x, y)
-  --     -- enem.x, enem.y = wx, wy
-  --     -- enem.xstart, enem.ystart = enem.x, enem.y
-  --     -- o.addToWorld(enem)
+    -- else
+      -- -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
+      -- local enemClass = assert(love.filesystem.load("/GameObjects/misc/chess/pawn.lua"))()
+      -- local enem = enemClass:new()
+      -- local wx, wy = cam:toWorld(x, y)
+      -- enem.x, enem.y = wx, wy
+      -- enem.xstart, enem.ystart = enem.x, enem.y
+      -- o.addToWorld(enem)
   --   end
   -- end
 
