@@ -13,6 +13,7 @@ local floor = math.floor
 local NPC = {}
 
 function NPC.initialize(instance)
+  instance.forceFacing = "up"
   instance.nossbTriangle = true
   instance.ssbStayOnScreen = true
   instance.content = "Finally I created the summoning spell. \z
@@ -37,6 +38,8 @@ NPC.functions = {
   handleHookReturn = function (self)
     if not self.hookReturn then
       self.dlgState = "waiting"
+    elseif self.hookReturn == "ptTriggered" then
+      self.dlgState = "talking"
     elseif self.hookReturn == "ssbDone" then
       -- Clean up
       cd.cleanSsb(self)
@@ -45,10 +48,8 @@ NPC.functions = {
       session.startQuest("mainQuest3");
       session.startQuest("mysticalSpells1");
       session.save.readMageJournal1 = true
-    elseif self.hookReturn == "ssbFar" then
+    elseif self.hookReturn == "ssbFar" or self.hookReturn == "ssbLookedAway" then
       self.dlgState = "interrupted"
-    elseif self.hookReturn == "ptTriggered" then
-      self.dlgState = "talking"
     end
   end,
 }
