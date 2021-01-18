@@ -36,7 +36,7 @@ tilesets_to_symbols['Tiles/Floor'] = {
   'ld', 'f', 'f', 'ld', 'f', 'f', 'f', 'f',
   'f', 'f', 'f', 'ga', 'ga', 'ga', 'ga', 'f',
   'f', 'f', 'f', 'f', 'f', 'f', 'f', 'iF',
-  'f', 'f', 'f', 'f', 'f', 'ga', 'n', 'n',
+  'f', 'f', 'f', 'f', 'f', 'ga', 'f', 'f',
 }
 tilesets_to_symbols['Tiles/Floor'].initFields = {}
 tilesets_to_symbols['Tiles/Walls'] = {
