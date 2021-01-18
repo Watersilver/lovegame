@@ -13,7 +13,7 @@ room.width = 512
 room.height = 512
 room.downTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
+    roomTarget = "Rooms/cursedForest/r10.lua", -- DONE
     xleftmost = 0, xrightmost = 264,
     xmod = 0, ymod = 0
   },

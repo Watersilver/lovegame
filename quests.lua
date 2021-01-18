@@ -54,4 +54,34 @@ quests.mainQuest3 = {
   }
 }
 
+quests.chessPuzzle1 = {
+  title = "Forest Chessboard",
+  description = {
+    stage1 =
+    "A strange chessboard\n\z
+    I encountered in the\n\z
+    cursed forest:\n\z
+    Small case is black\n\z
+    Dot is empty square\n\z
+    r = rook, b = bishop,\n\z
+    h = knight, q = queen,\n\z
+    k = king, p = pawn"
+  }
+}
+
+quests.chessPuzzle2 = {
+  title = "Forest Chessboard",
+  description = {
+    stage1 =
+    "r . . q k . h r\n\z
+    p p p . p p . p\n\z
+    . . h . p . . p\n\z
+    . . . . . . . .\n\z
+    . . . . . . . .\n\z
+    . P . . . . . .\n\z
+    H P P P P P P P\n\z
+    R . . . K B . R\n\z"
+  }
+}
+
 return quests

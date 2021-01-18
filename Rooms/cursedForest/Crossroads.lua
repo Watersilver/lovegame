@@ -7,65 +7,35 @@ local room = {}
 room.newType = true
 
 room.music_info = snd.ovrwrld1
-room.timeScreenEffect = 'default'
+room.timeScreenEffect = 'forestCurse1'
 
 room.width = 512
 room.height = 512
 room.downTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
-    xleftmost = 0, xrightmost = 264,
-    xmod = 0, ymod = 0
-  },
-  {
-    roomTarget = "Rooms/cursedForest/Crossroads.lua",
-    xleftmost = 265, xrightmost = 520,
+    roomTarget = "Rooms/cursedForest/Maze.lua",
+    xleftmost = 0, xrightmost = 520,
     xmod = 0, ymod = 0
   }
 }
 room.rightTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
-    yupper = 0, ylower = 200,
-    xmod = 0, ymod = 0
-  },
-  {
-    roomTarget = "Rooms/cursedForest/Crossroads.lua",
-    yupper = 201, ylower = 328,
-    xmod = 0, ymod = 0
-  },
-  {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
-    yupper = 329, ylower = 520,
+    roomTarget = "Rooms/cursedForest/Maze.lua",
+    yupper = 0, ylower = 520,
     xmod = 0, ymod = 0
   }
 }
 room.leftTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
-    yupper = 0, ylower = 200,
-    xmod = 0, ymod = 0
-  },
-  {
-    roomTarget = "Rooms/cursedForest/Crossroads.lua",
-    yupper = 201, ylower = 328,
-    xmod = 0, ymod = 0
-  },
-  {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
-    yupper = 329, ylower = 520,
+    roomTarget = "Rooms/cursedForest/Maze.lua",
+    yupper = 0, ylower = 520,
     xmod = 0, ymod = 0
   }
 }
 room.upTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
-    xleftmost = 0, xrightmost = 264,
-    xmod = 0, ymod = 0
-  },
-  {
-    roomTarget = "Rooms/cursedForest/Crossroads.lua",
-    xleftmost = 265, xrightmost = 520,
+    roomTarget = "Rooms/cursedForest/Maze.lua",
+    xleftmost = 0, xrightmost = 520,
     xmod = 0, ymod = 0
   }
 }

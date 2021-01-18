@@ -6,48 +6,49 @@ local snd = require "sound"
 local room = {}
 room.newType = true
 
-room.music_info = snd.ovrwrld1
+-- room.music_info = snd.ovrwrld1
 room.timeScreenEffect = 'forestCurse1'
 
 room.width = 512
 room.height = 512
 room.downTrans = {
   {
-    roomTarget = "Rooms/cursedForest/r07.lua", -- DONE
+    roomTarget = "Rooms/cursedForest/r07.lua", -- DONEx2
     xleftmost = 0, xrightmost = 264,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/r08.lua", -- DONE
+    roomTarget = "Rooms/cursedForest/r08.lua", -- DONEx2
     xleftmost = 265, xrightmost = 520,
     xmod = 0, ymod = 0
   }
 }
 room.rightTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
+    roomTarget = "Rooms/cursedForest/r10.lua", -- DONEx2
     yupper = 0, ylower = 200,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/r05.lua", -- DONE -- Or maybe not
+    roomTarget = "Rooms/cursedForest/Crossroads.lua", -- DONE
     yupper = 201, ylower = 328,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
+    -- roomTarget = "Rooms/cursedForest/r11.lua", -- DONEx2
+    roomTarget = "Rooms/cursedForest/r05.lua", -- DONEx2
     yupper = 329, ylower = 520,
     xmod = 0, ymod = 0
   }
 }
 room.leftTrans = {
   {
-    roomTarget = "Rooms/cursedForest/r04.lua", -- DONE
+    roomTarget = "Rooms/cursedForest/r04.lua", -- DONEx2
     yupper = 0, ylower = 200,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
+    roomTarget = "Rooms/cursedForest/r09.lua", -- DONEx2
     yupper = 201, ylower = 328,
     xmod = 0, ymod = 0
   },
@@ -59,12 +60,12 @@ room.leftTrans = {
 }
 room.upTrans = {
   {
-    roomTarget = "Rooms/cursedForest/r03.lua", -- DONE
+    roomTarget = "Rooms/cursedForest/r03.lua", -- DONEx2
     xleftmost = 0, xrightmost = 264,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/r02.lua", -- DONE
+    roomTarget = "Rooms/cursedForest/r02.lua", -- DONEx2
     xleftmost = 265, xrightmost = 520,
     xmod = 0, ymod = 0
   }

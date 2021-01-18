@@ -1114,4 +1114,8 @@ room.gameObjects = {
 { x = 40, y = 504, n = {l = 10}, t = 1, i = 200},
 ----------End of gameObjects----------
 }
+
+room.manuallyPlacedObjects = {
+  {x = 0, y = 0, blueprint = "InRooms.cursedForest.forestCurse"},
+}
 return room

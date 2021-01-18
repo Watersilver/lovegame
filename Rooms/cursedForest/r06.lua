@@ -13,58 +13,58 @@ room.width = 512
 room.height = 512
 room.downTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
+    roomTarget = "Rooms/cursedForest/r03.lua", -- DONE
     xleftmost = 0, xrightmost = 264,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/Crossroads.lua",
+    roomTarget = "Rooms/cursedForest/r04.lua", -- DONE
     xleftmost = 265, xrightmost = 520,
     xmod = 0, ymod = 0
   }
 }
 room.rightTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
+    roomTarget = "Rooms/cursedForest/r12.lua", -- DONE
     yupper = 0, ylower = 200,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/Crossroads.lua",
+    roomTarget = "Rooms/cursedForest/r07.lua", -- DONE
     yupper = 201, ylower = 328,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/r01.lua",
+    roomTarget = "Rooms/cursedForest/r01.lua", -- DONE
     yupper = 329, ylower = 520,
     xmod = 0, ymod = 0
   }
 }
 room.leftTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
+    roomTarget = "Rooms/cursedForest/r10.lua", -- DONE
     yupper = 0, ylower = 200,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/Crossroads.lua",
+    roomTarget = "Rooms/cursedForest/r05.lua", -- DONE
     yupper = 201, ylower = 328,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
+    roomTarget = "Rooms/cursedForest/r08.lua", -- DONE
     yupper = 329, ylower = 520,
     xmod = 0, ymod = 0
   }
 }
 room.upTrans = {
   {
-    roomTarget = "Rooms/cursedForestTemplate1.lua",
+    roomTarget = "Rooms/cursedForest/r11.lua", -- DONE
     xleftmost = 0, xrightmost = 264,
     xmod = 0, ymod = 0
   },
   {
-    roomTarget = "Rooms/cursedForest/Crossroads.lua",
+    roomTarget = "Rooms/cursedForest/r09.lua", -- DONE
     xleftmost = 265, xrightmost = 520,
     xmod = 0, ymod = 0
   }
