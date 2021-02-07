@@ -1114,7 +1114,7 @@ room.manuallyPlacedObjects = {
   --   n = {destination = "Rooms/w100x100.lua", desx = 257, desy = 257},
   --   -- giveChase = true
   -- },
-  {x = 111, y = 111, blueprint = "enemies.sworders.sworderTemplate"},
+  -- {x = 111, y = 111, blueprint = "enemies.sworders.sworderTemplate"},
   {x = 360, y = 248, blueprint = "GlobalNpcs.saver"},
   {x = 328, y = 104, blueprint = "GlobalNpcs.debug.spellGiver2"},
   {x = 104, y = 344, blueprint = "GlobalNpcs.debug.skillGiver2"},
@@ -1123,4 +1123,11 @@ room.manuallyPlacedObjects = {
 
   -- 312, 392 -- Boss
 }
+
+session.placeEnemies(room, {
+  {x = 111, y = 111, blueprint = "enemies.sworders.sworderTemplate"},
+  {x = 111, y = 211, blueprint = "enemies.sworders.sworderTemplate"},
+  {x = 111, y = 311, blueprint = "enemies.sworders.sworderTemplate"}
+})
+
 return room

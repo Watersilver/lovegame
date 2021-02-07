@@ -260,6 +260,25 @@ function u.shuffle(tbl)
   return tbl
 end
 
+function u.getTriangleArea(ax, ay, bx, by, cx, cy)
+  if type(ax) == "table" then
+    ax, ay, bx, by, cx, cy =
+    ax[1], ax[2], ax[3], ax[4], ax[5], ax[6]
+  end
+  return math.abs((ax * (by - cy) + bx * (cy - ay) + cx * (ay - by)) / 2)
+end
+
+function u.randomPointFromTriangle(triangle)
+  local r1, r2 = love.math.random(), love.math.random();
+  return (1 - sqrt(r1)) * triangle[1] + (sqrt(r1) * (1 - r2)) * triangle[3] + (sqrt(r1) * r2) * triangle[5],
+         (1 - sqrt(r1)) * triangle[2] + (sqrt(r1) * (1 - r2)) * triangle[4] + (sqrt(r1) * r2) * triangle[6]
+end
+
+function u.randomPointFromTriangulatedPolygon(polygon)
+  local triangle = u.chooseFromChanceTable(polygon)
+  return u.randomPointFromTriangle(triangle)
+end
+
 -- Delete "chars" characters from the end of the string. UTF-8 friendly
 function u.utf8_backspace(t, chars)
     -- get the byte offset to the last UTF-8 character in the string.
@@ -274,15 +293,19 @@ function u.utf8_backspace(t, chars)
 end
 
 -- Queue data structure
-function u.newQueue()
+function u.newQueue(maxLength)
   return {
     first = 0,
     last = -1,
     length = 0,
+    maxLength = maxLength,
     add = function (self, value)
       self.last = self.last + 1
       self[self.last] = value
       self.length = self.length + 1
+      if self.maxLength and self.maxLength > 0 and self.length > self.maxLength then
+        return self:remove()
+      end
     end,
     remove = function (self)
       local first = self.first
@@ -299,6 +322,28 @@ function u.newQueue()
     getLast = function (self)
       return self[self.last]
     end
+  }
+end
+
+local fastAccessQueueMethods = {
+  add = function (self, value)
+    local removedValue = self._queue:add(value)
+    if removedValue and self._bag[removedValue] then
+      self._bag[removedValue] = nil
+    end
+    self._bag[value] = true
+  end,
+
+  has = function (self, value)
+    return self._bag[value]
+  end
+}
+function u.newFastAccessQueue(capacity)
+  return {
+    _queue = u.newQueue(capacity),
+    _bag = {},
+    add = fastAccessQueueMethods.add,
+    has = fastAccessQueueMethods.has
   }
 end
 
@@ -374,5 +419,18 @@ function u.storeColour()
   local prevColour = { r = r, g = g, b = b, a = a }
   return function() u.changeColour(prevColour) end
 end
+
+-- Create a list of triangles that cover the same area as the polygon you are given. If your polygon is convex it is easier, since you can have all triangles share a common vertex. If your polygons are not guaranteed to be convex, then you'll have to find a better polygon triangulation technique. Here's the relevant Wikipedia article. https://en.wikipedia.org/wiki/Polygon_triangulation
+--
+-- Randomly choose which triangle to use, weighted by its area. So if triangle A is 75% of the area and triangle B is 25% of the area, triangle A should be picked 75% of the time and B 25%. This means find the fraction of the total area that each triangle takes up, and store that in a list. Then generate a random double number from 0 - 1 (Math.random() does this), and subtract each value in the list until the next subtraction would make it negative. That will pick a triangle at random with the area weights considered.
+--
+-- Randomly pick a point within the chosen triangle. You can use this formula : sample random point in triangle.
+
+
+-- you can generate a random point, P, uniformly from within triangle ABC by the following convex combination of the vertices:
+--
+-- P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C
+--
+-- where r1 and r2 are uniformly drawn from [0, 1], and sqrt is the square root function.
 
 return u
