@@ -26,7 +26,13 @@ room.leftTrans = {
     xmod = 0, ymod = 0
   }
 }
-room.upTrans = {}
+room.upTrans = {
+  {
+    roomTarget = "Rooms/cursedForest/r01.lua",
+    xleftmost = 0, xrightmost = 520,
+    xmod = 0, ymod = 0
+  }
+}
 
 room.game_scale = 2
 

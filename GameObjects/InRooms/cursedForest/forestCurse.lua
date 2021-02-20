@@ -6,16 +6,14 @@ local snd = require "sound"
 
 local possibleStartingRooms = {
   {weight = 1, value = "Rooms/cursedForest/r01.lua"},
-  {weight = 1, value = "Rooms/cursedForest/r03.lua"},
-  {weight = 1, value = "Rooms/cursedForest/r06.lua"},
-  {weight = 1, value = "Rooms/cursedForest/r09.lua"},
-  {weight = 1, value = "Rooms/cursedForest/r10.lua"},
-  {weight = 1, value = "Rooms/cursedForest/r11.lua"},
-  {weight = 1, value = "Rooms/cursedForest/r12.lua"},
+  -- {weight = 1, value = "Rooms/cursedForest/r03.lua"},
+  -- {weight = 1, value = "Rooms/cursedForest/r06.lua"},
+  -- -- Dangerous. Has gap to the left
+  -- -- {weight = 1, value = "Rooms/cursedForest/r09.lua"},
+  -- {weight = 1, value = "Rooms/cursedForest/r10.lua"},
+  -- {weight = 1, value = "Rooms/cursedForest/r11.lua"},
+  -- {weight = 1, value = "Rooms/cursedForest/r12.lua"},
 }
-
--- In some areas of the forest where you come from
--- is as important as where you're going...
 
 local Curse = {}
 
@@ -31,20 +29,6 @@ end
 Curse.functions = {
   load = function (self)
     if self.dieASAP then o.removeFromWorld(self) end
-  end,
-
-  startTimer = function (self)
-    if not self.momentEntered then
-      self.momentEntered = {
-        time = session.save.time,
-        days = session.save.days
-      }
-    end
-  end,
-
-  clearTimer = function (self)
-    self.momentEntered = nil
-    self.bellsRang = 0
   end,
 
   updateTimer = function (self, dt)
@@ -66,12 +50,12 @@ Curse.functions = {
     self:updateTimer(dt)
   end,
 
-  draw = function (self)
-    if self.dieASAP then return end
-    if pl1 then
-      love.graphics.circle("fill", pl1.x, pl1.y - 33, 3)
-    end
-  end,
+  -- draw = function (self)
+  --   if self.dieASAP then return end
+  --   if pl1 then
+  --     love.graphics.circle("fill", pl1.x, pl1.y - 33, 3)
+  --   end
+  -- end,
 
   -- not for drawing in this case but it's the
   -- only one that only runs durin transition
@@ -86,7 +70,6 @@ Curse.functions = {
 
     -- Test if I must be deleted
     if roomName:find("Rooms/w098x102.lua") then
-      self:clearTimer()
       game.room.leftTrans = {
         {
           roomTarget = self.getFirstRoom(),
@@ -95,7 +78,6 @@ Curse.functions = {
         }
       }
     elseif roomName:find("Rooms/w095x103.lua") then
-      self:clearTimer()
       game.room.rightTrans = {
         {
           roomTarget = self.getFirstRoom(),
@@ -104,7 +86,6 @@ Curse.functions = {
         }
       }
     elseif roomName:find("Rooms/w096x104.lua") then
-      self:clearTimer()
       game.room.upTrans = {
         {
           roomTarget = self.getFirstRoom(),
@@ -114,7 +95,6 @@ Curse.functions = {
       }
     elseif roomName:find("Rooms/w096x102.lua") then
       if game.lastSide == "up" then
-        self:startTimer()
         game.room.downTrans = {
           {
             roomTarget = "Rooms/cursedForest/r08.lua",
@@ -130,14 +110,14 @@ Curse.functions = {
             xmod = 0, ymod = 0
           }
         }
-        self:clearTimer()
       end
     elseif roomName:find("cursedForest") then
       game.room.music_info = "ambient1"
-      self:startTimer()
       if roomName:find("Chess") then
-        session.startQuest("chessPuzzle1");
-        session.startQuest("chessPuzzle2");
+        -- game.room.music_info = snd.silence
+        game.room.music_info = {"Silence", previousFadeOut = 0.5}
+        session.startQuest("chessPuzzle1")
+        session.startQuest("chessPuzzle2")
       end
     else
       o.removeFromWorld(self)

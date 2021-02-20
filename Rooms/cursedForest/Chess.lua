@@ -6,7 +6,6 @@ local snd = require "sound"
 local room = {}
 room.newType = true
 
-room.music_info = snd.ovrwrld1
 room.timeScreenEffect = 'forestCurse1'
 
 room.width = 512
@@ -1135,12 +1134,10 @@ room.manuallyPlacedObjects = {
   {x = getX() + 4 * step, y = getY() + 7 * step, blueprint = "misc.chess.king"},
   {x = getX() + 5 * step, y = getY() + 7 * step, blueprint = "misc.chess.bishop"},
   {x = getX() + 7 * step, y = getY() + 7 * step, blueprint = "misc.chess.rook"},
-}
 
--- Freely the forest to traverse
--- Stand where the white queen fell
--- There she'll guard you from the curse
--- When you hear the fourth bell
+  -- place curse
+  {x = 0, y = 0, blueprint = "InRooms.cursedForest.Chess.curse"},
+}
 
 -- position:
 -- r . . q k . h r
@@ -1151,5 +1148,4 @@ room.manuallyPlacedObjects = {
 -- . P . . . . . .
 -- H P P P P P P P
 -- R . . . K B . R
--- Not sure if bishop existing breaks it. I think not
 return room

@@ -472,6 +472,7 @@ glsounds = snd.load_sounds{
   enemyJump = {"Effects/Oracle_Enemy_Jump"},
   shieldDeflect = {"Effects/Oracle_Shield_Deflect"},
   journalEntry = {"Effects/journalEntry"},
+  bell = {"Effects/bell"},
   -- Harpsounds
   harpad = {"Effects/harp/ad"},
   harpadB = {"Effects/harp/adB"},
@@ -1130,28 +1131,28 @@ local function mainCameraDraw(l,t,w,h)
 
   end -- if layers > 0
 
-  -- Enemarea code
-  enemarea = enemarea or {}
-  triangles = triangles or {}
-  if enemarea[1] then
-    -- Polygon
-    if #enemarea == 2 then
-      love.graphics.points(enemarea)
-    elseif #enemarea == 4 then
-      love.graphics.line(enemarea)
-    elseif #enemarea >= 6 then
-      love.graphics.polygon("line", enemarea)
-    end
-  end
-  -- Triangles
-  for _, triangle in ipairs(triangles) do
-    -- love.graphics.polygon("line", triangle)
-
-    local resetColour = u.storeColour()
-    u.changeColour{"white", a = COLORCONST * 0.5}
-    love.graphics.polygon("fill", triangle)
-    resetColour()
-  end
+  -- -- Enemarea code
+  -- enemarea = enemarea or {}
+  -- triangles = triangles or {}
+  -- if enemarea[1] then
+  --   -- Polygon
+  --   if #enemarea == 2 then
+  --     love.graphics.points(enemarea)
+  --   elseif #enemarea == 4 then
+  --     love.graphics.line(enemarea)
+  --   elseif #enemarea >= 6 then
+  --     love.graphics.polygon("line", enemarea)
+  --   end
+  -- end
+  -- -- Triangles
+  -- for _, triangle in ipairs(triangles) do
+  --   -- love.graphics.polygon("line", triangle)
+  --
+  --   local resetColour = u.storeColour()
+  --   u.changeColour{"white", a = COLORCONST * 0.5}
+  --   love.graphics.polygon("fill", triangle)
+  --   resetColour()
+  -- end
 
 end
 local function afterScreenEffects(l,t,w,h)
@@ -1469,11 +1470,11 @@ function love.mousepressed(x, y, button, isTouch)
   --   end
   -- end
 
-  -- Enemarea code
-  if type(enemarea[1]) == "table" then enemarea = {} end
-  x, y = cam:toWorld(x, y)
-  table.insert(enemarea, x)
-  table.insert(enemarea, y)
+  -- -- Enemarea code
+  -- if type(enemarea[1]) == "table" then enemarea = {} end
+  -- x, y = cam:toWorld(x, y)
+  -- table.insert(enemarea, x)
+  -- table.insert(enemarea, y)
 
   moub[button] = true
 end
@@ -1489,57 +1490,57 @@ function love.keypressed(key, scancode)
     love.window.setFullscreen(not love.window.getFullscreen())
   end
 
-  -- Enemarea code
-  if key == "f" then
-    if #enemarea > 4 then
-      for _, triangle in ipairs(love.math.triangulate(enemarea)) do
-        table.insert(triangles, triangle)
-      end
-    end
-    enemarea = {}
-  elseif key == "g" then
-    enemarea = {}
-    triangles = {}
-  elseif key == "h" then
-    -- local areaData = "{\n"
-
-    -- no whitespace
-    local areaData = "{"
-    local delim = ""
-    -- Find total area
-    local totalArea = 0
-    for _, triangle in ipairs(triangles) do
-      totalArea = totalArea + u.getTriangleArea(triangle)
-    end
-    for _, triangle in ipairs(triangles) do
-
-      -- areaData = areaData..delim.."  {\n"..
-      -- "    value = {"..
-      -- triangle[1]..", "..triangle[2]..", "..
-      -- triangle[3]..", "..triangle[4]..", "..
-      -- triangle[5]..", "..triangle[6].."},\n"..
-      -- "    chance = "..(u.getTriangleArea(triangle) / totalArea).."\n"..
-      -- "  }"
-      --
-      -- delim = ",\n"
-
-      -- no whitespace
-      areaData = areaData..delim.."{"..
-      "value={"..
-      triangle[1]..","..triangle[2]..","..
-      triangle[3]..","..triangle[4]..","..
-      triangle[5]..","..triangle[6].."},"..
-      "chance="..(u.getTriangleArea(triangle) / totalArea)..
-      "}"
-
-      delim = ","
-
-    end
-    -- areaData = areaData.."\n}\n"
-    -- no whitespace
-    areaData = areaData.."}"
-    love.filesystem.write("enemarea.txt", areaData)
-  end
+  -- -- Enemarea code
+  -- if key == "f" then
+  --   if #enemarea > 4 then
+  --     for _, triangle in ipairs(love.math.triangulate(enemarea)) do
+  --       table.insert(triangles, triangle)
+  --     end
+  --   end
+  --   enemarea = {}
+  -- elseif key == "g" then
+  --   enemarea = {}
+  --   triangles = {}
+  -- elseif key == "h" then
+  --   -- local areaData = "{\n"
+  --
+  --   -- no whitespace
+  --   local areaData = "{"
+  --   local delim = ""
+  --   -- Find total area
+  --   local totalArea = 0
+  --   for _, triangle in ipairs(triangles) do
+  --     totalArea = totalArea + u.getTriangleArea(triangle)
+  --   end
+  --   for _, triangle in ipairs(triangles) do
+  --
+  --     -- areaData = areaData..delim.."  {\n"..
+  --     -- "    value = {"..
+  --     -- triangle[1]..", "..triangle[2]..", "..
+  --     -- triangle[3]..", "..triangle[4]..", "..
+  --     -- triangle[5]..", "..triangle[6].."},\n"..
+  --     -- "    chance = "..(u.getTriangleArea(triangle) / totalArea).."\n"..
+  --     -- "  }"
+  --     --
+  --     -- delim = ",\n"
+  --
+  --     -- no whitespace
+  --     areaData = areaData..delim.."{"..
+  --     "value={"..
+  --     triangle[1]..","..triangle[2]..","..
+  --     triangle[3]..","..triangle[4]..","..
+  --     triangle[5]..","..triangle[6].."},"..
+  --     "chance="..(u.getTriangleArea(triangle) / totalArea)..
+  --     "}"
+  --
+  --     delim = ","
+  --
+  --   end
+  --   -- areaData = areaData.."\n}\n"
+  --   -- no whitespace
+  --   areaData = areaData.."}"
+  --   love.filesystem.write("enemarea.txt", areaData)
+  -- end
 
   -- if key == "c" then collectgarbage(); fuck = collectgarbage("count") end
   text.key = scancode ~= "return" and scancode or text.key

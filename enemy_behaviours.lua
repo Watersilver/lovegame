@@ -12,11 +12,11 @@ local defaultDeathSound = {"Testplosion"}
 local defaultDeathSprite = {im.spriteSettings.testsplosion}
 
 function ebh.die(object)
-  -- require to avoid circular dependency
   if object.enemyId then
     session.deadEnemies:add(object.enemyId)
   end
 
+  -- require to avoid circular dependency
   local explOb = (require "GameObjects.explode"):new{
     x = object.x or object.xstart, y = object.y or object.ystart,
     layer = object.layer,
