@@ -6,13 +6,13 @@ local snd = require "sound"
 
 local possibleStartingRooms = {
   {weight = 1, value = "Rooms/cursedForest/r01.lua"},
-  -- {weight = 1, value = "Rooms/cursedForest/r03.lua"},
-  -- {weight = 1, value = "Rooms/cursedForest/r06.lua"},
-  -- -- Dangerous. Has gap to the left
-  -- -- {weight = 1, value = "Rooms/cursedForest/r09.lua"},
-  -- {weight = 1, value = "Rooms/cursedForest/r10.lua"},
-  -- {weight = 1, value = "Rooms/cursedForest/r11.lua"},
-  -- {weight = 1, value = "Rooms/cursedForest/r12.lua"},
+  {weight = 1, value = "Rooms/cursedForest/r03.lua"},
+  {weight = 1, value = "Rooms/cursedForest/r06.lua"},
+  -- Dangerous. Has gap to the left
+  -- {weight = 1, value = "Rooms/cursedForest/r09.lua"},
+  {weight = 1, value = "Rooms/cursedForest/r10.lua"},
+  {weight = 1, value = "Rooms/cursedForest/r11.lua"},
+  {weight = 1, value = "Rooms/cursedForest/r12.lua"},
 }
 
 local Curse = {}
