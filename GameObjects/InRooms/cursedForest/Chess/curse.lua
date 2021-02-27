@@ -57,6 +57,10 @@ Curse.functions = {
 
   end,
 
+  draw = function (self)
+    -- transdraw doesn't run if draw doesnt exist, so add this here
+  end,
+
   -- not for drawing in this case but it's the
   -- only one that only runs durin transition
   trans_draw = function (self)

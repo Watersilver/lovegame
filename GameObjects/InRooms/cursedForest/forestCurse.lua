@@ -19,7 +19,6 @@ local Curse = {}
 
 function Curse.initialize(instance)
   instance.layer = 30
-  instance.timer = 0
   instance.transPersistent = true
   instance.ids[#instance.ids+1] = "ForestCurse"
   if o.identified.ForestCurse and o.identified.ForestCurse[1].exists then instance.dieASAP = true end
@@ -31,13 +30,6 @@ Curse.functions = {
     if self.dieASAP then o.removeFromWorld(self) end
   end,
 
-  updateTimer = function (self, dt)
-    -- session.save.days: 24 kathe mera
-    -- session.save.time: mexri 24
-    if not self.momentEntered then return end
-    -- fuck = 24 * (session.save.days - self.momentEntered.days) + session.save.time - self.momentEntered.time
-  end,
-
   getFirstRoom = function ()
     return u.chooseFromWeightTable(possibleStartingRooms)
   end,
@@ -46,16 +38,15 @@ Curse.functions = {
     if self.dieASAP then return end
     if not self.TransRanAtLeastOnce then self:trans_draw() end
     self.transRan = false
-
-    self:updateTimer(dt)
   end,
 
-  -- draw = function (self)
-  --   if self.dieASAP then return end
-  --   if pl1 then
-  --     love.graphics.circle("fill", pl1.x, pl1.y - 33, 3)
-  --   end
-  -- end,
+  draw = function (self)
+    -- transdraw doesn't run if draw doesnt exist, so add this here
+    -- if self.dieASAP then return end
+    -- if pl1 then
+    --   love.graphics.circle("fill", pl1.x, pl1.y - 33, 3)
+    -- end
+  end,
 
   -- not for drawing in this case but it's the
   -- only one that only runs durin transition
