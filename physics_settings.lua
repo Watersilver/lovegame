@@ -16,6 +16,7 @@ local ps = {}
 love.physics.setMeter(16)
 
 ps.pw = love.physics.newWorld(0, 280)--280)
+ps.pw:setGravity(0, 0)
 
 -- Make shapes
 ps.shapes = {
@@ -116,13 +117,15 @@ thickness, height * proportion
 
 function ps.shapes.edgeToTiles(instance, edgetable)
   local i = 1
-  if instance.physical_properties.tile[1] == "none" then return end
+  local pp = instance.physical_properties
+  if pp.tile[1] == "none" then return end
   instance.body = love.physics.newBody(ps.pw, instance.xstart, instance.ystart)
   instance.body:setUserData(instance)
   instance.fixtures = {}
-  for _, side in ipairs(instance.physical_properties.tile) do
+  for _, side in ipairs(pp.tile) do
     local shape = edgetable[side]
     local newf = love.physics.newFixture(instance.body, shape)
+    if pp.restitution then newf:setRestitution(pp.restitution) end
     u.push(instance.fixtures, newf)
     newf:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
     newf:setUserData(side)
@@ -131,12 +134,23 @@ function ps.shapes.edgeToTiles(instance, edgetable)
   end
 
   -- WARNING: This is here so that walls aren't paper thin. Might want to find better way
-  -- WARNING: HATCHET JOB
+  -- WARNING: HATCHET JOB. Don't delete. Will break floor detection
   local shape = ps.shapes.rect1x1minusinfinitesimal
   local newf = love.physics.newFixture(instance.body, shape)
   u.push(instance.fixtures, newf)
   newf:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
+  newf:setCategory(FLOORCOLLIDECAT)
   -- WARNING: HATCHET JOB
+
+  if pp.bodyType == "dynamic" then
+    instance.body:setType("dynamic")
+    instance.body:setFixedRotation(true)
+    instance.body:setMass(pp.mass or 40)
+    instance.body:setLinearDamping(pp.linearDamping or 40)
+    for _, fixture in ipairs(instance.body:getFixtureList()) do
+      fixture:setRestitution(pp.restitution or 0)
+    end
+  end
 
 end
 
