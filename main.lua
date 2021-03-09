@@ -1441,6 +1441,10 @@ end
 function love.mousepressed(x, y, button, isTouch)
   -- x, y = cam:toWorld(x, y)
 
+  -- local DynBrick = require("GameObjects.dynamicBrick")
+  -- local brick = DynBrick:new{x = x, y = y, xstart = x, ystart = y}
+  -- o.addToWorld(brick)
+
   -- if button == 2 then
   --   if cursor then
   --     cursor = cursor + 1

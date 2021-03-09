@@ -1065,6 +1065,5 @@ room.gameObjects = {
 room.manuallyPlacedObjects = {
   {x = 0, y = 0, blueprint = "InRooms.w095x099.portalChecker095x099"},
   {x = 312, y = 344, blueprint = "GlobalNpcs.saver"},
-  {x = 0, y = 0, blueprint = "enemies.ZoraSpawner"},
 }
 return room
