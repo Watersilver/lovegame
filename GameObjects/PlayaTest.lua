@@ -2258,6 +2258,7 @@ function Playa.initialize(instance)
       end_state = function(instance, dt)
         inp.enable_controller(instance.player)
         instance:setGhost(false)
+        instance.x_scale = 1
       end
     },
 
@@ -2845,7 +2846,7 @@ Playa.functions = {
 
       if sensorID then
         local sensors = self.sensors
-        if not other.unpushable then
+        if (not other.unpushable) and (not other.goThroughPlayer) then
           local onEdge
           if other.edge then
             other.onEdge = ec.isOnEdge(other, self)
@@ -2890,7 +2891,7 @@ Playa.functions = {
 
       if sensorID then
         local sensors = self.sensors
-        if not other.unpushable == true then
+        if (not other.unpushable == true) and (not other.goThroughPlayer) then
           -- local sensors = self.sensors
 
           -- for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
@@ -2930,6 +2931,7 @@ Playa.functions = {
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
     -- don't collide with floors
     if other.floor or other.notSolidStatic then coll:setEnabled(false) return end
+    if other.goThroughPlayer then coll:setEnabled(false) end
     if not myF:isSensor() then
       -- jump over stuff on ground
       if other.grounded then

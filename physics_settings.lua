@@ -82,6 +82,12 @@ ps.shapes = {
       sprite = love.physics.newRectangleShape(0, 0, 37*0.5, 61*0.5),
       body = love.physics.newRectangleShape(0, 5, 10, 20),
       laser = love.physics.newRectangleShape(0, 80, 20, 160),
+    },
+    boss2 = {
+      -- head = love.physics.newRectangleShape(0, 0, 37*0.5, 61*0.5),
+      head = love.physics.newRectangleShape(0, 3, 89, 48),
+      eye = love.physics.newRectangleShape(8,8),
+      hand = love.physics.newRectangleShape(36,24),
     }
   }
 }

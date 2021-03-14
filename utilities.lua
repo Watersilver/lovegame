@@ -98,6 +98,13 @@ function u.perpendicularRightTurn2d(x, y)
   return y, -x
 end
 
+function u.rotate2d(x, y, radAngle)
+  local xrotated, yrotated
+  xrotated = x * math.cos(radAngle) - y * math.sin(radAngle);
+  yrotated = x * math.sin(radAngle) + y * math.cos(radAngle);
+  return xrotated, yrotated;
+end
+
 function u.posFromSide(distanceKept, xdiff, ydiff, targetingSide)
   if targetingSide == "up" then
     return xdiff, ydiff - distanceKept, targetingSide

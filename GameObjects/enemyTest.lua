@@ -36,6 +36,7 @@ function Enemy.initialize(instance)
     categories = {DEFAULTCAT, FLOORCOLLIDECAT, ROOMEDGECOLLIDECAT}
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
+  instance.enemy = true
   instance.input = {left = 0, right = 0, up = 0, down = 0}
   instance.zo = 0
   instance.x_scale = 1
@@ -46,6 +47,7 @@ function Enemy.initialize(instance)
   instance.damager = 1 -- how much damage I cause
   instance.grounded = true -- can be jumped over
   instance.flying = false -- can go through walls
+  instance.goThroughPlayer = false -- can go through player
   instance.jumping = false -- can go over player and other non solids
   instance.levitating = false -- can go through over hazardous floor
   instance.actAszo0 = false -- move in regards to floor friction etc as if grounded
@@ -420,7 +422,8 @@ Enemy.functions = {
       return
     end
 
-    if self.flying then
+      -- instance.goThroughEnemies = true
+    if self.flying or (self.goThroughEnemies and other.enemy) then
       coll:setEnabled(false)
     elseif self.jumping then
       if other.body:getType() ~= "static" then coll:setEnabled(false) end

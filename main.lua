@@ -683,10 +683,10 @@ function love.update(dt)
     end
   end
 
-  -- -- display mouse position
+  -- display mouse position
   -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  -- local wmrx, wmry = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
-  -- fuck = tostring(wmrx) .. "/" .. tostring(wmry)
+  -- wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
+  -- fuck = tostring(wmx) .. "/" .. tostring(wmy)
   --
   -- -- display room
   -- fuck = fuck .. "\n" .. (session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or "")

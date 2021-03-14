@@ -12,6 +12,8 @@ function NoBody.initialize(instance)
   }
   instance.image_speed = 0
   instance.image_index = 0
+  instance.x_scale = 1
+  instance.y_scale = 1
 end
 
 NoBody.functions = {
@@ -22,7 +24,7 @@ draw = function (self)
   love.graphics.setShader(self.myShader)
   love.graphics.draw(
   sprite.img, frame, self.x or self.xstart, self.y or self.ystart, 0,
-  sprite.res_x_scale, sprite.res_y_scale,
+  sprite.res_x_scale * self.x_scale, sprite.res_y_scale * self.y_scale,
   sprite.cx, sprite.cy)
   love.graphics.setShader(worldShader)
 end,
@@ -38,7 +40,7 @@ trans_draw = function (self)
   love.graphics.draw(
   sprite.img, frame,
   xtotal, ytotal, 0,
-  sprite.res_x_scale, sprite.res_y_scale,
+  sprite.res_x_scale * self.x_scale, sprite.res_y_scale * self.y_scale,
   sprite.cx, sprite.cy)
   love.graphics.setShader(worldShader)
 end

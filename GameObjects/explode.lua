@@ -113,15 +113,15 @@ Explode.functions = {
         }
         o.addToWorld(nextplosion)
       else
-        if self.drops then
+        if self.onExplEnd then
+          -- For specific stuff, use custom method
+          self:onExplEnd()
+        elseif self.drops then
           -- If I have custom drops, use them to determine drop
           drops.custom(self.xexplode or self.xstart, self.yexplode or self.ystart, self.drops)
-        elseif self.drop then
+        elseif self.drop and self.drop ~= "noDrop" then
           -- Else use one of the drop tables
           drops[self.drop](self.xexplode or self.xstart, self.yexplode or self.ystart)
-        elseif self.onExplEnd then
-          -- For more specific stuff, use custom method
-          self:onExplEnd()
         end
       end
       self.image_indexfloat = frames - 1

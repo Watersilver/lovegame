@@ -120,17 +120,6 @@ im.spriteSettings = {
   missileSkill = {'missileSkill', 4, padding = 1, width = 16, height = 13},
   mobilitySkill = {'mobilitySkill', 4, padding = 1, width = 9, height = 13},
 
-  boss1TestSprites = {
-    -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
-    {'boss1/arevcyeq', 4, padding = 2, width = 24, height = 28},
-    -- {'boss1/arevcyeqLH', 2, padding = 2, width = 8, height = 9},
-    {'boss1/arevcyeqLH', 2, padding = 2, width = 15, height = 10},
-    {'boss1/arevcyeqRH', padding = 0, width = 12, height = 12},
-    {'boss1/arevcyeqLaser1', 2, padding = 0, width = 26, height = 107}
-  },
-  boss1Orb = {'boss1/arevcyeqOrb', padding = 0, width = 16, height = 16},
-  boss1LiftableOrb = {'boss1/arevcyeqLiftableOrb', padding = 0, width = 16, height = 16},
-  boss1OrbShadow = {'boss1/arevcyeqOrbShadow', 1, padding = 2, width = 16, height = 16},
   playerSprites = {
     {'Witch/walk_left', 2, padding = 2, width = 16, height = 16},
     {'Witch/walk_up', 2, padding = 2, width = 16, height = 16},
@@ -312,6 +301,29 @@ im.spriteSettings = {
     {'Enemies/Blob/walk', 4, padding = 2, width = 14, height = 16},
     {'Enemies/Blob/transwalk', 4, padding = 2, width = 14, height = 16},
     {'Enemies/Blob/shock', 4, padding = 2, width = 13, height = 16},
+  },
+
+  -- Bosses
+  -- Boss 1
+  boss1TestSprites = {
+    -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
+    {'boss1/arevcyeq', 4, padding = 2, width = 24, height = 28},
+    -- {'boss1/arevcyeqLH', 2, padding = 2, width = 8, height = 9},
+    {'boss1/arevcyeqLH', 2, padding = 2, width = 15, height = 10},
+    {'boss1/arevcyeqRH', padding = 0, width = 12, height = 12},
+    {'boss1/arevcyeqLaser1', 2, padding = 0, width = 26, height = 107}
+  },
+  boss1Orb = {'boss1/arevcyeqOrb', padding = 0, width = 16, height = 16},
+  boss1LiftableOrb = {'boss1/arevcyeqLiftableOrb', padding = 0, width = 16, height = 16},
+  boss1OrbShadow = {'boss1/arevcyeqOrbShadow', 1, padding = 2, width = 16, height = 16},
+
+  -- Boss 2
+  boss2 = {
+    {'Bosses/boss2/Head', 3, padding = 2, width = 94, height = 89},
+    {'Bosses/boss2/LeftEye', 3, padding = 2, width = 18, height = 19},
+    {'Bosses/boss2/RightEye', 3, padding = 2, width = 18, height = 19},
+    {'Bosses/boss2/HandFront', 1, padding = 2, width = 36, height = 24},
+    {'Bosses/boss2/HandBack', 2, padding = 2, width = 53, height = 60}
   },
 
   -- Misc
