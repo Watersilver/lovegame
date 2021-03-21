@@ -50,15 +50,26 @@ function Orb.initialize(instance)
   instance.sounds = snd.load_sounds({
     land = {"Effects/Oracle_Boss_BigBoom"}
   })
+
+  instance.floorTiles = {role = "thrownFloorTilesIndex"}
 end
 
 Orb.functions = {
   load = function (self)
     et.functions.load(self)
+    if self.breakOnLanding then
+      self.body:setType("dynamic")
+    end
   end,
 
   destroy = function (self)
-    expl.commonExplosion(self)
+    if self.groundType == "gap" then
+      expl.plummet(self)
+    elseif self.groundType == "water" then
+      expl.sink(self)
+    else
+      expl.commonExplosion(self)
+    end
   end,
 
   enemyUpdate = function (self, dt)
@@ -71,15 +82,45 @@ Orb.functions = {
       self.harmless = true
       if self.zo == 0 then
         if not self.touchedGround then
-          gsh.newShake(mainCamera, "displacement")
-          snd.play(self.sounds.land)
-          self.unpushable = false
-          self.pushback = true
-          self.attackDodger = false
-          self.touchedGround = true
+          if self.groundType == "solid" then
+            gsh.newShake(mainCamera, "displacement")
+            snd.play(self.sounds.land)
+            self.unpushable = false
+            self.pushback = true
+            self.attackDodger = false
+            self.touchedGround = true
+          end
+          if self.breakOnLanding then
+            o.removeFromWorld(self)
+          end
         end
       end
     end
+
+    if self.floorTiles[1] then
+      local x, y = self.body:getPosition()
+      -- I could be stepping on up to four tiles. Find closest to determine mods
+      local closestTile
+      local closestDistance = math.huge
+      local previousClosestDistance
+      for _, floorTile in ipairs(self.floorTiles) do
+        previousClosestDistance = closestDistance
+        closestDistance = math.min(u.distanceSqared2d(x, y, floorTile.xstart, floorTile.ystart), closestDistance)
+        if closestDistance < previousClosestDistance then
+          closestTile = floorTile
+        end
+      end
+      self.xClosestTile = closestTile.xstart
+      self.yClosestTile = closestTile.ystart
+      if closestTile.water then
+        self.groundType = "water"
+      elseif closestTile.gap then
+        self.groundType = "gap"
+      else
+        self.groundType = "solid"
+      end
+    end
+
     -- if self.liftable then self.myShader = liftableShader end
   end,
 
@@ -92,7 +133,21 @@ Orb.functions = {
   hitByThrown = function (self, other, myF, otherF)
   end,
 
-  beginContact = u.emptyFunc,
+  beginContact = function(self, a, b, coll, aob, bob)
+    -- Find which fixture belongs to whom
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+    -- remember tiles
+    u.rememberFloorTile(self, other)
+  end,
+
+  endContact = function(self, a, b, coll, aob, bob)
+    -- Find which fixture belongs to whom
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+    -- Forget Floor tiles
+    u.forgetFloorTile(self, other)
+  end,
 
   preSolve = function (self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom

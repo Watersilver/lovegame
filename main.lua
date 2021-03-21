@@ -683,7 +683,7 @@ function love.update(dt)
     end
   end
 
-  -- display mouse position
+  -- -- display mouse position
   -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
   -- wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
   -- fuck = tostring(wmx) .. "/" .. tostring(wmy)

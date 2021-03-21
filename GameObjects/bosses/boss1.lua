@@ -257,7 +257,7 @@ local states = {
     instance.hurtCounter = 2
     instance.invulnerable = instance.hurtCounter
     instance.hp = instance.hp - 1
-    if instance.hp == 0 then
+    if instance.hp <= 0 then
       instance.image_index = 3
       snd.play(instance.sounds.fatalHit)
       instance.dying = true

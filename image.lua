@@ -319,7 +319,8 @@ im.spriteSettings = {
 
   -- Boss 2
   boss2 = {
-    {'Bosses/boss2/Head', 3, padding = 2, width = 94, height = 89},
+    {'Bosses/boss2/Head', 4, padding = 2, width = 94, height = 89},
+    {'Bosses/boss2/HeadFront', 2, padding = 2, width = 94, height = 63},
     {'Bosses/boss2/LeftEye', 3, padding = 2, width = 18, height = 19},
     {'Bosses/boss2/RightEye', 3, padding = 2, width = 18, height = 19},
     {'Bosses/boss2/HandFront', 1, padding = 2, width = 36, height = 24},

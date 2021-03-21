@@ -109,6 +109,7 @@ Explode.functions = {
           nosound = self.nosound,
           normalDrop = self.normalDrop,
           drop = self.drop,
+          explodeDistance = self.explodeDistance,
           createOnExplEnd = self.createOnExplEnd
         }
         o.addToWorld(nextplosion)

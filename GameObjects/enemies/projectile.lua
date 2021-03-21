@@ -33,6 +33,7 @@ function Projectile.initialize(instance)
   instance.doesntGoThroughSolids = false
   instance.getDestroyed = o.removeFromWorld
   instance.seeThrough = true
+  instance.thrownGoesThrough = true
 end
 
 local function fireUpdate(self, dt)
@@ -150,7 +151,8 @@ Projectile.functions = {
     end
   end,
 
-  hitByMissile = function (self, other, myF, otherF)
+  hitByMissile = function (self, other, myF, otherF, coll)
+    if self.notBreakableByMissile then return end
     if session.save.nayrusWisdom then
       self:getDestroyed("missile");
     end
@@ -166,6 +168,10 @@ Projectile.functions = {
   end,
 
   preSolve = function(self, a, b, coll, aob, bob)
+    -- if self.dontInteractWithMissile then
+    --   coll:setEnabled(false)
+    --   return
+    -- end
     coll:setEnabled(false)
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
   end,
