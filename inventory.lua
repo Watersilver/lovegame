@@ -261,7 +261,7 @@ function inv.check_use(instance, trig, side, dt)
   if trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
     returnValue = true
-  elseif trig.jump then
+  elseif trig.jump and instance.zo >= 0 then
     instance.animation_state:change_state(instance, dt, side .. "jump")
     returnValue = true
   elseif trig.fire_missile then
