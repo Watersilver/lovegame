@@ -108,6 +108,15 @@ im.spriteSettings = {
   dropFairy = {
     {'Drops/fairy', 1, padding = 0, width = 8, height = 11}
   },
+  dropBlast = {
+    {'Drops/blastSeed', 1, padding = 0, width = 8, height = 8},
+  },
+  dropMultiBlast = {
+    {'Drops/blastSeeds', 1, padding = 0, width = 12, height = 9},
+  },
+  dropDust = {
+    {'Drops/magicDust', 1, padding = 0, width = 8, height = 14}
+  },
 
   pieceOfHeart = {
     {'pieceOfHeart', 1, padding = 0, width = 16, height = 15}
@@ -276,6 +285,9 @@ im.spriteSettings = {
   bullet = {
     {'Enemies/Bullet/bullet', 1, padding = 2, width = 10, height = 10}
   },
+  dragonFire = {
+    {'Bosses/boss3/dragonFire', 4, padding = 2, width = 8, height = 12}
+  },
   robeMissile = {
     {'Enemies/Robe/attack', 4, padding = 2, width = 12, height = 12}
   },
@@ -327,6 +339,10 @@ im.spriteSettings = {
     {'Bosses/boss2/HandBack', 2, padding = 2, width = 53, height = 60}
   },
 
+  boss3 = {
+    {'Bosses/boss3/boss3', 6, 4, padding = 2, width = 56, height = 68},
+  },
+
   -- Misc
   torch = {
     {'Misc/Torch/out', 1, padding = 2, width = 16, height = 16},
@@ -334,6 +350,9 @@ im.spriteSettings = {
   },
   eyeStatue = {
     {'Misc/EyeStatue/statue', 10, padding = 2, width = 16, height = 16},
+  },
+  door = {
+    {'Door', 2, 2}
   },
   -- chesspieces
   pawn = {

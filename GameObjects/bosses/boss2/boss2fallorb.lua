@@ -82,12 +82,17 @@ Orb.functions = {
       self.harmless = true
       if self.zo == 0 then
         if not self.touchedGround then
-          gsh.newShake(mainCamera, "displacement")
-          snd.play(self.sounds.land)
-          self.unpushable = false
-          self.pushback = true
-          self.attackDodger = false
-          self.touchedGround = true
+          if self.groundType == "solid" then
+            gsh.newShake(mainCamera, "displacement")
+            snd.play(self.sounds.land)
+            self.unpushable = false
+            self.pushback = true
+            self.attackDodger = false
+            self.touchedGround = true
+          end
+          if self.breakOnLanding then
+            o.removeFromWorld(self)
+          end
         end
       end
     end

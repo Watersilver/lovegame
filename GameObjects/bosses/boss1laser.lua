@@ -27,6 +27,7 @@ function Laser.initialize(instance)
   instance.boss1laser = true
   instance.canBeRolledThrough = false
   instance.canBeBullrushed = false
+  instance.dpDeflectable = false
   instance.image_index = 1
   instance.sounds = snd.load_sounds({
     laserSound = {"Effects/OOA_Boss_Shoot"}

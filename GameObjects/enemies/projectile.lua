@@ -9,6 +9,7 @@ local sh = require "GameObjects.shadow"
 local u = require "utilities"
 local game = require "game"
 local o = require "GameObjects.objects"
+local fire = require "GameObjects.fire"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 local bnd = require "GameObjects.bounceAndDie"
@@ -63,6 +64,26 @@ local function boneBreak(self, howIGotDestroyed)
 
 end
 
+local function burn(self)
+  self.dpDeflectable = false
+  self.dpBreakable = false
+  self.breakable = false
+  self.undamageable = true
+  self.notBreakableByMissile = true
+  self.attackDodger = true
+  self.invisible = true
+  self.onFireEnd = o.removeFromWorld
+  local myfire = fire:new{
+    x = self.x, y = self.y,
+    layer = self.layer - 1,
+    fuel = self
+  }
+  o.addToWorld(myfire)
+  self.forceStill = true
+  if not self.targetStart then return end
+  self.body:setPosition(self.targetStart.x, self.targetStart.y)
+end
+
 Projectile.functions = {
   load = function (self)
     et.functions.load(self)
@@ -84,6 +105,9 @@ Projectile.functions = {
       self.breakable = true
       self.getDestroyed = boneBreak
       self.maxspeed = 100
+    elseif self.dragonFire then
+      self.onReachTarget = burn
+      self.image_speed = 0.25
     end
 
     if not self.holdFire then
@@ -106,6 +130,18 @@ Projectile.functions = {
       end
     end
 
+    -- Determine direction if fed target
+    if self.target then
+      local _, direction = u.cartesianToPolar(self.target.x - self.x, self.target.y - self.y)
+      self.direction = direction
+      self.reachedTarget = false
+      self.tarDis = u.magnitude2d(self.target.x - self.x, self.target.y - self.y)
+      self.targetStart = {
+        x = self.target.x,
+        y = self.target.y
+      }
+    end
+
     self.body:setLinearVelocity(u.polarToCartesian(self.maxspeed, self.direction))
   end,
 
@@ -117,6 +153,18 @@ Projectile.functions = {
       o.removeFromWorld(self)
     end
     if self.xtraUpdate then self.xtraUpdate(self, dt) end
+    if self.targetStart then
+      -- fire
+      local newTarDis = u.magnitude2d(self.targetStart.x - self.x, self.targetStart.y - self.y)
+      if not self.reachedTarget and newTarDis > self.tarDis then
+        self.reachedTarget = true
+        if self.onReachTarget then self:onReachTarget() end
+      end
+      self.tarDis = newTarDis
+    end
+    if self.forceStill then
+      self.body:setLinearVelocity(0, 0)
+    end
   end,
 
   -- draw = function (self)

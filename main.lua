@@ -439,6 +439,11 @@ local moup = mouseP
 -- global sounds
 glsounds = snd.load_sounds{
   wingFlap = {"Effects/Wing_flap"},
+  dragonWingFlap = {"Effects/OOS_OnoxDragon_Fly"},
+  dragonRoar = {"Effects/OOS_Dodongo_Roar"},
+  dragonWalk = {"Effects/OOS_Aquamentus_Walk"},
+  smallBoom = {"Effects/Oracle_Barrier"},
+  bigBoom = {"Effects/Oracle_Boss_BigBoom"},
   pauseOpen = {"Effects/Oracle_PauseMenu_Open"},
   pauseClose = {"Effects/Oracle_PauseMenu_Close"},
   secret = {"Effects/Oracle_Secret"},
@@ -473,6 +478,7 @@ glsounds = snd.load_sounds{
   shieldDeflect = {"Effects/Oracle_Shield_Deflect"},
   journalEntry = {"Effects/journalEntry"},
   bell = {"Effects/bell"},
+  dungeonDoor = {"Effects/Oracle_Dungeon_Door"},
   -- Harpsounds
   harpad = {"Effects/harp/ad"},
   harpadB = {"Effects/harp/adB"},

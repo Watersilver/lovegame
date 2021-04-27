@@ -205,14 +205,16 @@ Enemy.functions = {
   end,
 
   draw = function (self)
-    if self.spritebody then
-      if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
-      self.spritebody:setPosition(self.x, self.y)
-      self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
-    end
+    if self.invisible then return end
 
     local zo = self.zo or 0
     local xtotal, ytotal = self.x, self.y + zo
+
+    if self.spritebody then
+      if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
+      self.spritebody:setPosition(xtotal, ytotal)
+      self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    end
 
     local sprite = self.sprite
     local frames = self.sprite.frames
@@ -236,6 +238,8 @@ Enemy.functions = {
   end,
 
   trans_draw = function (self)
+    if self.invisible then return end
+
     local sprite = self.sprite
     local frames = self.sprite.frames
     while self.image_index >= frames do

@@ -31,7 +31,11 @@ local function getDestroyed(self, other, myF, otherF)
     }
     o.addToWorld(explOb)
   end
-  drops.cheapest(self.xstart, self.ystart)
+  if self.drops then
+    drops.custom(self.xexplode or self.xstart, self.yexplode or self.ystart, self.drops)
+  else
+    drops.cheapest(self.xstart, self.ystart)
+  end
   self.beginContact = nil
 end
 

@@ -10,7 +10,7 @@ local im = require "image"
 local gsh = require "gamera_shake"
 local ebh = require "enemy_behaviours"
 
-local b1fo = require "GameObjects.bosses.boss1fallorb"
+local b1fo = require "GameObjects.bosses.boss2.boss2fallorb"
 
 local leftmost = 34.24
 local rightmost = 365.76

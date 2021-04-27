@@ -915,9 +915,23 @@ room.gameObjects = {
 
 { x = 312, y = 392, n = {
   l = 10,
-  -- destination = "Rooms/TestRoomBoss.lua",
-  -- desx = 72,
-  -- desy = 120,
+  destination = "Rooms/TestRoomBoss.lua",
+  desx = 72,
+  desy = 120,
+  -- destination = "Rooms/testtesttest.lua",
+  -- desx = 200,
+  -- desy = 200,
+}, t = 3, i = 8},
+
+{ x = 72, y = 136, n = {
+  l = 10,
+  destination = "Rooms/boss2room.lua",
+  desx = 200,
+  desy = 200,
+}, t = 3, i = 8},
+
+{ x = 312, y = 88, n = {
+  l = 10,
   destination = "Rooms/testtesttest.lua",
   desx = 200,
   desy = 200,
@@ -928,7 +942,6 @@ room.gameObjects = {
 { x = 56, y = 120, n = {l = 10}, t = 2, i = 202},
 { x = 72, y = 120, n = {l = 10}, t = 2, i = 202},
 { x = 88, y = 120, n = {l = 10}, t = 2, i = 202},
-{ x = 72, y = 136, n = {l = 10}, t = 3, i = 8},
 { x = 56, y = 88, n = {l = 10}, t = 1, i = 0},
 { x = 56, y = 104, n = {l = 10}, t = 1, i = 0},
 { x = 72, y = 104, n = {l = 10}, t = 1, i = 0},
@@ -1037,7 +1050,6 @@ room.gameObjects = {
 { x = 360, y = 88, n = {l = 10}, t = 2, i = 204},
 { x = 344, y = 72, n = {l = 10}, t = 2, i = 201},
 { x = 360, y = 72, n = {l = 10}, t = 2, i = 201},
-{ x = 312, y = 88, n = {l = 10}, t = 3, i = 8},
 { x = 312, y = 104, n = {l = 10}, t = 1, i = 179},
 { x = 328, y = 104, n = {l = 10}, t = 1, i = 12},
 { x = 392, y = 232, n = {l = 10}, t = 2, i = 86},
@@ -1122,6 +1134,7 @@ room.manuallyPlacedObjects = {
   {x = 328, y = 104, blueprint = "GlobalNpcs.debug.spellGiver2"},
   {x = 104, y = 344, blueprint = "GlobalNpcs.debug.skillGiver2"},
   {x = 56, y = 152, blueprint = "GlobalNpcs.debug.specialGiver2"},
+  {x = 248, y = 222, blueprint = "GlobalNpcs.debug.instrGiver"},
   {x = 232, y = 216, blueprint = "GlobalNpcs.test.debugItemContainer"},
 
   -- 312, 392 -- Boss
@@ -1130,7 +1143,7 @@ room.manuallyPlacedObjects = {
 session.placeEnemies(room, {
   {x = 111, y = 111, blueprint = "enemies.sworders.sworderTemplate"},
   {x = 111, y = 211, blueprint = "enemies.sworders.sworderTemplate"},
-  {x = 111, y = 311, blueprint = "enemies.sworders.sworderTemplate"}
+  {x = 131, y = 311, blueprint = "enemies.sworders.sworderTemplate"}
 })
 
 return room

@@ -11,16 +11,16 @@ room.timeScreenEffect = 'fullLight'
 
 room.width = 512
 room.height = 512
-room.downTrans = {}
-room.rightTrans = {}
-room.leftTrans = {}
-room.upTrans = {
+room.downTrans = {
   {
-    roomTarget = "Rooms/boss3room.lua",
+    roomTarget = "Rooms/testtesttest.lua",
     xleftmost = 0, xrightmost = 520,
     xmod = 0, ymod = 0
   }
 }
+room.rightTrans = {}
+room.leftTrans = {}
+room.upTrans = {}
 
 room.game_scale = 2
 
@@ -855,14 +855,10 @@ room.gameObjects = {
 { x = 280, y = 424, n = {l = 10}, t = 1, i = 17},
 { x = 280, y = 408, n = {l = 10}, t = 1, i = 17},
 { x = 280, y = 376, n = {l = 10}, t = 1, i = 17},
-{ x = 88, y = 232, n = {l = 10}, t = 1, i = 4},
-{ x = 88, y = 280, n = {l = 10}, t = 1, i = 4},
-{ x = 424, y = 280, n = {l = 10}, t = 1, i = 4},
-{ x = 424, y = 232, n = {l = 10}, t = 1, i = 4},
-{ x = 88, y = 232, n = {l = 11}, t = 5, i = 1},
-{ x = 88, y = 280, n = {l = 11}, t = 5, i = 1},
-{ x = 424, y = 280, n = {l = 11}, t = 5, i = 1},
-{ x = 424, y = 232, n = {l = 11}, t = 5, i = 1},
+{ x = 88, y = 232, n = {l = 11, drops = {{chance = 1, value = "blastSeeds"}}}, t = 1, i = 4},
+{ x = 88, y = 280, n = {l = 11, drops = {{chance = 1, value = "blastSeeds"}}}, t = 1, i = 4},
+{ x = 424, y = 280, n = {l = 11, drops = {{chance = 1, value = "blastSeeds"}}}, t = 1, i = 4},
+{ x = 424, y = 232, n = {l = 11, drops = {{chance = 1, value = "blastSeeds"}}}, t = 1, i = 4},
 { x = 72, y = 72, n = {l = 10}, t = 1, i = 6},
 { x = 88, y = 136, n = {l = 10}, t = 1, i = 6},
 { x = 168, y = 88, n = {l = 10}, t = 1, i = 6},
@@ -1055,6 +1051,14 @@ room.gameObjects = {
 { x = 328, y = 360, n = {l = 10}, t = 1, i = 65},
 { x = 216, y = 456, n = {l = 10}, t = 1, i = 65},
 ----------End of gameObjects----------
+}
+
+room.manuallyPlacedObjects = {
+  { x = room.width * 0.5, y = room.height * 0.5 - 30, blueprint = "bosses.boss3.boss3"},
+  { x = room.width * 0.5 + 8, y = 0, n = {side = "down"}, blueprint = "misc.DunDoor"},
+  { x = room.width * 0.5 - 8, y = 0, n = {side = "down"}, blueprint = "misc.DunDoor"},
+  { x = room.width * 0.5 + 8, y = 0, n = {side = "up"}, blueprint = "misc.DunDoor"},
+  { x = room.width * 0.5 - 8, y = 0, n = {side = "up"}, blueprint = "misc.DunDoor"},
 }
 
 return room

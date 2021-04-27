@@ -88,6 +88,11 @@ ps.shapes = {
       head = love.physics.newRectangleShape(0, 3, 89, 48),
       eye = love.physics.newRectangleShape(8,8),
       hand = love.physics.newRectangleShape(36,24),
+    },
+    boss3 = {
+      sprite = love.physics.newRectangleShape(56,68),
+      -- body = love.physics.newRectangleShape(0, 24, 46, 20), -- 68
+      body = love.physics.newRectangleShape(0, 24, 30, 20),
     }
   }
 }
@@ -148,8 +153,9 @@ function ps.shapes.edgeToTiles(instance, edgetable)
   newf:setCategory(FLOORCOLLIDECAT)
   -- WARNING: HATCHET JOB
 
-  if pp.bodyType == "dynamic" then
-    instance.body:setType("dynamic")
+  -- if pp.bodyType == "dynamic" then
+  if pp.bodyType and pp.bodyType ~= "static" then
+    instance.body:setType(pp.bodyType)
     instance.body:setFixedRotation(true)
     instance.body:setMass(pp.mass or 40)
     instance.body:setLinearDamping(pp.linearDamping or 40)
