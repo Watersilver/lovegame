@@ -28,6 +28,15 @@ end
 
 Tile.functions = {
 draw = function (self)
+
+  -- Avoid drawing tiles I don't need to
+  local x, y = self.xstart, self.ystart
+  local sz2 = 16
+
+  if x + sz2 < caml or x - sz2 > caml + camw or y + sz2 < camt or y - sz2 > camt + camh then
+    return
+  end
+
   local sprite = self.sprite
   local frame = sprite[self.image_index]
   love.graphics.draw(
@@ -44,6 +53,11 @@ trans_draw = function (self)
   local frame = sprite[self.image_index]
 
   local xtotal, ytotal = trans.still_objects_coords(self)
+  local sz2 = 16
+
+  if xtotal + sz2 < caml or xtotal - sz2 > caml + camw or ytotal + sz2 < camt or ytotal - sz2 > camt + camh then
+    return
+  end
 
   love.graphics.draw(
   sprite.img, frame,

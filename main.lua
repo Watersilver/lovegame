@@ -541,6 +541,16 @@ textCam:setWindow(sh.get_resized_text_window( love.graphics.getWidth(), love.gra
 dialogue.textBox.l, dialogue.textBox.t, dialogue.textBox.w, dialogue.textBox.h =
   200,337.5,400,90
 
+currentCamera = nil
+caml, camt, camw, camh = nil, nil, nil, nil
+local function setCurrentCam(curcam)
+  currentCamera = curcam
+  if not currentCamera then
+    caml, camt, camw, camh = nil, nil, nil, nil
+    return
+  end
+  caml, camt, camw, camh = currentCamera:getVisible()
+end
 
 sh.calculate_total_scale{game_scale=1}
 
@@ -1303,6 +1313,7 @@ local function hudDraw(l,t,w,h)
   end
 end
 function love.draw()
+
   -- drug effects
   if session.drug and session.drug.shader then
     -- delete following lines and the resetting of canvas below to disable drug canvas
@@ -1315,6 +1326,7 @@ function love.draw()
     local l, t, w, h = sh.get_current_window()
     cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
     cam:setPosition(cam.xt, cam.yt)
+    setCurrentCam(mainCamera)
     cam:draw(mainCameraDraw)
 
     -- Draw screen effect due to game time
@@ -1353,6 +1365,7 @@ function love.draw()
     local l, t, w, h = sh.get_current_window()
     cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
     cam:setPosition(cam.xt, cam.yt)
+    setCurrentCam(mainCamera)
     cam:draw(mainCameraDraw)
 
     -- Draw screen effect due to game time
@@ -1372,6 +1385,7 @@ function love.draw()
 
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)
+  setCurrentCam(hud)
 
   if hud.visible and pl1 then
     hud:draw(hudDraw)
@@ -1380,6 +1394,7 @@ function love.draw()
   -- Print dialogues, signs, and generally, in-game text stuff
   if dialogue.enabled then
     textCam:setScale(sh.get_window_scale())
+    setCurrentCam(textCam)
 
     dialogue.currentMethod.draw(textCam)
 
@@ -1388,6 +1403,7 @@ function love.draw()
     end
   end
 
+  setCurrentCam()
   -- debug
   love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
   if currentEnemyName then love.graphics.print(currentEnemyName, 0, love.graphics.getHeight()-77) end
