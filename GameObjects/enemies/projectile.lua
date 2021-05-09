@@ -72,7 +72,7 @@ local function burn(self)
   self.notBreakableByMissile = true
   self.attackDodger = true
   self.invisible = true
-  self.onFireEnd = o.removeFromWorld
+  self.onFireEnd = self.onFireEnd or o.removeFromWorld
   local myfire = fire:new{
     x = self.x, y = self.y,
     layer = self.layer - 1,

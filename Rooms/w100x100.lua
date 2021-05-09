@@ -932,9 +932,9 @@ room.gameObjects = {
 
 { x = 312, y = 88, n = {
   l = 10,
-  destination = "Rooms/testtesttest.lua",
-  desx = 200,
-  desy = 200,
+  destination = "Rooms/boss3room.lua",
+  desx = 263,
+  desy = 480,
 }, t = 3, i = 8},
 
 { x = 56, y = 136, n = {l = 10}, t = 2, i = 204},

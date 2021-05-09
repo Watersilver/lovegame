@@ -13,9 +13,22 @@ local game = require "game"
 local o = require "GameObjects.objects"
 local expl = require "GameObjects.explode"
 
+local shdrs = require "Shaders.shaders"
+local hitShader = shdrs.enemyHitShader
+local deathShader = shdrs.bossDeathShader
+
 local proj = require "GameObjects.enemies.projectile"
 
 local pi = math.pi
+
+local function onFireEnd(fuel)
+  o.removeFromWorld(fuel)
+  if o.identified.blastSeedDrop and #o.identified.blastSeedDrop >= 2 then return end
+  local drops = require "GameObjects.drops.drops"
+  drops.custom(fuel.x, fuel.y, {
+    {chance = 0.05, value = "blastSeed"}
+  })
+end
 
 local animationTable = {
   wingsOpen = {0,1,2,3,4,5,12,14,16},
@@ -453,7 +466,11 @@ local states = {
             instance.flthrwflameIndex = instance.flthrwflameIndex + dt * instance.flthrwflameSpeed
             if instance.flthrwflameIndex >= 1 then
               instance.flthrwflameIndex = 0
-              instance:fireblast(2, 32)
+              if instance.hp / instance.initialHP < 0.51 then
+                instance:fireblast(3, 32)
+              else
+                instance:fireblast(2, 32)
+              end
             end
 
           elseif instance.flthrwIndex > 0.5 then
@@ -486,7 +503,11 @@ local states = {
         elseif instance.firing < 0.25 and prevFiring >= 0.25 then
           instance.animationState.mouth = "mouthOpen"
           snd.play(glsounds.dragonRoar)
-          instance:fireblast(4, 64)
+          if instance.hp / instance.initialHP < 0.51 then
+            instance:fireblast(6, 64)
+          else
+            instance:fireblast(4, 64)
+          end
         end
 
         if instance.firing <= 0 then
@@ -600,6 +621,17 @@ local states = {
           end
           instance:fire(0)
           instance.target = prevTarget
+          if instance.hp / instance.initialHP < 0.51 then
+            for i = 1, 4 do
+              local prevTarget = instance.target
+              instance.target = {
+                x = love.math.random() * game.room.width,
+                y = love.math.random() * game.room.height
+              }
+              instance:fire(0)
+              instance.target = prevTarget
+            end
+          end
         end
       end
     end,
@@ -1025,6 +1057,7 @@ function Boss3.initialize(instance)
   instance.canBeRolledThrough = false
   instance.canLeaveRoom = true
   instance.hp = 20
+  instance.initialHP = instance.hp
   instance.bombsplosionDamageMod = 1 / 4
   instance.sounds = snd.load_sounds({
     hitSound = {"Effects/Oracle_Boss_Hit"},
@@ -1047,7 +1080,12 @@ function Boss3.initialize(instance)
     y = 0
   }
   instance.lookingRight = false
-  -- instance.shadowHeightMod = -2
+  instance.chargeDmg = 4
+  instance.stompDmg = 3
+  instance.touchDmg = 2
+  instance.attackDmg = instance.touchDmg
+  instance.blowUpForce = 130
+  instance.chargeImpact = 25
 end
 
 Boss3.functions = {
@@ -1080,8 +1118,10 @@ Boss3.functions = {
       notBreakableByMissile = true,
       dpDeflectable = false,
       dragonFire = true,
+      attackDmg = 2,
       sprite_info = im.spriteSettings.dragonFire,
-      target = target
+      target = target,
+      onFireEnd = onFireEnd
     }
     o.addToWorld(fireball)
     if not nosound then snd.play(glsounds.dragonRoar) end
@@ -1110,6 +1150,30 @@ Boss3.functions = {
     self.shieldDown = true
     ebh.damagedByHit(self, other, myF, otherF)
     self.shieldDown = false
+
+    if self.hp <= 0 and not self.dying then
+      self.dying = true
+      self.invulnerable = 2
+    end
+  end,
+
+  die = function (self)
+    local explOb = expl:new{
+      x = self.x or self.xstart, y = self.y or self.ystart,
+      layer = self.layer,
+      explosionNumber = self.explosionNumber or 9,
+      explosion_sprite = self.explosionSprite or im.spriteSettings.testsplosion,
+      image_speed = self.explosionSpeed or 0.5,
+      onlySoundOnce = true,
+      sounds = snd.load_sounds({explode = {"Effects/Oracle_Boss_Explode"}})
+    }
+    o.addToWorld(explOb)
+    o.removeFromWorld(self)
+    game.room.music_info = snd.silence
+    snd.bgmV2.getMusicAndload()
+    for _, door in ipairs(o.identified.DunDoor) do
+      door:open()
+    end
   end,
 
   enemyUpdate = function (self, dt)
@@ -1144,16 +1208,36 @@ Boss3.functions = {
         self.image_index = self.image_index_override
       end
 
-      -- determine mouth position from image index and side
-      -- self.mouth.x = self.x - 20 * self.x_scale
-      -- if self.animationState.legs == "inTheAir" then
-      --   self.mouth.y = self.y + self.zo - 12
-      -- else
-      --   self.mouth.y = self.y + self.zo + 4
-      -- end
       self:determineMouthPos()
     end
     self.invPrev = self.invulnerable
+
+    -- Special boss shader handling
+    if self.hp <= 0 then
+      self.myShader = deathShader
+    elseif self.invulnerable then
+      self.myShader = nil
+      if math.floor(7 * self.invulnerable % 2) == 1 then
+        self.myShader = hitShader
+      end
+    else
+      self.myShader = nil
+    end
+
+    -- Determine attack type and dmg
+    if self.stomp then
+      self.attackDmg = self.stompDmg
+      self.explosive = nil
+      self.impact = nil
+    elseif self.state.state == "charge" and self.substate == 3 and self.speed > 30 then
+      self.attackDmg = self.chargeDmg
+      self.explosive = true
+      self.impact = self.chargeImpact
+    else
+      self.attackDmg = self.touchDmg
+      self.explosive = nil
+      self.impact = nil
+    end
 
     -- determine components
     if self.cutscene then

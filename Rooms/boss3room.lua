@@ -13,7 +13,7 @@ room.width = 512
 room.height = 512
 room.downTrans = {
   {
-    roomTarget = "Rooms/testtesttest.lua",
+    roomTarget = "Rooms/boss3room.lua",
     xleftmost = 0, xrightmost = 520,
     xmod = 0, ymod = 0
   }
@@ -1054,7 +1054,7 @@ room.gameObjects = {
 }
 
 room.manuallyPlacedObjects = {
-  { x = room.width * 0.5, y = room.height * 0.5 - 30, blueprint = "bosses.boss3.boss3"},
+  { x = room.width * 0.5, y = room.height * 0.5 - 30, blueprint = "bosses.boss3"},
   { x = room.width * 0.5 + 8, y = 0, n = {side = "down"}, blueprint = "misc.DunDoor"},
   { x = room.width * 0.5 - 8, y = 0, n = {side = "down"}, blueprint = "misc.DunDoor"},
   { x = room.width * 0.5 + 8, y = 0, n = {side = "up"}, blueprint = "misc.DunDoor"},

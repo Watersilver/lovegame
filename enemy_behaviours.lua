@@ -113,6 +113,9 @@ end
 
 function ebh.damagedByHit(object, other, myF, otherF)
 
+  -- Do nothing if dying
+  if object.hp <= 0 then return end
+
   -- Determine if shield was pierced
   local piercedShield = checkIfShieldPierced(object)
 
@@ -143,9 +146,13 @@ function ebh.damagedByHit(object, other, myF, otherF)
 
     -- Apply damage
     if object.hp then object.hp = object.hp - damage end
-    if object.hp <= 0 then object.harmless = true end
+    if object.hp <= 0 then
+      object.harmless = true
+      snd.play(object.sounds.fatalHit or object.sounds.hitSound)
+    else
+      snd.play(object.sounds.hitSound)
+    end
     if object.resetBehaviour then object.behaviourTimer = object.resetBehaviour end
-    snd.play(object.sounds.hitSound)
 
     -- invulnerability
     local invframesMod = object.invframesMod or 1

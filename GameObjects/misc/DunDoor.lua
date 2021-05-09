@@ -42,6 +42,7 @@ function DungeonDoor.initialize(instance)
   instance.currentInstruction = nil
   instance.visible = false
   instance.speed = 180
+  instance.ids[#instance.ids+1] = "DunDoor"
 end
 
 DungeonDoor.functions = {

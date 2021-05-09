@@ -15,6 +15,7 @@ end
 function Drop.initialize(instance)
   instance.sprite_info = im.spriteSettings.dropBlast
   instance.onPlayerTouch = onPlayerTouch
+  instance.ids[#instance.ids+1] = "blastSeedDrop"
 end
 
 Drop.functions = {}
