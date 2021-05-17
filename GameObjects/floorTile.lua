@@ -36,6 +36,9 @@ draw = function (self)
   if x + sz2 < caml or x - sz2 > caml + camw or y + sz2 < camt or y - sz2 > camt + camh then
     return
   end
+  -- if xtotal + sz2 < caml or xtotal - sz2 > caml + camw or ytotal + sz2 < camt or ytotal - sz2 > camt + camh then
+  --   return
+  -- end
 
   local sprite = self.sprite
   local frame = sprite[self.image_index]

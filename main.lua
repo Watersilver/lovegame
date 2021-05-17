@@ -574,6 +574,7 @@ function love.load()
   game.clockInactive = game.room.timeDoesntPass
 
   -- -- Room Creator
+  -- -- 25 width 15 visible height (last tile mostly obscured) for zoom 2
   -- game.room = assert(love.filesystem.load("RoomBuilding/room_editor.lua"))()
   -- sh.calculate_total_scale{game_scale=game.room.game_scale}
   -- session.initialize()
@@ -1391,7 +1392,7 @@ function love.draw()
     hud:draw(hudDraw)
   end
 
-  -- Print dialogues, signs, and generally, in-game text stuff
+  -- Print dialogues, signs, and generally in-game text stuff
   if dialogue.enabled then
     textCam:setScale(sh.get_window_scale())
     setCurrentCam(textCam)

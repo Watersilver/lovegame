@@ -22,6 +22,11 @@ draw = function (self)
   local sprite = self.sprite
   if sprite then
     local x, y = self.body and self.body:getPosition() or self.xstart, self.ystart
+    local sz2 = 16
+
+    if x + sz2 < caml or x - sz2 > caml + camw or y + sz2 < camt or y - sz2 > camt + camh then
+      return
+    end
     self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
     local frame = sprite[self.image_index]
     love.graphics.draw(
@@ -35,6 +40,11 @@ trans_draw = function (self)
   local sprite = self.sprite
   if sprite then
     local xtotal, ytotal = trans.still_objects_coords(self)
+    local sz2 = 16
+
+    if xtotal + sz2 < caml or xtotal - sz2 > caml + camw or ytotal + sz2 < camt or ytotal - sz2 > camt + camh then
+      return
+    end
     self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
     local frame = sprite[self.image_index]
     love.graphics.draw(

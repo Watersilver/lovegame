@@ -68,9 +68,15 @@ DungeonEdge.functions = {
   draw = function (self)
     local sprite = self.sprite
     if sprite then
+      local x, y = self.xstart, self.ystart
+      local sz2 = 16
+      if x + sz2 < caml or x - sz2 > caml + camw or y + sz2 < camt or y - sz2 > camt + camh then
+        return
+      end
+
       local frame = sprite[self.image_index]
       love.graphics.draw(
-      sprite.img, frame, self.xstart, self.ystart, 0,
+      sprite.img, frame, x, y, 0,
       sprite.res_x_scale, sprite.res_y_scale,
       sprite.cx, sprite.cy)
     end
@@ -84,6 +90,10 @@ DungeonEdge.functions = {
     local sprite = self.sprite
     if sprite then
       local xtotal, ytotal = trans.still_objects_coords(self)
+      local sz2 = 16
+      if xtotal + sz2 < caml or xtotal - sz2 > caml + camw or ytotal + sz2 < camt or ytotal - sz2 > camt + camh then
+        return
+      end
       local frame = sprite[self.image_index]
       love.graphics.draw(
       sprite.img, frame, xtotal, ytotal, 0,
