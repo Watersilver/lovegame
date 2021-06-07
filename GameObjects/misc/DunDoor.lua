@@ -110,6 +110,7 @@ DungeonDoor.functions = {
           self.pushback = true
           self.forceSwordSound = true
           self.unpushable = false
+          self.attackDodger = false
 
           self.visible = true
         end
@@ -137,6 +138,7 @@ DungeonDoor.functions = {
           self.pushback = false
           self.forceSwordSound = false
           self.unpushable = true
+          self.attackDodger = true
 
           self.visible = false
         end
