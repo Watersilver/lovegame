@@ -424,6 +424,12 @@ player_states.run_gripping = function(instance, dt, side)
   if instance.speed < 5 then
     instance.image_index = 0
   end
+
+  -- Check if object cannot be gripped any longer
+  if instance.grippedOb.untouchable or instance.grippedOb.unpushable or
+  instance.grippedOb.goThroughPlayer or instance.grippedOb.onEdge then
+    instance.grippedOb = nil
+  end
 end
 
 player_states.check_gripping = function(instance, dt, side)

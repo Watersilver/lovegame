@@ -48,51 +48,6 @@ local abs = math.abs
 local pi = math.pi
 local huge = math.huge
 
--- local check_walk = hps.check_walk
--- local check_halt = hps.check_halt
--- local check_still = hps.check_still
--- local check_push = hps.check_push
--- local run_swing = hps.run_swing
--- local check_swing = hps.check_swing
--- local start_swing = hps.start_swing
--- local end_swing = hps.end_swing
--- local run_stab = hps.run_stab
--- local check_stab = hps.check_stab
--- local start_stab = hps.start_stab
--- local end_stab = hps.end_stab
--- local check_hold = hps.check_hold
--- local start_hold = hps.start_hold
--- local start_jump = hps.start_jump
--- local run_fall = hps.run_fall
--- local check_fall = hps.check_fall
--- local start_fall = hps.start_fall
--- local end_fall = hps.end_fall
--- local run_missile = hps.run_missile
--- local check_missile = hps.check_missile
--- local start_missile = hps.start_missile
--- local end_missile = hps.end_missile
--- local run_gripping = hps.run_gripping
--- local check_gripping = hps.check_gripping
--- local start_gripping = hps.start_gripping
--- local end_gripping = hps.end_gripping
--- local run_lifting = hps.run_lifting
--- local check_lifting = hps.check_lifting
--- local start_lifting = hps.start_lifting
--- local end_lifting = hps.end_lifting
--- local run_lifted = hps.run_lifted
--- local check_lifted = hps.check_lifted
--- local start_lifted = hps.start_lifted
--- local end_lifted = hps.end_lifted
--- local run_damaged = hps.run_damaged
--- local check_damaged = hps.check_damaged
--- local start_damaged = hps.start_damaged
--- local end_damaged = hps.end_damaged
--- local run_climbing = hps.run_climbing
--- local check_climbing = hps.check_climbing
--- local start_climbing = hps.start_climbing
--- local end_climbing = hps.end_climbing
--- local img_speed_and_footstep_sound = hps.img_speed_and_footstep_sound
-
 local Playa = {}
 
 
@@ -140,7 +95,10 @@ function Playa.initialize(instance)
   instance.triggers = {}
   instance.stateTriggers = {}
   instance.sideTable = {"down", "right", "left", "up"}
-  instance.sensors = {downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={}}
+  instance.sensors = {
+    downTouchedObs={}, rightTouchedObs={}, leftTouchedObs={}, upTouchedObs={},
+    downTouchedObsPush={}, rightTouchedObsPush={}, leftTouchedObsPush={}, upTouchedObsPush={},
+  }
   instance.item_use_counter = 0 -- Counts how long you're still while using item
   instance.currentMasks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
   instance.physical_properties = {
@@ -2855,7 +2813,7 @@ Playa.functions = {
             -- local sensors = self.sensors
             sensors[sensorID] = sensors[sensorID] or 0
             sensors[sensorID] = sensors[sensorID] + 1
-            -- insert(sensors[sensorID .. "edObs"], other)
+            insert(sensors[sensorID .. "edObsPush"], other)
           end
         end
         insert(sensors[sensorID .. "edObs"], other)
@@ -2886,28 +2844,45 @@ Playa.functions = {
 
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
-      if other.untouchable then return end
+      -- Old stupid(er) way
+      -- if other.untouchable then return end
+      -- local sensorID = myF:getUserData()
+      --
+      -- if sensorID then
+      --   local sensors = self.sensors
+      --   if (not other.unpushable == true) and (not other.goThroughPlayer) then
+      --     -- local sensors = self.sensors
+      --
+      --     -- for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
+      --     --   if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
+      --     -- end
+      --
+      --     if not other.onEdge then
+      --       if sensors[sensorID] then
+      --         sensors[sensorID] = sensors[sensorID] - 1
+      --         if sensors[sensorID] == 0 then sensors[sensorID] = nil end
+      --       end
+      --     end
+      --
+      --   end
+      --   for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
+      --     if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
+      --   end
+      -- end
+      local sensors = self.sensors
       local sensorID = myF:getUserData()
-
-      if sensorID then
-        local sensors = self.sensors
-        if (not other.unpushable == true) and (not other.goThroughPlayer) then
-          -- local sensors = self.sensors
-
-          -- for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
-          --   if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
-          -- end
-
-          if not other.onEdge then
-            if sensors[sensorID] then
-              sensors[sensorID] = sensors[sensorID] - 1
-              if sensors[sensorID] == 0 then sensors[sensorID] = nil end
-            end
-          end
-
+      for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
+        if touchedOb == other then
+          remove(sensors[sensorID .. "edObs"], i)
+          break
         end
-        for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
-          if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
+      end
+      for i, touchedOb in ipairs(sensors[sensorID .. "edObsPush"]) do
+        if touchedOb == other then
+          remove(sensors[sensorID .. "edObsPush"], i)
+          sensors[sensorID] = sensors[sensorID] - 1
+          if sensors[sensorID] == 0 then sensors[sensorID] = nil end
+          break
         end
       end
 
