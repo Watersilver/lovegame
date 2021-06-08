@@ -2871,6 +2871,7 @@ Playa.functions = {
       -- end
       local sensors = self.sensors
       local sensorID = myF:getUserData()
+      if not sensorID then return end
       for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
         if touchedOb == other then
           remove(sensors[sensorID .. "edObs"], i)
