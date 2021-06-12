@@ -167,11 +167,11 @@ function u.projection2d(x, y, xdir, ydir)
 end
 
 function u.polarToCartesian(r, th)
-  return r * cos( th ), r * sin( th )
+  return r * cos( th ), r * sin( th ) -- x, y
 end
 
 function u.cartesianToPolar(x, y)
-  return sqrt(x*x + y*y), atan2(y, x)
+  return sqrt(x*x + y*y), atan2(y, x) -- r, th
 end
 
 function u.findSmallestArc(th, targetTh)

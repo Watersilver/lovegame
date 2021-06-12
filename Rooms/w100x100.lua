@@ -918,9 +918,6 @@ room.gameObjects = {
   destination = "Rooms/TestRoomBoss.lua",
   desx = 72,
   desy = 120,
-  -- destination = "Rooms/testtesttest.lua",
-  -- desx = 200,
-  -- desy = 200,
 }, t = 3, i = 8},
 
 { x = 72, y = 136, n = {
@@ -935,6 +932,13 @@ room.gameObjects = {
   destination = "Rooms/boss3room.lua",
   desx = 263,
   desy = 480,
+}, t = 3, i = 8},
+
+{ x = 440, y = 232, n = {
+  l = 10,
+  destination = "Rooms/testtesttest.lua",
+  desx = 158,
+  desy = 24,
 }, t = 3, i = 8},
 
 { x = 56, y = 136, n = {l = 10}, t = 2, i = 204},
@@ -1035,7 +1039,6 @@ room.gameObjects = {
 { x = 408, y = 184, n = {l = 10}, t = 2, i = 208},
 { x = 440, y = 184, n = {l = 10}, t = 2, i = 216},
 { x = 456, y = 184, n = {l = 10}, t = 2, i = 209},
-{ x = 440, y = 232, n = {l = 10}, t = 3, i = 8},
 { x = 424, y = 184, n = {l = 10}, t = 2, i = 205},
 { x = 424, y = 200, n = {l = 10}, t = 2, i = 223},
 { x = 296, y = 88, n = {l = 10}, t = 2, i = 204},

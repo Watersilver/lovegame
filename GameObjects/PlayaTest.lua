@@ -2375,9 +2375,13 @@ Playa.functions = {
         previousClosestDistance = closestDistance
         -- Magic number to account for player height
         closestDistance = min(distanceSqared2d(x, y+6, floorTile.xstart, floorTile.ystart), closestDistance)
-        if closestDistance < previousClosestDistance then
+        if closestDistance <= previousClosestDistance then
           closestTile = floorTile
         end
+      end
+
+      if not closestTile then
+        closestTile = self.floorTiles[1]
       end
 
       self.xClosestTile = closestTile.xstart
@@ -2871,7 +2875,7 @@ Playa.functions = {
       -- end
       local sensors = self.sensors
       local sensorID = myF:getUserData()
-      if not sensorID then return end
+      if (not sensorID) or (not sensors) then return end
       for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
         if touchedOb == other then
           remove(sensors[sensorID .. "edObs"], i)

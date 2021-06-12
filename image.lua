@@ -343,6 +343,14 @@ im.spriteSettings = {
     {'Bosses/boss3/boss3', 6, 4, padding = 2, width = 56, height = 68},
   },
 
+  boss4 = {
+    {'Bosses/boss4/boss4', 4, padding = 2, width = 28, height = 29},
+    {'Bosses/boss4/shield', 5, padding = 2, width = 16, height = 24},
+    {'Bosses/boss4/wreckingBall', 8, padding = 2, width = 16, height = 16},
+    {'Bosses/boss4/spikes', 2, padding = 2, width = 22, height = 20},
+    {'Bosses/boss4/chainLink', 1, padding = 0, width = 8, height = 8},
+  },
+
   -- Misc
   torch = {
     {'Misc/Torch/out', 1, padding = 2, width = 16, height = 16},

@@ -599,6 +599,10 @@ player_states.end_lifted = function(instance, dt, side)
 end
 
 player_states.run_damaged = function(instance, dt, side)
+  if instance.takingDamage then
+    instance.takingDamage = instance.takingDamage - 1
+    if instance.takingDamage == 0 then instance.takingDamage = nil end
+  end
   instance.damCounter = instance.damCounter - dt
   if instance.triggers.land then
     instance.sprite = im.sprites["Witch/die"]
@@ -616,6 +620,8 @@ player_states.check_damaged = function(instance, dt, side)
   elseif instance.damCounter < 0 then
     instance.animation_state:change_state(instance, dt,
     (instance.sprite == im.sprites["Witch/die"] and "down" or side) .. "still")
+  elseif not instance.takingDamage and trig.damaged then
+    instance.animation_state:change_state(instance, dt, side .. "damaged")
   end
 end
 
@@ -626,6 +632,7 @@ player_states.start_damaged = function(instance, dt, side)
     instance.sprite = im.sprites["Witch/hurt_left"]
     instance.x_scale = -1
   end
+  instance.takingDamage = 3 -- Cannot take more damage for three frames
   instance.image_index = 0
   instance.image_speed = 0
   if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
@@ -633,13 +640,14 @@ player_states.start_damaged = function(instance, dt, side)
   end
   if instance.triggers.damaged == 0 then instance.noInvShader = true end
   inp.disable_controller(instance.player)
-  instance.invulnerable = 1
+  instance.invulnerable = pl1.triggers.noInvFrames and 0 or 1
   instance.damCounter = instance.triggers.damCounter or 0.5
   instance.damKeepMoving = instance.triggers.damKeepMoving
   snd.play(instance.triggers.altHurtSound or instance.sounds.hurt)
 end
 
 player_states.end_damaged = function(instance, dt, side)
+  instance.takingDamage = false
   if side == "right" then
     instance.x_scale = 1
   end

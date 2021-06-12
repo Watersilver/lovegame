@@ -93,6 +93,11 @@ ps.shapes = {
       sprite = love.physics.newRectangleShape(56,68),
       -- body = love.physics.newRectangleShape(0, 24, 46, 20), -- 68
       body = love.physics.newRectangleShape(0, 24, 30, 20),
+    },
+    boss4 = {
+      sprite = love.physics.newRectangleShape(28,29),
+      -- body = love.physics.newRectangleShape(20, 24)
+      body = love.physics.newCircleShape(12)
     }
   }
 }

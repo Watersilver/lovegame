@@ -426,7 +426,6 @@ Enemy.functions = {
       return
     end
 
-      -- instance.goThroughEnemies = true
     if self.flying or (self.goThroughEnemies and other.enemy) then
       coll:setEnabled(false)
     elseif self.jumping then

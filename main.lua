@@ -471,6 +471,7 @@ glsounds = snd.load_sounds{
   fire = {"Effects/Oracle_EmberSeed"},
   ice = {"Effects/Oracle_SwordShimmer"},
   stone = {"Effects/Oracle_Rumble2b"},
+  boing = {"Effects/Oracle_ScentSeed"},
   plant = {"Effects/Oracle_ScentSeed_Shot"},
   wind = {"Effects/Oracle_GaleSeed"},
   blockFall = {"Effects/Oracle_Block_Fall"},

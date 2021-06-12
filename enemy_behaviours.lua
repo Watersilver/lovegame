@@ -139,24 +139,29 @@ function ebh.damagedByHit(object, other, myF, otherF)
     elseif object.lastHit == "bullrush" then
       baseDamage = session.save.faroresCourage and 1 or 0.5
       damageMod = object.bullrushDamageMod or 1
+    elseif object.lastHit == "custom" then
+      baseDamage = object.customDamage or 1
+      damageMod = 1
+      object.customDamage = nil
     end
     -- Weaker strikes if shaking (can't check trigger because it might get reset before we get here)
     if pl1 and (pl1.shakex ~= 0 or pl1.shakey ~= 0) then baseDamage = baseDamage * 0.5 end
     local damage = baseDamage * damageMod
 
+    -- invulnerability
+    local invframesMod = object.invframesMod or 1
+    object.invulnerable = invframesMod * 0.25
+
     -- Apply damage
     if object.hp then object.hp = object.hp - damage end
     if object.hp <= 0 then
       object.harmless = true
+      object.invulnerable = object.deathInvulnerable or object.invulnerable
       snd.play(object.sounds.fatalHit or object.sounds.hitSound)
     else
       snd.play(object.sounds.hitSound)
     end
     if object.resetBehaviour then object.behaviourTimer = object.resetBehaviour end
-
-    -- invulnerability
-    local invframesMod = object.invframesMod or 1
-    object.invulnerable = invframesMod * 0.25
   end
 end
 

@@ -121,9 +121,11 @@ DungeonDoor.functions = {
           self.body:setPosition(self.x, self.y)
           self.currentInstruction = nil
           snd.play(glsounds.dungeonDoor)
+          self.body:setType("static")
         end
       elseif self.currentInstruction == "open" then
         if newInst then
+          self.body:setType("kinematic")
           self.body:setLinearVelocity(-self.xToClose * self.speed, -self.yToClose * self.speed)
         end
         if instructionDone(self) then
