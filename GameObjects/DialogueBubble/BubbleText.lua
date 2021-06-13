@@ -115,7 +115,7 @@ local methods = {
     sw, sh = sw - sl, sh - st
     love.graphics.setScissor(sl, st, sw, sh)
     -- This color gets combined with text colour
-    -- SEt to white to no modify text colour
+    -- Set to white to no modify text colour
     u.changeColour{"white"}
     local prevFont = love.graphics.getFont()
     love.graphics.setFont(self.font)
@@ -123,7 +123,7 @@ local methods = {
     -- Draw string loop
     love.graphics.draw(self.text, left, top + 0.5 - self.yOffset, 0, self.scale)
     love.graphics.setFont(prevFont)
-    love.graphics.setScissor( )
+    love.graphics.setScissor()
     resetColour()
   end,
 }

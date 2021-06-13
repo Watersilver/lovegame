@@ -11,6 +11,9 @@ local ebh = require "enemy_behaviours"
 local sm = require "state_machine"
 local gsh = require "gamera_shake"
 
+local dlgCtrl = require "GameObjects.DialogueBubble.DialogueControl"
+local cd = require "GameObjects.DialogueBubble.controlDefaults"
+
 local dc = require "GameObjects.Helpers.determine_colliders"
 
 local shdrs = require "Shaders.shaders"
@@ -243,6 +246,36 @@ function WreckingBall.initialize(instance)
 end
 
 WreckingBall.functions = {
+
+  -- dialogue stuff
+  handleHookReturn = function (self)
+    if self.speak then
+      self.speak = false
+      self.spoke = true
+      self.content = "HAIL THE EMPIRE!"
+      self.bubbleOffsetX = 5 + (self.creator.x - self.x)
+      self.bubbleOffsetY = 9
+      self.ssbRGBA = self.creator.ssbRGBA
+
+      self.dlgState = "talking"
+    elseif self.spoke then
+      self.spoke = false
+
+      self.dlgState = "done"
+    end
+  end,
+
+  determineUpdateHook = function (self)
+    if self.dlgState == "done" then
+      cd.cleanSsb(self)
+      self.updateHook = u.emptyFunc
+    elseif self.dlgState == "talking" then
+      -- self.blockInput = true
+      self.updateHook = cd.singleSimpleInteractiveBubble
+    end
+  end,
+  -- end dialogue stuff
+
   toggleSpikes = function (self, bool)
     self.spikedup = bool
     if bool then
@@ -410,10 +443,12 @@ WreckingBall.functions = {
   end,
 
   load = function (self)
+    dlgCtrl.functions.load(self)
     self.sprite = im.sprites["Bosses/boss4/wreckingBall"]
   end,
 
   enemyUpdate = function (self, dt)
+    dlgCtrl.functions.update(self, dt)
     if not self.creator or not self.creator.exists then return o.removeFromWorld(self) end
     if self.creator.hp <= 0 then
       self.harmless = true
@@ -529,6 +564,7 @@ WreckingBall.functions = {
 
 function WreckingBall:new(init)
   local instance = p:new() -- add parent functions and fields
+  p.new(dlgCtrl, instance) -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields
   p.new(WreckingBall, instance, init) -- add own functions and fields
   return instance

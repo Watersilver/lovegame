@@ -19,7 +19,8 @@ GCON = {
   -- pieces of heart in world:
   -- 4 random
   maxRandomPOHs = 4,
-  maxPOHs = 4,
+  -- maxPOHs = 4,
+  maxPOHs = 40,
   -- Day and night music breaking points
   music = {
     daySilence = 6,

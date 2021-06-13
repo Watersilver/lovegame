@@ -200,8 +200,8 @@ DialogueBubble.functions = {
       if self.positionMod < -1 then self.positionMod = -1 end
     end
 
-    self.x = anchor.x
-    self.y = anchor.y + (anchor.zo or 0) -
+    self.x = anchor.x + (anchor.bubbleOffsetX or 0)
+    self.y = anchor.y + (anchor.bubbleOffsetY or 0) + (anchor.zo or 0) -
     self.positionMod *
     (
       self.height * 0.5
@@ -282,7 +282,7 @@ DialogueBubble.functions = {
 
     -- Draw bubble
     if anchor and anchor.exists and not self.noTriangle then
-      local triangleX = anchor.x
+      local triangleX = anchor.x + (anchor.bubbleOffsetX or 0)
       triangleX = u.clamp(x - maxXOffset, triangleX, x + maxXOffset)
       -- Draw little triangle
       -- If above anchor

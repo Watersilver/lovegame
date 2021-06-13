@@ -13,6 +13,9 @@ local game = require "game"
 local o = require "GameObjects.objects"
 local expl = require "GameObjects.explode"
 
+local dlgCtrl = require "GameObjects.DialogueBubble.DialogueControl"
+local cd = require "GameObjects.DialogueBubble.controlDefaults"
+
 local wreckingBall = require "GameObjects.bosses.boss4.wreckingBall"
 
 local shdrs = require "Shaders.shaders"
@@ -31,23 +34,6 @@ local states = {
     check_state = function(instance, dt)
       if true then
         instance.state:change_state(instance, dt, "cutscene")
-      end
-    end,
-    end_state = function(instance, dt)
-    end
-  },
-
-  cutscene = {
-    run_state = function(instance, dt)
-    end,
-    start_state = function(instance, dt)
-      instance.body:setPosition(222, 222)
-      game.room.music_info = "SoMBelieveinVictory"
-      snd.bgmV2.getMusicAndload()
-    end,
-    check_state = function(instance, dt)
-      if true then
-        instance.state:change_state(instance, dt, "still")
       end
     end,
     end_state = function(instance, dt)
@@ -86,7 +72,7 @@ local states = {
         instance.state:change_state(instance, dt, u.chooseFromWeightTable{
           {value = "bounceAround", weight = 100},
           {value = "jump", weight = 75},
-          {value = "swing", weight = 100},
+          {value = "swing", weight = (instance:isShieldBroken() and 200 or 100)},
           {value = "powerThrow", weight = instance.justPowerThrowed and 0 or 90}
         })
         instance.justPowerThrowed = false
@@ -435,6 +421,99 @@ local states = {
       instance.walk_anim_speed = 0
     end
   },
+
+  cutscene = {
+    run_state = function(instance, dt)
+      local prevstep = instance.step
+
+      if instance.step == 0 then
+        if pl1 and pl1.exists then
+          if pl1.y < 200 then
+            local xsc = pl1.x_scale
+            pl1.animation_state:change_state(pl1, dt, "cutscene")
+            pl1.body:setLinearVelocity(0, 0)
+            pl1.x_scale = xsc
+            instance.step = instance.step + 1
+          end
+        end
+      elseif instance.step == 1 then
+        if pl1 and pl1.exists then
+          if pl1.zo == 0 then
+            pl1.sprite = im.sprites["Witch/still_up"]
+            pl1.x_scale = 1
+            instance.step = instance.step + 1
+            instance.timer = 1
+          end
+        end
+      elseif instance.step == 2 then
+        if instance.timer < 0 then
+          instance.step = instance.step + 1
+        end
+        instance.timer = instance.timer - dt
+      elseif instance.step == 3 then
+        instance.speak = true
+        instance.step = instance.step + 1
+        instance.timer = 1
+      elseif instance.step == 5 then
+        if instance.timer < 0 then
+          instance.zo = -200
+          instance.step = instance.step + 1
+          instance.ball:emote("confusion")
+          o.change_layer(instance.ball, instance.ball.layer + 1)
+        end
+        instance.timer = instance.timer - dt
+      elseif instance.step == 6 then
+        instance.body:setPosition(game.room.width / 2, game.room.height / 2)
+        instance.step = instance.step + 1
+        snd.play(glsounds.blockFall)
+      elseif instance.step == 7 then
+        instance.zo = instance.zo + dt * 100
+        if instance.zo >= 0 then
+          o.change_layer(instance.ball, instance.ball.layer - 1)
+          instance.cutsceneland = true
+          instance.zo = 0
+          gsh.newShake(mainCamera, "displacement")
+          snd.play(glsounds.bigBoom)
+          instance.timer = 2
+          instance.step = instance.step + 1
+        end
+      elseif instance.step == 8 then
+        instance.timer = instance.timer - dt
+        if instance.timer <= 0 then
+          instance.step = instance.step + 1
+          instance.waitTimer = 0
+        end
+      end
+
+      instance.changedStep = prevstep ~= instance.step
+    end,
+    start_state = function(instance, dt)
+      instance.body:setPosition(game.room.width / 2, -222)
+      instance.step = 0
+      instance.timer = 0
+      instance.walk_index = 1
+      instance.walk_anim_speed = 0
+    end,
+    check_state = function(instance, dt)
+      if instance.step == 10 then
+        if pl1 and pl1.exists then
+          pl1.animation_state:change_state(pl1, dt, "upstill")
+        end
+        instance.state:change_state(instance, dt, "swing")
+      end
+    end,
+    end_state = function(instance, dt)
+      instance.step = nil
+      instance.timer = nil
+      instance.changedStep = nil
+
+      instance.ball.dlgState = "done"
+      instance.ball.updateHook = nil
+
+      game.room.music_info = "SoMBelieveinVictory"
+      snd.bgmV2.getMusicAndload()
+    end
+  }
 }
 
 local Boss4 = {}
@@ -474,9 +553,120 @@ function Boss4.initialize(instance)
   }
   instance.attackDmg = 2
   instance.shieldDmg = 0
+  instance.content = nil
+  instance.content_index = 0
 end
 
+local dialogue = {
+  "Did you hear something?",
+  "Huh? Let's go see.",
+  "...A creature.",
+  "Squishy.",
+  "It seeks to stop us!",
+  "It wants to destroy the world!",
+  "It opposes the empire!",
+  "Foolish creature. The empire cannot be stopped.",
+  "The empire will consume all.",
+  "And then all will be the empire.",
+  "All will be perfect!",
+  "HAIL THE EMPIRE!",
+}
+
 Boss4.functions = {
+
+  -- dialogue stuff
+  setSpeaker = function (self, speaker)
+    self.speaker = speaker or self
+    if self.ball == speaker then
+      self.bubbleOffsetX = -(self.x - self.ball.x)
+      self.bubbleOffsetY = nil
+    else
+      self.bubbleOffsetX = 5
+      self.bubbleOffsetY = nil
+    end
+  end,
+
+  waitHook = function (self, dt)
+    if self.waitTimer then
+      self.waitTimer = self.waitTimer - dt
+      if self.waitTimer < 0 then
+        self.waitTimer = nil
+        self.speak = true
+        self.updateHook = nil
+
+        if self.content_index == 11 then
+          self.ball.speak = true
+        end
+      end
+    end
+  end,
+
+  handleHookReturn = function (self)
+    if self.speaking then
+      self.speaking = false
+      self.waitTimer = 0.3
+      cd.cleanSsb(self)
+
+      if self.content_index == 2 then
+        self.waitTimer = nil
+        self.step = self.step + 1
+      elseif self.content_index == 12 then
+        self.waitTimer = nil
+        self.step = self.step + 1
+      end
+
+      self.dlgState = "waiting"
+    elseif self.speak then
+      self.speak = false
+      self.speaking = true
+
+      self.content_index = self.content_index + 1
+
+      if self.content_index == 2 or self.content_index == 4
+      or self.content_index == 6 or self.content_index == 8
+      or self.content_index == 10 or self.content_index == 12 then
+        self:setSpeaker(self.ball)
+      else
+        self:setSpeaker(self)
+      end
+
+      if self.content_index == 4 then
+        self.ball:emote("neutral")
+      elseif self.content_index == 8 then
+        self.ball:emote("ready")
+      elseif self.content_index == 10 then
+        self.ball:emote("crazy")
+      elseif self.content_index == 11 then
+        self.hand_index = 1
+      elseif self.content_index == 12 then
+        self.ball:emote("mania")
+      end
+
+      self.content = dialogue[self.content_index]
+      self.ssbStayOnScreen = true
+      self.ssbRGBA = {COLORCONST, 0, 0, COLORCONST}
+
+      if self.cutsceneland and self.speaker ~= self.ball then
+        self.ssbPosition = "up"
+      else
+        self.ssbPosition = "down"
+      end
+      cd.cleanSsb(self)
+
+      self.dlgState = "talking"
+    end
+  end,
+
+  determineUpdateHook = function (self)
+    if self.dlgState == "waiting" then
+      self.updateHook = self.waitHook
+    elseif self.dlgState == "talking" then
+      -- self.blockInput = true
+      self.updateHook = cd.singleSimpleInteractiveBubble
+    end
+  end,
+  -- end dialogue stuff
+
   determineComponents = function (self)
 
     if self:isShieldBroken() then
@@ -579,6 +769,7 @@ Boss4.functions = {
   end,
 
   load = function (self)
+    dlgCtrl.functions.load(self)
     self.shadowHeightMod = self.sprite.height * 0.5 - 8
     self:createBall()
   end,
@@ -614,6 +805,8 @@ Boss4.functions = {
   end,
 
   enemyUpdate = function (self, dt)
+    dlgCtrl.functions.update(self, dt)
+
     -- Get tricked by decoy
     self.target = session.decoy or pl1
 
@@ -747,6 +940,7 @@ Boss4.functions = {
 
 function Boss4:new(init)
   local instance = p:new() -- add parent functions and fields
+  p.new(dlgCtrl, instance) -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields
   p.new(Boss4, instance, init) -- add own functions and fields
   return instance

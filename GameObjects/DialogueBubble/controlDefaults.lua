@@ -46,8 +46,11 @@ private.singleSimpleBubbleTemplate = function(settings)
       local options = {} or settings.options
       local startingPos = determinePosFromPlayer(dlgControl)
       if startingPos then options.position = startingPos end
+      if dlgControl.ssbPosition then options.position = dlgControl.ssbPosition end
       if dlgControl.nossbTriangle then options.noTriangle = true end
       if dlgControl.ssbStayOnScreen then options.staysOnScreen = true end
+      if dlgControl.ssbColor then options.color = dlgControl.ssbColor end
+      if dlgControl.ssbRGBA then options.textRGBA = dlgControl.ssbRGBA end
       dlgControl.speechBubble = bubble.addNew(dlgControl:getDlg(), dlgControl, options)
       local inst = dlgControl.speechBubble
       inst.timeBetweenLetters = 0.055
@@ -61,6 +64,7 @@ private.singleSimpleBubbleTemplate = function(settings)
       end
 
       instance.position = determinePosFromPlayer(dlgControl) or instance.position
+      if dlgControl.ssbPosition then instance.position = dlgControl.ssbPosition end
 
       if instance.writable then
         if not instance.scrollingUp and (instance.content:getNextVisibleHeight() > instance.content:getHeight()) then
@@ -131,6 +135,7 @@ private.singleSimpleBubbleTemplate = function(settings)
 end
 
 cd.cleanSsb = function (dlgControl)
+  if not dlgControl.speechBubble then return end
   dlgControl.speechBubble:remove()
   dlgControl.speechBubble = nil
 end

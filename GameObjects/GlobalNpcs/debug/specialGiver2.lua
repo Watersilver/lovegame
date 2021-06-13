@@ -19,6 +19,7 @@ function NPC.initialize(instance)
     "Water Walk",
     "Light",
     "Customize",
+    "Piece of Heart"
   }
   instance.question = "Choose Special."
   instance.image_speed = 0.05
@@ -63,6 +64,12 @@ NPC.functions = {
         session.save.walkOnWater = not session.save.walkOnWater
       elseif self.choiceReturn.a == "Light" then
         session.save.playerGlowAvailable = not session.save.playerGlowAvailable
+      elseif self.choiceReturn.a == "Piece of Heart" then
+        local itemInfo = (require "GameObjects.GlobalNpcs.fanfareGottenItems.pieceOfHeart").itemInfo
+        local o = require "GameObjects.objects"
+        local itemGetPoseAndDlg = require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"
+        local pieceOfHeart = itemGetPoseAndDlg:new(itemInfo)
+        o.addToWorld(pieceOfHeart)
       end
       self.dlgState = "reacting"
     elseif self.hookReturn == "ssbDone" then

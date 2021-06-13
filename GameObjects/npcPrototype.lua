@@ -3,9 +3,6 @@ local u = require "utilities"
 local im = require "image"
 local p = require "GameObjects.prototype"
 local trans = require "transitions"
-local game = require "game"
-local inp = require "input"
-local dlg = require "dialogue"
 local ls = require "lightSources"
 
 local floor = math.floor
