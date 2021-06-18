@@ -71,7 +71,7 @@ local states = {
         -- Choose next state
         instance.state:change_state(instance, dt, u.chooseFromWeightTable{
           {value = "bounceAround", weight = 100},
-          {value = "jump", weight = 75},
+          {value = "jump", weight = 40},
           {value = "swing", weight = (instance:isShieldBroken() and 200 or 100)},
           {value = "powerThrow", weight = instance.justPowerThrowed and 0 or 90}
         })
@@ -564,10 +564,10 @@ local dialogue = {
   "Squishy.",
   "It seeks to stop us!",
   "It wants to destroy the world!",
-  "It opposes the empire!",
-  "Foolish creature. The empire cannot be stopped.",
+  "It opposes the Empire!",
+  "Foolish creature. The Empire cannot be stopped.",
   "The empire will consume all.",
-  "And then all will be the empire.",
+  "And then all will be the Empire.",
   "All will be perfect!",
   "HAIL THE EMPIRE!",
 }

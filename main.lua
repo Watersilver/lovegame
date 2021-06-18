@@ -20,7 +20,7 @@ GCON = {
   -- 4 random
   maxRandomPOHs = 4,
   -- maxPOHs = 4,
-  maxPOHs = 40,
+  maxPOHs = 84,
   -- Day and night music breaking points
   music = {
     daySilence = 6,
@@ -708,7 +708,7 @@ function love.update(dt)
   -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
   -- wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
   -- fuck = tostring(wmx) .. "/" .. tostring(wmy)
-  --
+  -- --
   -- -- display room
   -- fuck = fuck .. "\n" .. (session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or "")
   -- if not fook then fook = {} end

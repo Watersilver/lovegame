@@ -30,7 +30,7 @@ function NPC.initialize(instance)
   instance.layer = 20
   instance.zo = 0
   instance.unpushable = true
-  instance.content = "Hi! Get in the house by the lake to fight boss 1 (requires grip), to the westmost house to fight boss 2 (kindof requires missiles) and to the northmost house to fight boss 3 (requires bombs). Talk to npcs to learn attacks and upgrade your abilities to prepare. Don't forget to save your game!"
+  instance.content = "Hi! Get in the house by the lake to fight boss 1 (requires grip), to the westmost house to fight boss 2 (kindof requires missiles), to the northmost house to fight boss 3 (requires bombs) and to the easter house to fight boss 4 (requires grip and almost cetrainly jump and a weapon). Talk to npcs to learn attacks and upgrade your abilities to prepare. Don't forget to save your game!"
 end
 
 NPC.functions = {
