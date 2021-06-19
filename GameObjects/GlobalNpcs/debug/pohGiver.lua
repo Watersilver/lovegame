@@ -13,7 +13,6 @@ local NPC = {}
 
 function NPC.initialize(instance)
   instance.choices = {
-    "22",
     "21",
     "20",
     "19",

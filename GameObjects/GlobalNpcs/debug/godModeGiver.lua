@@ -45,7 +45,7 @@ NPC.functions = {
       self.dlgState = "choosing"
     elseif self.hookReturn == "ssbChose" then
       -- Choice is self.choiceReturn.a
-      if self.choiceReturn.a == "yes" then
+      if self.choiceReturn.a == "Yes" then
         session.save.armorLvl = 3
         session.save.magicLvl = 3
         session.save.athleticsLvl = 3
