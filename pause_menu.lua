@@ -499,7 +499,9 @@ local drawFuncs = {
       for iindex, itemid in ipairs(session.save.items) do
         local pr, pg, pb, pa = love.graphics.getColor()
         love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
-        if session.save.equippedRing == itemid then
+        if session.save.equippedRing == itemid or
+        session.save.targetlessFocus == itemid
+        then
           love.graphics.setColor(COLORCONST*0.7, COLORCONST*0.4, COLORCONST, COLORCONST*0.2)
           love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
         elseif pamleft.itemCursor == iindex then
@@ -511,6 +513,7 @@ local drawFuncs = {
         end
         love.graphics.setColor(pr, pg, pb, pa)
         local iname = items[itemid] and items[itemid].name or "no data..."
+        if type(iname) == "function" then iname = iname() end
         love.graphics.print(iname, padding, padding + t, 0, textScale)
         local inameWidth = love.graphics.getFont():getWidth(iname) * textScale
         local duplicates = session.save[itemid] or "?"

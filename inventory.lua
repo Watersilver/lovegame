@@ -272,7 +272,7 @@ function inv.check_use(instance, trig, side, dt)
     returnValue = true
   elseif trig.bomb then
     local removeResult = session.removeItem("mateBlastSeed")
-    if removeResult == "don't have any" then return end
+    if removeResult < 0 then return end
     local blvl = inv.bomb.l1
     instance.liftedOb = (require "GameObjects.Items.lifted"):new{
       creator = instance,

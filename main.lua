@@ -65,6 +65,8 @@ gvar = {
 -- Load stuff from save directory
 local gs = require "game_settings"
 
+require "async"
+
 local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local p = require "GameObjects.BoxTest"
@@ -275,7 +277,9 @@ session = {
     session.save[questid] = result or true
   end,
   checkItemLim = function(itemid)
-    return require("items")[itemid].limit
+    local lim = require("items")[itemid].limit
+    if type(lim) == "function" then lim = lim() end
+    return lim
   end,
   addItem = function(itemid)
     if session.save[itemid] then
@@ -296,14 +300,14 @@ session = {
     end
   end,
   removeItem = function(itemid)
-    if not session.save[itemid] then return "don't have any" end
+    if not session.save[itemid] then return -1 end
     session.save[itemid] = session.save[itemid] - 1
     if session.save[itemid] < 1 then
       session.save[itemid] = nil
       local index = u.getFirstIndexByValue(session.save.items, itemid)
       table.remove(session.save.items, index)
-      return "ran out"
     end
+    return session.save[itemid] or 0
   end,
   getMusic = function()
     local music_info = session.musicOverride or game.room.music_info
@@ -483,6 +487,11 @@ glsounds = snd.load_sounds{
   journalEntry = {"Effects/journalEntry"},
   bell = {"Effects/bell"},
   dungeonDoor = {"Effects/Oracle_Dungeon_Door"},
+
+  -- Feedback
+  runOut = {"Effects/run_out"},
+  runningLow = {"Effects/running_low"},
+
   -- Harpsounds
   harpad = {"Effects/harp/ad"},
   harpadB = {"Effects/harp/adB"},
@@ -673,6 +682,10 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
+
+  -- Run async functions before messing with the timeflow (dt)
+  async.realTimeUpdate(dt)
+
 	dt = math.min(0.03333333, dt)
   local drugSlomo
   if session.drug then drugSlomo = session.drug.slomo end
@@ -680,6 +693,9 @@ function love.update(dt)
   if pl1 and pl1.exists and pl1.timeFlow then
     dt = dt / pl1.timeFlow
   end
+
+  -- Run async functions after messing with the timeflow (dt)
+  async.gameTimeUpdate(dt)
 
   -- update timers
   gvar.t = gvar.t + dt

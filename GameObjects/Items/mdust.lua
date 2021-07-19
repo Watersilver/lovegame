@@ -254,6 +254,34 @@ MagicDust.functions = {
     o.addToWorld(appearEffect)
   end,
 
+  useFocus = function (focus)
+    if session.save.targetlessFocus == focus then
+      local result = session.removeItem(focus)
+      if result == 1 then
+        async.realTime{
+          function() snd.play(glsounds.runningLow) end,
+          0.2,
+          function() return session.save[focus] ~= 1 end
+        }
+
+      end
+      if result == 0 then
+        async.realTime{
+          function() snd.play(glsounds.runOut) end,
+          0.2,
+          function() return session.save[focus] end
+        }
+      end
+      -- Unequip focus if ran out
+      if result <= 0 then
+        session.save.targetlessFocus = nil
+      end
+      if result >= 0 then
+        return true
+      end
+    end
+  end,
+
   update = function (self, dt)
 
     if self.fixture then
@@ -281,18 +309,27 @@ MagicDust.functions = {
         -- If none of the above happens, nothing happens
         {value = u.emptyFunc, chance = 1},
       }
-      if session.focus == "decoy" then
+      -- if session.save.targetlessFocus == "focusDoll" then
+      --   local result = session.removeItem("focusDoll")
+      --   if result == 1 then
+      --     snd.play(glsounds.runningLow)
+      --   end
+      --   if result == 0 then
+      --     snd.play(glsounds.runOut)
+      --   end
+      --   -- Unequip focus if ran out
+      --   if result <= 0 then
+      --     session.save.targetlessFocus = nil
+      --   end
+      --   if result >= 0 then
+      --     reaction = self.createDecoy
+      --   end
+      -- end
+      if self.useFocus("focusDoll") then
         reaction = self.createDecoy
       end
       reaction(self)
       self.hasReacted = true
-    else
-      if not self.usedFocus then
-        -- Focus doesn't work after reaction, whether it helped or not
-        session.focus = nil
-        -- Mark because other wise I'll keep deliting focus as long as I exist
-        self.usedFocus = true
-      end
     end
 
     -- determine shader

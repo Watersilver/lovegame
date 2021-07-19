@@ -81,15 +81,15 @@ items.testi2 = {
 }
 
 -- Key
-items.keySpellbook = {
-  name = "Spellbook",
-  description =
-  "A Book on how to use\n\z
-  focuses to control\n\z
-  the effects of the\n\z
-  magic dust.",
-  limit = 1
-}
+-- items.keySpellbook = {
+--   name = "Spellbook",
+--   description =
+--   "A Book on how to use\n\z
+--   focuses to control\n\z
+--   the effects of the\n\z
+--   magic dust.",
+--   limit = 1
+-- }
 
 items.keyLyre = {
   name = "Lyre",
@@ -138,21 +138,29 @@ items.focusDoll = {
     "Dolls like this were\n\z
     placed in kids' rooms,\n\z
     to confuse nightmares."
-    if session.save.keySpellbook then
+    -- if session.save.keySpellbook then
+    if session.save.hasMystery then
       desc = desc .. "\n\nSpell focus for Decoy"
     end
     return desc
   end,
   use = function()
-    if session.save.keySpellbook then
-      session.usedItemComment =
-      "You say the magic words\n\z
-      and it disintegrates in\n\z
-      a flash of light!\n\z
-      \n\z
-      Decoy charged"
-      session.removeItem("focusDoll")
-      session.focus = "decoy"
+    if session.save.hasMystery then
+      -- session.usedItemComment =
+      -- "You say the magic words\n\z
+      -- and it disintegrates in\n\z
+      -- a flash of light!\n\z
+      -- \n\z
+      -- Decoy charged"
+      -- session.removeItem("focusDoll")
+      -- session.focus = "decoy"
+      if session.save.targetlessFocus == "focusDoll" then
+        session.usedItemComment = "Unequipped doll as\nspell focus"
+        session.save.targetlessFocus = nil
+      else
+        session.usedItemComment = "Equipped doll as\nspell focus"
+        session.save.targetlessFocus = "focusDoll"
+      end
     else
       session.save.dollFail = session.save.dollFail and session.save.dollFail + 1 or 0
       if session.save.dollFail < 10 or session.save.dollFail > 20 then
