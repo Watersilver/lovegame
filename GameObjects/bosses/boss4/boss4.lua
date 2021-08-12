@@ -566,7 +566,7 @@ local dialogue = {
   "It wants to destroy the world!",
   "It opposes the Empire!",
   "Foolish creature. The Empire cannot be stopped.",
-  "The empire will consume all.",
+  "The Empire will consume all.",
   "And then all will be the Empire.",
   "All will be perfect!",
   "HAIL THE EMPIRE!",
