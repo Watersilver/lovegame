@@ -24,7 +24,7 @@ function Plant.initialize(instance)
   instance.ballbreaker = false
   instance.liftable = false
 
-  instance.timer = 0
+  instance.timeTillRegen = 0
   instance.image_index_float = 2
   instance.image_index = instance.image_index_float
   instance.cooldown = 3
@@ -42,8 +42,8 @@ Plant.functions = {
       self.cantGrab = true
     end
 
-    if self.timer > 0 then
-      self.timer = self.timer - dt
+    if self.timeTillRegen > 0 then
+      self.timeTillRegen = self.timeTillRegen - dt
     else
       self.image_index_float = self.image_index_float + dt * self.sprite.frames
       if self.image_index_float > 2 then self.image_index_float = 2 end
@@ -65,7 +65,7 @@ Plant.functions = {
       xstart = self.x or self.xstart, ystart = self.y or self.ystart,
       x = self.x or self.xstart, y = self.y or self.ystart,
       image_index_float = 0,
-      timer = self.cooldown,
+      timeTillRegen = self.cooldown,
       drops = self.drops
     }
     o.addToWorld(uprooted)
@@ -80,7 +80,7 @@ Plant.functions = {
     if other.immasword or other.immabombsplosion or (other.immasprint and not otherF:isSensor() and session.save.faroresCourage) then
       if not other.stab and self.image_index == 2 then
         self.image_index_float = 0
-        self.timer = self.cooldown
+        self.timeTillRegen = self.cooldown
         local explOb = expl:new{
           x = self.x or self.xstart, y = self.y or self.ystart,
           -- layer = self.layer+1,
