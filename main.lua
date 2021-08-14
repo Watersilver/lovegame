@@ -488,6 +488,10 @@ glsounds = snd.load_sounds{
   bell = {"Effects/bell"},
   dungeonDoor = {"Effects/Oracle_Dungeon_Door"},
 
+  -- Mundane
+  bushCut = {"Effects/Oracle_Bush_Cut"},
+  uproot = {"Effects/Bush_Uproot"},
+
   -- Feedback
   runOut = {"Effects/run_out"},
   runningLow = {"Effects/running_low"},

@@ -14,10 +14,6 @@ local shdrs = require "Shaders.shaders"
 local FM = require ("GameObjects.FloorDetectors.floorMarker")
 local FU = require ("GameObjects.FloorDetectors.floorUnmarker")
 
-local function myDrops(x, y)
-  drops.cheap(x, y)
-end
-
 local function throw_collision(self)
   local explOb = expl:new{
     x = self.x or self.xstart, y = self.y or self.ystart,
@@ -28,7 +24,9 @@ local function throw_collision(self)
     sounds = snd.load_sounds({explode = self.explosionSound})
   }
   o.addToWorld(explOb)
-  myDrops(self.x, self.y)
+  if self.myDrops then
+    self:myDrops()
+  end
 end
 
 local Brick = {}
@@ -88,12 +86,22 @@ onMdustTouch = function (self, other)
   reaction(self)
 end,
 
+myDrops = function (self)
+  drops.cheap(self.x, self.y)
+end,
+
 onFireEnd = function (self)
-  myDrops(self.x, self.y)
+  if self.myDrops then
+    self:myDrops()
+  end
   o.removeFromWorld(self)
 end,
 
 load = function(self)
+  self.persistentData = {
+    drops = self.drops
+  }
+
   self.image_speed = 0
   if self.plantified then
     self.myShader = shdrs.plantShader

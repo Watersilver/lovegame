@@ -9,32 +9,38 @@ local o = require "GameObjects.objects"
 local drops = require "GameObjects.drops.drops"
 
 local fT = require "GameObjects.floorTile"
+local sL = require "GameObjects.softLiftable"
 
 local Plant = {}
 
 function Plant.initialize(instance)
   instance.sprite_info = im.spriteSettings.regeneratingPlant
-  instance.physical_properties = {
-    bodyType = "static",
-    fixedRotation = true,
-    sensor = true,
-    shape = ps.shapes.circleThreeFourths,
-    masks = {1,2,3,4,5,6,7,8,9,10,11,12,14,16},
-  }
-  instance.image_speed = 0
+  instance.physical_properties.sensor = true
   instance.seeThrough = true
+  instance.attackDodger = true
+  instance.image_speed = 0
   instance.layer = 13
+  instance.bombGoesThrough = true
+  instance.ballbreaker = false
+  instance.liftable = false
 
   instance.timer = 0
   instance.image_index_float = 2
   instance.image_index = instance.image_index_float
-  instance.attackDodger = true
-  instance.cooldown = 10
+  instance.cooldown = 3
 end
 
 Plant.functions = {
   update = function (self, dt)
     self.image_index = math.floor(self.image_index_float)
+
+    if self.image_index == 2 then
+      self.liftable = true
+      self.cantGrab = false
+    else
+      self.liftable = false
+      self.cantGrab = true
+    end
 
     if self.timer > 0 then
       self.timer = self.timer - dt
@@ -42,6 +48,28 @@ Plant.functions = {
       self.image_index_float = self.image_index_float + dt * self.sprite.frames
       if self.image_index_float > 2 then self.image_index_float = 2 end
     end
+  end,
+
+  onMdustTouch = function(self, other)
+    other.hasReacted = false
+  end,
+
+  myDrops = function (selfOrThrown)
+    if selfOrThrown.persistentData.drops then
+      drops.custom(selfOrThrown.x, selfOrThrown.y, selfOrThrown.persistentData.drops)
+    end
+  end,
+
+  on_replaced_by_lifted = function (self)
+    local uprooted = Plant:new{
+      xstart = self.x or self.xstart, ystart = self.y or self.ystart,
+      x = self.x or self.xstart, y = self.y or self.ystart,
+      image_index_float = 0,
+      timer = self.cooldown,
+      drops = self.drops
+    }
+    o.addToWorld(uprooted)
+    snd.play(glsounds.uproot)
   end,
 
   beginContact = function(self, a, b, coll, aob, bob)
@@ -63,9 +91,7 @@ Plant.functions = {
           sounds = snd.load_sounds({explode = {"Effects/Oracle_Bush_Cut"}})
         }
         o.addToWorld(explOb)
-        if self.drops then
-          drops.custom(self.xexplode or self.xstart, self.yexplode or self.ystart, self.drops)
-        end
+        self:myDrops()
       end
     end
   end
@@ -73,7 +99,7 @@ Plant.functions = {
 
 function Plant:new(init)
   local instance = p:new() -- add parent functions and fields
-  p.new(fT, instance) -- add parent functions and fields
+  p.new(sL, instance) -- add parent functions and fields
   p.new(Plant, instance, init) -- add own functions and fields
   return instance
 end
