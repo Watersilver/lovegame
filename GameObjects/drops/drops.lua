@@ -12,7 +12,7 @@ local Fairy = require "GameObjects.drops.fairy"
 local drops = {}
 
 function drops.custom(x, y, droptable)
-  local dropname = chooseFromChanceTable(droptable)
+  local dropname = type(droptable) == "string" and droptable or chooseFromChanceTable(droptable)
   if dropname then
     local Drop =  require ("GameObjects.drops." .. dropname)
     o.addToWorld(Drop:new{xstart = x, ystart = y, zvel = 100})
