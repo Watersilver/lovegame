@@ -318,7 +318,7 @@ function u.newQueue(maxLength)
       local first = self.first
       if first > self.last then error("queue is empty") end
       local value = self[first]
-      self[first] = nil        -- to allow garbage collection
+      self[first] = nil -- to allow garbage collection
       self.first = first + 1
       self.length = self.length - 1
       return value

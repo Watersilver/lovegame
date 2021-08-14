@@ -79,7 +79,8 @@ onMdustTouch = function (self, other)
     -- {value = nil, chance = 1},
   }
   if not reaction then return end
-  if reaction == other.createFire then self.onMdustTouch = nil
+  if reaction == other.createFire then
+    self.onMdustTouch = nil
   elseif reaction == other.createWind then
     self:throw_collision()
     o.removeFromWorld(self)
