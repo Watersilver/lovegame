@@ -101,6 +101,7 @@ function Playa.initialize(instance)
   }
   instance.item_use_counter = 0 -- Counts how long you're still while using item
   instance.currentMasks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
+  instance.thrownGoesThrough = true
   instance.physical_properties = {
     bodyType = "dynamic",
     fixedRotation = true,
@@ -2808,7 +2809,8 @@ Playa.functions = {
 
       if sensorID then
         local sensors = self.sensors
-        if (not other.unpushable) and (not other.goThroughPlayer) then
+        -- if (not other.unpushable) and (not other.goThroughPlayer) then
+        if not other.unpushable then
           local onEdge
           if other.edge then
             other.onEdge = ec.isOnEdge(other, self)

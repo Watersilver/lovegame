@@ -381,16 +381,64 @@ local mo = {}
         end
 
         if sens.downTouch then
-          if down == 1 then trig.push_down = true end
+          if down == 1 then
+            for _, touchedOb in ipairs(sens.downTouchedObs) do
+              local notGoThrough =
+                not touchedOb.goThroughPlayer and
+                not touchedOb.floor and
+                (touchedOb.fixture and not touchedOb.fixture:isSensor())
+
+              if notGoThrough then
+                trig.push_down = true
+                break
+              end
+            end
+          end
         end
         if sens.rightTouch then
-          if right == 1 then trig.push_right = true end
+          if right == 1 then
+            for _, touchedOb in ipairs(sens.rightTouchedObs) do
+              local notGoThrough =
+                not touchedOb.goThroughPlayer and
+                not touchedOb.floor and
+                (touchedOb.fixture and not touchedOb.fixture:isSensor())
+
+              if notGoThrough then
+                trig.push_right = true
+                break
+              end
+            end
+          end
         end
         if sens.leftTouch then
-          if left == 1 then trig.push_left = true end
+          if left == 1 then
+            for _, touchedOb in ipairs(sens.leftTouchedObs) do
+              local notGoThrough =
+                not touchedOb.goThroughPlayer and
+                not touchedOb.floor and
+                (touchedOb.fixture and not touchedOb.fixture:isSensor())
+
+              if notGoThrough then
+                trig.push_left = true
+                break
+              end
+            end
+          end
         end
         if sens.upTouch then
-          if up == 1 then trig.push_up = true end
+          if up == 1 then
+            for _, touchedOb in ipairs(sens.upTouchedObs) do
+              local notGoThrough =
+                not touchedOb.goThroughPlayer and
+                not touchedOb.floor and
+                (touchedOb.fixture and not touchedOb.fixture:isSensor())
+
+              if notGoThrough then
+                trig.push_up = true
+                break
+              end
+            end
+          end
         end
 
         if sens.downTouchedObs[1] then

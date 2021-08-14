@@ -23,7 +23,7 @@ local pi = math.pi
 local function destroyself(self)
   if not self.destroyedself then
     self.destroyedself = true
-    if self.throw_collision then self:throw_collision() else u.emptyFunc() end
+    if self.throw_collision then self:throw_collision() end
     o.removeFromWorld(self)
     if self.shadow then o.removeFromWorld(self.shadow) end
     self.shadow = nil
@@ -41,6 +41,7 @@ local function touchGround(self)
   if self.iAmBomb then
     if not self.planted then snd.play(glsounds.bombDrop) end
     if self.bounces == 0 then
+      self.cantGrab = false
       self.bounces = 1
       self.zvel = 55
       self.zo = -1
@@ -87,13 +88,17 @@ function Thrown.initialize(instance)
     sensor = true,
     gravityScaleFactor = 0,
     masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT},
-    categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
+    -- categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
+    categories = {}
   }
   instance.seeThrough = true
   instance.immathrown = true
   instance.bounces = 0
   instance.thrownGoesThrough = true
   instance.zo = - 1.5 * ps.shapes.plshapeHeight
+
+  instance.liftable = true
+  instance.cantGrab = true
 end
 
 Thrown.functions = {

@@ -289,8 +289,17 @@ function inv.check_use(instance, trig, side, dt)
     instance.animation_state:change_state(instance, dt, side .. "lifting")
     returnValue = true
   elseif trig.gripping and instance.sensors[side .. "Touch"] then
-    instance.animation_state:change_state(instance, dt, side .. "gripping")
-    returnValue = true
+    -- using the same method to find "other" in player states
+    -- Dont change one without the other
+    local other
+    local touchedObTable = instance.sensors[side .. "TouchedObs"]
+    for _, touchedOb in ipairs(touchedObTable) do
+      other = touchedOb
+    end
+    if other and not other.cantGrab then
+      instance.animation_state:change_state(instance, dt, side .. "gripping")
+      returnValue = true
+    end
   elseif trig.usingMdust then
     instance.animation_state:change_state(instance, dt, side .. "mdust")
     returnValue = true

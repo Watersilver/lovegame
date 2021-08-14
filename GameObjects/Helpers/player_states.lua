@@ -444,6 +444,8 @@ end
 
 player_states.start_gripping = function(instance, dt, side)
   -- Determine whether I will grip or lift
+  -- using the same method to find "other" in inventory
+  -- Dont change one without the other
   local other
   local touchedObTable = instance.sensors[side .. "TouchedObs"]
   for _, touchedOb in ipairs(touchedObTable) do
@@ -457,8 +459,6 @@ player_states.start_gripping = function(instance, dt, side)
       )
     else
       instance.animation_state:change_state(instance, dt, side .. "lifting")
-      o.removeFromWorld(other)
-      other.destroy = other.on_replaced_by_lifted
       instance.liftedOb = lft:new{
         creator = instance,
         side = side,
@@ -466,7 +466,13 @@ player_states.start_gripping = function(instance, dt, side)
         sprite_info = other.sprite_info or {im.spriteSettings.testlift},
         image_index = floor(other.image_index),
         lift_info = other.lift_info,
+        persistentData = other.persistentData,
+        iAmBomb = other.iAmBomb,
+        timer = other.timer,
+        vibrPhase = other.vibrPhase,
+        startingTimer = other.startingTimer,
         lift_update = other.lift_update,
+        myDrops = other.myDrops,
         throw_update = other.throw_update,
         explosionNumber = other.explosionNumber,
         explosionSprite = other.explosionSprite,
@@ -476,6 +482,12 @@ player_states.start_gripping = function(instance, dt, side)
         throw_collision = other.throw_collision or emptyFunc,
         inheritedShader = other.myShader
       }
+      o.removeFromWorld(other)
+      -- other.destroy = other.on_replaced_by_lifted
+      other.destroy = nil
+      if other.on_replaced_by_lifted then
+        other:on_replaced_by_lifted()
+      end
       o.addToWorld(instance.liftedOb)
       return
     end
