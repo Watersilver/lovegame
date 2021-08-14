@@ -6,6 +6,12 @@ input.controllers = {}
 
 input.disabledControllers = {}
 
+input.keys = {
+  pressed = {},
+  prev = {},
+  held = {}
+}
+
 local player1defaults = id.player1
 
 function input.set_input(arg)
@@ -99,6 +105,12 @@ function input.check_input()
   input.shiftPrevious = input.shift
   input.shift = love.keyboard.isDown("lshift", "rshift")
   input.shiftPressed = input.shift and not input.shiftPrevious
+
+  for key in string.gmatch("zsxdcvgbhnjmq2w3er5t6y7ui9o", ".") do
+    input.keys.prev[key] = input.keys.held[key]
+    input.keys.held[key] = love.keyboard.isDown(key)
+    input.keys.pressed[key] = input.keys.held[key] and not input.keys.prev[key]
+  end
 end
 
 function input.disable_controller(playername)

@@ -1885,23 +1885,18 @@ function Playa.initialize(instance)
     end
     },
 
-
     downharp = {
     run_state = function(instance, dt)
-      local inin = instance.input
-      local inpr = instance.previnput
-      local up = inin.up == 1
-      local down = inin.down == 1
-      local z = inin.z == 1 and inpr.z == 0
-      local x = inin.x == 1 and inpr.x == 0
-      local c = inin.c == 1 and inpr.c == 0
-      local a = inin.a == 1 and inpr.a == 0
-      local s = inin.s == 1 and inpr.s == 0
-      local d = inin.d == 1 and inpr.d == 0
-      local q = inin.q == 1 and inpr.q == 0
-      local w = inin.w == 1 and inpr.w == 0
-      local e = inin.e == 1 and inpr.e == 0
-      if z or x or c or a or s or d or q or w or e then
+      local notesPlayed = 0
+
+      for key, pressed in pairs(inp.keys.pressed) do
+        if pressed then
+          snd.play(instance.harpSoundTable[key])
+          notesPlayed = notesPlayed + 1
+        end
+      end
+
+      if notesPlayed > 0 then
         instance.harpTimer = 0.5
         if instance.noteTimer <= 0 then
           instance.noteTimer = 0.25
@@ -1919,37 +1914,6 @@ function Playa.initialize(instance)
           }
           o.addToWorld(note)
         end
-      end
-      if up then
-        if z then snd.play(glsounds.harpdd) end
-        if x then snd.play(glsounds.harpfd) end
-        if c then snd.play(glsounds.harpadB) end
-        if a then snd.play(glsounds.harpbd) end
-        if s then snd.play(glsounds.harpdm) end
-        if d then snd.play(glsounds.harpfm) end
-        if q then snd.play(glsounds.harpamB) end
-        if w then snd.play(glsounds.harpbm) end
-        if e then snd.play(glsounds.harpdu) end
-      elseif down then
-        if z then snd.play(glsounds.harpcd) end
-        if x then snd.play(glsounds.harpedB) end
-        if c then snd.play(glsounds.harpfdS) end
-        if a then snd.play(glsounds.harpad) end
-        if s then snd.play(glsounds.harpcm) end
-        if d then snd.play(glsounds.harpemB) end
-        if q then snd.play(glsounds.harpfmS) end
-        if w then snd.play(glsounds.harpam) end
-        if e then snd.play(glsounds.harpcu) end
-      else
-        if z then snd.play(glsounds.harpddB) end
-        if x then snd.play(glsounds.harped) end
-        if c then snd.play(glsounds.harpgd) end
-        if a then snd.play(glsounds.harpbdB) end
-        if s then snd.play(glsounds.harpdmB) end
-        if d then snd.play(glsounds.harpem) end
-        if q then snd.play(glsounds.harpgm) end
-        if w then snd.play(glsounds.harpbmB) end
-        if e then snd.play(glsounds.harpduB) end
       end
       if instance.harpTimer > 0 then
         instance.image_speed = 0.05
@@ -1989,6 +1953,45 @@ function Playa.initialize(instance)
       instance.movement_state:change_state(pl1, dt, "stand_still")
       instance.wasMusicOn = gs.musicOn
       gs.musicOn = false
+
+      if not instance.harpSoundTable then
+        instance.harpSoundTable = {
+          -- White keys down
+          z = glsounds.harpcd,
+          x = glsounds.harpdd,
+          c = glsounds.harped,
+          v = glsounds.harpfd,
+          b = glsounds.harpgd,
+          n = glsounds.harpad,
+          m = glsounds.harpbd,
+
+          -- Black keys down
+          s = glsounds.harpddB,
+          d = glsounds.harpedB,
+          g = glsounds.harpfdS,
+          h = glsounds.harpadB,
+          j = glsounds.harpbdB,
+
+          -- White keys up
+          q = glsounds.harpcm,
+          w = glsounds.harpdm,
+          e = glsounds.harpem,
+          r = glsounds.harpfm,
+          t = glsounds.harpgm,
+          y = glsounds.harpam,
+          u = glsounds.harpbm,
+
+          ["2"] = glsounds.harpdmB,
+          ["3"] = glsounds.harpemB,
+          ["5"] = glsounds.harpfmS,
+          ["6"] = glsounds.harpamB,
+          ["7"] = glsounds.harpbmB,
+
+          i = glsounds.harpcu,
+          o = glsounds.harpdu,
+          ["9"] = glsounds.harpduB
+        }
+      end
     end,
 
     end_state = function(instance, dt)
