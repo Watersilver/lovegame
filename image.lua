@@ -362,6 +362,12 @@ im.spriteSettings = {
   door = {
     {'Door', 2, 2}
   },
+  regeneratingPlant = {
+    {'Misc/RegeneratingPlant/plant', 3, padding = 2, width = 14, height = 14},
+  },
+  button = {
+    {'Misc/Button/brown', 2, padding = 2, width = 10, height = 10},
+  },
   -- chesspieces
   pawn = {
     {'Misc/Chess/pawn', 5, padding = 2, width = 11, height = 16},
