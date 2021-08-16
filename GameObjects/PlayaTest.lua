@@ -1726,13 +1726,8 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      if instance.markanim <= 0 and not instance.onEdge and instance.zo == 0 then
-        -- make mark
-        if instance.mark then o.removeFromWorld(instance.mark) end
-        instance.sounds.markStart:stop()
-        snd.play(instance.sounds.mark)
-        instance.mark = mark:new{xstart = instance.x, ystart = instance.y, creator = instance, layer = instance.layer - 1}
-        o.addToWorld(instance.mark)
+      if instance.markanim <= 0 and instance:canMark() then
+        instance:newMark()
       end
     end
     },
@@ -1780,17 +1775,28 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      if instance.recallanim <= 0 and not instance.onEdge then
-        if instance.mark then
-          instance.sounds.recallStart:stop()
-          snd.play(instance.sounds.recall)
-          instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
-          instance.stateTriggers.poof = true
+      if instance.mark and instance.recallanim <= 0 and instance:canMark() then
+        instance.sounds.recallStart:stop()
+        snd.play(instance.sounds.recall)
+        instance.stateTriggers.poof = true
+
+        if session.latestVisitedRooms:getLast() ~= instance.mark.roomName then
+          if not game.transitioning then
+            game.transition{
+              type = "whiteScreen",
+              progress = 0.9,
+              roomTarget = instance.mark.roomName,
+              playa = instance,
+              desx = instance.mark.xstart,
+              desy = instance.mark.ystart
+            }
+          end
+          instance:newMark(true, session.latestVisitedRooms:getLast())
         else
-          -- fail
+          instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
+          instance:newMark(true)
         end
-      else
-        -- fail
+
       end
     end
     },
@@ -2286,6 +2292,19 @@ Playa.functions = {
 
   successfullyBullrushed = function (self, other)
     return self.immasprint and other.canBeBullrushed and (not other.shielded or other.shieldDown)
+  end,
+
+  canMark = function (self)
+    return not self.onEdge and self.zo == 0
+  end,
+
+  newMark = function (self, silent, roomName)
+    if self.mark and self.mark.exists then o.removeFromWorld(self.mark) end
+    self.sounds.markStart:stop()
+    if not silent then snd.play(self.sounds.mark) end
+    self.mark = mark:new{xstart = self.x, ystart = self.y, creator = self, layer = self.layer - 1}
+    if roomName then self.mark.roomName = roomName end
+    o.addToWorld(self.mark)
   end,
 
   takeDamage = function (self, other)

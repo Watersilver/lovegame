@@ -11,6 +11,9 @@ local floor = math.floor
 local image_indexProgress = 0
 local image_indexProgressDirection = 1
 
+-- TODO items for marking screens of overworld
+-- TODO fix trans draw
+-- TODO Also a global var that knows if I am able to teleport from this screen to another
 function Mark.initialize(instance)
   instance.sprite_info = {im.spriteSettings.mark}
   image_indexProgress = 0
@@ -31,6 +34,10 @@ function Mark.initialize(instance)
   else
     if session.save.faroresCourage then instance.myShader = shdrs["itemGreenShader"] end
   end
+
+  -- for teleport between screens
+  instance.transPersistent = true
+  instance.roomName = session.latestVisitedRooms:getLast()
 end
 
 Mark.functions = {
@@ -51,6 +58,8 @@ Mark.functions = {
   end,
 
   draw = function (self)
+    if session.latestVisitedRooms:getLast() ~= self.roomName then return end
+
     local sprite = self.sprite
     local frame = sprite[self.image_index]
     local worldShader = love.graphics.getShader()
@@ -79,9 +88,6 @@ Mark.functions = {
     sprite.res_x_scale, sprite.res_y_scale,
     sprite.cx, sprite.cy)
     love.graphics.setShader(worldShader)
-    if self.body then
-      -- draw
-    end
   end,
 
   delete = function (self)
