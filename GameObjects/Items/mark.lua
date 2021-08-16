@@ -36,7 +36,7 @@ function Mark.initialize(instance)
   end
 
   -- for teleport between screens
-  instance.transPersistent = true
+  if session.canTeleport() then instance.transPersistent = true end
   instance.roomName = session.latestVisitedRooms:getLast()
 end
 

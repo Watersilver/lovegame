@@ -1776,14 +1776,15 @@ function Playa.initialize(instance)
 
     end_state = function(instance, dt)
       if instance.mark and instance.recallanim <= 0 and instance:canMark() then
+
         if session.latestVisitedRooms:getLast() ~= instance.mark.roomName then
-          if not game.transitioning then
+          if not game.transitioning and session.canTeleport(instance.mark) then
             instance.sounds.recallStart:stop()
             snd.play(instance.sounds.recall)
             instance.stateTriggers.poof = true
             game.transition{
               type = "whiteScreen",
-              progress = 0.9,
+              progress = 0.8,
               roomTarget = instance.mark.roomName,
               playa = instance,
               desx = instance.mark.xstart,
@@ -2615,6 +2616,12 @@ Playa.functions = {
     if self.sensors.rightTouch then
       self.db.rightcol = 0
     end
+
+    -- fuck = ""
+    -- for key, val in pairs(self.sensors) do
+    --   if type(val) == "table" then val = #val end
+    --   fuck = fuck .. key .. ": " .. val .. '\n'
+    -- end
 
     -- set Shader
     if trig.enableHitShader then

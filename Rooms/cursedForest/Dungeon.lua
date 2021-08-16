@@ -11,7 +11,7 @@ room.music_info = snd.ovrwrld1
 room.width = 512
 room.height = 512
 local upTarget, downTarget, leftTarget
-if session.save.forsetCurseLifted then
+if session.save.forestCurseLifted then
   room.timeScreenEffect = 'default'
   upTarget = "Rooms/cursedForest/north.lua"
   downTarget = "Rooms/cursedForest/south.lua"

@@ -10,7 +10,7 @@ room.music_info = snd.ovrwrld1
 
 room.width = 512
 room.height = 512
-if session.save.forsetCurseLifted then
+if session.save.forestCurseLifted then
   room.timeScreenEffect = 'default'
   room.downTrans = {
     {

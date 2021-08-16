@@ -22,7 +22,7 @@ function Curse.initialize(instance)
   instance.transPersistent = true
   instance.ids[#instance.ids+1] = "ForestCurse"
   if o.identified.ForestCurse and o.identified.ForestCurse[1].exists then instance.dieASAP = true end
-  if session.save.forsetCurseLifted then instance.dieASAP = true end
+  if session.save.forestCurseLifted then instance.dieASAP = true end
 end
 
 Curse.functions = {

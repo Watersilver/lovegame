@@ -224,6 +224,14 @@ session = {
     -- Modifier due to temp speedBoosts or penalties
     return maxSpeed
   end,
+  canTeleport = function(mark)
+    local from =
+      (session.save.forestCurseLifted or not session.latestVisitedRooms:getLast():find("cursedForest"))
+    local to = mark and (
+      (session.save.forestCurseLifted or not mark.roomName:find("cursedForest"))
+    ) or true
+    return (from and to) or game.room.blockTeleport
+  end,
   journalEntryNotification = function()
     local Txtx = assert(love.filesystem.load("GameObjects/overlayText/newNote.lua"))()
     local txtx = Txtx:new()
