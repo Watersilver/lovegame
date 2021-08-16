@@ -12,8 +12,6 @@ local image_indexProgress = 0
 local image_indexProgressDirection = 1
 
 -- TODO items for marking screens of overworld
--- TODO fix trans draw
--- TODO Also a global var that knows if I am able to teleport from this screen to another
 function Mark.initialize(instance)
   instance.sprite_info = {im.spriteSettings.mark}
   image_indexProgress = 0
@@ -74,20 +72,21 @@ Mark.functions = {
     end
   end,
 
+  -- TODO try to make trans_draw
   trans_draw = function (self)
-    local sprite = self.sprite
-    local frame = sprite[self.image_index]
-
-    local xtotal, ytotal = trans.still_objects_coords(self)
-
-    local worldShader = love.graphics.getShader()
-    love.graphics.setShader(self.myShader)
-    love.graphics.draw(
-    sprite.img, frame,
-    xtotal, ytotal+2, 0,
-    sprite.res_x_scale, sprite.res_y_scale,
-    sprite.cx, sprite.cy)
-    love.graphics.setShader(worldShader)
+    -- local sprite = self.sprite
+    -- local frame = sprite[self.image_index]
+    --
+    -- local xtotal, ytotal = trans.still_objects_coords(self)
+    --
+    -- local worldShader = love.graphics.getShader()
+    -- love.graphics.setShader(self.myShader)
+    -- love.graphics.draw(
+    -- sprite.img, frame,
+    -- xtotal, ytotal+2, 0,
+    -- sprite.res_x_scale, sprite.res_y_scale,
+    -- sprite.cx, sprite.cy)
+    -- love.graphics.setShader(worldShader)
   end,
 
   delete = function (self)
