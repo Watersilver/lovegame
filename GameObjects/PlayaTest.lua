@@ -2396,19 +2396,40 @@ Playa.functions = {
       -- I could be stepping on up to four tiles. Find closest to determine mods
       local closestTile
       local closestDistance = huge
-      local previousClosestDistance
+      local distance
+
       for _, floorTile in ipairs(self.floorTiles) do
-        previousClosestDistance = closestDistance
         -- Magic number to account for player height
-        closestDistance = min(distanceSqared2d(x, y+6, floorTile.xstart, floorTile.ystart), closestDistance)
-        if closestDistance <= previousClosestDistance then
+        distance = distanceSqared2d(x, y+6, floorTile.xstart, floorTile.ystart)
+
+        if distance <= closestDistance then
+          closestDistance = distance
           closestTile = floorTile
         end
       end
 
-      if not closestTile then
-        closestTile = self.floorTiles[1]
-      end
+      -- Old stupid method of finding closest tile that caused trouble
+      -- if new doesn't solve trouble review
+      -- local closestTile
+      -- local closestDistance = huge
+      -- local previousClosestDistance
+      --
+      -- for _, floorTile in ipairs(self.floorTiles) do
+      --   previousClosestDistance = closestDistance
+      --   -- Magic number to account for player height
+      --   closestDistance = min(distanceSqared2d(x, y+6, floorTile.xstart, floorTile.ystart), closestDistance)
+      --
+      --   -- If I get weird crashes that have to do with floor tiles
+      --   -- check stuff out here.
+      --   -- < to <= fixes it but breaks correct tile detection
+      --   if closestDistance < previousClosestDistance then
+      --     closestTile = floorTile
+      --   end
+      -- end
+      --
+      -- if not closestTile then
+      --   closestTile = self.floorTiles[1]
+      -- end
 
       self.xClosestTile = closestTile.xstart
       self.yClosestTile = closestTile.ystart
