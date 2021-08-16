@@ -386,7 +386,7 @@ local mo = {}
               local notGoThrough =
                 not touchedOb.goThroughPlayer and
                 not touchedOb.floor and
-                (touchedOb.fixture and not touchedOb.fixture:isSensor())
+                (touchedOb.isTile or touchedOb.fixture and not touchedOb.fixture:isSensor())
 
               if notGoThrough then
                 trig.push_down = true
@@ -401,7 +401,7 @@ local mo = {}
               local notGoThrough =
                 not touchedOb.goThroughPlayer and
                 not touchedOb.floor and
-                (touchedOb.fixture and not touchedOb.fixture:isSensor())
+                (touchedOb.isTile or touchedOb.fixture and not touchedOb.fixture:isSensor())
 
               if notGoThrough then
                 trig.push_right = true
@@ -416,7 +416,7 @@ local mo = {}
               local notGoThrough =
                 not touchedOb.goThroughPlayer and
                 not touchedOb.floor and
-                (touchedOb.fixture and not touchedOb.fixture:isSensor())
+                (touchedOb.isTile or touchedOb.fixture and not touchedOb.fixture:isSensor())
 
               if notGoThrough then
                 trig.push_left = true
@@ -431,7 +431,7 @@ local mo = {}
               local notGoThrough =
                 not touchedOb.goThroughPlayer and
                 not touchedOb.floor and
-                (touchedOb.fixture and not touchedOb.fixture:isSensor())
+                (touchedOb.isTile or touchedOb.fixture and not touchedOb.fixture:isSensor())
 
               if notGoThrough then
                 trig.push_up = true

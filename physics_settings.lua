@@ -138,6 +138,7 @@ function ps.shapes.edgeToTiles(instance, edgetable)
   instance.body = love.physics.newBody(ps.pw, instance.xstart, instance.ystart)
   instance.body:setUserData(instance)
   instance.fixtures = {}
+  instance.isTile = true
   for _, side in ipairs(pp.tile) do
     local shape = edgetable[side]
     local newf = love.physics.newFixture(instance.body, shape)
