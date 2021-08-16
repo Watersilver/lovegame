@@ -1776,12 +1776,11 @@ function Playa.initialize(instance)
 
     end_state = function(instance, dt)
       if instance.mark and instance.recallanim <= 0 and instance:canMark() then
-        instance.sounds.recallStart:stop()
-        snd.play(instance.sounds.recall)
-        instance.stateTriggers.poof = true
-
         if session.latestVisitedRooms:getLast() ~= instance.mark.roomName then
           if not game.transitioning then
+            instance.sounds.recallStart:stop()
+            snd.play(instance.sounds.recall)
+            instance.stateTriggers.poof = true
             game.transition{
               type = "whiteScreen",
               progress = 0.9,
@@ -1790,9 +1789,12 @@ function Playa.initialize(instance)
               desx = instance.mark.xstart,
               desy = instance.mark.ystart
             }
+            instance:newMark(true, session.latestVisitedRooms:getLast())
           end
-          instance:newMark(true, session.latestVisitedRooms:getLast())
         else
+          instance.sounds.recallStart:stop()
+          snd.play(instance.sounds.recall)
+          instance.stateTriggers.poof = true
           instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
           instance:newMark(true)
         end
