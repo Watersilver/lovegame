@@ -93,11 +93,11 @@ Curse.functions = {
     self.run = game.transitioning and game.transitioning.firstFrame
   end,
 
-  draw = function (self)
-    if pl1 then
-      love.graphics.circle(session.save.forestCurseLifted and "line" or "fill", pl1.x, pl1.y - 33, 3)
-    end
-  end
+  -- draw = function (self)
+  --   if pl1 then
+  --     love.graphics.circle(session.save.forestCurseLifted and "line" or "fill", pl1.x, pl1.y - 33, 3)
+  --   end
+  -- end
 }
 
 function Curse:new(init)
