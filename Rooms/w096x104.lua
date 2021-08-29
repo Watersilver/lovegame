@@ -1136,7 +1136,4 @@ room.gameObjects = {
 ----------End of gameObjects----------
 }
 
-room.manuallyPlacedObjects = {
-  {x = 0, y = 0, blueprint = "InRooms.cursedForest.forestCurse"},
-}
 return room

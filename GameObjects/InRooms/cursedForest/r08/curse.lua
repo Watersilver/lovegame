@@ -10,33 +10,18 @@ function Curse.initialize(instance)
 end
 
 Curse.functions = {
-
-  update = function (self, dt)
-    if not self.TransRanAtLeastOnce then self:trans_draw() end
-    self.transRan = false
-  end,
-
-  draw = function (self)
-    -- transdraw doesn't run if draw doesnt exist, so add this here
-  end,
-
-  -- not for drawing in this case but it's the
-  -- only one that only runs durin transition
-  trans_draw = function (self)
-    if self.transRan then return end
-    self.transRan = true
-    self.TransRanAtLeastOnce = true
+  unstoppable_update = function (self)
+    if self.ran then return end
+    self.ran = true
 
     local bKnights = o.identified.boolKnight
-    if bKnights then
-      if love.math.random() > 0.5 then
-        bKnights[1].liar = true
-      else
-        bKnights[2].liar = true
-      end
-      bKnights[1].rightWay = self.rightWay
-      bKnights[2].rightWay = self.rightWay
+    if love.math.random() > 0.5 then
+      bKnights[1].liar = true
+    else
+      bKnights[2].liar = true
     end
+    bKnights[1].rightWay = self.rightWay
+    bKnights[2].rightWay = self.rightWay
 
     local rightRoom = "Rooms/w096x102.lua"
     local wrongRoom = "Rooms/cursedForest/Trap.lua"

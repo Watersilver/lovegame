@@ -10,22 +10,7 @@ end
 
 Curse.functions = {
 
-  update = function (self, dt)
-    if not self.TransRanAtLeastOnce then self:trans_draw() end
-    self.transRan = false
-  end,
-
-  draw = function (self)
-    -- transdraw doesn't run if draw doesnt exist, so add this here
-  end,
-
-  -- not for drawing in this case but it's the
-  -- only one that only runs durin transition
-  trans_draw = function (self)
-    if self.transRan then return end
-    self.transRan = true
-    self.TransRanAtLeastOnce = true
-
+  unstoppable_update = function (self)
     local previousRoomName = session.latestVisitedRooms:get(session.latestVisitedRooms.length - 2)
 
     game.room.upTrans = {

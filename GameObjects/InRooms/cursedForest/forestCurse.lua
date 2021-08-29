@@ -18,82 +18,36 @@ local possibleStartingRooms = {
 local Curse = {}
 
 function Curse.initialize(instance)
+  instance.run = true
   instance.layer = 30
-  instance.transPersistent = true
+  instance.persistent = true
   instance.ids[#instance.ids+1] = "ForestCurse"
-  if o.identified.ForestCurse and o.identified.ForestCurse[1].exists then instance.dieASAP = true end
-  if session.save.forestCurseLifted then instance.dieASAP = true end
+  if o.identified.ForestCurse and o.identified.ForestCurse[1].exists then
+    error( "Trying to instantiate multiple forest curses." )
+  end
 end
 
 Curse.functions = {
-  load = function (self)
-    if self.dieASAP then o.removeFromWorld(self) end
-  end,
-
   getFirstRoom = function ()
     return u.chooseFromWeightTable(possibleStartingRooms)
   end,
 
-  update = function (self, dt)
-    if self.dieASAP then return end
-    if not self.TransRanAtLeastOnce then self:trans_draw() end
-    self.transRan = false
-  end,
+  unstoppable_update = function (self, dt)
+    if session.save.forestCurseLifted then return end
+    if not (session.latestVisitedRooms and session.latestVisitedRooms:getLast()) then return end
+    if self.run then
+      local roomName = session.latestVisitedRooms:getLast()
 
-  draw = function (self)
-    -- transdraw doesn't run if draw doesnt exist, so add this here
-    -- if self.dieASAP then return end
-    -- if pl1 then
-    --   love.graphics.circle("fill", pl1.x, pl1.y - 33, 3)
-    -- end
-  end,
-
-  -- not for drawing in this case but it's the
-  -- only one that only runs durin transition
-  trans_draw = function (self)
-    if self.dieASAP then return end
-    if self.transRan then return end
-    self.transRan = true
-    self.TransRanAtLeastOnce = true
-
-    -- local roomName = session.latestVisitedRooms:get(session.latestVisitedRooms.length - 1)
-    local roomName = session.latestVisitedRooms:getLast()
-
-    -- Test if I must be deleted
-    if roomName:find("Rooms/w098x102.lua") then
-      game.room.leftTrans = {
-        {
-          roomTarget = self.getFirstRoom(),
-          yupper = 0, ylower = 520,
-          xmod = 0, ymod = 0
-        }
-      }
-    elseif roomName:find("Rooms/w095x103.lua") then
-      game.room.rightTrans = {
-        {
-          roomTarget = self.getFirstRoom(),
-          yupper = 0, ylower = 520,
-          xmod = 0, ymod = 0
-        }
-      }
-    elseif roomName:find("Rooms/w096x104.lua") then
-      game.room.upTrans = {
-        {
-          roomTarget = self.getFirstRoom(),
-          xleftmost = 0, xrightmost = 520,
-          xmod = 0, ymod = 0
-        }
-      }
-    elseif roomName:find("Rooms/w096x102.lua") then
-      if game.lastSide == "up" then
-        game.room.downTrans = {
+      -- Test if entering forest
+      if roomName:find("Rooms/w098x102.lua") then
+        game.room.leftTrans = {
           {
-            roomTarget = "Rooms/cursedForest/r08.lua",
-            xleftmost = 0, xrightmost = 520,
+            roomTarget = self.getFirstRoom(),
+            yupper = 0, ylower = 520,
             xmod = 0, ymod = 0
           }
         }
-      else
+      elseif roomName:find("Rooms/w095x103.lua") then
         game.room.rightTrans = {
           {
             roomTarget = self.getFirstRoom(),
@@ -101,17 +55,47 @@ Curse.functions = {
             xmod = 0, ymod = 0
           }
         }
+      elseif roomName:find("Rooms/w096x104.lua") then
+        game.room.upTrans = {
+          {
+            roomTarget = self.getFirstRoom(),
+            xleftmost = 0, xrightmost = 520,
+            xmod = 0, ymod = 0
+          }
+        }
+      elseif roomName:find("Rooms/w096x102.lua") then
+        if game.lastSide == "up" then
+          game.room.downTrans = {
+            {
+              roomTarget = "Rooms/cursedForest/r08.lua",
+              xleftmost = 0, xrightmost = 520,
+              xmod = 0, ymod = 0
+            }
+          }
+        else
+          game.room.rightTrans = {
+            {
+              roomTarget = self.getFirstRoom(),
+              yupper = 0, ylower = 520,
+              xmod = 0, ymod = 0
+            }
+          }
+        end
+      elseif roomName:find("cursedForest") then
+        game.room.music_info = "ambient1"
+        if roomName:find("Chess") then
+          game.room.music_info = {"Silence", previousFadeOut = 0.5}
+          session.startQuest("chessPuzzle1")
+          session.startQuest("chessPuzzle2")
+        end
       end
-    elseif roomName:find("cursedForest") then
-      game.room.music_info = "ambient1"
-      if roomName:find("Chess") then
-        -- game.room.music_info = snd.silence
-        game.room.music_info = {"Silence", previousFadeOut = 0.5}
-        session.startQuest("chessPuzzle1")
-        session.startQuest("chessPuzzle2")
-      end
-    else
-      o.removeFromWorld(self)
+    end
+    self.run = game.transitioning and game.transitioning.firstFrame
+  end,
+
+  draw = function (self)
+    if pl1 then
+      love.graphics.circle(session.save.forestCurseLifted and "line" or "fill", pl1.x, pl1.y - 33, 3)
     end
   end
 }

@@ -3,6 +3,7 @@ local u = require "utilities"
 local o = {}
 
 o.identified = {} -- These can be referred to by name
+o.unstoppableUpdaters = {role = "unstoppableUpdater"} -- List of objects with unstoppable_update functions
 o.unpausableUpdaters = {role = "unpausableUpdater"} -- List of objects with unpausable_update functions
 o.earlyUpdaters = {role = "earlyUpdater"} -- List of objects with early_update functions
 o.updaters = {role = "updater"} -- List of objects with update functions
@@ -56,6 +57,10 @@ function o.to_be_deleted:remove_all()
     if object.unpausableUpdater then
       u.free(o.unpausableUpdaters, object.unpausableUpdater)
       object.unpausableUpdater = nil
+    end
+    if object.unstoppableUpdater then
+      u.free(o.unstoppableUpdaters, object.unstoppableUpdater)
+      object.unstoppableUpdater = nil
     end
     if object.updater then
       u.free(o.updaters, object.updater)
@@ -156,6 +161,10 @@ function o.to_be_added:add_all()
       if object.spritefixture_properties then
         object:build_spritefixture()
       end
+    end
+    -- Add to unstoppableUpdaters if unstoppableUpdater and if not already there
+    if object.unstoppable_update and not object.unstoppableUpdater then
+      object[o.unstoppableUpdaters.role] = u.push(o.unstoppableUpdaters, object)
     end
     -- Add to unpausableUpdaters if unpausableUpdater and if not already there
     if object.unpausable_update and not object.unpausableUpdater then

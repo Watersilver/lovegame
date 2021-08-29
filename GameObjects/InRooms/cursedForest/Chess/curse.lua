@@ -12,6 +12,7 @@ function Curse.initialize(instance)
   instance.timeDone = false
   instance.duration = 24
   instance.durDiv4 = instance.duration / 4
+  instance.run = true
 end
 
 Curse.functions = {
@@ -28,9 +29,6 @@ Curse.functions = {
   end,
 
   update = function (self, dt)
-    if not self.TransRanAtLeastOnce then self:trans_draw() end
-    self.transRan = false
-
     if not self.timerDone then
       -- Determine if bell will ring
       local timerPrevMod = self.timer % self.durDiv4
@@ -57,19 +55,11 @@ Curse.functions = {
 
   end,
 
-  draw = function (self)
-    -- transdraw doesn't run if draw doesnt exist, so add this here
-  end,
-
-  -- not for drawing in this case but it's the
-  -- only one that only runs durin transition
-  trans_draw = function (self)
-    if self.transRan then return end
-    self.transRan = true
-    self.TransRanAtLeastOnce = true
-
-    if not session.save.solvedForestChessPuzzle then return end
-    self:unsealPath()
+  unstoppable_update = function (self)
+    if self.run and session.save.solvedForestChessPuzzle then
+      self:unsealPath()
+    end
+    self.run = false
   end
 }
 

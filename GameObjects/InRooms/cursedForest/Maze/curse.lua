@@ -10,21 +10,7 @@ end
 
 Curse.functions = {
 
-  update = function (self, dt)
-    if not self.TransRanAtLeastOnce then self:trans_draw() end
-    self.transRan = false
-  end,
-
-  draw = function (self)
-    -- transdraw doesn't run if draw doesnt exist, so add this here
-  end,
-
-  -- not for drawing in this case but it's the
-  -- only one that only runs durin transition
-  trans_draw = function (self)
-    self.TransRanAtLeastOnce = true
-    if self.transRan then return end
-    self.transRan = true
+  unstoppable_update = function (self)
 
     if not pl1 or not pl1.exists then return end
 
@@ -79,7 +65,7 @@ Curse.functions = {
     game.room[emergedFrom.."Trans"][trapExitIndex].roomTarget = trapRoom
     game.room[wentTo.."Trans"][rightExitIndex].roomTarget = rightRoom
 
-    o.removeFromWorld(self)
+    if not game.transitioning then o.removeFromWorld(self) end
   end
 }
 

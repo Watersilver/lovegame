@@ -595,6 +595,8 @@ function love.load()
   -- snd.bgm:load(game.room.music_info)
   snd.bgmV2.getMusicAndload()
   game.clockInactive = game.room.timeDoesntPass
+  local FC = require("GameObjects.InRooms.cursedForest.forestCurse")
+  o.addToWorld(FC:new())
 
   -- -- Room Creator
   -- -- 25 width 15 visible height (last tile mostly obscured) for zoom 2
@@ -734,10 +736,10 @@ function love.update(dt)
 
   -- -- display mouse position
   -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  -- wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
+  -- -- wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
   -- fuck = tostring(wmx) .. "/" .. tostring(wmy)
-  -- --
-  -- -- display room
+  -- -- --
+  -- -- -- display room
   -- fuck = fuck .. "\n" .. (session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or "")
   -- if not fook then fook = {} end
   -- fook[session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or ""] = true
@@ -768,7 +770,9 @@ function love.update(dt)
   -- manage transition
   if game.transitioning then
 
+    game.transitioning.firstFrame = false
     if not game.transitioning.startedTransition then
+      game.transitioning.firstFrame = true
       if game.transitioning.type == "whiteScreen" then
 
         -- Don't draw a time screen effect over white screen
@@ -860,10 +864,10 @@ function love.update(dt)
         elseif sd == "right" then xsign = 1
         elseif sd == "up" then ysign = -1
         elseif sd == "down" then ysign = 1 end
+        playa.lastTransSide = sd
         local xtransvel = u.sign(xsign or playa.vx) * u.clamp(math.abs(horside * 10), math.abs(playa.vx * 0.25), 25)
         local ytransvel = u.sign(ysign or playa.vy) * u.clamp(math.abs(verside * 10), math.abs(playa.vy * 0.25), 25)
         playa.body:setLinearVelocity(xtransvel, ytransvel)
-        playa.lastTransSide = sd
         -- playa.body:setLinearVelocity(playa.vx * 0.25, playa.vy * 0.25)
         playa.zvel = 0
       end
@@ -898,6 +902,15 @@ function love.update(dt)
       for i = 1, uUpnum do
         o.unpausableUpdaters[i]:unpausable_update(dt)
       end
+    end
+  end
+
+  -- Run unpausable_update methods
+  -- (note they don't run on transitions so name is a bit misleading)
+  local usUpnum = #o.unstoppableUpdaters
+  if usUpnum > 0 then
+    for i = 1, usUpnum do
+      o.unstoppableUpdaters[i]:unstoppable_update(dt)
     end
   end
 
