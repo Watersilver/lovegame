@@ -12,6 +12,7 @@ local image_indexProgress = 0
 local image_indexProgressDirection = 1
 
 -- TODO items for marking screens of overworld
+-- TODO try to make trans_draw
 function Mark.initialize(instance)
   instance.sprite_info = {im.spriteSettings.mark}
   image_indexProgress = 0
@@ -72,7 +73,6 @@ Mark.functions = {
     end
   end,
 
-  -- TODO try to make trans_draw
   trans_draw = function (self)
     -- local sprite = self.sprite
     -- local frame = sprite[self.image_index]

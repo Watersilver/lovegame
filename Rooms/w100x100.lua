@@ -1140,6 +1140,9 @@ room.manuallyPlacedObjects = {
   {x = 56, y = 152, blueprint = "GlobalNpcs.debug.specialGiver2"},
   {x = 248, y = 222, blueprint = "GlobalNpcs.debug.instrGiver"},
   {x = 232, y = 216, blueprint = "GlobalNpcs.test.debugItemContainer"},
+  {x = 232, y = 248, blueprint = "misc.regeneratingPlant", n ={
+    drops = "sprinkleOfDust"
+  }}
 
   -- 312, 392 -- Boss
 }
