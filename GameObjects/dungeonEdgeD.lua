@@ -40,7 +40,6 @@ DungeonEdge.functions = {
     if not otherF:isSensor() and myF == self.topFixture and other.player then
       self.touchTimer = 0
     end
-
   end,
 
   preSolve = function(self, a, b, coll, aob, bob)
@@ -108,6 +107,7 @@ DungeonEdge.functions = {
 
   load = function (self)
     self.image_speed = 0
+    self.isDungeonEdge = true
     if self.side == "left" then
       self.topFixture = love.physics.newFixture(self.body, ps.shapes.edgeRect1x1.r)
       self.topFixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)

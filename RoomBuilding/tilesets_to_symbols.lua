@@ -62,10 +62,11 @@ tilesets_to_symbols['Tiles/Walls'] = {
   -- waterfall
   'w1234', 'n', 'n', 'n', 'deD', 'w', 'w',
   'w1234', 'n', 'n', 'n', 'deU', 'deR', 'deL',
+
   'w', 'w', 'deD', 'w', 'w', 'w', 'w',
   'deR', 'deL', 'deU', 'w', 'w', 'b', 'b',
-  'w', 'w', 'w', 'w', 'w', 'w', 'w',
-  'w', 'w', 'w', 'w', 'w', 'w', 'w',
+  'w', 'w', 'deD', 'w', 'w', 'w', 'w',
+  'w', 'w', 'deU', 'w', 'w', 'w', 'w',
   -- torch
   'deR', 'deL', 'torch', 'n', 'n', 'n', 'w',
   'w', 'w', 'torch', 'n', 'n', 'n', 'w',

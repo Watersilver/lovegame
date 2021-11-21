@@ -68,6 +68,7 @@ local states = {
       local chx, chy = instance.creator:getHandPosition()
       instance.initcontractr = u.cartesianToPolar(chx - instance.x, chy - instance.y)
       instance.initcontractzo = instance.zo
+      instance.disableCollisions = true
     end,
     check_state = function(instance, dt)
       if instance.contractToAttach then
@@ -77,6 +78,7 @@ local states = {
     end_state = function(instance, dt)
       instance.contractToAttach = false
       instance.zo = instance.creator.zo
+      instance.disableCollisions = nil
     end
   },
 
@@ -123,6 +125,8 @@ local states = {
       instance.th = ((love.math.random() < 0.5) and 1 or -1) * love.math.random() * math.pi
       instance.rotDir = (love.math.random() < 0.5) and 1 or -1
       instance.t = 0
+
+      instance.disableCollisions = true
     end,
     check_state = function(instance, dt)
       if instance.swingDone then
@@ -137,6 +141,8 @@ local states = {
       instance.rotDir = nil
       instance.t = nil
       instance.repeatSwing = nil
+
+      instance.disableCollisions = nil
     end
   },
 

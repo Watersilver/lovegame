@@ -426,7 +426,7 @@ Enemy.functions = {
       return
     end
 
-    if self.flying or (self.goThroughEnemies and other.enemy) then
+    if self.disableCollisions or self.flying or (self.goThroughEnemies and other.enemy) then
       coll:setEnabled(false)
     elseif self.jumping then
       if other.body:getType() ~= "static" then coll:setEnabled(false) end

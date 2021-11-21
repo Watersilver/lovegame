@@ -327,6 +327,16 @@ local mo = {}
       end
     end,
 
+    -- helper function for determine_animation_triggers push triggers
+    __canPush = function(obj)
+      return not obj.goThroughPlayer and
+      not obj.floor and
+      (
+        obj.isTile or
+        obj.isDungeonEdge or
+        obj.fixture and not obj.fixture:isSensor()
+      )
+    end,
 
     determine_animation_triggers = function(object, dt)
       local anstate = object.animation_state.state
@@ -383,12 +393,7 @@ local mo = {}
         if sens.downTouch then
           if down == 1 then
             for _, touchedOb in ipairs(sens.downTouchedObs) do
-              local notGoThrough =
-                not touchedOb.goThroughPlayer and
-                not touchedOb.floor and
-                (touchedOb.isTile or touchedOb.fixture and not touchedOb.fixture:isSensor())
-
-              if notGoThrough then
+              if mo.top_down.__canPush(touchedOb) then
                 trig.push_down = true
                 break
               end
@@ -398,12 +403,7 @@ local mo = {}
         if sens.rightTouch then
           if right == 1 then
             for _, touchedOb in ipairs(sens.rightTouchedObs) do
-              local notGoThrough =
-                not touchedOb.goThroughPlayer and
-                not touchedOb.floor and
-                (touchedOb.isTile or touchedOb.fixture and not touchedOb.fixture:isSensor())
-
-              if notGoThrough then
+              if mo.top_down.__canPush(touchedOb) then
                 trig.push_right = true
                 break
               end
@@ -413,12 +413,7 @@ local mo = {}
         if sens.leftTouch then
           if left == 1 then
             for _, touchedOb in ipairs(sens.leftTouchedObs) do
-              local notGoThrough =
-                not touchedOb.goThroughPlayer and
-                not touchedOb.floor and
-                (touchedOb.isTile or touchedOb.fixture and not touchedOb.fixture:isSensor())
-
-              if notGoThrough then
+              if mo.top_down.__canPush(touchedOb) then
                 trig.push_left = true
                 break
               end
@@ -428,12 +423,7 @@ local mo = {}
         if sens.upTouch then
           if up == 1 then
             for _, touchedOb in ipairs(sens.upTouchedObs) do
-              local notGoThrough =
-                not touchedOb.goThroughPlayer and
-                not touchedOb.floor and
-                (touchedOb.isTile or touchedOb.fixture and not touchedOb.fixture:isSensor())
-
-              if notGoThrough then
+              if mo.top_down.__canPush(touchedOb) then
                 trig.push_up = true
                 break
               end
