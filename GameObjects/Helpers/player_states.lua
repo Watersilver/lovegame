@@ -152,8 +152,10 @@ player_states.end_swing = function(instance, dt, side)
     instance.body:setLinearVelocity(0, 0)
   end
   -- Delete sword
-  o.removeFromWorld(instance.sword)
-  instance.sword = nil
+  if instance.sword then
+    o.removeFromWorld(instance.sword)
+    instance.sword = nil
+  end
 
   if side == "right" then
     instance.x_scale = 1
@@ -255,8 +257,10 @@ end
 
 player_states.end_hold = function(instance, dt, side)
   -- Delete sword
-  o.removeFromWorld(instance.sword)
-  instance.sword = nil
+  if instance.sword then
+    o.removeFromWorld(instance.sword)
+    instance.sword = nil
+  end
   if side == "right" then instance.x_scale = 1 end
 end
 
@@ -383,8 +387,10 @@ player_states.end_missile = function(instance, dt, side)
     instance.x_scale = 1
   end
   if instance.missile_cooldown < session.getMagicCooldown() then
-    instance.missile.broken = true
-    instance.missile.fired = true
+    if instance.missile then
+      instance.missile.broken = true
+      instance.missile.fired = true
+    end
     instance.missile_cooldown = nil
     return
   end
