@@ -124,7 +124,6 @@ Boss2Hand.functions = {
         pl1.zvel = 66
       end
       snd.play(self.sounds.handTouchGround)
-      gsh.newShake(mainCamera, "displacement")
 
       -- Create orb b1fo
       if love.math.random() < 0.3 then
@@ -133,6 +132,9 @@ Boss2Hand.functions = {
           xstart = love.math.random(24, 376),
           ystart = love.math.random(104, 216)
         })
+        gsh.newShake(mainCamera, "displacement")
+      else
+      gsh.newShake(mainCamera, "displacement", 0.5)
       end
     end
     self.slammed = false

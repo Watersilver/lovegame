@@ -47,9 +47,6 @@ function Orb.initialize(instance)
   instance.grounded = false
   instance.explosionSound = {"Effects/Oracle_Rock_Shatter"}
   instance.throw_collision = throw_collision
-  instance.sounds = snd.load_sounds({
-    land = {"Effects/Oracle_Boss_BigBoom"}
-  })
 
   instance.floorTiles = {role = "thrownFloorTilesIndex"}
 end
@@ -59,7 +56,9 @@ Orb.functions = {
     et.functions.load(self)
     if self.breakOnLanding then
       self.body:setType("dynamic")
+      snd.play(glsounds.blockFall)
     end
+
   end,
 
   destroy = function (self)
@@ -83,8 +82,7 @@ Orb.functions = {
       if self.zo == 0 then
         if not self.touchedGround then
           if self.groundType == "solid" then
-            gsh.newShake(mainCamera, "displacement")
-            snd.play(self.sounds.land)
+            gsh.newShake(mainCamera, "displacement", 0.5)
             self.unpushable = false
             self.pushback = true
             self.attackDodger = false
