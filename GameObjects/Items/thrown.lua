@@ -87,9 +87,12 @@ function Thrown.initialize(instance)
     shape = instance.shape or ps.shapes.thrown,
     sensor = true,
     gravityScaleFactor = 0,
+    -- This means that it cannot collide with other player attacks
+    -- or with other stuff that collide with the floor
     masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT},
-    -- categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
-    categories = {}
+    -- This means that it is considered both a player attack,
+    -- a player jump attack and can collide with the floor
+    categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
   }
   instance.seeThrough = true
   instance.immathrown = true
