@@ -855,10 +855,10 @@ room.gameObjects = {
 { x = 280, y = 424, n = {l = 10}, t = 1, i = 17},
 { x = 280, y = 408, n = {l = 10}, t = 1, i = 17},
 { x = 280, y = 376, n = {l = 10}, t = 1, i = 17},
-{ x = 88, y = 232, n = {l = 11, drops = {{chance = 1, value = "blastSeeds"}}}, t = 1, i = 4},
-{ x = 88, y = 280, n = {l = 11, drops = {{chance = 1, value = "blastSeeds"}}}, t = 1, i = 4},
-{ x = 424, y = 280, n = {l = 11, drops = {{chance = 1, value = "blastSeeds"}}}, t = 1, i = 4},
-{ x = 424, y = 232, n = {l = 11, drops = {{chance = 1, value = "blastSeeds"}}}, t = 1, i = 4},
+{ x = 88, y = 232, n = {l = 10}, t = 1, i = 6},
+{ x = 88, y = 280, n = {l = 10}, t = 1, i = 6},
+{ x = 424, y = 280, n = {l = 10}, t = 1, i = 6},
+{ x = 424, y = 232, n = {l = 10}, t = 1, i = 6},
 { x = 72, y = 72, n = {l = 10}, t = 1, i = 6},
 { x = 88, y = 136, n = {l = 10}, t = 1, i = 6},
 { x = 168, y = 88, n = {l = 10}, t = 1, i = 6},
@@ -1059,6 +1059,22 @@ room.manuallyPlacedObjects = {
   { x = room.width * 0.5 - 8, y = 0, n = {side = "down"}, blueprint = "misc.DunDoor"},
   { x = room.width * 0.5 + 8, y = 0, n = {side = "up"}, blueprint = "misc.DunDoor"},
   { x = room.width * 0.5 - 8, y = 0, n = {side = "up"}, blueprint = "misc.DunDoor"},
+  {x = 88, y = 232, blueprint = "misc.regeneratingPlant", n ={
+    drops = "blastSeed",
+    cooldown = 60
+  }},
+  {x = 88, y = 280, blueprint = "misc.regeneratingPlant", n ={
+    drops = "blastSeeds",
+    cooldown = 120
+  }},
+  {x = 424, y = 232, blueprint = "misc.regeneratingPlant", n ={
+    drops = "blastSeeds",
+    cooldown = 120
+  }},
+  {x = 424, y = 280, blueprint = "misc.regeneratingPlant", n ={
+    drops = "blastSeed",
+    cooldown = 60
+  }}
 }
 
 return room
