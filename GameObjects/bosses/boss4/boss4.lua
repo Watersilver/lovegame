@@ -65,16 +65,34 @@ local states = {
     start_state = function(instance, dt)
       instance.ball:contract()
       instance.ball:toggleSpikes(false)
+
+      instance:reduceForcedThrow()
     end,
     check_state = function(instance, dt)
       if instance.ball.attached then
+        if instance.justPowerThrowed then
+          instance:resetForcedThrow()
+        end
+
+        local weightTable
+
+        if instance.shieldJustBroke then
+          instance.shieldJustBroke = false
+          instance:resetForcedThrow()
+          weightTable = {{value = "swing", weight = 1}}
+        elseif instance:shouldBeForcedToThrow() then
+          weightTable = {{value = "powerThrow", weight = 1}}
+        else
+          weightTable = {
+            {value = "bounceAround", weight = 100},
+            {value = "jump", weight = 40},
+            {value = "swing", weight = (instance:isShieldBroken() and 200 or 100)},
+            {value = "powerThrow", weight = instance.justPowerThrowed and 0 or 90}
+          }
+        end
+
         -- Choose next state
-        instance.state:change_state(instance, dt, u.chooseFromWeightTable{
-          {value = "bounceAround", weight = 100},
-          {value = "jump", weight = 40},
-          {value = "swing", weight = (instance:isShieldBroken() and 200 or 100)},
-          {value = "powerThrow", weight = instance.justPowerThrowed and 0 or 90}
-        })
+        instance.state:change_state(instance, dt, u.chooseFromWeightTable(weightTable))
         instance.justPowerThrowed = false
       end
     end,
@@ -254,6 +272,7 @@ local states = {
       else
         if not instance.throwing then
           if instance.ball.attached then
+
             instance.throwing = true
             instance.ball:emote("mania")
 
@@ -555,6 +574,7 @@ function Boss4.initialize(instance)
   instance.shieldDmg = 0
   instance.content = nil
   instance.content_index = 0
+  instance.shieldJustBroke = false
 end
 
 local dialogue = {
@@ -705,6 +725,21 @@ Boss4.functions = {
     self.zoprev = self.zo
   end,
 
+  -- returns max number of attacks that can be executed before
+  -- a power throw is forced to be next attack
+  resetForcedThrow = function (self)
+    self.timesUntillNextThrow = self:isShieldBroken() and 5 or 3
+  end,
+
+  -- If true force next attack to be power throw
+  shouldBeForcedToThrow = function (self)
+    return self.timesUntillNextThrow < 1
+  end,
+
+  reduceForcedThrow = function (self)
+    self.timesUntillNextThrow = self.timesUntillNextThrow - 1
+  end,
+
   isShieldBroken = function (self)
     return self.shieldDmg > 2
   end,
@@ -772,6 +807,8 @@ Boss4.functions = {
     dlgCtrl.functions.load(self)
     self.shadowHeightMod = self.sprite.height * 0.5 - 8
     self:createBall()
+
+    self:resetForcedThrow()
   end,
 
   createBall = function (self)
@@ -872,6 +909,10 @@ Boss4.functions = {
             self.shieldDmg = self.shieldDmg + 1
             snd.play(glsounds.dragonWalk)
             self.invulnerable = (self.invframesMod or 1) * 0.25
+
+            if self:isShieldBroken() then
+              self.shieldJustBroke = true
+            end
           end
         end
       else
