@@ -6,6 +6,8 @@ local snd = require "sound"
 
 local items = {}
 
+-- max name line: nnnnnnnnnnnnnnnn
+-- max description line: dddddddddddddddddddddddddd
 
 -- Rings should only affect save directly via equippedRing
 -- Everything else via session, (effects applied on init when loading)
@@ -213,8 +215,40 @@ items.foodFrittata = {
 
 -- Rings
 -- Gameplay
+items.ringWindSlice = {
+  name = "Windslice Ring",
+  description = "Slice with sword at\nfirst recall of mark.",
+  equip = function()
+    session.usedItemComment = "Equipped Windslice Ring!"
+    session.ringRecallSlice = 1
+  end,
+  unequip = function()
+    session.usedItemComment = "Unequipped Windslice Ring!"
+    session.ringRecallSlice = nil
+  end,
+  use = function()
+    useRing("ringWindSlice")
+  end
+}
+
+items.ringMyriadCuts = {
+  name = "Myriad Cuts Ring",
+  description = "Slice with sword\nat every recall.",
+  equip = function()
+    session.usedItemComment = "Equipped Myriad\nCuts Ring!"
+    session.ringRecallSlice = math.huge
+  end,
+  unequip = function()
+    session.usedItemComment = "Unequipped Myriad\nCuts Ring!"
+    session.ringRecallSlice = nil
+  end,
+  use = function()
+    useRing("ringMyriadCuts")
+  end
+}
+
 items.ringTimeflow = {
-  name = "R. Timeflow Ring",
+  name = "Timeflow Ring",
   description = "Helps with reflexes\na lot!",
   equip = function()
     session.usedItemComment = "Equipped Timeflow Ring!"
@@ -230,7 +264,7 @@ items.ringTimeflow = {
 }
 
 items.ringFocus = {
-  name = "R. Focus Ring",
+  name = "Focus Ring",
   description = "Helps with reflexes!",
   equip = function()
     session.usedItemComment = "Equipped Focus Ring!"
@@ -246,7 +280,7 @@ items.ringFocus = {
 }
 
 items.ringRubber = {
-  name = "R. Rubber Ring",
+  name = "Rubber Ring",
   description = "Makes you bouncy!",
   equip = function()
     session.usedItemComment = "Equipped Rubber Ring!"
@@ -262,7 +296,7 @@ items.ringRubber = {
 }
 
 items.ringGlide = {
-  name = "R. Glide Ring",
+  name = "Glide Ring",
   description = "Double jump!",
   equip = function()
     session.usedItemComment = "Equipped Glide Ring!"
@@ -279,7 +313,7 @@ items.ringGlide = {
 
 -- Skins
 items.ringMage = {
-  name = "R. Mage Ring",
+  name = "Mage Ring",
   description = "Transform into\nMage!",
   equip = function()
     session.usedItemComment = "Equipped Mage Ring!"
@@ -298,7 +332,7 @@ items.ringMage = {
 
 -- screen effects
 items.ringOld = {
-  name = "R. Old Ring",
+  name = "Old Ring",
   description = "See the world\nthrough a\ndifferent lens!",
   equip = function()
     session.usedItemComment = "Equipped Old Ring!"
@@ -314,7 +348,7 @@ items.ringOld = {
 }
 
 items.ringScreen = {
-  name = "R. Screen Ring",
+  name = "Screen Ring",
   description = "See the world\nthrough a\ndifferent lens!",
   equip = function()
     session.usedItemComment = "Equipped Screen Ring!"
@@ -330,7 +364,7 @@ items.ringScreen = {
 }
 
 items.ringGrey = {
-  name = "R. Grey Ring",
+  name = "Grey Ring",
   description = "See the world\nthrough a\ndifferent lens!",
   equip = function()
     session.usedItemComment = "Equipped Grey Ring!"
@@ -346,7 +380,7 @@ items.ringGrey = {
 }
 
 items.ringVignette = {
-  name = "R. Vignette Ring",
+  name = "Vignette Ring",
   description = "See the world\nthrough a\ndifferent lens!",
   equip = function()
     session.usedItemComment = "Equipped Vignette\nRing!"
