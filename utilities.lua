@@ -286,6 +286,23 @@ function u.randomPointFromTriangulatedPolygon(polygon)
   return u.randomPointFromTriangle(triangle)
 end
 
+function u.randomPointFromEllipse(width, height, perimeter)
+  -- if not give height, this is a circle
+  if type(height) ~= "number" then
+    perimeter = height
+    height = width
+  end
+  if perimeter then
+    local phi = math.random() * math.pi * 2
+    return 1 * cos(phi) * width * .5,
+           1 * sin(phi) * height * .5
+  else
+    local rho, phi = love.math.random(), math.random() * math.pi * 2
+    return sqrt(rho) * cos(phi) * width * .5,
+           sqrt(rho) * sin(phi) * height * .5
+  end
+end
+
 -- Delete "chars" characters from the end of the string. UTF-8 friendly
 function u.utf8_backspace(t, chars)
     -- get the byte offset to the last UTF-8 character in the string.
