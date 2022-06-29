@@ -90,6 +90,10 @@ local ls = require "lightSources"
 
 local gamera = require "gamera.gamera"
 
+local globs = {
+  particles = require "GameObjects.misc.particles"
+}
+
 -- Create table to save temporary stuff for current session
 session = {
   save = {
@@ -143,6 +147,28 @@ session = {
     session.timescale = 1
     session.latestVisitedRooms = u.newQueue()
     session.deadEnemies = u.newFastAccessQueue(20)
+
+    -- add global objects
+    session.particles = globs.particles:new()
+    o.addToWorld(session.particles)
+
+  end,
+  toMainMenu = function()
+    session.drug = nil
+    session.ringShader = nil
+
+    -- remove/clean global objects
+    if session.particles and session.particles.exists then
+      o.removeFromWorld(session.particles)
+    end
+    session.particles = nil
+
+    game.transition{
+      type = "whiteScreen",
+      progress = 0,
+      roomTarget = "Rooms/main_menu.lua",
+      purge = true
+    }
   end,
   updateTime = function(hoursPassed)
     local preUpdate = session.checkTimeOfDayForMusic()
@@ -342,16 +368,6 @@ session = {
   setMusicOverride = function(override_info)
     -- Music that will persist when changing rooms and has to be nilified manually
     session.musicOverride = override_info
-  end,
-  toMainMenu = function()
-    session.drug = nil
-    session.ringShader = nil
-    game.transition{
-      type = "whiteScreen",
-      progress = 0,
-      roomTarget = "Rooms/main_menu.lua",
-      purge = true
-    }
   end,
   barrierBounce = function(plaObj, horDir, verDir)
     plaObj.body:setLinearVelocity(200 * horDir, 200 * verDir)
