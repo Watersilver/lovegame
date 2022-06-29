@@ -1790,14 +1790,14 @@ function Playa.initialize(instance)
               desx = instance.mark.xstart,
               desy = instance.mark.ystart
             }
-            instance:newMark(true, session.latestVisitedRooms:getLast())
+            instance:newMark(true, session.latestVisitedRooms:getLast(), true)
           end
         else
           instance.sounds.recallStart:stop()
           snd.play(instance.sounds.recall)
           instance.stateTriggers.poof = true
           instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
-          instance:newMark(true)
+          instance:newMark(true, nil, true)
         end
 
       end
@@ -2301,11 +2301,15 @@ Playa.functions = {
     return not self.onEdge and self.zo == 0
   end,
 
-  newMark = function (self, silent, roomName)
-    if self.mark and self.mark.exists then o.removeFromWorld(self.mark) end
+  newMark = function (self, silent, roomName, reuse)
+    local used = 0
+    if self.mark and self.mark.exists then
+      if reuse then used = used + self.mark.used + 1 end
+      o.removeFromWorld(self.mark)
+    end
     self.sounds.markStart:stop()
     if not silent then snd.play(self.sounds.mark) end
-    self.mark = mark:new{xstart = self.x, ystart = self.y, creator = self, layer = self.layer - 1}
+    self.mark = mark:new{xstart = self.x, ystart = self.y, creator = self, layer = self.layer - 1, used = used}
     if roomName then self.mark.roomName = roomName end
     o.addToWorld(self.mark)
   end,

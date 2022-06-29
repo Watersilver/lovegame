@@ -3,6 +3,7 @@ local trans = require "transitions"
 local game = require "game"
 local im = require "image"
 local shdrs = require "Shaders.shaders"
+local u = require "utilities"
 
 local Mark = {}
 
@@ -19,6 +20,7 @@ function Mark.initialize(instance)
   image_indexProgressDirection = 1
   instance.image_index = image_indexProgress
   instance.seeThrough = true
+  instance.used = 0
   if shdrs.markCustomShader and session.save.customMarkAvailable and session.save.customMarkEnabled then
     local secondaryR = 0.65 + session.save.markR * 0.35
     local secondaryG = 0.65 + session.save.markG * 0.35
@@ -54,6 +56,17 @@ Mark.functions = {
       image_indexProgressDirection = - image_indexProgressDirection
     end
     self.image_index = floor(image_indexProgress * self.sprite.frames)
+
+    -- Add effect if mark is capable of producing sword slice
+    if self:canSlice() then
+      if self.sliceCounter == nil then self.sliceCounter = 0 end
+      self.sliceCounter = self.sliceCounter + dt
+      if self.sliceCounter > .05 then
+        self.sliceCounter = 0
+        local dx, dy = u.randomPointFromEllipse(16, 8, true)
+        session.particles:addSpark{x = self.xstart + dx, y = self.ystart+6 + dy}
+      end
+    end
   end,
 
   draw = function (self)
@@ -91,7 +104,11 @@ Mark.functions = {
 
   delete = function (self)
     if self.creator.mark == self then self.creator.mark = nil end
-  end
+  end,
+
+  canSlice = function (self)
+    return session.ringRecallSlice ~= nil and session.ringRecallSlice > self.used and self.roomName == session.latestVisitedRooms:getLast()
+  end,
 }
 
 function Mark:new(init)
