@@ -12,8 +12,6 @@ local floor = math.floor
 local image_indexProgress = 0
 local image_indexProgressDirection = 1
 
--- TODO items for marking screens of overworld
--- TODO try to make trans_draw
 function Mark.initialize(instance)
   instance.sprite_info = {im.spriteSettings.mark}
   image_indexProgress = 0
@@ -107,7 +105,12 @@ Mark.functions = {
   end,
 
   canSlice = function (self)
-    return session.ringRecallSlice ~= nil and session.ringRecallSlice > self.used and self.roomName == session.latestVisitedRooms:getLast()
+    return self.creator and self.creator.exists and
+    session.ringRecallSlice ~= nil and
+    session.ringRecallSlice > self.used and
+    self.roomName == session.latestVisitedRooms:getLast() and
+    -- within slashing distance
+    u.distance2d(self.xstart, self.ystart, self.creator.x, self.creator.y) < 200
   end,
 }
 

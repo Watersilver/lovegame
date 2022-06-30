@@ -21,9 +21,16 @@ Particles.functions = {
     local sparkInfo = nil
     local age = self.age
     local simpleSparks = self.simpleSparks
+    local currentRoom = session.latestVisitedRooms:getLast()
     for i = 1,#simpleSparks do
       -- delete sparks whose time is past
-      while simpleSparks[i] ~= nil and age - simpleSparks[i].birth >= simpleSparks[i].lifespan do
+      while
+      simpleSparks[i] ~= nil and
+      (
+        age - simpleSparks[i].birth >= simpleSparks[i].lifespan or
+        currentRoom ~= simpleSparks[i].birthRoom
+      )
+      do
         simpleSparks[i], simpleSparks[#simpleSparks] = simpleSparks[#simpleSparks], simpleSparks[i]
         table.remove(simpleSparks)
       end
@@ -32,13 +39,17 @@ Particles.functions = {
       if sparkInfo == nil then return end
 
       -- do the updating
-      sparkInfo.y = sparkInfo.y - dt * 5
+      sparkInfo.y = sparkInfo.y + dt * sparkInfo.vy
+      sparkInfo.x = sparkInfo.x + dt * sparkInfo.vx
     end
   end,
 
   addSpark = function (self, sparkInfo)
     sparkInfo.birth = self.age
     sparkInfo.lifespan = sparkInfo.lifespan or 1
+    sparkInfo.vy = sparkInfo.vy or -5
+    sparkInfo.vx = sparkInfo.vx or 0
+    sparkInfo.birthRoom = session.latestVisitedRooms:getLast()
     table.insert(self.simpleSparks, sparkInfo)
   end,
 

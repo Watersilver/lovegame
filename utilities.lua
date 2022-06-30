@@ -11,6 +11,11 @@ local atan2 = math.atan2
 function u.emptyFunc()
 end
 
+-- linear interpolation
+function u.lerp(a, b, t)
+  return a + b * t
+end
+
 function u.getFirstIndexByValue(arr, value)
   for i, v in ipairs(arr) do
     if value == v then return i end

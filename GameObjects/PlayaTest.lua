@@ -27,6 +27,7 @@ local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDr
 local sw = require "GameObjects.Items.sword"
 local hsw = require "GameObjects.Items.held_sword"
 local mark = require "GameObjects.Items.mark"
+local windSlice = require "GameObjects.Items.windSlice"
 
 local sh = require "GameObjects.shadow"
 
@@ -1775,7 +1776,7 @@ function Playa.initialize(instance)
     end,
 
     end_state = function(instance, dt)
-      if instance.mark and instance.recallanim <= 0 and instance:canMark() then
+      if instance.mark and instance.mark.exists and instance.recallanim <= 0 and instance:canMark() then
 
         if session.latestVisitedRooms:getLast() ~= instance.mark.roomName then
           if not game.transitioning and session.canTeleport(instance.mark) then
@@ -1794,6 +1795,16 @@ function Playa.initialize(instance)
           end
         else
           instance.sounds.recallStart:stop()
+          if instance.mark:canSlice() then
+            local ws = windSlice:new{
+              x0 = instance.x,
+              y0 = instance.y,
+              x1 = instance.mark.xstart,
+              y1 = instance.mark.ystart,
+              cr = instance
+            }
+            o.addToWorld(ws)
+          end
           snd.play(instance.sounds.recall)
           instance.stateTriggers.poof = true
           instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
