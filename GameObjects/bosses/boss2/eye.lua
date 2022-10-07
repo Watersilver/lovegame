@@ -242,6 +242,22 @@ Boss2Eye.functions = {
 
     if not self.head.enabled then return end
 
+    -- Rage sprite change
+    if not self.eyeChanged then
+      if not self.otherEye.exists then
+        self.eyeChanged = true
+        self.bulgingCounter = 0
+        self.sprite = (self.side > 0) and im.sprites["Bosses/boss2/LeftEyeMad"] or im.sprites["Bosses/boss2/RightEyeMad"]
+      end
+    else
+      self.bulgingCounter = (self.bulgingCounter + dt * 5) % 6
+
+      self.image_index = math.floor(self.bulgingCounter)
+
+      if self.image_index == 5 then self.image_index = 1 end
+      if self.image_index >= 3 then self.image_index = 2 end
+    end
+
     -- Attack behaviour
     self.attackPattern:update(self, dt)
 
@@ -314,6 +330,9 @@ Boss2Eye.functions = {
     -- What happens when I get destroyed.
     self.head:takeDamage()
     self.head.sightLoss = self.head.sightLoss + 1
+    if self.otherEye.exists then
+      self.otherEye.hp = 75 - math.floor(self.otherEye.hp / 2)
+    end
   end,
 
   -- draw = function (self)
@@ -327,6 +346,7 @@ Boss2Eye.functions = {
   -- end,
 
   gotHurt = function (self)
+    if not self.otherEye.exists then return end
     self.shielded = true
     self.shieldTimer = 1
     self.fullyOpenTimer = 0.5

@@ -335,6 +335,8 @@ im.spriteSettings = {
     {'Bosses/boss2/HeadFront', 2, padding = 2, width = 94, height = 63},
     {'Bosses/boss2/LeftEye', 3, padding = 2, width = 18, height = 19},
     {'Bosses/boss2/RightEye', 3, padding = 2, width = 18, height = 19},
+    {'Bosses/boss2/LeftEyeMad', 3, padding = 2, width = 18, height = 19},
+    {'Bosses/boss2/RightEyeMad', 3, padding = 2, width = 18, height = 19},
     {'Bosses/boss2/HandFront', 1, padding = 2, width = 36, height = 24},
     {'Bosses/boss2/HandBack', 2, padding = 2, width = 53, height = 60}
   },
@@ -349,6 +351,13 @@ im.spriteSettings = {
     {'Bosses/boss4/wreckingBall', 8, padding = 2, width = 16, height = 16},
     {'Bosses/boss4/spikes', 2, padding = 2, width = 22, height = 20},
     {'Bosses/boss4/chainLink', 1, padding = 0, width = 8, height = 8},
+  },
+
+  boss5 = {
+    {'Bosses/boss5/head', 3, 3, padding = 2, width = 24, height = 21},
+    {'Bosses/boss5/down', 2, 2, padding = 2, width = 33, height = 20},
+    {'Bosses/boss5/left', 2, 2, padding = 2, width = 24, height = 19},
+    {'Bosses/boss5/up', 2, 2, padding = 2, width = 32, height = 20},
   },
 
   -- Misc
@@ -412,7 +421,11 @@ function im.load_sprite(args)
     local padding = args.padding or args[4] or 1
 
     -- Prepare sprite
-    local sprite = {}
+    local sprite = {
+      framesX = rows,
+      framesY = columns
+    }
+
     -- Load image
     sprite.img = love.graphics.newImage("Sprites/" .. img_name .. ".png")
     local img = sprite.img
@@ -535,10 +548,6 @@ im.load_sprite(im.spriteSettings.portals)
 im.load_sprite(im.spriteSettings.edges)
 im.load_sprite(im.spriteSettings.clutter)
 im.load_sprite(im.spriteSettings.fire)
--- im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15, height = 31}
--- im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32, height = 50}
--- im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44, height = 70}
--- im.load_sprite{'introBackground', 1, padding = 0, width = 160, height = 96}
 im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15 * 5, height = 31 * 5}
 im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32 * 5, height = 50 * 5}
 im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44 * 5, height = 70 * 5}

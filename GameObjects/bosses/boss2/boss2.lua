@@ -125,6 +125,7 @@ local states = {
             instance.body:setPosition(x, defaultHeadHeight)
             instance.step = 2
             instance.stateTimer = 0
+            instance.y = defaultHeadHeight
           end
 
           local strain = 20 * instance.stateTimer % 2
@@ -160,6 +161,14 @@ local states = {
 
           instance.image_index = (laugh ~= 3) and laugh or 1
 
+          if instance.image_index == 0 then
+            instance.y = defaultHeadHeight
+          elseif instance.image_index == 1 then
+            instance.y = defaultHeadHeight + 4
+          elseif instance.image_index == 2 then
+            instance.y = defaultHeadHeight + 8
+          end
+
           if instance.laughPrev ~= laugh then
             instance.leftEye.eyelidState = love.math.random(0, 2)
             instance.rightEye.eyelidState = love.math.random(0, 2)
@@ -173,6 +182,7 @@ local states = {
             instance.rightEye.eyelidState = 0
             instance.laughPrev = nil
             instance.stateTimer = 0
+            instance.y = defaultHeadHeight
           end
         end
       end
