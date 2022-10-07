@@ -174,22 +174,19 @@ local function newAttackPattern(startingTimer)
         self.idleTimer = self.idleTimer - dt
         if self.idleTimer <= 0 then self.idleTimer = nil end
       else
-        if eye.image_index == 0 and not eye.head.invulnerable then
+        if (eye.image_index == 0 or eye.eyeChanged) and not eye.head.invulnerable then
           if self.attack then
             self.attack:update(self, eye, dt)
           else
             self:selectAttack(eye, dt)
             self.idleTimer = self.forceIdleTimer or math.max(self.minIdle, 4 * love.math.random())
-            if not eye.otherEye.exists then
-              self.idleTimer = self.idleTimer * 0.5
-            end
             self.forceIdleTimer = nil
           end
         else
-          self.idleTimer = self.idleTimer and math.max(self.minIdle, self.idleTimer) or self.minIdle
-          if not eye.otherEye.exists then
-            self.idleTimer = self.idleTimer * 0.5
-          end
+          self.idleTimer = self.minIdle
+        end
+        if not eye.otherEye.exists then
+          self.idleTimer = self.idleTimer * 0.5
         end
       end
     end,
