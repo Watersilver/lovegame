@@ -185,7 +185,7 @@ local function newAttackPattern(startingTimer)
         else
           self.idleTimer = self.minIdle
         end
-        if not eye.otherEye.exists then
+        if not eye.otherEye.exists and self.idleTimer then
           self.idleTimer = self.idleTimer * 0.5
         end
       end
