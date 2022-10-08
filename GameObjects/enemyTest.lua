@@ -98,8 +98,10 @@ Enemy.functions = {
   end,
 
   enemyUpdate = function (self, dt)
+    -- Get tricked by decoy
+    self.target = session.decoy or pl1
     -- Look for player
-    if self.lookFor then self.canSeePlayer = self:lookFor(pl1) end
+    if self.lookFor then self.canSeePlayer = self:lookFor(self.target) end
     -- Movement behaviour
     if self.behaviourTimer < 0 then
       ebh.randomizeAnalogue(self, true)
@@ -187,7 +189,7 @@ Enemy.functions = {
       end
     else
       self.myShader = nil
-      if self.hp <= 0 then
+      if self.hp <= 0 or self.shouldDie then
         self.die(self)
       end
     end

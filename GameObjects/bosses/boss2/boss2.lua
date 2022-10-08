@@ -268,7 +268,6 @@ local states = {
       instance.stateDuration = love.math.random() * (3 - instance.sightLoss)
       instance.stateTimer = instance.stateDuration
       instance.prevStateTimer = 0
-      instance.step = 0
       instance.angleTimer = 0
     end,
     check_state = function(instance, dt)
@@ -284,9 +283,46 @@ local states = {
     run_state = function(instance, dt)
       instance.angleTimer = instance.angleTimer + dt * 30
       instance.angle = 0.05 * math.sin(instance.angleTimer)
+
+      if not instance:oneArmed() then return end
+
+      local finalHand = instance:finalHand()
+
+      local nextStep = nil
+      if instance.step == 0 then
+        if instance.prevStep ~= instance.step then
+          instance.stepTimer = 0
+        end
+
+        instance.stepTimer = instance.stepTimer + dt * 5
+
+        instance.lastYOffset = math.sin(instance.stepTimer) * 48
+
+        if instance.lastYOffset < 0 then
+          nextStep = 1
+        end
+      elseif instance.step == 1 then
+        finalHand:slam(true)
+        nextStep = 2
+
+      elseif instance.step == 2 then
+        if finalHand.slamming then
+          instance.lastYOffset = - math.sin(finalHand.slamming * finalHand.slamTimeFactor) * 8
+        else
+          instance.lastYOffset = 0
+          nextStep = 0
+        end
+      end
+
+      instance.prevStep = instance.step
+      instance.step = nextStep or instance.step
     end,
     start_state = function(instance, dt)
       if not instance.angleTimer then instance.angleTimer = 0 end
+
+      instance.lastYOffset = 0
+      instance.prevStep = nil
+      instance.step = 0
     end,
     check_state = function(instance, dt)
       if instance.dismembered then
@@ -300,6 +336,9 @@ local states = {
 
   cartoonPhysics = {
     run_state = function(instance, dt)
+      instance.currentY = instance.currentY - dt * 55
+      instance.y = instance.currentY
+      if instance.y < instance.stateY then instance.y = instance.stateY end
       instance.body:setPosition(instance.stateX, instance.stateY)
       instance.stateTimer = instance.stateTimer - dt
 
@@ -317,6 +356,7 @@ local states = {
     end,
     start_state = function(instance, dt)
       instance.stateX, instance.stateY = instance.body:getPosition()
+      instance.currentY = instance.lastY + (instance.lastYOffset or 0)
       instance.stateTimer = 1
     end,
     check_state = function(instance, dt)
@@ -424,6 +464,18 @@ function Boss2.initialize(instance)
 end
 
 Boss2.functions = {
+  oneArmed = function (self)
+    if self.leftHand.exists and not self.rightHand.exists then return true end
+    if not self.leftHand.exists and self.rightHand.exists then return true end
+    return false
+  end,
+
+  finalHand = function (self)
+    if not self:oneArmed() then return nil end
+    if self.leftHand.exists then return self.leftHand end
+    return self.rightHand
+  end,
+
   load = function (self)
     self.body:setPosition(game.room.width * 0.5, game.room.height * 0.5 + 5)
     local x, y = self.body:getPosition()
@@ -494,7 +546,6 @@ Boss2.functions = {
   late_update = function (self, dt)
     if self.enabled and self.handsLoss == 0 and self.leftHand.exists and self.rightHand.exists then
       local x = (self.rightHand.x + self.leftHand.x) * 0.5
-      -- local y = defaultHeadHeight - 0.5 * (math.min(self.leftHand.y, self.rightHand.y) - handMinHeight)
       local y = defaultHeadHeight - 0.5 * (self.leftHand.y + self.rightHand.y - 2 * handMinHeight)
       self.body:setPosition(x, defaultHeadHeight)
       self.y = y
@@ -507,37 +558,23 @@ Boss2.functions = {
         self.lastY = y
       end
       -- Move towards non missing hand
-      local distFromHand = 80
-      local xSpeed = 22
+      local xSpeed = self:oneArmed() and 33 or 22
+      local distFromHand = 44
+      local target = x
       if not self.leftHand.exists or self.leftHand.dyingY then
-        if x > self.rightHand.x + distFromHand then
-          local xstart = x
-          x = x - dt * xSpeed
-          if x < self.rightHand.x + distFromHand then
-            x = self.rightHand.x + distFromHand
-          end
-          if self.leftHand.exists then
-            local xdiff = x - xstart
-            local hx, hy = self.leftHand.body:getPosition()
-            self.leftHand.body:setPosition(hx + xdiff, hy)
-          end
-        end
-      else
-        if x < self.leftHand.x - distFromHand then
-          local xstart = x
-          x = x + dt * xSpeed
-          if x > self.leftHand.x - distFromHand then
-            x = self.leftHand.x - distFromHand
-          end
-          if self.rightHand.exists then
-            local xdiff = x - xstart
-            local hx, hy = self.rightHand.body:getPosition()
-            self.rightHand.body:setPosition(hx + xdiff, hy)
-          end
-        end
+        target = self.rightHand.x + distFromHand
+      elseif not self.rightHand.exists or self.rightHand.dyingY then
+        target = self.leftHand.x - distFromHand
       end
+
+      if target > x then
+        x = x + dt * xSpeed
+      elseif target < x then
+        x = x - dt * xSpeed
+      end
+
       self.body:setPosition(x, defaultHeadHeight)
-      self.y = self.lastY
+      self.y = self.lastY + (self.lastYOffset or 0)
     end
 
     -- Check if blind

@@ -65,7 +65,6 @@ WreckingBall.functions = {
     -- if self.targetx, self.targetx then
       self.body:setPosition(self.targetx, self.targety)
       self.x, self.y = self.targetx, self.targety
-      fuck = ((not self.targetx) or (not self.targety)) and fuck + 1 or fuck
     -- else
     --   self.x, self.y = 0, 0
     -- end

@@ -11,9 +11,21 @@ local atan2 = math.atan2
 function u.emptyFunc()
 end
 
+-- Round to closest int
+function u.round(x)
+  return x + 0.5 - (x + 0.5) % 1
+end
+
 -- linear interpolation
 function u.lerp(a, b, t)
   return a + b * t
+end
+
+-- Returns a value for undefined values
+-- such as 0 / 0 or x / 0 etc.
+function u.defineUndefined(val, fallback)
+  if val ~= val or val == math.huge or val == -math.huge then return fallback end
+  return val
 end
 
 function u.getFirstIndexByValue(arr, value)

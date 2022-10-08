@@ -78,7 +78,7 @@ Boss2Hand.functions = {
 
     local x = self.body:getPosition()
     local min, max = self:getMovementRange()
-    x = (self.otherHand.exists and self.otherHand.hp > 0 and self.xSlam) and (min + self.xSlam * (max - min)) or x
+    x = self.xSlam and (min + self.xSlam * (max - min)) or x
     if self.dyingY then self.dyingY = self.dyingY - dt * 44 end
     local y
     if self.ySlam and self.dyingY then
@@ -176,15 +176,13 @@ Boss2Hand.functions = {
   destroy = function (self)
     -- What happens when I get destroyed.
     if self.otherHand.exists and self.otherHand.hp > 1 then
-      self.otherHand.hp = 1
+      self.otherHand.hp = 22 - math.floor(self.otherHand.hp / 2)
     end
     self.head:takeDamage()
   end,
 
   die = function (self)
---    if not self.otherHand.exists or self.otherHand.dyingY then return end
     if not self.dyingY then
-      -- self.dyingY = self.minHeight
       self.dyingY = self.ySlam or self.minHeight
       self.head.handsLoss = self.head.handsLoss + 1
     end
@@ -215,6 +213,14 @@ Boss2Hand.functions = {
         -- am right hand
         max = self.otherHand.x - self.sprite.width * 3
       end
+    else
+      if self.x_scale == -1 then
+        -- am left hand
+        min = leftmost + self.sprite.width * 3
+      else
+        -- am right hand
+        max = rightmost - self.sprite.width * 3
+      end
     end
     return min, max
   end,
@@ -229,6 +235,10 @@ Boss2Hand.functions = {
       self.xSlamStart = (self.x - min) / (max - min)
       if randomizeX then self.targetX = love.math.random()
       elseif not self.targetX then self.targetX = self.xSlamStart end
+
+      if not self.otherHand.exists then
+        self.targetX = u.clamp(self.xSlamStart -.1, self.targetX, self.xSlamStart + .1)
+      end
     end
   end,
 
