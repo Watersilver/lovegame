@@ -697,7 +697,6 @@ room.gameObjects = {
 { x = 104, y = 296, n = {l = 10}, t = 2, i = 212},
 { x = 72, y = 296, n = {l = 10}, t = 2, i = 211},
 { x = 56, y = 296, n = {l = 10}, t = 2, i = 210},
-{ x = 72, y = 328, n = {l = 10}, t = 3, i = 8},
 { x = 264, y = 232, n = {l = 10}, t = 2, i = 204},
 { x = 296, y = 232, n = {l = 10}, t = 2, i = 204},
 { x = 264, y = 216, n = {l = 10}, t = 2, i = 236},
@@ -939,6 +938,13 @@ room.gameObjects = {
   destination = "Rooms/testtesttest.lua",
   desx = 158,
   desy = 24,
+}, t = 3, i = 8},
+
+{ x = 72, y = 328, n = {
+  l = 10,
+  destination = "Rooms/boss5room.lua",
+  desx = 200,
+  desy = 232,
 }, t = 3, i = 8},
 
 { x = 56, y = 136, n = {l = 10}, t = 2, i = 204},

@@ -25,7 +25,6 @@ local asp = require "GameObjects.Helpers.add_spell"
 local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDrownPlummet
 
 local sw = require "GameObjects.Items.sword"
-local hsw = require "GameObjects.Items.held_sword"
 local mark = require "GameObjects.Items.mark"
 local windSlice = require "GameObjects.Items.windSlice"
 
@@ -37,20 +36,2133 @@ local hitShader = shdrs.playerHitShader
 
 local sqrt = math.sqrt
 local floor = math.floor
-local choose = u.choose
-local push = u.push
 local distanceSqared2d = u.distanceSqared2d
 local insert = table.insert
 local remove = table.remove
 local max = math.max
-local min = math.min
 local abs = math.abs
 
 local pi = math.pi
 local huge = math.huge
 
-local Playa = {}
+local movement_states = {
+  state = "start",
+  start = {
+  run_state = function(instance, dt)
+  end,
+  start_state = function(instance, dt)
+  end,
+  check_state = function(instance, dt)
+    if true then
+      instance.movement_state:change_state(instance, dt, "normal")
+    end
+  end,
+  end_state = function(instance, dt)
+  end
+  },
 
+  normal = {
+  run_state = function(instance, dt)
+    local otherstate = instance.animation_state.state
+
+    -- Apply movement table
+    if otherstate:find("sprintcharge") and instance.triggers.speed then
+      td.stand_still(instance, dt)
+    elseif otherstate == "sprint" and instance.triggers.speed then
+      local myinput = instance.input
+      -- local horin, verin = myinput.right - myinput.left, myinput.down - myinput.up
+      local _, targetDir = u.cartesianToPolar(myinput.right - myinput.left, myinput.down - myinput.up)
+      local turnSpeed = dt + dt * session.save.athleticsLvl + dt * (session.save.faroresCourage and 3 or 0)
+      turnSpeed = turnSpeed * (instance.floorFriction or 1)
+      if myinput.right - myinput.left == 0 and myinput.up - myinput.down == 0 then
+        instance.sprintDir = instance.sprintDir
+      elseif math.abs(instance.sprintDir - targetDir) < turnSpeed then
+        instance.sprintDir = targetDir
+      else
+        instance.sprintDir = instance.sprintDir + turnSpeed * u.findSmallestArc(instance.sprintDir, targetDir)
+      end
+      while instance.sprintDir > math.pi do
+        instance.sprintDir = instance.sprintDir - math.pi * 2
+      end
+      while instance.sprintDir <= -math.pi do
+        instance.sprintDir = instance.sprintDir + math.pi * 2
+      end
+
+      td.sprint(instance, dt)
+    else
+      td.walk(instance, dt)
+    end
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
+    if not instance.missile_cooldown then
+      if not instance.liftState then
+        if not instance.climbing then
+
+          local swhp = otherstate:find("still") or
+            otherstate:find("walk") or
+            otherstate:find("halt") or
+            otherstate:find("push")
+
+          local fs = otherstate:find("fall") or otherstate:find("swing")
+
+          if trig.stab then
+            instance.movement_state:change_state(instance, dt, "using_sword")
+          -- elseif trig.swing_sword and otherstate ~= "spinattack" then
+          elseif trig.swing_sword and (swhp or fs) then
+            instance.movement_state:change_state(instance, dt, "using_sword")
+          elseif instance.zo == 0 and swhp then
+            -- trigger these only grounded and during certain animations
+            -- WHY DID I SEPARATE MOVEMENT STATE AND ANIMATIO STATE?
+            if trig.mark then
+              instance.movement_state:change_state(instance, dt, "using_mark")
+            elseif trig.recall then
+              instance.movement_state:change_state(instance, dt, "using_recall")
+            elseif trig.mystery then
+              local removeResult = session.removeItem("mateMagicDust")
+              if removeResult < 0 then return end
+              -- Animation state gets checked after this
+              -- so mark a new trigger here to also change animation
+              -- because I can't removeItem again to check removeResult
+              -- for animation state...
+              trig.usingMdust = true
+              instance.movement_state:change_state(instance, dt, "using_mdust")
+            end
+          end
+
+        end
+      else
+        if instance.liftingStage then
+          instance.movement_state:change_state(instance, dt, "using_lift")
+        end
+      end
+    end
+  end,
+
+  start_state = function(instance, dt)
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  using_sword = {
+  start_state = function(instance, dt)
+    instance.movement_state:change_state(instance, dt, "using_item")
+  end,
+
+  end_state = function(instance, dt)
+    instance.item_use_duration = session.getSwordSpeed()
+  end
+  },
+
+
+  using_mark = {
+  start_state = function(instance, dt)
+    instance.movement_state:change_state(instance, dt, "using_item")
+  end,
+
+  end_state = function(instance, dt)
+    if session.save.faroresCourage then
+      instance.item_use_duration = inv.mark.time
+    else
+      instance.item_use_duration = inv.mark.time * 2
+    end
+  end
+  },
+
+
+  using_recall = {
+  start_state = function(instance, dt)
+    instance.movement_state:change_state(instance, dt, "using_item")
+  end,
+
+  end_state = function(instance, dt)
+    if session.save.faroresCourage then
+      instance.item_use_duration = inv.recall.time
+    else
+      instance.item_use_duration = inv.recall.time * 2
+    end
+  end
+  },
+
+
+  using_mdust = {
+  start_state = function(instance, dt)
+    instance.movement_state:change_state(instance, dt, "using_item")
+  end,
+
+  end_state = function(instance, dt)
+    instance.item_use_duration = inv.mystery.time
+  end
+  },
+
+
+  using_lift = {
+  start_state = function(instance, dt)
+    instance.movement_state:change_state(instance, dt, "using_item")
+  end,
+
+  end_state = function(instance, dt)
+    local gripTime
+    if session.save.dinsPower then
+      gripTime = inv.grip.time
+    else
+      gripTime = inv.grip.time * 1.5
+    end
+    instance.item_use_duration = gripTime
+  end
+  },
+
+
+  using_item = {
+  run_state = function(instance, dt)
+    -- Apply movement table
+    td.stand_still(instance, dt)
+    instance.item_use_counter = instance.item_use_counter + dt
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
+    if trig.swing_sword and not otherstate:find("stab") and (not otherstate:find("swing") or session.save.swordLvl > 2) and not instance.liftState then
+      instance.movement_state:change_state(instance, dt, "using_sword")
+    elseif instance.item_use_counter > instance.item_use_duration then
+      instance.movement_state:change_state(instance, dt, "normal")
+    end
+  end,
+
+  start_state = function(instance, dt)
+
+  end,
+
+  end_state = function(instance, dt)
+    instance.item_use_counter = 0
+  end
+  },
+
+
+  stand_still = {
+  run_state = function(instance, dt)
+    -- Apply movement table
+    td.stand_still(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+  end,
+
+  start_state = function(instance, dt)
+  end,
+
+  end_state = function(instance, dt)
+  end
+  }
+}
+
+local animation_states = {
+  state = "start",
+  start = {
+  run_state = function(instance, dt)
+  end,
+  start_state = function(instance, dt)
+  end,
+  check_state = function(instance, dt)
+    if true then
+      instance.animation_state:change_state(instance, dt, "downwalk")
+    end
+  end,
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  downwalk = {
+  run_state = function(instance, dt)
+    hps.img_speed_and_footstep_sound(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_walk(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/walk_down"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  rightwalk = {
+  run_state = function(instance, dt)
+    hps.img_speed_and_footstep_sound(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_walk(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/walk_left"]
+    instance.x_scale = -1
+  end,
+
+  end_state = function(instance, dt)
+    instance.x_scale = 1
+  end
+  },
+
+
+  leftwalk = {
+  run_state = function(instance, dt)
+    hps.img_speed_and_footstep_sound(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_walk(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/walk_left"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  upwalk = {
+  run_state = function(instance, dt)
+    hps.img_speed_and_footstep_sound(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_walk(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/walk_up"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  downhalt = {
+  run_state = function(instance, dt)
+    td.image_speed(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_halt(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    if instance.inShallowWater then snd.play(instance.sounds.water) end
+    instance.sprite = im.sprites["Witch/halt_down"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  righthalt = {
+  run_state = function(instance, dt)
+    td.image_speed(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_halt(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    if instance.inShallowWater then snd.play(instance.sounds.water) end
+    instance.sprite = im.sprites["Witch/halt_left"]
+    instance.x_scale = -1
+  end,
+
+  end_state = function(instance, dt)
+    instance.x_scale = 1
+  end
+  },
+
+
+  lefthalt = {
+  run_state = function(instance, dt)
+    td.image_speed(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_halt(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    if instance.inShallowWater then snd.play(instance.sounds.water) end
+    instance.sprite = im.sprites["Witch/halt_left"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  uphalt = {
+  run_state = function(instance, dt)
+    td.image_speed(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_halt(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    if instance.inShallowWater then snd.play(instance.sounds.water) end
+    instance.sprite = im.sprites["Witch/halt_up"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  downstill = {
+  run_state = function(instance, dt)
+    td.image_speed(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_still(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/still_down"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  rightstill = {
+  run_state = function(instance, dt)
+    td.image_speed(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_still(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/still_left"]
+    instance.x_scale = -1
+  end,
+
+  end_state = function(instance, dt)
+    instance.x_scale = 1
+  end
+  },
+
+
+  leftstill = {
+  run_state = function(instance, dt)
+    td.image_speed(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_still(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/still_left"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  upstill = {
+  run_state = function(instance, dt)
+    td.image_speed(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_still(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/still_up"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  downpush = {
+  run_state = function(instance, dt)
+    hps.img_speed_and_footstep_sound(instance, dt)
+    instance.image_speed = max(0.02, instance.image_speed)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_push(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/push_down"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  rightpush = {
+  run_state = function(instance, dt)
+    hps.img_speed_and_footstep_sound(instance, dt)
+    instance.image_speed = max(0.01, instance.image_speed)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_push(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/push_left"]
+    instance.x_scale = -1
+  end,
+
+  end_state = function(instance, dt)
+    instance.x_scale = 1
+  end
+  },
+
+
+  leftpush = {
+  run_state = function(instance, dt)
+    hps.img_speed_and_footstep_sound(instance, dt)
+    instance.image_speed = max(0.01, instance.image_speed)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_push(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/push_left"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  uppush = {
+  run_state = function(instance, dt)
+    hps.img_speed_and_footstep_sound(instance, dt)
+    instance.image_speed = max(0.01, instance.image_speed)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_push(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    instance.sprite = im.sprites["Witch/push_up"]
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  downswing = {
+  run_state = function(instance, dt)
+    hps.run_swing(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_swing(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_swing(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_swing(instance, dt, "down")
+  end
+  },
+
+
+  rightswing = {
+  run_state = function(instance, dt)
+    hps.run_swing(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_swing(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_swing(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_swing(instance, dt, "right")
+  end
+  },
+
+
+  leftswing = {
+  run_state = function(instance, dt)
+    hps.run_swing(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_swing(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_swing(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_swing(instance, dt, "left")
+  end
+  },
+
+
+  upswing = {
+  run_state = function(instance, dt)
+    hps.run_swing(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_swing(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_swing(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_swing(instance, dt, "up")
+  end
+  },
+
+
+  downstab = {
+  run_state = function(instance, dt)
+    hps.run_stab(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_stab(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_stab(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_stab(instance, dt, "down")
+  end
+  },
+
+
+  rightstab = {
+  run_state = function(instance, dt)
+    hps.run_stab(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_stab(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_stab(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_stab(instance, dt, "right")
+  end
+  },
+
+
+  leftstab = {
+  run_state = function(instance, dt)
+    hps.run_stab(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_stab(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_stab(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_stab(instance, dt, "left")
+  end
+  },
+
+
+  upstab = {
+  run_state = function(instance, dt)
+    hps.run_stab(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_stab(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_stab(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_stab(instance, dt, "up")
+  end
+  },
+
+
+  downhold = {
+  run_state = function(instance, dt)
+    hps.run_hold(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_hold(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_hold(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_hold(instance, dt, "down")
+  end
+  },
+
+
+  righthold = {
+  run_state = function(instance, dt)
+    hps.run_hold(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_hold(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_hold(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_hold(instance, dt, "right")
+  end
+  },
+
+
+  lefthold = {
+  run_state = function(instance, dt)
+    hps.run_hold(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_hold(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_hold(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_hold(instance, dt, "left")
+  end
+  },
+
+
+  uphold = {
+  run_state = function(instance, dt)
+    hps.run_hold(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_hold(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_hold(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_hold(instance, dt, "up")
+  end
+  },
+
+  spinattack = {
+  run_state = function(instance, dt)
+    instance.spinAttackCounter = instance.spinAttackCounter + dt
+    instance.playerSpinPhase = instance.playerSpinPhase + dt
+    if instance.playerSpinPhase > instance.playerSpinFreq then
+      instance.playerSpinPhase = instance.playerSpinPhase - instance.playerSpinFreq
+      if instance.spinKey then
+        instance.spinKey = u.chooseKeyFromTable(instance.sideTable, instance.spinKey)
+      else
+        instance.spinKey = u.chooseKeyFromTable(instance.sideTable)
+      end
+      -- instance.spinSide = instance.sideTable[love.math.random(1,4)]
+      local a = instance.spanSideKeys
+      local spindex = u.chooseKeyFromTable(
+        instance.sideTable,
+        -- inelegant but I can't unpack
+        a[1], a[2], a[3], a[4]
+      )
+      if #a == #instance.sideTable - 1 then
+        for i, v in ipairs(a) do
+          a[i] = nil
+        end
+      end
+      table.insert(a, spindex)
+      instance.spinSide = instance.sideTable[spindex]
+      if instance.spinSide == "right" then
+        instance.sprite = im.sprites["Witch/swing_left"]
+        instance.x_scale = -1
+      else
+        instance.sprite = im.sprites["Witch/swing_" .. instance.spinSide]
+        instance.x_scale = 1
+      end
+    end
+  end,
+
+  check_state = function(instance, dt)
+    if pddp(instance, instance.triggers, instance.spinSide) then
+    elseif instance.spinAttackCounter > 0.6 then
+      instance.animation_state:change_state(instance, dt, instance.spinSide .. "still")
+    end
+  end,
+
+  start_state = function(instance, dt)
+    snd.play(instance.sounds.swordSpin)
+    instance.sounds.swordCharge:stop()
+    instance.image_speed = 0
+    instance.image_index = 1
+    instance.spinAttackCounter = 0
+    instance.playerSpinFreq = 1 / 30
+    instance.playerSpinPhase = instance.playerSpinFreq
+    instance.spinKey = nil
+    instance.spanSideKeys = {}
+    -- Create sword
+    instance.sword = sw:new{
+      creator = instance,
+      spin = true,
+      layer = instance.layer
+    }
+    o.addToWorld(instance.sword)
+  end,
+
+  end_state = function(instance, dt)
+    if instance.spinSide == "right" then instance.x_scale = 1 end
+    instance.image_index = 0
+    instance.image_speed = 0
+    -- Delete sword
+    o.removeFromWorld(instance.sword)
+    instance.sword = nil
+  end
+  },
+
+
+  downjump = {
+  run_state = function(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_jump(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  rightjump = {
+  run_state = function(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_jump(instance, dt, "right")
+    instance.x_scale = -1
+  end,
+
+  end_state = function(instance, dt)
+    instance.x_scale = 1
+  end
+  },
+
+
+  leftjump = {
+  run_state = function(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_jump(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  upjump = {
+  run_state = function(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_jump(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  downfall = {
+  run_state = function(instance, dt)
+    hps.run_fall(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_fall(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_fall(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_fall(instance, dt, "down")
+  end
+  },
+
+
+  rightfall = {
+  run_state = function(instance, dt)
+    hps.run_fall(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_fall(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_fall(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_fall(instance, dt, "right")
+  end
+  },
+
+
+  leftfall = {
+  run_state = function(instance, dt)
+    hps.run_fall(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_fall(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_fall(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_fall(instance, dt, "left")
+  end
+  },
+
+
+  upfall = {
+  run_state = function(instance, dt)
+    hps.run_fall(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_fall(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_fall(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_fall(instance, dt, "up")
+  end
+  },
+
+
+  downmissile = {
+  run_state = function(instance, dt)
+    hps.run_missile(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_missile(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_missile(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_missile(instance, dt, "down")
+  end
+  },
+
+
+  rightmissile = {
+  run_state = function(instance, dt)
+    hps.run_missile(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_missile(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_missile(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_missile(instance, dt, "right")
+  end
+  },
+
+
+  leftmissile = {
+  run_state = function(instance, dt)
+    hps.run_missile(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_missile(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_missile(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_missile(instance, dt, "left")
+  end
+  },
+
+
+  upmissile = {
+  run_state = function(instance, dt)
+    hps.run_missile(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_missile(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_missile(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_missile(instance, dt, "up")
+  end
+  },
+
+
+  downgripping = {
+  run_state = function(instance, dt)
+    hps.run_gripping(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_gripping(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_gripping(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_gripping(instance, dt, "down")
+  end
+  },
+
+
+  rightgripping = {
+  run_state = function(instance, dt)
+    hps.run_gripping(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_gripping(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_gripping(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_gripping(instance, dt, "right")
+  end
+  },
+
+
+  leftgripping = {
+  run_state = function(instance, dt)
+    hps.run_gripping(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_gripping(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_gripping(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_gripping(instance, dt, "left")
+  end
+  },
+
+
+  upgripping = {
+  run_state = function(instance, dt)
+    hps.run_gripping(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_gripping(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_gripping(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_gripping(instance, dt, "up")
+  end
+  },
+
+
+  downlifting = {
+  run_state = function(instance, dt)
+    hps.run_lifting(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_lifting(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_lifting(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_lifting(instance, dt, "down")
+  end
+  },
+
+
+  rightlifting = {
+  run_state = function(instance, dt)
+    hps.run_lifting(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_lifting(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_lifting(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_lifting(instance, dt, "right")
+  end
+  },
+
+
+  leftlifting = {
+  run_state = function(instance, dt)
+    hps.run_lifting(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_lifting(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_lifting(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_lifting(instance, dt, "left")
+  end
+  },
+
+
+  uplifting = {
+  run_state = function(instance, dt)
+    hps.run_lifting(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_lifting(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_lifting(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_lifting(instance, dt, "up")
+  end
+  },
+
+
+  downlifted = {
+  run_state = function(instance, dt)
+    hps.run_lifted(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_lifted(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_lifted(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_lifted(instance, dt, "down")
+  end
+  },
+
+
+  rightlifted = {
+  run_state = function(instance, dt)
+    hps.run_lifted(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_lifted(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_lifted(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_lifted(instance, dt, "right")
+  end
+  },
+
+
+  leftlifted = {
+  run_state = function(instance, dt)
+    hps.run_lifted(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_lifted(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_lifted(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_lifted(instance, dt, "left")
+  end
+  },
+
+
+  uplifted = {
+  run_state = function(instance, dt)
+    hps.run_lifted(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_lifted(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_lifted(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_lifted(instance, dt, "up")
+  end
+  },
+
+
+  downdamaged = {
+  run_state = function(instance, dt)
+    hps.run_damaged(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_damaged(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_damaged(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_damaged(instance, dt, "down")
+  end
+  },
+
+
+  rightdamaged = {
+  run_state = function(instance, dt)
+    hps.run_damaged(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_damaged(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_damaged(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_damaged(instance, dt, "right")
+  end
+  },
+
+
+  leftdamaged = {
+  run_state = function(instance, dt)
+    hps.run_damaged(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_damaged(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_damaged(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_damaged(instance, dt, "left")
+  end
+  },
+
+
+  updamaged = {
+  run_state = function(instance, dt)
+    hps.run_damaged(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_damaged(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_damaged(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_damaged(instance, dt, "up")
+  end
+  },
+
+
+  downmdust = {
+  run_state = function(instance, dt)
+    hps.run_mdust(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_mdust(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_mdust(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_mdust(instance, dt, "down")
+  end
+  },
+
+
+  rightmdust = {
+  run_state = function(instance, dt)
+    hps.run_mdust(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_mdust(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_mdust(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_mdust(instance, dt, "right")
+  end
+  },
+
+
+  leftmdust = {
+  run_state = function(instance, dt)
+    hps.run_mdust(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_mdust(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_mdust(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_mdust(instance, dt, "left")
+  end
+  },
+
+
+  upmdust = {
+  run_state = function(instance, dt)
+    hps.run_mdust(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_mdust(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_mdust(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_mdust(instance, dt, "up")
+  end
+  },
+
+
+  downsprintcharge = {
+  run_state = function(instance, dt)
+    hps.run_sprintcharge(instance, dt, "down")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_sprintcharge(instance, dt, "down")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_sprintcharge(instance, dt, "down")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_sprintcharge(instance, dt, "down")
+  end
+  },
+
+
+  rightsprintcharge = {
+  run_state = function(instance, dt)
+    hps.run_sprintcharge(instance, dt, "right")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_sprintcharge(instance, dt, "right")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_sprintcharge(instance, dt, "right")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_sprintcharge(instance, dt, "right")
+  end
+  },
+
+
+  leftsprintcharge = {
+  run_state = function(instance, dt)
+    hps.run_sprintcharge(instance, dt, "left")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_sprintcharge(instance, dt, "left")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_sprintcharge(instance, dt, "left")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_sprintcharge(instance, dt, "left")
+  end
+  },
+
+
+  upsprintcharge = {
+  run_state = function(instance, dt)
+    hps.run_sprintcharge(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_sprintcharge(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_sprintcharge(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_sprintcharge(instance, dt, "up")
+  end
+  },
+
+
+  sprint = {
+  run_state = function(instance, dt)
+    hps.run_sprint(instance, dt)
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_sprint(instance, dt)
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_sprint(instance, dt)
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_sprint(instance, dt)
+  end
+  },
+
+
+  downmark = {
+  run_state = function(instance, dt)
+    instance.markanim = instance.markanim - dt
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+    if pddp(instance, trig, "down") then
+    elseif instance.climbing then
+      instance.animation_state:change_state(instance, dt, "upclimbing")
+    elseif trig.swing_sword then
+      if trig.restish then
+        instance.animation_state:change_state(instance, dt, "downswing")
+      elseif abs(instance.vx) > abs(instance.vy) then
+        if instance.vx > 0 then
+          instance.animation_state:change_state(instance, dt, "rightswing")
+        else
+          instance.animation_state:change_state(instance, dt, "leftswing")
+        end
+      else
+        if instance.vy < 0 then
+          instance.animation_state:change_state(instance, dt, "upswing")
+        else
+          instance.animation_state:change_state(instance, dt, "downswing")
+        end
+      end
+    elseif instance.markanim <= 0 then
+      instance.animation_state:change_state(instance, dt, "downwalk")
+    end
+  end,
+
+  start_state = function(instance, dt)
+    if session.save.faroresCourage then
+      instance.markanim = inv.mark.time
+    else
+      instance.markanim = inv.mark.time * 2
+    end
+    instance.sprite = im.sprites["Witch/mark_down"]
+    snd.play(instance.sounds.markStart)
+  end,
+
+  end_state = function(instance, dt)
+    if instance.markanim <= 0 and instance:canMark() then
+      instance:newMark()
+    end
+  end
+  },
+
+
+  downrecall = {
+  run_state = function(instance, dt)
+    instance.recallanim = instance.recallanim - dt
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+    if pddp(instance, trig, "down") then
+    elseif instance.climbing then
+      instance.animation_state:change_state(instance, dt, "upclimbing")
+    elseif trig.swing_sword then
+      if trig.restish then
+        instance.animation_state:change_state(instance, dt, "downswing")
+      elseif abs(instance.vx) > abs(instance.vy) then
+        if instance.vx > 0 then
+          instance.animation_state:change_state(instance, dt, "rightswing")
+        else
+          instance.animation_state:change_state(instance, dt, "leftswing")
+        end
+      else
+        if instance.vy < 0 then
+          instance.animation_state:change_state(instance, dt, "upswing")
+        else
+          instance.animation_state:change_state(instance, dt, "downswing")
+        end
+      end
+    elseif instance.recallanim <= 0 then
+      instance.animation_state:change_state(instance, dt, "downwalk")
+    end
+  end,
+
+  start_state = function(instance, dt)
+    if session.save.faroresCourage then
+      instance.recallanim = inv.recall.time
+    else
+      instance.recallanim = inv.recall.time * 2
+    end
+    instance.sprite = im.sprites["Witch/recall_down"]
+    snd.play(instance.sounds.recallStart)
+  end,
+
+  end_state = function(instance, dt)
+    if instance.mark and instance.mark.exists and instance.recallanim <= 0 and instance:canMark() then
+
+      if session.latestVisitedRooms:getLast() ~= instance.mark.roomName then
+        if not game.transitioning and session.canTeleport(instance.mark) then
+          instance.sounds.recallStart:stop()
+          snd.play(instance.sounds.recall)
+          instance.stateTriggers.poof = true
+          game.transition{
+            type = "whiteScreen",
+            progress = 0.8,
+            roomTarget = instance.mark.roomName,
+            playa = instance,
+            desx = instance.mark.xstart,
+            desy = instance.mark.ystart
+          }
+          instance:newMark(true, session.latestVisitedRooms:getLast(), true)
+        end
+      else
+        instance.sounds.recallStart:stop()
+        if instance.mark:canSlice() then
+          local ws = windSlice:new{
+            x0 = instance.x,
+            y0 = instance.y,
+            x1 = instance.mark.xstart,
+            y1 = instance.mark.ystart,
+            cr = instance
+          }
+          o.addToWorld(ws)
+        end
+        snd.play(instance.sounds.recall)
+        instance.stateTriggers.poof = true
+        instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
+        instance:newMark(true, nil, true)
+      end
+
+    end
+  end
+  },
+
+
+  upclimbing = {
+  run_state = function(instance, dt)
+    hps.run_climbing(instance, dt, "up")
+  end,
+
+  check_state = function(instance, dt)
+    hps.check_climbing(instance, dt, "up")
+  end,
+
+  start_state = function(instance, dt)
+    hps.start_climbing(instance, dt, "up")
+  end,
+
+  end_state = function(instance, dt)
+    hps.end_climbing(instance, dt, "up")
+  end
+  },
+
+
+  downdrown = {
+  run_state = function(instance, dt)
+    instance.body:setLinearVelocity(0, 0)
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+    if trig.animation_end then
+      instance.animation_state:change_state(instance, dt, "respawn")
+    end
+  end,
+
+  start_state = function(instance, dt)
+    instance.image_index = 0
+    instance.image_speed = 0.1
+    instance.xUnsteppable = instance.x
+    instance.yUnsteppable = instance.y
+    -- Ensure you're not jumping while drowning
+    instance.jo = 0
+    instance.fo = 0
+    instance.zvel = 0
+    instance.sprite = im.sprites["Witch/drown_down"]
+    inp.disable_controller(instance.player)
+    snd.play(instance.sounds.water)
+    instance:setGhost(true)
+  end,
+
+  end_state = function(instance, dt)
+    instance.image_index = 0
+    instance.image_speed = 0
+    inp.enable_controller(instance.player)
+    instance:setGhost(false)
+    if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
+      instance:addHealth(-1)
+    end
+  end
+  },
+
+
+  downeating = {
+  run_state = function(instance, dt)
+    -- inp.disable_controller(instance.player)
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+    if trig.damaged then
+      instance.animation_state:change_state(instance, dt, "downdamaged")
+    elseif otherstate == "normal" then
+      instance:addHealth(instance.item_health_bonus)
+      snd.play(glsounds.getHeart)
+      instance.animation_state:change_state(instance, dt, "downstill")
+    end
+  end,
+
+  start_state = function(instance, dt)
+    instance.image_index = 0
+    instance.image_speed = 0.05
+    instance.sprite = im.sprites["Witch/eating_down"]
+    inp.disable_controller(instance.player)
+  end,
+
+  end_state = function(instance, dt)
+    instance.image_index = 0
+    instance.image_speed = 0
+    instance.item_health_bonus = nil
+    inp.enable_controller(instance.player)
+  end
+  },
+
+  downharp = {
+  run_state = function(instance, dt)
+    local notesPlayed = 0
+
+    for key, pressed in pairs(inp.keys.pressed) do
+      if pressed then
+        snd.play(instance.harpSoundTable[key])
+        notesPlayed = notesPlayed + 1
+      end
+    end
+
+    if notesPlayed > 0 then
+      instance.harpTimer = 0.5
+      if instance.noteTimer <= 0 then
+        instance.noteTimer = 0.25
+        local xstart = instance.x
+        local ystart = instance.y
+        local dir = math.pi * 0.5 * (- 1 - love.math.random())
+        local xmod, ymod = u.polarToCartesian(instance.height, dir)
+        xstart = xstart + xmod
+        ystart = ystart + ymod
+        local note = instance.noteObj:new{
+          x = xstart, y = ystart,
+          xstart = xstart, ystart = ystart,
+          layer = instance.layer,
+          randomize = true
+        }
+        o.addToWorld(note)
+      end
+    end
+    if instance.harpTimer > 0 then
+      instance.image_speed = 0.05
+      if instance.prevHarpTimer == 0 then
+        instance.image_index = 1
+      end
+    else
+      instance.image_speed = 0
+      instance.image_index = 0
+    end
+    instance.prevHarpTimer = instance.harpTimer
+    instance.harpTimer = instance.harpTimer - dt
+    if instance.harpTimer < 0 then instance.harpTimer = 0 end
+    instance.noteTimer = instance.noteTimer - dt
+    if instance.noteTimer < 0 then instance.noteTimer = 0 end
+    if gs.musicOn then
+      instance.wasMusicOn = gs.musicOn
+      gs.musicOn = false
+    end
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+    if trig.damaged then
+      instance.animation_state:change_state(instance, dt, "downdamaged")
+    end
+  end,
+
+  start_state = function(instance, dt)
+    instance.noteObj = require "GameObjects.note"
+    instance.image_index = 0
+    instance.image_speed = 0
+    instance.harpTimer = 0
+    instance.noteTimer = 0
+    instance.prevHarpTimer = 0
+    instance.sprite = im.sprites["Witch/harp_down"]
+    instance.movement_state:change_state(pl1, dt, "stand_still")
+    instance.wasMusicOn = gs.musicOn
+    gs.musicOn = false
+
+    if not instance.harpSoundTable then
+      instance.harpSoundTable = {
+        -- White keys down
+        z = glsounds.harpcd,
+        x = glsounds.harpdd,
+        c = glsounds.harped,
+        v = glsounds.harpfd,
+        b = glsounds.harpgd,
+        n = glsounds.harpad,
+        m = glsounds.harpbd,
+
+        -- Black keys down
+        s = glsounds.harpddB,
+        d = glsounds.harpedB,
+        g = glsounds.harpfdS,
+        h = glsounds.harpadB,
+        j = glsounds.harpbdB,
+
+        -- White keys up
+        q = glsounds.harpcm,
+        w = glsounds.harpdm,
+        e = glsounds.harpem,
+        r = glsounds.harpfm,
+        t = glsounds.harpgm,
+        y = glsounds.harpam,
+        u = glsounds.harpbm,
+
+        ["2"] = glsounds.harpdmB,
+        ["3"] = glsounds.harpemB,
+        ["5"] = glsounds.harpfmS,
+        ["6"] = glsounds.harpamB,
+        ["7"] = glsounds.harpbmB,
+
+        i = glsounds.harpcu,
+        o = glsounds.harpdu,
+        ["9"] = glsounds.harpduB
+      }
+    end
+  end,
+
+  end_state = function(instance, dt)
+    if instance.wasMusicOn then gs.musicOn = true end
+    instance.image_index = 0
+    instance.image_speed = 0
+    instance.wasMusicOn = nil
+    instance.harpTimer = nil
+    instance.noteTimer = nil
+    instance.prevHarpTimer = nil
+    instance.noteObj = nil
+    instance.movement_state:change_state(pl1, dt, "normal")
+  end
+  },
+
+
+  plummet = {
+  run_state = function(instance, dt)
+    local pmod = instance.image_index
+    if pmod > 1 then pmod = 1 end
+    instance.body:setPosition(
+      instance.xPlummetStart + pmod * (instance.xClosestTile - instance.xPlummetStart),
+      instance.yPlummetStart + pmod * (instance.yClosestTile - instance.yPlummetStart)
+    )
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+    if trig.animation_end then
+      instance.animation_state:change_state(instance, dt, "respawn")
+    end
+  end,
+
+  start_state = function(instance, dt)
+    snd.play(instance.sounds.plummet)
+    instance.sprite = im.sprites["Witch/plummet"]
+    instance.xPlummetStart = instance.x
+    instance.yPlummetStart = instance.y
+    instance.plummetFrames = instance.sprite.frames
+    instance.image_index = 0
+    instance.image_speed = 0.1
+    inp.disable_controller(instance.player)
+    instance:setGhost(true)
+  end,
+
+  end_state = function(instance, dt)
+    instance.xUnsteppable = instance.x
+    instance.yUnsteppable = instance.y
+    inp.enable_controller(instance.player)
+    instance:setGhost(false)
+    if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
+      instance:addHealth(-1)
+    end
+  end
+  },
+
+
+  respawn = {
+  run_state = function(instance, dt)
+    if not instance.noVelTrans and not instance.transed then
+      instance.transed = true
+      instance.transvx, instance.transvy = instance.body:getLinearVelocity()
+      local sd = instance.lastTransSide
+      local xsign, ysign
+      if sd == "left" then xsign = -1
+      elseif sd == "right" then xsign = 1
+      elseif sd == "up" then ysign = -1
+      elseif sd == "down" then ysign = 1 end
+      if xsign then
+        if u.sign(xsign) ~= u.sign(instance.transvx) then
+          instance.transvx = xsign * math.max(math.abs(instance.transvx), 10)
+        end
+      end
+      if ysign then
+        if u.sign(ysign) ~= u.sign(instance.transvy) then
+          instance.transvy = ysign * math.max(math.abs(instance.transvy), 10)
+        end
+      end
+    end
+    instance.body:setLinearVelocity(0, 0)
+    local rmod = instance.respawnCounter / instance.respawnCounterMax
+    instance.body:setPosition(
+      instance.xUnsteppable + rmod * (instance.xLastSteppable - instance.xUnsteppable),
+      instance.yUnsteppable + rmod * (instance.yLastSteppable - instance.yUnsteppable)
+    )
+    if instance.respawnCounter then
+      instance.respawnCounter = instance.respawnCounter + dt
+    end
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+    if instance.respawnCounter > instance.respawnCounterMax then
+      instance.animation_state:change_state(instance, dt, "downstill")
+    end
+  end,
+
+  start_state = function(instance, dt)
+    -- Change threshold to avoid screen transitions that get triggered
+    -- prematurely because of noVelTrans
+    instance.transvx, instance.transvy = nil, nil
+    gvar.screenEdgeThreshold = 2
+    instance.noVelTrans = true
+    instance.transed = false
+    instance.respawnCounter = 0
+    instance.respawnCounterMax = 0.4
+    instance.invisible = true
+    inp.disable_controller(instance.player)
+    instance:setGhost(true)
+    if not instance.xLastSteppable or not instance.yLastSteppable then
+      instance.xLastSteppable = instance.xUnsteppable
+      instance.yLastSteppable = instance.yUnsteppable
+    end
+  end,
+
+  end_state = function(instance, dt)
+    gvar.screenEdgeThreshold = GCON.defaultScreenEdgeThreshold
+    instance.noVelTrans = false
+    instance.transed = nil
+    instance.disableTransitions = false
+    instance.body:setPosition(instance.xLastSteppable, instance.yLastSteppable)
+    instance.invisible = false
+    inp.enable_controller(instance.player)
+    instance:setGhost(false)
+    instance.invulnerable = 1
+    if instance.transvx and instance.transvy then
+      instance.body:setLinearVelocity(instance.transvx, instance.transvy)
+    end
+  end
+  },
+
+
+  downdie = {
+  run_state = function(instance, dt)
+    if instance.deathPhase == 1 then
+      if instance.image_index >= 3 then
+        instance.image_index = 2
+        instance.image_speed = - instance.image_speed
+        instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
+      elseif instance.image_index <= 0 then
+        instance.image_index = 1
+        instance.image_speed = - instance.image_speed
+        instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
+        instance.x_scale = - instance.x_scale
+        if instance.deathDizzinesCounter >= instance.deathDizzinesRepeats then
+          instance.deathPhase = 2
+          instance.image_speed = 0.1
+          instance.image_index = 1
+          instance.deathDizzinesCounter = 0
+        end
+      end
+    elseif instance.deathPhase == 2 then
+      if instance.image_index >= 2 then
+        instance.image_index = 1
+        instance.image_speed = - instance.image_speed
+        instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
+      elseif instance.image_index <= 0 then
+        instance.image_index = 1
+        instance.image_speed = - instance.image_speed
+        instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
+        instance.x_scale = - instance.x_scale
+        if instance.deathDizzinesCounter >= instance.deathDizzinesFastRepeats then
+          instance.deathPhase = 3
+          instance.image_speed = 0
+          instance.image_index = 0
+          instance.x_scale = 1
+          snd.play(instance.sounds.die)
+        end
+      end
+    elseif instance.deathPhase == 3 then
+      instance.deathFallCounter = instance.deathFallCounter + dt
+      if instance.deathFallCounter > 0 then
+        instance.deathFallCounter = 0
+        instance.image_index = 6
+        instance.deathPhase = 4
+      end
+    elseif instance.deathPhase == 4 then
+      instance.deathFallCounter = instance.deathFallCounter + dt
+      if instance.deathFallCounter > 0.4 then
+        instance.deathFallCounter = 0
+        instance.deathPhase = 5
+        instance.deathState = "dead"
+        o.addToWorld(go:new{player = instance})
+      end
+      instance.ioy = instance.ioyDeathStart + math.sin(instance.deathFallCounter * 10)
+    end
+  end,
+
+  check_state = function(instance, dt)
+  end,
+
+  start_state = function(instance, dt)
+    snd.bgm:setFadeState("fadeout")
+    snd.play(instance.sounds.dying)
+    instance.sprite = im.sprites["Witch/die"]
+    inp.disable_controller(instance.player)
+    instance.deathPhase = 1
+    instance.image_index = 0
+    instance.image_speed = 0.1
+    instance.deathDizzinesCounter = 0
+    instance.deathDizzinesRepeats = 6
+    instance.deathDizzinesFastRepeats = 4
+    instance.deathFallCounter = 0
+    instance.ioyDeathStart = instance.ioy
+    instance:setGhost(true)
+    instance.deathState = "dying"
+  end,
+
+  end_state = function(instance, dt)
+  end
+  },
+
+
+  cutscene = {
+    run_state = function(instance, dt)
+    end,
+
+    check_state = function(instance, dt)
+    end,
+
+    start_state = function(instance, dt)
+      inp.disable_controller(instance.player)
+      instance:setGhost(true)
+    end,
+
+    end_state = function(instance, dt)
+      inp.enable_controller(instance.player)
+      instance:setGhost(false)
+      instance.x_scale = 1
+    end
+  },
+
+
+  dontdraw = {
+  run_state = function(instance, dt)
+    if instance.dontdrawRun then instance:dontdrawRun(dt) end
+  end,
+
+  check_state = function(instance, dt)
+    if instance.dontdrawCheck then instance:dontdrawCheck(dt) end
+  end,
+
+  start_state = function(instance, dt)
+    if instance.dontdrawStart then instance:dontdrawStart(dt) end
+    instance.invisible = true
+    inp.disable_controller(instance.player)
+    instance:setGhost(true)
+  end,
+
+  end_state = function(instance, dt)
+    if instance.dontdrawEnd then instance:dontdrawEnd(dt) end
+    instance.dontdrawRun = nil
+    instance.dontdrawCheck = nil
+    instance.dontdrawStart = nil
+    instance.dontdrawEnd = nil
+    instance.invisible = false
+    inp.enable_controller(instance.player)
+    instance:setGhost(false)
+  end
+  }
+}
+
+local Playa = {}
 
 function Playa.initialize(instance)
   -- Debug
@@ -66,7 +2178,6 @@ function Playa.initialize(instance)
   -- Load stuff from save
   asp.emptySpellSlots()
   instance:readSave()
-
 
   instance.ids[#instance.ids+1] = "PlayaTest"
   instance.timeFlow = 1
@@ -154,2125 +2265,8 @@ function Playa.initialize(instance)
   instance.player = "player1"
   inp.enable_controller(instance.player)
   instance.layer = 20
-  instance.movement_state = sm.new_state_machine{
-    state = "start",
-    start = {
-    run_state = function(instance, dt)
-    end,
-    start_state = function(instance, dt)
-    end,
-    check_state = function(instance, dt)
-      if true then
-        instance.movement_state:change_state(instance, dt, "normal")
-      end
-    end,
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    normal = {
-    run_state = function(instance, dt)
-      local otherstate = instance.animation_state.state
-
-      -- Apply movement table
-      if otherstate:find("sprintcharge") and instance.triggers.speed then
-        td.stand_still(instance, dt)
-      elseif otherstate == "sprint" and instance.triggers.speed then
-        local myinput = instance.input
-        -- local horin, verin = myinput.right - myinput.left, myinput.down - myinput.up
-        local _, targetDir = u.cartesianToPolar(myinput.right - myinput.left, myinput.down - myinput.up)
-        local turnSpeed = dt + dt * session.save.athleticsLvl + dt * (session.save.faroresCourage and 3 or 0)
-        turnSpeed = turnSpeed * (instance.floorFriction or 1)
-        if myinput.right - myinput.left == 0 and myinput.up - myinput.down == 0 then
-          instance.sprintDir = instance.sprintDir
-        elseif math.abs(instance.sprintDir - targetDir) < turnSpeed then
-          instance.sprintDir = targetDir
-        else
-          instance.sprintDir = instance.sprintDir + turnSpeed * u.findSmallestArc(instance.sprintDir, targetDir)
-        end
-        while instance.sprintDir > math.pi do
-          instance.sprintDir = instance.sprintDir - math.pi * 2
-        end
-        while instance.sprintDir <= -math.pi do
-          instance.sprintDir = instance.sprintDir + math.pi * 2
-        end
-
-        td.sprint(instance, dt)
-      else
-        td.walk(instance, dt)
-      end
-
-    end,
-
-    check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
-      if not instance.missile_cooldown then
-        if not instance.liftState then
-          if not instance.climbing then
-
-            local swhp = otherstate:find("still") or
-              otherstate:find("walk") or
-              otherstate:find("halt") or
-              otherstate:find("push")
-
-            local fs = otherstate:find("fall") or otherstate:find("swing")
-
-            if trig.stab then
-              instance.movement_state:change_state(instance, dt, "using_sword")
-            -- elseif trig.swing_sword and otherstate ~= "spinattack" then
-            elseif trig.swing_sword and (swhp or fs) then
-              instance.movement_state:change_state(instance, dt, "using_sword")
-            elseif instance.zo == 0 and swhp then
-              -- trigger these only grounded and during certain animations
-              -- WHY DID I SEPARATE MOVEMENT STATE AND ANIMATIO STATE?
-              if trig.mark then
-                instance.movement_state:change_state(instance, dt, "using_mark")
-              elseif trig.recall then
-                instance.movement_state:change_state(instance, dt, "using_recall")
-              elseif trig.mystery then
-                local removeResult = session.removeItem("mateMagicDust")
-                if removeResult < 0 then return end
-                -- Animation state gets checked after this
-                -- so mark a new trigger here to also change animation
-                -- because I can't removeItem again to check removeResult
-                -- for animation state...
-                trig.usingMdust = true
-                instance.movement_state:change_state(instance, dt, "using_mdust")
-              end
-            end
-
-          end
-        else
-          if instance.liftingStage then
-            instance.movement_state:change_state(instance, dt, "using_lift")
-          end
-        end
-
-      end
-
-    end,
-
-    start_state = function(instance, dt)
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    using_sword = {
-    start_state = function(instance, dt)
-      instance.movement_state:change_state(instance, dt, "using_item")
-    end,
-
-    end_state = function(instance, dt)
-      instance.item_use_duration = session.getSwordSpeed()
-    end
-    },
-
-
-    using_mark = {
-    start_state = function(instance, dt)
-      instance.movement_state:change_state(instance, dt, "using_item")
-    end,
-
-    end_state = function(instance, dt)
-      if session.save.faroresCourage then
-        instance.item_use_duration = inv.mark.time
-      else
-        instance.item_use_duration = inv.mark.time * 2
-      end
-    end
-    },
-
-
-    using_recall = {
-    start_state = function(instance, dt)
-      instance.movement_state:change_state(instance, dt, "using_item")
-    end,
-
-    end_state = function(instance, dt)
-      if session.save.faroresCourage then
-        instance.item_use_duration = inv.recall.time
-      else
-        instance.item_use_duration = inv.recall.time * 2
-      end
-    end
-    },
-
-
-    using_mdust = {
-    start_state = function(instance, dt)
-      instance.movement_state:change_state(instance, dt, "using_item")
-    end,
-
-    end_state = function(instance, dt)
-      instance.item_use_duration = inv.mystery.time
-    end
-    },
-
-
-    using_lift = {
-    start_state = function(instance, dt)
-      instance.movement_state:change_state(instance, dt, "using_item")
-    end,
-
-    end_state = function(instance, dt)
-      local gripTime
-      if session.save.dinsPower then
-        gripTime = inv.grip.time
-      else
-        gripTime = inv.grip.time * 1.5
-      end
-      instance.item_use_duration = gripTime
-    end
-    },
-
-
-    using_item = {
-    run_state = function(instance, dt)
-      -- Apply movement table
-      td.stand_still(instance, dt)
-      instance.item_use_counter = instance.item_use_counter + dt
-    end,
-
-    check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.movement_state.state, instance.animation_state.state
-      if trig.swing_sword and not otherstate:find("stab") and (not otherstate:find("swing") or session.save.swordLvl > 2) and not instance.liftState then
-        instance.movement_state:change_state(instance, dt, "using_sword")
-      elseif instance.item_use_counter > instance.item_use_duration then
-        instance.movement_state:change_state(instance, dt, "normal")
-      end
-    end,
-
-    start_state = function(instance, dt)
-
-    end,
-
-    end_state = function(instance, dt)
-      instance.item_use_counter = 0
-    end
-    },
-
-
-    stand_still = {
-    run_state = function(instance, dt)
-      -- Apply movement table
-      td.stand_still(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-    end,
-
-    start_state = function(instance, dt)
-    end,
-
-    end_state = function(instance, dt)
-    end
-    }
-  }
-  instance.animation_state = sm.new_state_machine{
-    state = "start",
-    start = {
-    run_state = function(instance, dt)
-    end,
-    start_state = function(instance, dt)
-    end,
-    check_state = function(instance, dt)
-      if true then
-        instance.animation_state:change_state(instance, dt, "downwalk")
-      end
-    end,
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    downwalk = {
-    run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_walk(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/walk_down"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    rightwalk = {
-    run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_walk(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/walk_left"]
-      instance.x_scale = -1
-    end,
-
-    end_state = function(instance, dt)
-      instance.x_scale = 1
-    end
-    },
-
-
-    leftwalk = {
-    run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_walk(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/walk_left"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    upwalk = {
-    run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_walk(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/walk_up"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    downhalt = {
-    run_state = function(instance, dt)
-      td.image_speed(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_halt(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      if instance.inShallowWater then snd.play(instance.sounds.water) end
-      instance.sprite = im.sprites["Witch/halt_down"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    righthalt = {
-    run_state = function(instance, dt)
-      td.image_speed(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_halt(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      if instance.inShallowWater then snd.play(instance.sounds.water) end
-      instance.sprite = im.sprites["Witch/halt_left"]
-      instance.x_scale = -1
-    end,
-
-    end_state = function(instance, dt)
-      instance.x_scale = 1
-    end
-    },
-
-
-    lefthalt = {
-    run_state = function(instance, dt)
-      td.image_speed(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_halt(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      if instance.inShallowWater then snd.play(instance.sounds.water) end
-      instance.sprite = im.sprites["Witch/halt_left"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    uphalt = {
-    run_state = function(instance, dt)
-      td.image_speed(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_halt(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      if instance.inShallowWater then snd.play(instance.sounds.water) end
-      instance.sprite = im.sprites["Witch/halt_up"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    downstill = {
-    run_state = function(instance, dt)
-      td.image_speed(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_still(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/still_down"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    rightstill = {
-    run_state = function(instance, dt)
-      td.image_speed(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_still(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/still_left"]
-      instance.x_scale = -1
-    end,
-
-    end_state = function(instance, dt)
-      instance.x_scale = 1
-    end
-    },
-
-
-    leftstill = {
-    run_state = function(instance, dt)
-      td.image_speed(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_still(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/still_left"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    upstill = {
-    run_state = function(instance, dt)
-      td.image_speed(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_still(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/still_up"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    downpush = {
-    run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-      instance.image_speed = max(0.02, instance.image_speed)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_push(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/push_down"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    rightpush = {
-    run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-      instance.image_speed = max(0.01, instance.image_speed)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_push(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/push_left"]
-      instance.x_scale = -1
-    end,
-
-    end_state = function(instance, dt)
-      instance.x_scale = 1
-    end
-    },
-
-
-    leftpush = {
-    run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-      instance.image_speed = max(0.01, instance.image_speed)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_push(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/push_left"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    uppush = {
-    run_state = function(instance, dt)
-      hps.img_speed_and_footstep_sound(instance, dt)
-      instance.image_speed = max(0.01, instance.image_speed)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_push(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      instance.sprite = im.sprites["Witch/push_up"]
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    downswing = {
-    run_state = function(instance, dt)
-      hps.run_swing(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_swing(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_swing(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_swing(instance, dt, "down")
-    end
-    },
-
-
-    rightswing = {
-    run_state = function(instance, dt)
-      hps.run_swing(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_swing(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_swing(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_swing(instance, dt, "right")
-    end
-    },
-
-
-    leftswing = {
-    run_state = function(instance, dt)
-      hps.run_swing(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_swing(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_swing(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_swing(instance, dt, "left")
-    end
-    },
-
-
-    upswing = {
-    run_state = function(instance, dt)
-      hps.run_swing(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_swing(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_swing(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_swing(instance, dt, "up")
-    end
-    },
-
-
-    downstab = {
-    run_state = function(instance, dt)
-      hps.run_stab(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_stab(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_stab(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_stab(instance, dt, "down")
-    end
-    },
-
-
-    rightstab = {
-    run_state = function(instance, dt)
-      hps.run_stab(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_stab(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_stab(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_stab(instance, dt, "right")
-    end
-    },
-
-
-    leftstab = {
-    run_state = function(instance, dt)
-      hps.run_stab(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_stab(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_stab(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_stab(instance, dt, "left")
-    end
-    },
-
-
-    upstab = {
-    run_state = function(instance, dt)
-      hps.run_stab(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_stab(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_stab(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_stab(instance, dt, "up")
-    end
-    },
-
-
-    downhold = {
-    run_state = function(instance, dt)
-      hps.run_hold(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_hold(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_hold(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_hold(instance, dt, "down")
-    end
-    },
-
-
-    righthold = {
-    run_state = function(instance, dt)
-      hps.run_hold(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_hold(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_hold(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_hold(instance, dt, "right")
-    end
-    },
-
-
-    lefthold = {
-    run_state = function(instance, dt)
-      hps.run_hold(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_hold(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_hold(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_hold(instance, dt, "left")
-    end
-    },
-
-
-    uphold = {
-    run_state = function(instance, dt)
-      hps.run_hold(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_hold(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_hold(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_hold(instance, dt, "up")
-    end
-    },
-
-    spinattack = {
-    run_state = function(instance, dt)
-      instance.spinAttackCounter = instance.spinAttackCounter + dt
-      instance.playerSpinPhase = instance.playerSpinPhase + dt
-      if instance.playerSpinPhase > instance.playerSpinFreq then
-        instance.playerSpinPhase = instance.playerSpinPhase - instance.playerSpinFreq
-        if instance.spinKey then
-          instance.spinKey = u.chooseKeyFromTable(instance.sideTable, instance.spinKey)
-        else
-          instance.spinKey = u.chooseKeyFromTable(instance.sideTable)
-        end
-        -- instance.spinSide = instance.sideTable[love.math.random(1,4)]
-        local a = instance.spanSideKeys
-        local spindex = u.chooseKeyFromTable(
-          instance.sideTable,
-          -- inelegant but I can't unpack
-          a[1], a[2], a[3], a[4]
-        )
-        if #a == #instance.sideTable - 1 then
-          for i, v in ipairs(a) do
-            a[i] = nil
-          end
-        end
-        table.insert(a, spindex)
-        instance.spinSide = instance.sideTable[spindex]
-        if instance.spinSide == "right" then
-          instance.sprite = im.sprites["Witch/swing_left"]
-          instance.x_scale = -1
-        else
-          instance.sprite = im.sprites["Witch/swing_" .. instance.spinSide]
-          instance.x_scale = 1
-        end
-      end
-    end,
-
-    check_state = function(instance, dt)
-      if pddp(instance, instance.triggers, instance.spinSide) then
-      elseif instance.spinAttackCounter > 0.6 then
-        instance.animation_state:change_state(instance, dt, instance.spinSide .. "still")
-      end
-    end,
-
-    start_state = function(instance, dt)
-      snd.play(instance.sounds.swordSpin)
-      instance.sounds.swordCharge:stop()
-      instance.image_speed = 0
-      instance.image_index = 1
-      instance.spinAttackCounter = 0
-      instance.playerSpinFreq = 1 / 30
-      instance.playerSpinPhase = instance.playerSpinFreq
-      instance.spinKey = nil
-      instance.spanSideKeys = {}
-      -- Create sword
-      instance.sword = sw:new{
-        creator = instance,
-        spin = true,
-        layer = instance.layer
-      }
-      o.addToWorld(instance.sword)
-    end,
-
-    end_state = function(instance, dt)
-      if instance.spinSide == "right" then instance.x_scale = 1 end
-      instance.image_index = 0
-      instance.image_speed = 0
-      -- Delete sword
-      o.removeFromWorld(instance.sword)
-      instance.sword = nil
-    end
-    },
-
-
-    downjump = {
-    run_state = function(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_jump(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    rightjump = {
-    run_state = function(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_jump(instance, dt, "right")
-      instance.x_scale = -1
-    end,
-
-    end_state = function(instance, dt)
-      instance.x_scale = 1
-    end
-    },
-
-
-    leftjump = {
-    run_state = function(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_jump(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    upjump = {
-    run_state = function(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_jump(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    downfall = {
-    run_state = function(instance, dt)
-      hps.run_fall(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_fall(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_fall(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_fall(instance, dt, "down")
-    end
-    },
-
-
-    rightfall = {
-    run_state = function(instance, dt)
-      hps.run_fall(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_fall(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_fall(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_fall(instance, dt, "right")
-    end
-    },
-
-
-    leftfall = {
-    run_state = function(instance, dt)
-      hps.run_fall(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_fall(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_fall(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_fall(instance, dt, "left")
-    end
-    },
-
-
-    upfall = {
-    run_state = function(instance, dt)
-      hps.run_fall(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_fall(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_fall(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_fall(instance, dt, "up")
-    end
-    },
-
-
-    downmissile = {
-    run_state = function(instance, dt)
-      hps.run_missile(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_missile(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_missile(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_missile(instance, dt, "down")
-    end
-    },
-
-
-    rightmissile = {
-    run_state = function(instance, dt)
-      hps.run_missile(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_missile(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_missile(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_missile(instance, dt, "right")
-    end
-    },
-
-
-    leftmissile = {
-    run_state = function(instance, dt)
-      hps.run_missile(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_missile(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_missile(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_missile(instance, dt, "left")
-    end
-    },
-
-
-    upmissile = {
-    run_state = function(instance, dt)
-      hps.run_missile(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_missile(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_missile(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_missile(instance, dt, "up")
-    end
-    },
-
-
-    downgripping = {
-    run_state = function(instance, dt)
-      hps.run_gripping(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_gripping(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_gripping(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_gripping(instance, dt, "down")
-    end
-    },
-
-
-    rightgripping = {
-    run_state = function(instance, dt)
-      hps.run_gripping(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_gripping(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_gripping(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_gripping(instance, dt, "right")
-    end
-    },
-
-
-    leftgripping = {
-    run_state = function(instance, dt)
-      hps.run_gripping(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_gripping(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_gripping(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_gripping(instance, dt, "left")
-    end
-    },
-
-
-    upgripping = {
-    run_state = function(instance, dt)
-      hps.run_gripping(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_gripping(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_gripping(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_gripping(instance, dt, "up")
-    end
-    },
-
-
-    downlifting = {
-    run_state = function(instance, dt)
-      hps.run_lifting(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_lifting(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_lifting(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_lifting(instance, dt, "down")
-    end
-    },
-
-
-    rightlifting = {
-    run_state = function(instance, dt)
-      hps.run_lifting(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_lifting(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_lifting(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_lifting(instance, dt, "right")
-    end
-    },
-
-
-    leftlifting = {
-    run_state = function(instance, dt)
-      hps.run_lifting(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_lifting(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_lifting(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_lifting(instance, dt, "left")
-    end
-    },
-
-
-    uplifting = {
-    run_state = function(instance, dt)
-      hps.run_lifting(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_lifting(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_lifting(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_lifting(instance, dt, "up")
-    end
-    },
-
-
-    downlifted = {
-    run_state = function(instance, dt)
-      hps.run_lifted(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_lifted(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_lifted(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_lifted(instance, dt, "down")
-    end
-    },
-
-
-    rightlifted = {
-    run_state = function(instance, dt)
-      hps.run_lifted(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_lifted(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_lifted(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_lifted(instance, dt, "right")
-    end
-    },
-
-
-    leftlifted = {
-    run_state = function(instance, dt)
-      hps.run_lifted(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_lifted(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_lifted(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_lifted(instance, dt, "left")
-    end
-    },
-
-
-    uplifted = {
-    run_state = function(instance, dt)
-      hps.run_lifted(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_lifted(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_lifted(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_lifted(instance, dt, "up")
-    end
-    },
-
-
-    downdamaged = {
-    run_state = function(instance, dt)
-      hps.run_damaged(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_damaged(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_damaged(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_damaged(instance, dt, "down")
-    end
-    },
-
-
-    rightdamaged = {
-    run_state = function(instance, dt)
-      hps.run_damaged(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_damaged(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_damaged(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_damaged(instance, dt, "right")
-    end
-    },
-
-
-    leftdamaged = {
-    run_state = function(instance, dt)
-      hps.run_damaged(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_damaged(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_damaged(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_damaged(instance, dt, "left")
-    end
-    },
-
-
-    updamaged = {
-    run_state = function(instance, dt)
-      hps.run_damaged(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_damaged(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_damaged(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_damaged(instance, dt, "up")
-    end
-    },
-
-
-    downmdust = {
-    run_state = function(instance, dt)
-      hps.run_mdust(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_mdust(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_mdust(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_mdust(instance, dt, "down")
-    end
-    },
-
-
-    rightmdust = {
-    run_state = function(instance, dt)
-      hps.run_mdust(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_mdust(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_mdust(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_mdust(instance, dt, "right")
-    end
-    },
-
-
-    leftmdust = {
-    run_state = function(instance, dt)
-      hps.run_mdust(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_mdust(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_mdust(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_mdust(instance, dt, "left")
-    end
-    },
-
-
-    upmdust = {
-    run_state = function(instance, dt)
-      hps.run_mdust(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_mdust(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_mdust(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_mdust(instance, dt, "up")
-    end
-    },
-
-
-    downsprintcharge = {
-    run_state = function(instance, dt)
-      hps.run_sprintcharge(instance, dt, "down")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_sprintcharge(instance, dt, "down")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_sprintcharge(instance, dt, "down")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_sprintcharge(instance, dt, "down")
-    end
-    },
-
-
-    rightsprintcharge = {
-    run_state = function(instance, dt)
-      hps.run_sprintcharge(instance, dt, "right")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_sprintcharge(instance, dt, "right")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_sprintcharge(instance, dt, "right")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_sprintcharge(instance, dt, "right")
-    end
-    },
-
-
-    leftsprintcharge = {
-    run_state = function(instance, dt)
-      hps.run_sprintcharge(instance, dt, "left")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_sprintcharge(instance, dt, "left")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_sprintcharge(instance, dt, "left")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_sprintcharge(instance, dt, "left")
-    end
-    },
-
-
-    upsprintcharge = {
-    run_state = function(instance, dt)
-      hps.run_sprintcharge(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_sprintcharge(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_sprintcharge(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_sprintcharge(instance, dt, "up")
-    end
-    },
-
-
-    sprint = {
-    run_state = function(instance, dt)
-      hps.run_sprint(instance, dt)
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_sprint(instance, dt)
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_sprint(instance, dt)
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_sprint(instance, dt)
-    end
-    },
-
-
-    downmark = {
-    run_state = function(instance, dt)
-      instance.markanim = instance.markanim - dt
-    end,
-
-    check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if pddp(instance, trig, side) then
-      elseif instance.climbing then
-        instance.animation_state:change_state(instance, dt, "upclimbing")
-      elseif trig.swing_sword then
-        if trig.restish then
-          instance.animation_state:change_state(instance, dt, "downswing")
-        elseif abs(instance.vx) > abs(instance.vy) then
-          if instance.vx > 0 then
-            instance.animation_state:change_state(instance, dt, "rightswing")
-          else
-            instance.animation_state:change_state(instance, dt, "leftswing")
-          end
-        else
-          if instance.vy < 0 then
-            instance.animation_state:change_state(instance, dt, "upswing")
-          else
-            instance.animation_state:change_state(instance, dt, "downswing")
-          end
-        end
-      elseif instance.markanim <= 0 then
-        instance.animation_state:change_state(instance, dt, "downwalk")
-      end
-    end,
-
-    start_state = function(instance, dt)
-      if session.save.faroresCourage then
-        instance.markanim = inv.mark.time
-      else
-        instance.markanim = inv.mark.time * 2
-      end
-      instance.sprite = im.sprites["Witch/mark_down"]
-      snd.play(instance.sounds.markStart)
-    end,
-
-    end_state = function(instance, dt)
-      if instance.markanim <= 0 and instance:canMark() then
-        instance:newMark()
-      end
-    end
-    },
-
-
-    downrecall = {
-    run_state = function(instance, dt)
-      instance.recallanim = instance.recallanim - dt
-    end,
-
-    check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if pddp(instance, trig, side) then
-      elseif instance.climbing then
-        instance.animation_state:change_state(instance, dt, "upclimbing")
-      elseif trig.swing_sword then
-        if trig.restish then
-          instance.animation_state:change_state(instance, dt, "downswing")
-        elseif abs(instance.vx) > abs(instance.vy) then
-          if instance.vx > 0 then
-            instance.animation_state:change_state(instance, dt, "rightswing")
-          else
-            instance.animation_state:change_state(instance, dt, "leftswing")
-          end
-        else
-          if instance.vy < 0 then
-            instance.animation_state:change_state(instance, dt, "upswing")
-          else
-            instance.animation_state:change_state(instance, dt, "downswing")
-          end
-        end
-      elseif instance.recallanim <= 0 then
-        instance.animation_state:change_state(instance, dt, "downwalk")
-      end
-    end,
-
-    start_state = function(instance, dt)
-      if session.save.faroresCourage then
-        instance.recallanim = inv.recall.time
-      else
-        instance.recallanim = inv.recall.time * 2
-      end
-      instance.sprite = im.sprites["Witch/recall_down"]
-      snd.play(instance.sounds.recallStart)
-    end,
-
-    end_state = function(instance, dt)
-      if instance.mark and instance.mark.exists and instance.recallanim <= 0 and instance:canMark() then
-
-        if session.latestVisitedRooms:getLast() ~= instance.mark.roomName then
-          if not game.transitioning and session.canTeleport(instance.mark) then
-            instance.sounds.recallStart:stop()
-            snd.play(instance.sounds.recall)
-            instance.stateTriggers.poof = true
-            game.transition{
-              type = "whiteScreen",
-              progress = 0.8,
-              roomTarget = instance.mark.roomName,
-              playa = instance,
-              desx = instance.mark.xstart,
-              desy = instance.mark.ystart
-            }
-            instance:newMark(true, session.latestVisitedRooms:getLast(), true)
-          end
-        else
-          instance.sounds.recallStart:stop()
-          if instance.mark:canSlice() then
-            local ws = windSlice:new{
-              x0 = instance.x,
-              y0 = instance.y,
-              x1 = instance.mark.xstart,
-              y1 = instance.mark.ystart,
-              cr = instance
-            }
-            o.addToWorld(ws)
-          end
-          snd.play(instance.sounds.recall)
-          instance.stateTriggers.poof = true
-          instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
-          instance:newMark(true, nil, true)
-        end
-
-      end
-    end
-    },
-
-
-    upclimbing = {
-    run_state = function(instance, dt)
-      hps.run_climbing(instance, dt, "up")
-    end,
-
-    check_state = function(instance, dt)
-      hps.check_climbing(instance, dt, "up")
-    end,
-
-    start_state = function(instance, dt)
-      hps.start_climbing(instance, dt, "up")
-    end,
-
-    end_state = function(instance, dt)
-      hps.end_climbing(instance, dt, "up")
-    end
-    },
-
-
-    downdrown = {
-    run_state = function(instance, dt)
-      instance.body:setLinearVelocity(0, 0)
-    end,
-
-    check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.animation_end then
-        instance.animation_state:change_state(instance, dt, "respawn")
-      end
-    end,
-
-    start_state = function(instance, dt)
-      instance.image_index = 0
-      instance.image_speed = 0.1
-      instance.xUnsteppable = instance.x
-      instance.yUnsteppable = instance.y
-      -- Ensure you're not jumping while drowning
-      instance.jo = 0
-      instance.fo = 0
-      instance.zvel = 0
-      instance.sprite = im.sprites["Witch/drown_down"]
-      inp.disable_controller(instance.player)
-      snd.play(instance.sounds.water)
-      instance:setGhost(true)
-    end,
-
-    end_state = function(instance, dt)
-      instance.image_index = 0
-      instance.image_speed = 0
-      inp.enable_controller(instance.player)
-      instance:setGhost(false)
-      if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
-        instance:addHealth(-1)
-      end
-    end
-    },
-
-
-    downeating = {
-    run_state = function(instance, dt)
-      -- inp.disable_controller(instance.player)
-    end,
-
-    check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.damaged then
-        instance.animation_state:change_state(instance, dt, "downdamaged")
-      elseif otherstate == "normal" then
-        instance:addHealth(instance.item_health_bonus)
-        snd.play(glsounds.getHeart)
-        instance.animation_state:change_state(instance, dt, "downstill")
-      end
-    end,
-
-    start_state = function(instance, dt)
-      instance.image_index = 0
-      instance.image_speed = 0.05
-      instance.sprite = im.sprites["Witch/eating_down"]
-      inp.disable_controller(instance.player)
-    end,
-
-    end_state = function(instance, dt)
-      instance.image_index = 0
-      instance.image_speed = 0
-      instance.item_health_bonus = nil
-      inp.enable_controller(instance.player)
-    end
-    },
-
-    downharp = {
-    run_state = function(instance, dt)
-      local notesPlayed = 0
-
-      for key, pressed in pairs(inp.keys.pressed) do
-        if pressed then
-          snd.play(instance.harpSoundTable[key])
-          notesPlayed = notesPlayed + 1
-        end
-      end
-
-      if notesPlayed > 0 then
-        instance.harpTimer = 0.5
-        if instance.noteTimer <= 0 then
-          instance.noteTimer = 0.25
-          local xstart = instance.x
-          local ystart = instance.y
-          local dir = math.pi * 0.5 * (- 1 - love.math.random())
-          local xmod, ymod = u.polarToCartesian(instance.height, dir)
-          xstart = xstart + xmod
-          ystart = ystart + ymod
-          local note = instance.noteObj:new{
-            x = xstart, y = ystart,
-            xstart = xstart, ystart = ystart,
-            layer = instance.layer,
-            randomize = true
-          }
-          o.addToWorld(note)
-        end
-      end
-      if instance.harpTimer > 0 then
-        instance.image_speed = 0.05
-        if instance.prevHarpTimer == 0 then
-          instance.image_index = 1
-        end
-      else
-        instance.image_speed = 0
-        instance.image_index = 0
-      end
-      instance.prevHarpTimer = instance.harpTimer
-      instance.harpTimer = instance.harpTimer - dt
-      if instance.harpTimer < 0 then instance.harpTimer = 0 end
-      instance.noteTimer = instance.noteTimer - dt
-      if instance.noteTimer < 0 then instance.noteTimer = 0 end
-      if gs.musicOn then
-        instance.wasMusicOn = gs.musicOn
-        gs.musicOn = false
-      end
-    end,
-
-    check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.damaged then
-        instance.animation_state:change_state(instance, dt, "downdamaged")
-      end
-    end,
-
-    start_state = function(instance, dt)
-      instance.noteObj = require "GameObjects.note"
-      instance.image_index = 0
-      instance.image_speed = 0
-      instance.harpTimer = 0
-      instance.noteTimer = 0
-      instance.prevHarpTimer = 0
-      instance.sprite = im.sprites["Witch/harp_down"]
-      instance.movement_state:change_state(pl1, dt, "stand_still")
-      instance.wasMusicOn = gs.musicOn
-      gs.musicOn = false
-
-      if not instance.harpSoundTable then
-        instance.harpSoundTable = {
-          -- White keys down
-          z = glsounds.harpcd,
-          x = glsounds.harpdd,
-          c = glsounds.harped,
-          v = glsounds.harpfd,
-          b = glsounds.harpgd,
-          n = glsounds.harpad,
-          m = glsounds.harpbd,
-
-          -- Black keys down
-          s = glsounds.harpddB,
-          d = glsounds.harpedB,
-          g = glsounds.harpfdS,
-          h = glsounds.harpadB,
-          j = glsounds.harpbdB,
-
-          -- White keys up
-          q = glsounds.harpcm,
-          w = glsounds.harpdm,
-          e = glsounds.harpem,
-          r = glsounds.harpfm,
-          t = glsounds.harpgm,
-          y = glsounds.harpam,
-          u = glsounds.harpbm,
-
-          ["2"] = glsounds.harpdmB,
-          ["3"] = glsounds.harpemB,
-          ["5"] = glsounds.harpfmS,
-          ["6"] = glsounds.harpamB,
-          ["7"] = glsounds.harpbmB,
-
-          i = glsounds.harpcu,
-          o = glsounds.harpdu,
-          ["9"] = glsounds.harpduB
-        }
-      end
-    end,
-
-    end_state = function(instance, dt)
-      if instance.wasMusicOn then gs.musicOn = true end
-      instance.image_index = 0
-      instance.image_speed = 0
-      instance.wasMusicOn = nil
-      instance.harpTimer = nil
-      instance.noteTimer = nil
-      instance.prevHarpTimer = nil
-      instance.noteObj = nil
-      instance.movement_state:change_state(pl1, dt, "normal")
-    end
-    },
-
-
-    plummet = {
-    run_state = function(instance, dt)
-      local pmod = instance.image_index
-      if pmod > 1 then pmod = 1 end
-      instance.body:setPosition(
-        instance.xPlummetStart + pmod * (instance.xClosestTile - instance.xPlummetStart),
-        instance.yPlummetStart + pmod * (instance.yClosestTile - instance.yPlummetStart)
-      )
-    end,
-
-    check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.animation_end then
-        instance.animation_state:change_state(instance, dt, "respawn")
-      end
-    end,
-
-    start_state = function(instance, dt)
-      snd.play(instance.sounds.plummet)
-      instance.sprite = im.sprites["Witch/plummet"]
-      instance.xPlummetStart = instance.x
-      instance.yPlummetStart = instance.y
-      instance.plummetFrames = instance.sprite.frames
-      instance.image_index = 0
-      instance.image_speed = 0.1
-      inp.disable_controller(instance.player)
-      instance:setGhost(true)
-    end,
-
-    end_state = function(instance, dt)
-      instance.xUnsteppable = instance.x
-      instance.yUnsteppable = instance.y
-      inp.enable_controller(instance.player)
-      instance:setGhost(false)
-      if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
-        instance:addHealth(-1)
-      end
-    end
-    },
-
-
-    respawn = {
-    run_state = function(instance, dt)
-      if not instance.noVelTrans and not instance.transed then
-        instance.transed = true
-        instance.transvx, instance.transvy = instance.body:getLinearVelocity()
-        local sd = instance.lastTransSide
-        local xsign, ysign
-        if sd == "left" then xsign = -1
-        elseif sd == "right" then xsign = 1
-        elseif sd == "up" then ysign = -1
-        elseif sd == "down" then ysign = 1 end
-        if xsign then
-          if u.sign(xsign) ~= u.sign(instance.transvx) then
-            instance.transvx = xsign * math.max(math.abs(instance.transvx), 10)
-          end
-        end
-        if ysign then
-          if u.sign(ysign) ~= u.sign(instance.transvy) then
-            instance.transvy = ysign * math.max(math.abs(instance.transvy), 10)
-          end
-        end
-      end
-      instance.body:setLinearVelocity(0, 0)
-      local rmod = instance.respawnCounter / instance.respawnCounterMax
-      instance.body:setPosition(
-        instance.xUnsteppable + rmod * (instance.xLastSteppable - instance.xUnsteppable),
-        instance.yUnsteppable + rmod * (instance.yLastSteppable - instance.yUnsteppable)
-      )
-      if instance.respawnCounter then
-        instance.respawnCounter = instance.respawnCounter + dt
-      end
-    end,
-
-    check_state = function(instance, dt)
-      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if instance.respawnCounter > instance.respawnCounterMax then
-        instance.animation_state:change_state(instance, dt, "downstill")
-      end
-    end,
-
-    start_state = function(instance, dt)
-      -- Change threshold to avoid screen transitions that get triggered
-      -- prematurely because of noVelTrans
-      instance.transvx, instance.transvy = nil, nil
-      gvar.screenEdgeThreshold = 2
-      instance.noVelTrans = true
-      instance.transed = false
-      instance.respawnCounter = 0
-      instance.respawnCounterMax = 0.4
-      instance.invisible = true
-      inp.disable_controller(instance.player)
-      instance:setGhost(true)
-      if not instance.xLastSteppable or not instance.yLastSteppable then
-        instance.xLastSteppable = instance.xUnsteppable
-        instance.yLastSteppable = instance.yUnsteppable
-      end
-    end,
-
-    end_state = function(instance, dt)
-      gvar.screenEdgeThreshold = GCON.defaultScreenEdgeThreshold
-      instance.noVelTrans = false
-      instance.transed = nil
-      instance.disableTransitions = false
-      instance.body:setPosition(instance.xLastSteppable, instance.yLastSteppable)
-      instance.invisible = false
-      inp.enable_controller(instance.player)
-      instance:setGhost(false)
-      instance.invulnerable = 1
-      if instance.transvx and instance.transvy then
-        instance.body:setLinearVelocity(instance.transvx, instance.transvy)
-      end
-    end
-    },
-
-
-    downdie = {
-    run_state = function(instance, dt)
-      if instance.deathPhase == 1 then
-        if instance.image_index >= 3 then
-          instance.image_index = 2
-          instance.image_speed = - instance.image_speed
-          instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
-        elseif instance.image_index <= 0 then
-          instance.image_index = 1
-          instance.image_speed = - instance.image_speed
-          instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
-          instance.x_scale = - instance.x_scale
-          if instance.deathDizzinesCounter >= instance.deathDizzinesRepeats then
-            instance.deathPhase = 2
-            instance.image_speed = 0.1
-            instance.image_index = 1
-            instance.deathDizzinesCounter = 0
-          end
-        end
-      elseif instance.deathPhase == 2 then
-        if instance.image_index >= 2 then
-          instance.image_index = 1
-          instance.image_speed = - instance.image_speed
-          instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
-        elseif instance.image_index <= 0 then
-          instance.image_index = 1
-          instance.image_speed = - instance.image_speed
-          instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
-          instance.x_scale = - instance.x_scale
-          if instance.deathDizzinesCounter >= instance.deathDizzinesFastRepeats then
-            instance.deathPhase = 3
-            instance.image_speed = 0
-            instance.image_index = 0
-            instance.x_scale = 1
-            snd.play(instance.sounds.die)
-          end
-        end
-      elseif instance.deathPhase == 3 then
-        instance.deathFallCounter = instance.deathFallCounter + dt
-        if instance.deathFallCounter > 0 then
-          instance.deathFallCounter = 0
-          instance.image_index = 6
-          instance.deathPhase = 4
-        end
-      elseif instance.deathPhase == 4 then
-        instance.deathFallCounter = instance.deathFallCounter + dt
-        if instance.deathFallCounter > 0.4 then
-          instance.deathFallCounter = 0
-          instance.deathPhase = 5
-          instance.deathState = "dead"
-          o.addToWorld(go:new{player = instance})
-        end
-        instance.ioy = instance.ioyDeathStart + math.sin(instance.deathFallCounter * 10)
-      end
-    end,
-
-    check_state = function(instance, dt)
-    end,
-
-    start_state = function(instance, dt)
-      snd.bgm:setFadeState("fadeout")
-      snd.play(instance.sounds.dying)
-      instance.sprite = im.sprites["Witch/die"]
-      inp.disable_controller(instance.player)
-      instance.deathPhase = 1
-      instance.image_index = 0
-      instance.image_speed = 0.1
-      instance.deathDizzinesCounter = 0
-      instance.deathDizzinesRepeats = 6
-      instance.deathDizzinesFastRepeats = 4
-      instance.deathFallCounter = 0
-      instance.ioyDeathStart = instance.ioy
-      instance:setGhost(true)
-      instance.deathState = "dying"
-    end,
-
-    end_state = function(instance, dt)
-    end
-    },
-
-
-    cutscene = {
-      run_state = function(instance, dt)
-      end,
-
-      check_state = function(instance, dt)
-      end,
-
-      start_state = function(instance, dt)
-        inp.disable_controller(instance.player)
-        instance:setGhost(true)
-      end,
-
-      end_state = function(instance, dt)
-        inp.enable_controller(instance.player)
-        instance:setGhost(false)
-        instance.x_scale = 1
-      end
-    },
-
-
-    dontdraw = {
-    run_state = function(instance, dt)
-      if instance.dontdrawRun then instance:dontdrawRun(dt) end
-    end,
-
-    check_state = function(instance, dt)
-      if instance.dontdrawCheck then instance:dontdrawCheck(dt) end
-    end,
-
-    start_state = function(instance, dt)
-      if instance.dontdrawStart then instance:dontdrawStart(dt) end
-      instance.invisible = true
-      inp.disable_controller(instance.player)
-      instance:setGhost(true)
-    end,
-
-    end_state = function(instance, dt)
-      if instance.dontdrawEnd then instance:dontdrawEnd(dt) end
-      dontdrawRun = nil
-      dontdrawCheck = nil
-      dontdrawStart = nil
-      dontdrawEnd = nil
-      instance.invisible = false
-      inp.enable_controller(instance.player)
-      instance:setGhost(false)
-    end
-    }
-  }
+  instance.movement_state = sm.new_state_machine(movement_states)
+  instance.animation_state = sm.new_state_machine(animation_states)
 end
 
 Playa.functions = {
@@ -2497,14 +2491,14 @@ Playa.functions = {
       -- dungeonJumpingLand
       if self.dungeonJumping and self.zvel == 0 then
         self.dungeonJumping = nil
-        inp.enable_controller(instance.player)
+        inp.enable_controller(self.player)
         self:setGhost(false)
       end
     else
       -- dungeonJumping
       if self.dungeonJumping then
         self:setGhost(true)
-        inp.disable_controller(instance.player)
+        inp.disable_controller(self.player)
         self.body:setLinearVelocity(self.dungeonJumping[1], self.dungeonJumping[2])
       end
     end

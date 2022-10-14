@@ -132,15 +132,24 @@ end
 
 function p:new(instance, init)
   if not instance then instance = {} end
-  if self.initialize then self.initialize(instance) end
   for funcname, func in pairs(self.functions) do
     instance[funcname] = func
   end
+  if self.initialize then self.initialize(instance) end
   if init then
     for key, value in pairs(init) do
       instance[key] = value
     end
   end
+
+  if instance.x then instance.xstart = instance.x
+  elseif instance.xstart then instance.x = instance.xstart
+  end
+
+  if instance.y then instance.ystart = instance.y
+  elseif instance.ystart then instance.y = instance.ystart
+  end
+
   return instance
 end
 

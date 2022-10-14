@@ -134,17 +134,18 @@ end
 
 function trans.moving_objects_coords(instance)
   local xtotal, ytotal
+  local zo = instance.zo or 0
 
   if instance.onPreviousRoom then
     xtotal = instance.x + trans.xtransform
       + game.transitioning.xmod
     ytotal = instance.y + trans.ytransform
-      + game.transitioning.ymod
+      + zo + game.transitioning.ymod
   else
     xtotal = instance.x + trans.xtransform
       + trans.xdisplacement
     ytotal = instance.y + trans.ytransform
-      + trans.ydisplacement
+      + zo + trans.ydisplacement
   end
 
   return xtotal, ytotal

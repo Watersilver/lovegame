@@ -1,3 +1,5 @@
+delta_time = 0
+
 -- Setup canvases
 local ringCanvas = love.graphics.newCanvas()
 local drugCanvas = love.graphics.newCanvas()
@@ -712,6 +714,7 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
+  delta_time = dt
 
   -- Run async functions before messing with the timeflow (dt)
   async.realTimeUpdate(dt)
@@ -752,7 +755,7 @@ function love.update(dt)
 
   -- -- display mouse position
   -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  -- -- wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
+  -- wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
   -- fuck = tostring(wmx) .. "/" .. tostring(wmy)
   -- -- --
   -- -- -- display room

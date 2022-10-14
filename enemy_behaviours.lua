@@ -155,6 +155,7 @@ function ebh.damagedByHit(object, other, myF, otherF)
     -- Apply damage
     if object.hp then object.hp = object.hp - damage end
     if object.hp <= 0 then
+      object.shouldDie = true
       object.harmless = true
       object.invulnerable = object.deathInvulnerable or object.invulnerable
       snd.play(object.sounds.fatalHit or object.sounds.hitSound)

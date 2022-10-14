@@ -22,10 +22,11 @@ local function control(fixture, x, y, xn, yn, fraction)
   return 1
 end
 
-function si.lookFor(seer, target, seeDead)
+function si.lookFor(seer, target, options)
+  if not options then options = {} end
   -- Return if I don't have to cast ray
   if not target then return false end
-  if not seeDead then
+  if not options.seeDead then
     if target.deathState then return false end
   end
   local sd = seer.sightDistance or dsg
@@ -56,6 +57,24 @@ function si.lookFor(seer, target, seeDead)
   if seer.canSeeThroughWalls then return true end
   -- If there are obstacles between self and target, don't see target
   ps.pw:rayCast(sx, sy, tx, ty, control)
+
+  if options.ignore then
+    local ignoredIndexes = {}
+    for o in ipairs(options.ignore) do
+      for i in ipairs(seenObjs) do
+        if options.ignore[o] == seenObjs[i] then
+          table.insert(ignoredIndexes, i)
+        end
+      end
+    end
+
+    for j = #ignoredIndexes, 1, -1 do
+      local i = ignoredIndexes[j]
+      seenObjs[i].seen = nil
+      table.remove(seenObjs, i)
+    end
+  end
+
   local seenObjsNum = #seenObjs
   -- empty seen objs
   for i in ipairs(seenObjs) do

@@ -95,7 +95,7 @@ Boss2Hand.functions = {
     -- Dying hand shake
     if self.dyingY then
       if not self.shakeX then
-        self.shakeX, self.shakeY = 0
+        self.shakeX, self.shakeY = 0, 0
         self.shakeTime = 0
         self.invulnerable = 100
       end
@@ -126,18 +126,48 @@ Boss2Hand.functions = {
       snd.play(self.sounds.handTouchGround)
 
       -- Create orb b1fo
-      if love.math.random() < 0.3 then
+      if self:shouldSpawnRocks() then
         o.addToWorld(b1fo:new{
           breakOnLanding = true,
           xstart = love.math.random(24, 376),
           ystart = love.math.random(104, 216)
         })
+        self:spawn2nd()
         gsh.newShake(mainCamera, "displacement")
       else
       gsh.newShake(mainCamera, "displacement", 0.5)
       end
     end
     self.slammed = false
+  end,
+
+  shouldSpawnRocks = function(self)
+    local chance = 0.3
+    if self.head.sightLoss == 1 then
+      chance = 0.4
+    elseif self.head.sightLoss == 2 then
+      chance = 0.6
+    end
+
+    if self.head:oneArmed() then
+      chance = 1
+    end
+
+    return love.math.random() < chance
+  end,
+
+  spawn2nd = function(self)
+    if not self.head:oneArmed() then return end
+    local chance = 0.5
+    local homing = love.math.random() < (chance / 2)
+
+    if love.math.random() < chance then
+      o.addToWorld(b1fo:new{
+        breakOnLanding = true,
+        xstart = homing and pl1.x or love.math.random(24, 376),
+        ystart = homing and pl1.y or love.math.random(104, 216)
+      })
+    end
   end,
 
   hitBySword = function (self, other, myF, otherF)
