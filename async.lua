@@ -1,7 +1,7 @@
 local llMethods = {
   pushBack = function (self, value)
     local node = {value = value}
-    if not first then
+    if not self.first then
       self.first = node
       self.last = node
     else
@@ -13,7 +13,7 @@ local llMethods = {
 
   pushFront = function (self, value)
     local node = {value = value}
-    if not first then
+    if not self.first then
       self.first = node
       self.last = node
     else
@@ -45,7 +45,7 @@ local llMethods = {
       node.next.previous = node.previous
     end
     if node.previous then
-      node.previous.next = previous.next
+      node.previous.next = node.next
     end
   end,
 
@@ -67,16 +67,18 @@ local llMethods = {
 }
 
 local function newLinkedList()
-  local ll = {
+
+  return {
     first = nil,
-    last = nil
+    last = nil,
+
+    count = llMethods.count,
+    delete = llMethods.delete,
+    findNode = llMethods.findNode,
+    isEmpty = llMethods.isEmpty,
+    pushBack = llMethods.pushBack,
+    pushFront = llMethods.pushFront
   }
-
-  for methodname, method in pairs(llMethods) do
-    ll[methodname] = method
-  end
-
-  return ll
 end
 
 local callbacks = {
