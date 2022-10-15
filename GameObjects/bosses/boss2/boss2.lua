@@ -176,6 +176,15 @@ local states = {
 
           instance.laughPrev = laugh
 
+          if (math.floor(instance.stateTimer * 10) % 10) == 0 then
+            if not instance.laughed_this_frame then
+              instance.laughed_this_frame = true
+              snd.play(glsounds.jagoburonLaugh)
+            end
+          else
+            instance.laughed_this_frame = false
+          end
+
           if instance.stateTimer > 2.3 and instance.image_index == 0 then
             instance.step = 6
             instance.leftEye.eyelidState = 0

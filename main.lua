@@ -77,18 +77,15 @@ local sh = require "scaling_handler"
 local pam = require "pause_menu"
 local inp = require "input"
 local im = require "image"
-local shdrs = require "Shaders.shaders"
 local dtse = require "drawTimeScreenEffect"
 local snd = require "sound"
 local text = require "text"
-local font = text.font
 local dialogue = require "dialogue"
 local game = require "game"
 local inv = require "inventory"
 local trans = require "transitions"
 local gsh = require "gamera_shake"
 local rm = require("RoomBuilding.room_manager")
-local ls = require "lightSources"
 
 local gamera = require "gamera.gamera"
 
@@ -469,6 +466,7 @@ local moup = mouseP
 
 -- global sounds
 glsounds = snd.load_sounds{
+  jagoburonLaugh = {"Effects/jagoburonLaugh"},
   wingFlap = {"Effects/Wing_flap"},
   dragonWingFlap = {"Effects/OOS_OnoxDragon_Fly"},
   dragonRoar = {"Effects/OOS_Dodongo_Roar"},
@@ -512,11 +510,11 @@ glsounds = snd.load_sounds{
   supercharge = {"Effects/Oracle_BiggoronsSword"},
   journalEntry = {"Effects/journalEntry"},
   bell = {"Effects/bell"},
-  dungeonDoor = {"Effects/Oracle_Dungeon_Door"},
 
   -- Mundane
   bushCut = {"Effects/Oracle_Bush_Cut"},
   uproot = {"Effects/Bush_Uproot"},
+  dungeonDoor = {"Effects/Oracle_Dungeon_Door"},
 
   -- Feedback
   runOut = {"Effects/run_out"},
