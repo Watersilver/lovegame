@@ -114,7 +114,6 @@ local movement_states = {
             instance.movement_state:change_state(instance, dt, "using_sword")
           elseif instance.zo == 0 and swhp then
             -- trigger these only grounded and during certain animations
-            -- WHY DID I SEPARATE MOVEMENT STATE AND ANIMATIO STATE?
             if trig.mark then
               instance.movement_state:change_state(instance, dt, "using_mark")
             elseif trig.recall then
@@ -2179,6 +2178,7 @@ function Playa.initialize(instance)
   asp.emptySpellSlots()
   instance:readSave()
 
+  instance.sideScroll = false
   instance.ids[#instance.ids+1] = "PlayaTest"
   instance.timeFlow = 1
   instance.angle = 0
@@ -2270,6 +2270,36 @@ function Playa.initialize(instance)
 end
 
 Playa.functions = {
+  grounded = function(self)
+    if self.sideScroll then
+      local _, vy = self.body:getLinearVelocity()
+      local twitchThreshold = 0.1
+      if vy < -twitchThreshold then return false end
+      for _, other in ipairs(self.sensors.downTouchedObs) do
+        if self:canCollide(other) then return true end
+      end
+      return false
+    end
+
+    return self.zo == 0
+  end,
+
+  canDoubleJump = function(self)
+    if not session.jumpL2 then return false end
+    if self.double_jumping then return false end
+
+    local vel = self.zvel
+
+    if self.sideScroll then
+      local _, vy = self.body:getLinearVelocity()
+      vel = -vy
+    end
+
+    if vel <= -86 and not self:grounded() then return true end
+
+    return false
+  end,
+
   addHealth = function (self, addedHealth)
     self.health = math.min(self.health + addedHealth, self.maxHealth)
   end,
@@ -2303,7 +2333,7 @@ Playa.functions = {
   end,
 
   canMark = function (self)
-    return not self.onEdge and self.zo == 0
+    return not self.onEdge and self:grounded()
   end,
 
   newMark = function (self, silent, roomName, reuse)
@@ -2446,16 +2476,16 @@ Playa.functions = {
       self.floorFriction = closestTile.floorFriction
       self.floorViscosity = closestTile.floorViscosity
       if closestTile.grass then
-        if self.zo == 0 then
+        if self:grounded() then
           self.ongrass = im.sprites[closestTile.grass]
         end
       elseif closestTile.shallowWater then
-        if self.zo == 0 then
+        if self:grounded() then
           self.inShallowWater = im.sprites[closestTile.shallowWater]
           self.landedTileSound = "water"
         end
       elseif closestTile.water then
-        if self.zo == 0 then
+        if self:grounded() then
           if session.save.walkOnWater then
             self.inShallowWater = im.sprites[closestTile.water]
             self.landedTileSound = "water"
@@ -2465,7 +2495,7 @@ Playa.functions = {
           end
         end
       elseif closestTile.gap then
-        if self.zo == 0 then
+        if self:grounded() then
           self.overGap = true
           self.landedTileSound = "none"
         end
@@ -2483,7 +2513,7 @@ Playa.functions = {
       self.climbing = nil
     end
 
-    if self.zo == 0 then
+    if self:grounded() then
       -- watersound
       if self.inShallowWater and not self.inShallowWaterPrev then
         snd.play(self.sounds.water)
@@ -2590,8 +2620,10 @@ Playa.functions = {
         end
       end
     end
-    trig.land = (self.zo ~= self.zoPrev) and (self.zo == 0)
+    -- trig.land = (self.zo ~= self.zoPrev) and (self.zo == 0)
+    trig.land = self:grounded() and not self.groundedPrev
     self.zoPrev = self.zo
+    self.groundedPrev = self:grounded()
     td.determine_animation_triggers(self, dt)
     inv.determine_equipment_triggers(self, dt)
 
@@ -2872,7 +2904,6 @@ Playa.functions = {
         local sensors = self.sensors
         -- if (not other.unpushable) and (not other.goThroughPlayer) then
         if not other.unpushable then
-          local onEdge
           if other.edge then
             other.onEdge = ec.isOnEdge(other, self)
           end
@@ -2911,31 +2942,6 @@ Playa.functions = {
 
     -- If my fixture is sensor, add to a sensor named after its user data
     if myF:isSensor() then
-      -- Old stupid(er) way
-      -- if other.untouchable then return end
-      -- local sensorID = myF:getUserData()
-      --
-      -- if sensorID then
-      --   local sensors = self.sensors
-      --   if (not other.unpushable == true) and (not other.goThroughPlayer) then
-      --     -- local sensors = self.sensors
-      --
-      --     -- for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
-      --     --   if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
-      --     -- end
-      --
-      --     if not other.onEdge then
-      --       if sensors[sensorID] then
-      --         sensors[sensorID] = sensors[sensorID] - 1
-      --         if sensors[sensorID] == 0 then sensors[sensorID] = nil end
-      --       end
-      --     end
-      --
-      --   end
-      --   for i, touchedOb in ipairs(sensors[sensorID .. "edObs"]) do
-      --     if touchedOb == other then remove(sensors[sensorID .. "edObs"], i) end
-      --   end
-      -- end
       local sensors = self.sensors
       local sensorID = myF:getUserData()
       if (not sensorID) or (not sensors) then return end
@@ -2970,11 +2976,16 @@ Playa.functions = {
 
   end,
 
+  canCollide = function(self, other)
+    if other.floor or other.notSolidStatic then return false end
+    if other.goThroughPlayer then return false end
+    return true
+  end,
+
   preSolve = function(self, a, b, coll, aob, bob)
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
     -- don't collide with floors
-    if other.floor or other.notSolidStatic then coll:setEnabled(false) return end
-    if other.goThroughPlayer then coll:setEnabled(false) end
+    if not self:canCollide(other) then coll:setEnabled(false) end
     if not myF:isSensor() then
       -- jump over stuff on ground
       if other.grounded then

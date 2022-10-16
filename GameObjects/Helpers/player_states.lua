@@ -37,7 +37,7 @@ player_states.check_walk = function(instance, dt, side)
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif inv.check_use(instance, trig, side, dt) then
-  elseif instance.zo ~= 0 then
+  elseif not instance:grounded() then
     instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side, dt) then
   elseif td.check_walk_while_walking(instance, trig, side, dt) then
@@ -53,7 +53,7 @@ player_states.check_halt = function(instance, dt, side)
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif inv.check_use(instance, trig, side, dt) then
-  elseif instance.zo ~= 0 then
+  elseif not instance:grounded() then
     instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side, dt) then
   elseif td.check_walk_a(instance, trig, side, dt) then
@@ -69,7 +69,7 @@ player_states.check_still = function(instance, dt, side)
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif inv.check_use(instance, trig, side, dt) then
-  elseif instance.zo ~= 0 then
+  elseif not instance:grounded() then
     instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side, dt) then
   elseif td.check_walk_a(instance, trig, side, dt) then
@@ -280,9 +280,16 @@ end
 player_states.run_fall = function(instance, dt, side)
   -- Witch fall
   if instance.sprite.frames == 3 and session.save.equippedRing == "ringMage" then
-    if instance.zvel > 13 then -- 40 H 10
+    local vel = instance.zvel
+
+    if instance.sideScroll then
+      local _, vy = instance.body:getLinearVelocity()
+      vel = -vy
+    end
+
+    if vel > 13 then -- 40 H 10
       instance.image_index = 0
-    elseif instance.zvel < -13 then -- -40 H -10
+    elseif vel < -13 then -- -40 H -10
       instance.image_index = 2
     else
       instance.image_index = 1
@@ -302,9 +309,9 @@ player_states.check_fall = function(instance, dt, side)
   if pddp(instance, trig, side, dt) then
   elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
-  elseif trig.hold_jump and session.jumpL2 and not instance.double_jumping and instance.zvel < 0 and instance.zo > -7 and instance.zo < 0 then
+  elseif trig.hold_jump and instance:canDoubleJump() then
     instance.animation_state:change_state(instance, dt, side .. "jump")
-  elseif instance.zo == 0 then
+  elseif instance:grounded() then
     instance.animation_state:change_state(instance, dt, side .. "still")
   end
 end
@@ -689,7 +696,7 @@ player_states.check_sprintcharge = function(instance, dt, side)
   if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif instance.zo ~= 0 then
+  elseif not instance:grounded() then
     instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif not trig.speed then
     instance.animation_state:change_state(instance, dt, side .. "still")
@@ -790,7 +797,7 @@ player_states.check_sprint = function(instance, dt)
   if pddp(instance, trig, instance.sprintSide, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif instance.zo ~= 0 then
+  elseif not instance:grounded() then
     instance.animation_state:change_state(instance, dt, instance.sprintSide .. "fall")
   elseif not trig.speed then
     instance.animation_state:change_state(instance, dt, instance.sprintSide .. "still")

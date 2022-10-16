@@ -1565,6 +1565,10 @@ function love.mousepressed(x, y, button, isTouch)
   -- table.insert(enemarea, x)
   -- table.insert(enemarea, y)
 
+  if pl1 and pl1.exists then
+    pl1.sideScroll = not pl1.sideScroll
+  end
+
   moub[button] = true
 end
 

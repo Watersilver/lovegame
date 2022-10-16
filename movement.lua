@@ -145,8 +145,10 @@ local universalWalk = function(object, dt, inputForceFunc)
 
   local inversemaxspeed = 1/(maxspeed * normalisedSpeed) -- could be inf, don't worry
 
+  local grounded = object.sideScroll and object:grounded() or (object.zo == 0 or object.actAszo0)
+
   -- if on ground check how floor affects movement
-  if object.zo == 0 or object.actAszo0 then
+  if grounded then
     if floorFriction < 1 then
       mobility = mobility * floorFriction
       brakes = brakes * floorFriction
@@ -198,6 +200,8 @@ local universalWalk = function(object, dt, inputForceFunc)
   -- Calculate force due to input
   local infx, infy = iff[inputForceFunc](myinput, direction, mass, mobility)
 
+  if object.sideScroll then infy = 0 end
+
   -- Calculate friction force
   local ffx, ffy = object.vx, object.vy
   if infx == 0 and infy == 0 then
@@ -213,17 +217,21 @@ local universalWalk = function(object, dt, inputForceFunc)
     ffy = - ffy * mass * mobility * inversemaxspeed
   end
 
+  if object.sideScroll then
+    infy = 0
+    ffy = 0
+  end
+
   object.body:applyForce(infx, infy)
   object.body:applyForce(ffx, ffy)
 end
 
 local mo = {}
 
-  local sqrt = math.sqrt
   local abs = math.abs
   local sign = u.sign
 
-  function  mo.test_movement(object, dt)
+  function mo.test_movement(object, dt)
     local _, gravity = ps.pw:getGravity()
     local mass = object.body:getMass()
     local myinput = object.input
@@ -254,7 +262,7 @@ local mo = {}
     end,
 
     stand_still = function(object, dt)
-      if object.zo ~= 0 then return end
+      if object.sideScroll and (not object:grounded()) or object.zo ~= 0 then return end
       local mass = object.body:getMass()
       local _ -- mobility dummy
       local brakes = object.brakes or 6
@@ -279,9 +287,10 @@ local mo = {}
       ffx = - ffx * mass * brakes
       ffy = - ffy * mass * brakes
 
+      if object.sideScroll then ffy = 0 end
+
       object.body:applyForce(ffx, ffy)
     end,
-
 
     image_speed = function(object, dt, speedMod)
       local floorFriction = object.floorFriction or 1
@@ -297,8 +306,29 @@ local mo = {}
       object.image_speed = image_speed
     end,
 
+    sideZAxis = function(object)
+      if object.sideScroll then
+        if object.deathState then
+          object.body:setLinearVelocity(0, 0)
+          return true
+        end
+        if object.gravity and object.body then
+          object.body:applyForce(0, object.gravity * object.body:getMass())
+
+          if object.zvel ~= 0 then
+            local vx = object.body:getLinearVelocity()
+            object.body:setLinearVelocity(vx, -object.zvel * 1.05)
+            object.zvel = 0
+          end
+        end
+        return true
+      end
+      return false
+    end,
 
     zAxisPlayer = function(object, dt)
+      if mo.top_down.sideZAxis(object) then return end
+
       -- different from zAxis because player also has jo (jump offset) for cam purposes
       object.jo = object.jo - object.zvel * dt
       if object.jo >= 0 then
@@ -316,8 +346,9 @@ local mo = {}
       object.zo = object.jo + object.fo
     end,
 
-
     zAxis = function(object, dt)
+      if mo.top_down.sideZAxis(object) then return end
+
       object.zo = object.zo - object.zvel * dt
       if object.zo >= 0 then
         object.zo = 0
@@ -339,7 +370,6 @@ local mo = {}
     end,
 
     determine_animation_triggers = function(object, dt)
-      local anstate = object.animation_state.state
       local myinput = object.input
       local trig = object.triggers
       local sens = object.sensors
@@ -350,7 +380,7 @@ local mo = {}
       if down - up == 0 then down, up = 0, 0 end
 
       local directionalPressed = right + left + up + down
-      local vxBiggerThanVy =  abs(vx) > abs(vy)
+      local vxBiggerThanVy = abs(vx) > abs(vy)
 
       if directionalPressed > 0 then
         -- This is to avoid twitching due to physics collisions
@@ -388,6 +418,12 @@ local mo = {}
             trig.walk_up = true
           end
 
+        elseif object.sideScroll then
+          if down == 1 then
+            trig.walk_down = true
+          elseif up == 1 then
+            trig.walk_up = true
+          end
         end
 
         if sens.downTouch then
@@ -507,10 +543,6 @@ local mo = {}
       elseif trig.walk_left then
         instance.animation_state:change_state(instance, dt, "leftwalk")
         return true
-      -- Changed this so up takes precedence in this case. Change back if needed
-      -- elseif trig.walk_up then
-      --   instance.animation_state:change_state(instance, dt, "upwalk")
-      --   return true
       end
       return false
     end,
