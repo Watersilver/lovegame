@@ -1,7 +1,3 @@
-local ps = require "physics_settings"
-
-local abs = math.abs
-
 local ec = {}
 
 -- "below*Edge" functions check if "other" is on the low side of the edge

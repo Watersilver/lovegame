@@ -22,8 +22,6 @@ local shdrs = require "Shaders.shaders"
 local hitShader = shdrs.enemyHitShader
 local deathShader = shdrs.bossDeathShader
 
-local pi = math.pi
-
 local states = {
   -- WARNING STARTING STATE IN INITIALIZE!!!
   start = {
@@ -529,7 +527,7 @@ local states = {
       instance.ball.dlgState = "done"
       instance.ball.updateHook = nil
 
-      game.room.music_info = "SoMBelieveinVictory"
+      game.room.music_info = "Tempestuous-Clash-LOOP"
       snd.bgmV2.getMusicAndload()
     end
   }
