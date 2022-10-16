@@ -2977,15 +2977,20 @@ Playa.functions = {
   end,
 
   canCollide = function(self, other)
-    if other.floor or other.notSolidStatic then return false end
+    if self:endCollision(other) then return false end
     if other.goThroughPlayer then return false end
     return true
   end,
 
+  endCollision = function(self, other)
+    if other.floor or other.notSolidStatic then return true end
+    return false
+  end,
+
   preSolve = function(self, a, b, coll, aob, bob)
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-    -- don't collide with floors
     if not self:canCollide(other) then coll:setEnabled(false) end
+    if self:endCollision(other) then return end
     if not myF:isSensor() then
       -- jump over stuff on ground
       if other.grounded then
