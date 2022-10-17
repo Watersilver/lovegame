@@ -112,7 +112,7 @@ local movement_states = {
           -- elseif trig.swing_sword and otherstate ~= "spinattack" then
           elseif trig.swing_sword and (swhp or fs) then
             instance.movement_state:change_state(instance, dt, "using_sword")
-          elseif instance.zo == 0 and swhp then
+          elseif instance:grounded() and swhp then
             -- trigger these only grounded and during certain animations
             if trig.mark then
               instance.movement_state:change_state(instance, dt, "using_mark")
@@ -2178,7 +2178,14 @@ function Playa.initialize(instance)
   asp.emptySpellSlots()
   instance:readSave()
 
+  -- true state of sideScroll
+  instance.trueSideScroll = false
+
+  -- Perceived state of sideScroll.
+  -- might appear false even if true state is true,
+  -- for example while climbing
   instance.sideScroll = false
+
   instance.ids[#instance.ids+1] = "PlayaTest"
   instance.timeFlow = 1
   instance.angle = 0
@@ -2475,17 +2482,23 @@ Playa.functions = {
 
       self.floorFriction = closestTile.floorFriction
       self.floorViscosity = closestTile.floorViscosity
+
+      if self.sideScroll then
+        self.floorFriction = 1
+        self.floorViscosity = nil
+      end
+
       if closestTile.grass then
-        if self:grounded() then
+        if self:grounded() and not self.sideScroll then
           self.ongrass = im.sprites[closestTile.grass]
         end
       elseif closestTile.shallowWater then
-        if self:grounded() then
+        if self:grounded() and not self.sideScroll then
           self.inShallowWater = im.sprites[closestTile.shallowWater]
           self.landedTileSound = "water"
         end
       elseif closestTile.water then
-        if self:grounded() then
+        if self:grounded() and not self.sideScroll then
           if session.save.walkOnWater then
             self.inShallowWater = im.sprites[closestTile.water]
             self.landedTileSound = "water"
@@ -2495,7 +2508,7 @@ Playa.functions = {
           end
         end
       elseif closestTile.gap then
-        if self:grounded() then
+        if self:grounded() and not self.sideScroll then
           self.overGap = true
           self.landedTileSound = "none"
         end
@@ -2511,6 +2524,13 @@ Playa.functions = {
       self.floorFriction = 1
       self.floorViscosity = nil
       self.climbing = nil
+    end
+
+    self.trueSideScroll = game.room.sideScrolling
+    if self.trueSideScroll and self.climbing then
+      self.sideScroll = false
+    else
+      self.sideScroll = self.trueSideScroll
     end
 
     if self:grounded() then
@@ -2620,8 +2640,7 @@ Playa.functions = {
         end
       end
     end
-    -- trig.land = (self.zo ~= self.zoPrev) and (self.zo == 0)
-    trig.land = self:grounded() and not self.groundedPrev
+    trig.land = self:grounded() and self.groundedPrev == false
     self.zoPrev = self.zo
     self.groundedPrev = self:grounded()
     td.determine_animation_triggers(self, dt)
@@ -2738,14 +2757,6 @@ Playa.functions = {
     self.spritebody:setPosition(xtotal, ytotal)
     self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
-    -- if self.zo ~= 0 then
-    --   local shaspri = self.shadownSprite
-    --   love.graphics.draw(
-    --   shaspri.img, shaspri[0], x, y, 0,
-    --   shaspri.res_x_scale, shaspri.res_y_scale,
-    --   shaspri.cx, shaspri.cy)
-    -- end
-
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames
     while self.image_index >= sprite.frames do
@@ -2824,14 +2835,6 @@ Playa.functions = {
       self.spritejoint:destroy();
       self.spritejoint = nil
     end
-
-    -- if self.zo ~= 0 then
-    --   local shaspri = self.shadownSprite
-    --   love.graphics.draw(
-    --   shaspri.img, shaspri[0], x, y, 0,
-    --   shaspri.res_x_scale, shaspri.res_y_scale,
-    --   shaspri.cx, shaspri.cy)
-    -- end
 
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames

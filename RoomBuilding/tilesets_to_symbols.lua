@@ -109,7 +109,7 @@ tilesets_to_symbols['Tiles/Clutter'] = {
   'b', 'b', 'b', 'b', 'b', 'b', 'b', 'b',
   'rW', 'rW', 'rW2', 'rW', 'rW2', 'ptl', 'rW', 'w',
   'sL', 'sL', 'sL', 'sL', 'b', 'b', 'b', 'b',
-  'db', 'db2', 'b', 'b', 'b', 'b', 'b', 'b',
+  'db', 'db2', 'ld', 'ld', 'ld', 'b', 'b', 'b',
 }
 tilesets_to_symbols['Tiles/Clutter'].initFields = {
   [1] = {lift_info = "shrub"} -- shrub

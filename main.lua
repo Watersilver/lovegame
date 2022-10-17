@@ -831,10 +831,10 @@ function love.update(dt)
       local verside = gts == "up" and -1 or (gts == "down" and 1 or 0)
 
 
-      -- Store player
-      local playaTest = o.identified.PlayaTest
-      if playaTest and playaTest[1].x then
-        pl1 = playaTest[1]
+      -- Store player (if this isn't here, followingif statement will crash for some reason)
+      local playaTest2 = o.identified.PlayaTest
+      if playaTest2 and playaTest2[1].x then
+        pl1 = playaTest2[1]
         -- Die if fall in unsteppable after transition
         -- pl1.xLastSteppable = nil
         -- pl1.yLastSteppable = nil
@@ -1564,10 +1564,6 @@ function love.mousepressed(x, y, button, isTouch)
   -- x, y = cam:toWorld(x, y)
   -- table.insert(enemarea, x)
   -- table.insert(enemarea, y)
-
-  if pl1 and pl1.exists then
-    pl1.sideScroll = not pl1.sideScroll
-  end
 
   moub[button] = true
 end

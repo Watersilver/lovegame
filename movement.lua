@@ -200,8 +200,6 @@ local universalWalk = function(object, dt, inputForceFunc)
   -- Calculate force due to input
   local infx, infy = iff[inputForceFunc](myinput, direction, mass, mobility)
 
-  if object.sideScroll then infy = 0 end
-
   -- Calculate friction force
   local ffx, ffy = object.vx, object.vy
   if infx == 0 and infy == 0 then
@@ -308,6 +306,15 @@ local mo = {}
 
     sideZAxis = function(object)
       if object.sideScroll then
+        if object.zo then
+          object.zo = 0
+        end
+        if object.jo then
+          object.jo = 0
+        end
+        if object.fo then
+          object.fo = 0
+        end
         if object.deathState then
           object.body:setLinearVelocity(0, 0)
           return true
