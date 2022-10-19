@@ -1107,10 +1107,12 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
+    instance.isDownGripping = true
     hps.start_gripping(instance, dt, "down")
   end,
 
   end_state = function(instance, dt)
+    instance.isDownGripping = nil
     hps.end_gripping(instance, dt, "down")
   end
   },
@@ -2178,9 +2180,6 @@ function Playa.initialize(instance)
   asp.emptySpellSlots()
   instance:readSave()
 
-  -- true state of sideScroll
-  instance.trueSideScroll = false
-
   -- Perceived state of sideScroll.
   -- might appear false even if true state is true,
   -- for example while climbing
@@ -2278,7 +2277,7 @@ end
 
 Playa.functions = {
   grounded = function(self)
-    if self.sideScroll then
+    if game.room.sideScrolling then
       local _, vy = self.body:getLinearVelocity()
       local twitchThreshold = 0.1
       if vy < -twitchThreshold then return false end
@@ -2513,7 +2512,6 @@ Playa.functions = {
           self.landedTileSound = "none"
         end
       end
-      if closestTile.climbable and self.zo == 0 then self.climbing = true else self.climbing = nil end
       -- Where to respawn if I fall in a gap or drown
       if not closestTile.unsteppable then
         self.xLastSteppable = closestTile.xstart
@@ -2523,14 +2521,6 @@ Playa.functions = {
     else
       self.floorFriction = 1
       self.floorViscosity = nil
-      self.climbing = nil
-    end
-
-    self.trueSideScroll = game.room.sideScrolling
-    if self.trueSideScroll and self.climbing then
-      self.sideScroll = false
-    else
-      self.sideScroll = self.trueSideScroll
     end
 
     if self:grounded() then
@@ -2645,6 +2635,28 @@ Playa.functions = {
     self.groundedPrev = self:grounded()
     td.determine_animation_triggers(self, dt)
     inv.determine_equipment_triggers(self, dt)
+
+    local prevCli = self.climbing
+    self.climbing = nil
+    if self.closestTile and self.closestTile.climbable then
+      if game.room.sideScrolling then
+        if prevCli then
+          self.climbing = true
+        else
+          local up = self.input.up or 0
+          local down = self.input.down or 0
+          self.climbing = up - down == 1 or nil
+        end
+      elseif self.zo == 0 then
+        self.climbing = true
+      end
+    end
+
+    if game.room.sideScrolling and not self.climbing then
+      self.sideScroll = true
+    else
+      self.sideScroll = false
+    end
 
     -- Determine z axis offset
     td.zAxisPlayer(self, dt)

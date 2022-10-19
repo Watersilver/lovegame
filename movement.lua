@@ -218,6 +218,11 @@ local universalWalk = function(object, dt, inputForceFunc)
   if object.sideScroll then
     infy = 0
     ffy = 0
+
+    if object.isDownGripping then
+      infx = 0
+      ffx = 0
+    end
   end
 
   object.body:applyForce(infx, infy)

@@ -126,7 +126,7 @@ local shspot = {
   },
   up = {
     [0] = {xoff = shso1, yoff = 0},
-    -- [1] = {xoff = shso2, yoff = shso2},
+    -- [1] = {xoff = shso2, yoff = -shso2},
     [1] = {xoff = 0, yoff = -shso3},
     [2] = {xoff = 0, yoff = -shso3}
   }
@@ -421,21 +421,35 @@ Sword.functions = {
     end
 
     if (pushback) and not self.hitWall and not other.attackDodger then
-      local lvx, lvy = cr.body:getLinearVelocity()
+      -- old way of negating velocity
+      -- local lvx, lvy = cr.body:getLinearVelocity()
+      -- cr.body:applyLinearImpulse(-lvx * crmass, -lvy * crmass)
+      cr.body:setLinearVelocity(0, 0)
       local crmass = cr.body:getMass()
       local _, crbrakes = session.getAthlectics()
       crbrakes = clamp(0, crbrakes, cr.brakesLim)
-      cr.body:applyLinearImpulse(-lvx * crmass, -lvy * crmass)
       local px, py
       if not self.spin then
-        if self.side == "down" then
-          px, py = 0, -10 * crmass * crbrakes
-        elseif self.side == "right" then
-          px, py = -10 * crmass * crbrakes, 0
-        elseif self.side == "left" then
-          px, py = 10 * crmass * crbrakes, 0
-        elseif self.side == "up" then
-          px, py = 0, 10 * crmass * crbrakes
+        if self.phase == 0 then
+          if self.side == "down" then
+            px, py = 10 * crmass * crbrakes, 0
+          elseif self.side == "right" then
+            px, py = 0, 10 * crmass * crbrakes
+          elseif self.side == "left" then
+            px, py = 0, 10 * crmass * crbrakes
+          elseif self.side == "up" then
+            px, py = -10 * crmass * crbrakes, 0
+          end
+        else
+          if self.side == "down" then
+            px, py = 0, -10 * crmass * crbrakes
+          elseif self.side == "right" then
+            px, py = -10 * crmass * crbrakes, 0
+          elseif self.side == "left" then
+            px, py = 10 * crmass * crbrakes, 0
+          elseif self.side == "up" then
+            px, py = 0, 10 * crmass * crbrakes
+          end
         end
       else
         px, py = u.normalize2d(cr.x - self.x, cr.y - self.y)

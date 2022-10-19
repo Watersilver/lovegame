@@ -15,7 +15,7 @@ p.functions = {
 
     --Check if tile
     if pp.tile then
-      ps.shapes.edgeToTiles(self, pp.edgetable)
+      ps.shapes.edgeToTiles(self)
     --Check if thick wall
     elseif pp.thickWall then
       if not self.body then self.body = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0) end
@@ -87,8 +87,6 @@ p.functions = {
       if pp.mass then body:setMass(pp.mass) end
 
     end
-
-    self.physical_properties = nil
   end,
 
   build_spritefixture = function(self)

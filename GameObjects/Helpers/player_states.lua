@@ -307,6 +307,8 @@ end
 player_states.check_fall = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if pddp(instance, trig, side, dt) then
+  elseif instance.climbing then
+    instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif trig.hold_jump and instance:canDoubleJump() then

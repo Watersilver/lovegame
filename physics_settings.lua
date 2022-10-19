@@ -16,6 +16,8 @@ local ps = {}
 love.physics.setMeter(16)
 
 ps.pw = love.physics.newWorld(0, 280)--280)
+
+-- Don't use internal gravity
 ps.pw:setGravity(0, 0)
 
 -- Make shapes
@@ -40,6 +42,7 @@ ps.shapes = {
     l = love.physics.newEdgeShape(-8, -8, -8, 8), -- left side
     r = love.physics.newEdgeShape(8, -8, 8, 8), -- right side
     d = love.physics.newEdgeShape(-8, 8, 8, 8), -- down side
+    dc = love.physics.newEdgeShape(-7.8, 8.1, 7.8, 8.1), -- down side for ground collisions
     d2 = love.physics.newEdgeShape(-8, 0, 8, 0) -- down side for zelda edges
   },
   edgeRectHalfxHalf = {
@@ -131,9 +134,10 @@ width * 0.5, height * 0.5,
 thickness, height * proportion
 )
 
-function ps.shapes.edgeToTiles(instance, edgetable)
+function ps.shapes.edgeToTiles(instance)
   local i = 1
   local pp = instance.physical_properties
+  local edgetable = pp.edgetable
   if pp.tile[1] == "none" then return end
   instance.body = love.physics.newBody(ps.pw, instance.xstart, instance.ystart)
   instance.body:setUserData(instance)
@@ -148,6 +152,14 @@ function ps.shapes.edgeToTiles(instance, edgetable)
     newf:setUserData(side)
     -- instance.fixtures[i]:setUserData(instance)
     i = i + 1
+  end
+
+  -- For sidescrolling
+  if pp.downSensor then
+    instance.downfixture = love.physics.newFixture(instance.body, pp.downSensor, 0)
+    instance.downfixture:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
+    instance.downfixture:setSensor(true)
+    instance.downfixture:setUserData("downTouch")
   end
 
   -- WARNING: This is here so that walls aren't paper thin. Might want to find better way

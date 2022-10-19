@@ -1,7 +1,6 @@
 local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local game = require "game"
-local im = require "image"
 local o = require "GameObjects.objects"
 local ps = require "physics_settings"
 local bspl = require "GameObjects.Items.bombsplosion"
@@ -27,40 +26,61 @@ end
 
 local floor = math.floor
 
-local endOffset = {x = 0, y = -0.6 * ps.shapes.plshapeHeight}
-local offsets = {
+-- for todown
+local tdendOffset = {x = 0, y = -0.6 * ps.shapes.plshapeHeight}
+local tdoffsets = {
   down = {
-    -- {x = 0, y = 3 * ps.shapes.plshapeHeight},
-    -- {x = 0, y = 2.5 * ps.shapes.plshapeHeight},
-    -- {x = 0, y = 1.5 * ps.shapes.plshapeHeight},
     {x = 0, y = 2 * ps.shapes.plshapeHeight},
     {x = 0, y = 1.7 * ps.shapes.plshapeHeight},
     {x = 0, y = 1.3 * ps.shapes.plshapeHeight},
-    endOffset
+    tdendOffset
   },
   right = {
-    -- {x = 1.5 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
-    -- {x = 0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
-    -- {x = 0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
     {x = 1.2 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
     {x = 0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
     {x = 0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
-    endOffset
+    tdendOffset
   },
   left = {
-    -- {x = -1.5 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
-    -- {x = -0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
-    -- {x = -0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
     {x = -1.2 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
     {x = -0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
     {x = -0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
-    endOffset
+    tdendOffset
   },
   up = {
     {x = 0, y = 0},
     {x = 0, y = -0.1 * ps.shapes.plshapeHeight},
     {x = 0, y = -0.3 * ps.shapes.plshapeHeight},
-    endOffset
+    tdendOffset
+  }
+}
+
+-- For side scrolling
+local ssendOffset = {x = 0, y = -0.8 * ps.shapes.plshapeHeight}
+local ssoffsets = {
+  down = {
+    {x = 0, y = 2 * ps.shapes.plshapeHeight},
+    {x = 0, y = 1.7 * ps.shapes.plshapeHeight},
+    {x = 0, y = 1.3 * ps.shapes.plshapeHeight},
+    ssendOffset
+  },
+  right = {
+    {x = 1.2 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
+    {x = 0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
+    {x = 0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
+    ssendOffset
+  },
+  left = {
+    {x = -1.2 * ps.shapes.plshapeWidth, y = ps.shapes.plshapeHeight},
+    {x = -0.75 * ps.shapes.plshapeWidth, y = 0.2 * ps.shapes.plshapeHeight},
+    {x = -0.2 * ps.shapes.plshapeWidth, y = -0.1 * ps.shapes.plshapeHeight},
+    ssendOffset
+  },
+  up = {
+    {x = 0, y = 0},
+    {x = 0, y = -0.1 * ps.shapes.plshapeHeight},
+    {x = 0, y = -0.3 * ps.shapes.plshapeHeight},
+    ssendOffset
   }
 }
 
@@ -76,6 +96,7 @@ Lifted.functions = {
     local cr = self.creator
     -- Set initial position
     local creatorx, creatory = cr.body:getPosition()
+    local offsets = game.room.sideScrolling and ssoffsets or tdoffsets
     local offs = offsets[self.side][#offsets[self.side]-1]
     local xoff, yoff = offs.x, offs.y
     local fy = 0
@@ -101,17 +122,18 @@ Lifted.functions = {
     local xoff, yoff
 
     -- Determine offset due to lifting stage
+    local offsets = game.room.sideScrolling and ssoffsets or tdoffsets
     if not self.lifted then
       local stage = floor(cr.liftingStage or 1)
       local offs = offsets[self.side][stage]
       xoff, yoff = offs.x, offs.y
       if stage == 4 then
-        self.xoff, self.yoff = xoff, yoff
         o.change_layer(self, cr.layer+1)
         self.lifted = true
       end
     else
-      xoff, yoff = self.xoff, self.yoff
+      local offs = offsets[self.side][4]
+      xoff, yoff = offs.x, offs.y
       -- Bobbing
       if floor(cr.image_index) == 1 then
         yoff = yoff + 1
@@ -156,7 +178,7 @@ Lifted.functions = {
     end
 
     -- lift_update is a function fed by what I was before I was lifted
-    if self.lift_update then lift_update(self, dt) end
+    if self.lift_update then self.lift_update(self, dt) end
   end,
 
   draw = function (self, td)

@@ -83,7 +83,6 @@ function Thrown.initialize(instance)
   -- instance.sprite_info will be handled by creator
   instance.physical_properties = {
     bodyType = "dynamic",
-    gravityScaleFactor = 0,
     shape = instance.shape or ps.shapes.thrown,
     sensor = true,
     gravityScaleFactor = 0,
@@ -123,45 +122,52 @@ Thrown.functions = {
   update = function(self, dt)
 
     -- Handle zaxis
-    self.zo = self.zo - self.zvel * dt
-    if self.zo >= 0 then
-      -- self.zo = 0
-      -- self.zvel = 0
-      if self.floorTiles[1] then
-        local x, y = self.body:getPosition()
-        -- I could be stepping on up to four tiles. Find closest to determine mods
-        local closestTile
-        local closestDistance = math.huge
-        local previousClosestDistance
-        for _, floorTile in ipairs(self.floorTiles) do
-          previousClosestDistance = closestDistance
-          -- Magic number to account for thrown height
-          closestDistance = math.min(u.distanceSqared2d(x, y+3, floorTile.xstart, floorTile.ystart), closestDistance)
-          if closestDistance < previousClosestDistance then
-            closestTile = floorTile
+    if not game.room.sideScrolling then
+      self.zo = self.zo - self.zvel * dt
+      if self.zo >= 0 then
+        if self.floorTiles[1] then
+          local x, y = self.body:getPosition()
+          -- I could be stepping on up to four tiles. Find closest to determine mods
+          local closestTile
+          local closestDistance = math.huge
+          local previousClosestDistance
+          for _, floorTile in ipairs(self.floorTiles) do
+            previousClosestDistance = closestDistance
+            -- Magic number to account for thrown height
+            closestDistance = math.min(u.distanceSqared2d(x, y+3, floorTile.xstart, floorTile.ystart), closestDistance)
+            if closestDistance < previousClosestDistance then
+              closestTile = floorTile
+            end
           end
-        end
-        self.xClosestTile = closestTile.xstart
-        self.yClosestTile = closestTile.ystart
-        if closestTile.water then
-          sink(self)
-        elseif closestTile.gap then
-          plummet(self)
+          self.xClosestTile = closestTile.xstart
+          self.yClosestTile = closestTile.ystart
+          if closestTile.water then
+            sink(self)
+          elseif closestTile.gap then
+            plummet(self)
+          else
+            touchGround(self)
+          end
         else
           touchGround(self)
         end
       else
-        touchGround(self)
+        self.zvel = self.zvel - self.gravity * dt
+        if not self.shadow then
+          self.shadow = sh:new{
+            caster = self, layer = self.layer-2,
+            xstart = x, ystart = y
+          }
+          o.addToWorld(self.shadow)
+        end
       end
     else
-      self.zvel = self.zvel - self.gravity * dt
-      if not self.shadow then
-        self.shadow = sh:new{
-          caster = self, layer = self.layer-2,
-          xstart = x, ystart = y
-        }
-        o.addToWorld(self.shadow)
+      if self.zo < 0 then
+        local x, y = self.body:getPosition()
+        self.body:setPosition(x, y + self.zo)
+        self.zo = 0
       end
+      self.body:applyForce(0, self.gravity * self.body:getMass());
     end
 
     -- life timer (for bombs)
@@ -179,7 +185,7 @@ Thrown.functions = {
 
 
     -- throw_update is a function fed by what I was before I was thrown
-    if self.throw_update then throw_update(self, dt) end
+    if self.throw_update then self.throw_update(self, dt) end
   end,
 
   draw = function(self, td)

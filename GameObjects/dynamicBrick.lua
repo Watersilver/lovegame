@@ -1,12 +1,10 @@
 local ps = require "physics_settings"
 local p = require "GameObjects.prototype"
-local im = require "image"
 local trans = require "transitions"
-local o = require "GameObjects.objects"
 local u = require "utilities"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local expl = require "GameObjects.explode"
-local snd = require "sound"
+local game = require "game"
 
 local bt = {}
 
@@ -20,6 +18,7 @@ function bt.initialize(instance)
     mass = 40,
     linearDamping = 40,
     restitution = 0,
+    downSensor = ps.shapes.edgeRect1x1.dc
   }
   instance.ballbreaker = true
   instance.image_index = 0
@@ -27,11 +26,28 @@ function bt.initialize(instance)
   instance.pushback = true
   instance.layer = 13
   instance.forceSwordSound = true
+
+  instance.bottomObs = {}
 end
 
 bt.functions = {
+  isBottomFixture = function(self, fixture)
+    return fixture:getUserData() == "downTouch"
+  end,
+
   update = function(self, dt)
     self.x, self.y = self.body:getPosition()
+
+    if (game.room.sideScrolling) then
+      self.body:applyForce(0, 350 * self.body:getMass())
+
+      if #self.bottomObs > 0 then
+        self.body:setLinearDamping(self.physical_properties.linearDamping)
+      else
+        self.body:setLinearDamping(0)
+      end
+    end
+
     self.image_index = (self.image_index + dt*60*self.image_speed)
     local frames = self.sprite.frames
     if self.image_index >= frames then
@@ -86,6 +102,12 @@ bt.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    if (self:isBottomFixture(myF)) then
+      table.insert(self.bottomObs, other)
+    end
+
+    if myF:isSensor() then return end
+
     -- remember tiles
     u.rememberFloorTile(self, other)
   end,
@@ -93,6 +115,17 @@ bt.functions = {
   endContact = function(self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+    if self:isBottomFixture(myF) then
+      for i, obj in ipairs(self.bottomObs) do
+        if obj == other then
+          table.remove(self.bottomObs, i)
+          break
+        end
+      end
+    end
+
+    if myF:isSensor() then return end
 
     -- Forget Floor tiles
     u.forgetFloorTile(self, other)
