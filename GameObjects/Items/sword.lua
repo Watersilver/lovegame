@@ -66,7 +66,8 @@ local function calculate_offset(side, phase)
   elseif side == "up" then
     if phase == 0 then
       xoff = 14
-      yoff = - 1
+      -- yoff = - 1
+      yoff = 3
       aoff = pi * 0.5
     elseif phase == 1 then
       xoff = 11
@@ -364,6 +365,13 @@ Sword.functions = {
 
   draw = function(self, td)
     local x, y = self.body:getPosition()
+
+    -- Move y a bit up to make it appear higher
+    -- It's really a bit lower because it would
+    -- push you back if you swing it next to wall
+    if self.side == "up" and self.phase == 0 then
+      y = y - 4
+    end
 
     if td then
       x = x + trans.xtransform + game.transitioning.xmod - game.transitioning.progress * trans.xadjust
