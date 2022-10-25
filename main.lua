@@ -314,6 +314,16 @@ session = {
     if type(lim) == "function" then lim = lim() end
     return lim
   end,
+  hasItem = function(itemid)
+    return type(session.save[itemid]) == "number"
+  end,
+  getEquippedTargetlessFocus = function()
+    if session.save.targetlessFocus and not session.hasItem(session.save.targetlessFocus) then
+      session.save.targetlessFocus = nil
+      return nil
+    end
+    return session.save.targetlessFocus
+  end,
   addItem = function(itemid)
     if session.save[itemid] then
       session.save[itemid] = session.save[itemid] + 1

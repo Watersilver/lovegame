@@ -254,33 +254,42 @@ MagicDust.functions = {
     o.addToWorld(appearEffect)
   end,
 
-  useFocus = function (focus)
-    if session.save.targetlessFocus == focus then
-      local result = session.removeItem(focus)
-      if result == 1 then
-        async.realTime{
-          function() snd.play(glsounds.runningLow) end,
-          0.2,
-          function() return session.save[focus] ~= 1 end
-        }
-
-      end
-      if result == 0 then
-        async.realTime{
-          function() snd.play(glsounds.runOut) end,
-          0.2,
-          function() return session.save[focus] end
-        }
-      end
-      -- Unequip focus if ran out
-      if result <= 0 then
-        session.save.targetlessFocus = nil
-      end
-      if result >= 0 then
-        return true
-      end
+  hasFocusEquipped = function (focus)
+    -- Check if I have the given focus equipped
+    if session.getEquippedTargetlessFocus() == focus and focus then
+      return true
     end
+
+    return false
   end,
+
+  -- this methods will deplete focuses
+  -- useFocus = function (focus)
+  --   if session.save.targetlessFocus == focus then
+  --     local result = session.removeItem(focus)
+  --     if result == 1 then
+  --       async.realTime{
+  --         function() snd.play(glsounds.runningLow) end,
+  --         0.2,
+  --         function() return session.save[focus] ~= 1 end
+  --       }
+  --     end
+  --     if result == 0 then
+  --       async.realTime{
+  --         function() snd.play(glsounds.runOut) end,
+  --         0.2,
+  --         function() return session.save[focus] end
+  --       }
+  --     end
+  --     -- Unequip focus if ran out
+  --     if result <= 0 then
+  --       session.save.targetlessFocus = nil
+  --     end
+  --     if result >= 0 then
+  --       return true
+  --     end
+  --   end
+  -- end,
 
   update = function (self, dt)
 
@@ -290,18 +299,18 @@ MagicDust.functions = {
       self.fixture = nil
     end
 
-    if not self.hasReacted then
+    if not self.hasReacted or self.reactAnyway then
       -- Make an untargeted reaction
       local reaction = u.chooseFromChanceTable{
         -- If you have nayrusWisdom, no explosions
         {value = self.explode, chance = self.poweredUp and 0 or 0.08},
         {value = self.chainReaction, chance = self.poweredUp and 0 or 0.02},
         -- If you have nayrusWisdom, you may get healing instead
-        {value = self.createHeart, chance = self.poweredUp and 0.04 or 0},
-        {value = self.createFairy, chance = self.poweredUp and 0.01 or 0},
+        {value = self.createHeart, chance = self.poweredUp and 0.08 or 0},
+        {value = self.createFairy, chance = self.poweredUp and 0.02 or 0},
         -- Inconsequential
-        {value = self.createFire, chance = 0.1},
-        {value = self.createWind, chance = 0.1},
+        {value = self.createFire, chance = self.noFire and 0 or 0.1},
+        {value = self.createWind, chance = self.noWind and 0 or 0.1},
         -- If you hit a wall, no magic block
         {value = self.createBlock, chance = not self.hitSolid and 0.4 or 0},
         -- If you hit a wall, no decoy
@@ -309,27 +318,13 @@ MagicDust.functions = {
         -- If none of the above happens, nothing happens
         {value = u.emptyFunc, chance = 1},
       }
-      -- if session.save.targetlessFocus == "focusDoll" then
-      --   local result = session.removeItem("focusDoll")
-      --   if result == 1 then
-      --     snd.play(glsounds.runningLow)
-      --   end
-      --   if result == 0 then
-      --     snd.play(glsounds.runOut)
-      --   end
-      --   -- Unequip focus if ran out
-      --   if result <= 0 then
-      --     session.save.targetlessFocus = nil
-      --   end
-      --   if result >= 0 then
-      --     reaction = self.createDecoy
-      --   end
-      -- end
-      if self.useFocus("focusDoll") then
+      -- Check if I have to force some reaction because of some focus
+      if self.hasFocusEquipped("focusDoll") and not self.hitSolid then
         reaction = self.createDecoy
       end
-      reaction(self)
+      if reaction then reaction(self) end
       self.hasReacted = true
+      self.reactAnyway = nil
     end
 
     -- determine shader

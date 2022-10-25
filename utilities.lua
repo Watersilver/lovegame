@@ -254,11 +254,11 @@ end
 -- By design. Might be a stupid design
 function u.chooseFromChanceTable(cTbl)
   local choiceNumber = random()
-  for key, valChanceTbl in pairs(cTbl) do
+  for _, valChanceTbl in pairs(cTbl) do
     if choiceNumber < valChanceTbl.chance then return valChanceTbl.value end
     choiceNumber = choiceNumber - valChanceTbl.chance
   end
-  return
+  return nil
 end
 
 function u.chooseFromWeightTable(wTbl)

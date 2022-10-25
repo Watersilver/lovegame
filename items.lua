@@ -195,13 +195,12 @@ items.focusDoll = {
         if pl1 then
           local mdust = require "GameObjects.Items.mdust"
           mdust.functions.chainReaction(pl1)
-          session.removeItem("focusDoll")
         end
       end
       return "error"
     end
   end,
-  limit = 10
+  limit = 1
 }
 
 -- Recovery
