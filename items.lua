@@ -156,12 +156,12 @@ items.focusDoll = {
       -- Decoy charged"
       -- session.removeItem("focusDoll")
       -- session.focus = "decoy"
-      if session.save.targetlessFocus == "focusDoll" then
+      if session.save.focus == "focusDoll" then
         session.usedItemComment = "Unequipped doll as\nspell focus"
-        session.save.targetlessFocus = nil
+        session.save.focus = nil
       else
         session.usedItemComment = "Equipped doll as\nspell focus"
-        session.save.targetlessFocus = "focusDoll"
+        session.save.focus = "focusDoll"
       end
     else
       session.save.dollFail = session.save.dollFail and session.save.dollFail + 1 or 0

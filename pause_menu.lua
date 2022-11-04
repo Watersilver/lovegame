@@ -500,7 +500,7 @@ local drawFuncs = {
         local pr, pg, pb, pa = love.graphics.getColor()
         love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
         if session.save.equippedRing == itemid or
-        session.save.targetlessFocus == itemid
+        session.save.focus == itemid
         then
           love.graphics.setColor(COLORCONST*0.7, COLORCONST*0.4, COLORCONST, COLORCONST*0.2)
           love.graphics.rectangle("fill", 0, t, scrollBarX, ih)

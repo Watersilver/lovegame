@@ -10,19 +10,13 @@ local drops = require "GameObjects.drops.drops"
 local u = require "utilities"
 local FM = require ("GameObjects.FloorDetectors.floorMarker")
 local FU = require ("GameObjects.FloorDetectors.floorUnmarker")
+local magic_dust_effects = require("GameObjects.Helpers.magic_dust_effects")
 
 local dc = require "GameObjects.Helpers.determine_colliders"
-
-
-
-local lp = love.physics
 
 local rt = {}
 
 local sprite_info = {im.spriteSettings.liftableRock}
-
-local explosion_sprite = im.spriteSettings.rockDestruction
-local explosion_sound = {"Effects/Oracle_Rock_Shatter"}
 
 local function throw_collision(self)
   expl.commonExplosion(self)
@@ -48,19 +42,23 @@ end
 
 rt.functions = {
 
-  onMdustTouch = function (self, other)
-    local reaction = u.chooseFromChanceTable{
+  [GCON.md.choose] = function ()
+    return u.chooseFromChanceTable{
       -- chance of plant
-      {value = other.createPlant, chance = 0.03},
+      {value = GCON.md.reaction.plant, chance = 0.03},
       -- chance of exploding
-      {value = other.createBomb, chance = 0.02},
+      {value = GCON.md.reaction.bomb, chance = 0.02},
       -- If none of the above happens, nothing happens
-      -- {value = nil, chance = 1},
+      {value = GCON.md.reaction.nothing, chance = 1},
     }
-    if not reaction then return end
-    if reaction == other.createFire then self.onMdustTouch = nil
-    else o.removeFromWorld(self) end
-    reaction(self)
+  end,
+
+  [GCON.md.reaction.plant] = function (self)
+    magic_dust_effects.createPlant(self)
+  end,
+
+  [GCON.md.reaction.bomb] = function (self)
+    magic_dust_effects.createBomb(self)
   end,
 
   load = function (self)
@@ -115,9 +113,6 @@ rt.functions = {
     if (session.save.dinsPower and other.immasword) or (other.immabombsplosion and other.poweredUp) then
       throw_collision(self)
       o.removeFromWorld(self)
-    elseif not self.petrified and other.immamdust and not other.hasReacted and self.onMdustTouch then
-      other.hasReacted = true
-      self.onMdustTouch(self, other)
     end
   end,
 

@@ -6,6 +6,7 @@ local dc = require "GameObjects.Helpers.determine_colliders"
 local sh = require "GameObjects.shadow"
 local zAxis = (require "movement").top_down.zAxis
 local u = require "utilities"
+local magic_dust_effects = require "GameObjects.Helpers.magic_dust_effects"
 
 local o = require "GameObjects.objects"
 
@@ -26,20 +27,10 @@ local pp = {
 local function onPlayerTouch()
 end
 
-local function onMdustTouch(instance, other)
-  local reaction = instance:reactWith(other)
-  if not reaction then return end
-  instance.onPlayerTouch = u.emptyFunc
-  instance.onMdustTouch = nil
-  o.removeFromWorld(instance)
-  reaction(instance)
-end
-
 function Drop.initialize(instance)
   instance.physical_properties = pp
   instance.sprite_info = spriteInfo
   instance.onPlayerTouch = onPlayerTouch
-  instance.onMdustTouch = onMdustTouch
   instance.image_speed = 0
   instance.seeThrough = true
   instance.layer = 21
@@ -56,107 +47,110 @@ function Drop.initialize(instance)
 end
 
 Drop.functions = {
-load = function (self)
-  self.x = self.xstart
-  self.y = self.ystart
-end,
+  load = function (self)
+    self.x = self.xstart
+    self.y = self.ystart
+  end,
 
-reactWith = function (self, other)
-  return u.chooseFromChanceTable{
-    -- chance of freezing
-    {value = other.createFrozenBlock, chance = 0.02},
-    -- chance of vanishing
-    {value = other.vanish, chance = 0.73},
-    -- If none of the above happens, nothing happens
-    {value = nil, chance = 1},
-  }
-end,
+  [GCON.md.choose] = function ()
+    return u.chooseFromChanceTable{
+      -- chance of freezing
+      {value = GCON.md.reaction.ice, chance = 0.02},
+      -- chance of vanishing
+      {value = GCON.md.reaction.disappear, chance = 0.73},
+      -- If none of the above happens, nothing happens
+      {value = GCON.md.reaction.nothing, chance = 1},
+    }
+  end,
 
-update = function (self, dt)
-  zAxis(self, dt)
-  if self.bounceOnce and self.zo == 0 then
-    self.zvel = 50
-    self.zo = -0.0001
-    self.bounceOnce = nil
-  end
-  if self.zo == 0 then o.change_layer(self, 19) end
+  [GCON.md.reaction.ice] = function (self)
+    magic_dust_effects.createFrozenBlock(self)
+  end,
 
-  sh.handleShadow(self)
-
-  if self.touchedBySword and self.zo == 0 and self.touchedBySword.creator and not self.touchedBySword.creator.triggers.posingForItem then
+  [GCON.md.reaction.disappear] = function (self)
+    magic_dust_effects.disappearEffect(self)
     o.removeFromWorld(self)
-    self.touchedBySword.creator.triggers.posingForItem = true
-    self:onPlayerTouch()
-    self.onPlayerTouch = u.emptyFunc
-    return
-  end
-end,
+  end,
 
-beginContact = function(self, a, b, coll, aob, bob)
-  local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+  update = function (self, dt)
+    zAxis(self, dt)
+    if self.bounceOnce and self.zo == 0 then
+      self.zvel = 50
+      self.zo = -0.0001
+      self.bounceOnce = nil
+    end
+    if self.zo == 0 then o.change_layer(self, 19) end
 
-  if other.immasword then
-    self.touchedBySword = other
-  end
+    sh.handleShadow(self)
 
-  if other.immamdust and not other.hasReacted and self.onMdustTouch then
-    other.hasReacted = true
-    self:onMdustTouch(other)
-  end
-end,
-
-endContact = function(self, a, b, coll, aob, bob)
-  local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-
-  if other.immasword then
-    self.touchedBySword = nil
-  end
-end,
-
-preSolve = function(self, a, b, coll, aob, bob)
-  local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-  coll:setEnabled(false)
-  if not otherF:isSensor() then
-    if other.player and not other.triggers.posingForItem and (self.zo ~= 0 or other.zo == 0) then
+    if self.touchedBySword and self.zo == 0 and self.touchedBySword.creator and not self.touchedBySword.creator.triggers.posingForItem then
       o.removeFromWorld(self)
-      other.triggers.posingForItem = true
+      self.touchedBySword.creator.triggers.posingForItem = true
       self:onPlayerTouch()
       self.onPlayerTouch = u.emptyFunc
-      self.onMdustTouch = nil
       return
     end
+  end,
+
+  beginContact = function(self, a, b, coll, aob, bob)
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+    if other.immasword then
+      self.touchedBySword = other
+    end
+  end,
+
+  endContact = function(self, a, b, coll, aob, bob)
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+
+    if other.immasword then
+      self.touchedBySword = nil
+    end
+  end,
+
+  preSolve = function(self, a, b, coll, aob, bob)
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+    coll:setEnabled(false)
+    if not otherF:isSensor() then
+      if other.player and not other.triggers.posingForItem and (self.zo ~= 0 or other.zo == 0) then
+        o.removeFromWorld(self)
+        other.triggers.posingForItem = true
+        self:onPlayerTouch()
+        self.onPlayerTouch = u.emptyFunc
+        return
+      end
+    end
+  end,
+
+  draw = function (self)
+    local sprite = self.sprite
+    local frame = sprite[self.image_index]
+    local zo = self.zo or 0
+    local xtotal, ytotal = self.xstart, self.ystart + zo
+    love.graphics.draw(
+    sprite.img, frame, xtotal, ytotal, 0,
+    sprite.res_x_scale, sprite.res_y_scale,
+    sprite.cx, sprite.cy)
+    -- if self.body then
+    --   love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+    -- end
+  end,
+
+  trans_draw = function (self)
+    local sprite = self.sprite
+    local frame = sprite[self.image_index]
+
+    local xtotal, ytotal = trans.still_objects_coords(self)
+
+    love.graphics.draw(
+    sprite.img, frame,
+    xtotal, ytotal, 0,
+    sprite.res_x_scale, sprite.res_y_scale,
+    sprite.cx, sprite.cy)
+    -- if self.body then
+    --   -- draw
+    -- end
   end
-end,
-
-draw = function (self)
-  local sprite = self.sprite
-  local frame = sprite[self.image_index]
-  local zo = self.zo or 0
-  local xtotal, ytotal = self.xstart, self.ystart + zo
-  love.graphics.draw(
-  sprite.img, frame, xtotal, ytotal, 0,
-  sprite.res_x_scale, sprite.res_y_scale,
-  sprite.cx, sprite.cy)
-  -- if self.body then
-  --   love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-  -- end
-end,
-
-trans_draw = function (self)
-  local sprite = self.sprite
-  local frame = sprite[self.image_index]
-
-  local xtotal, ytotal = trans.still_objects_coords(self)
-
-  love.graphics.draw(
-  sprite.img, frame,
-  xtotal, ytotal, 0,
-  sprite.res_x_scale, sprite.res_y_scale,
-  sprite.cx, sprite.cy)
-  -- if self.body then
-  --   -- draw
-  -- end
-end
 }
 
 function Drop:new(init)

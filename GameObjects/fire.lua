@@ -32,13 +32,8 @@ Fire.functions = {
   end,
 
   destroy = function (self)
-    if self.fuel then
-      if self.fuel.grass then
-        self.fuel.noExplosion = true
-        self.fuel:getDestroyed(nil, self.fuel.fixture)
-      elseif self.fuel.onFireEnd then
-        self.fuel:onFireEnd()
-      end
+    if self.fuel and self.fuel.onFireEnd then
+      self.fuel:onFireEnd()
     end
   end,
 

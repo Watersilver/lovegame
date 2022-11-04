@@ -2,21 +2,15 @@ local p = require "GameObjects.prototype"
 local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local trans = require "transitions"
-local game = require "game"
 local u = require "utilities"
 local im = require "image"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
-local gsh = require "gamera_shake"
+local magic_dust_effects = require "GameObjects.Helpers.magic_dust_effects"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
 local MagicDust = {}
-
-local floor = math.floor
-local clamp = u.clamp
-local pi = math.pi
-
 
 function MagicDust.initialize(instance)
 
@@ -53,7 +47,7 @@ MagicDust.functions = {
     snd.play(glsounds.magicDust)
   end,
 
-  explode = function (self)
+  [GCON.md.reaction.boom] = function (self)
     local boom = (require "GameObjects.Items.bombsplosion"):new{
       x = self.x, y = self.y,
       layer = self.layer,
@@ -62,7 +56,7 @@ MagicDust.functions = {
     o.addToWorld(boom)
   end,
 
-  chainReaction = function (self)
+  [GCON.md.reaction.kaboom] = function (self)
     local chain = (require "GameObjects.Items.chainReaction"):new{
       x = self.x, y = self.y,
       layer = self.layer
@@ -70,7 +64,7 @@ MagicDust.functions = {
     o.addToWorld(chain)
   end,
 
-  createBlock = function (self)
+  [GCON.md.reaction.block] = function (self)
     local box = (require "GameObjects.Items.magicBox"):new{
       xstart = self.x,
       ystart = self.y,
@@ -88,7 +82,7 @@ MagicDust.functions = {
     o.addToWorld(box)
   end,
 
-  createDecoy = function (self)
+  [GCON.md.reaction.decoy] = function (self)
     local decoy = (require "GameObjects.Items.decoy"):new{
       x = self.x, y = self.y,
       layer = self.layer,
@@ -97,175 +91,20 @@ MagicDust.functions = {
     o.addToWorld(decoy)
   end,
 
-  createFire = function (self)
-    local fire = (require "GameObjects.fire"):new{
-      x = self.x, y = self.y,
-      layer = self.creator and self.creator.layer - 1 or self.layer + 1,
-      fuel = self
-    }
-    o.addToWorld(fire)
+  [GCON.md.reaction.fire] = function (self)
+    magic_dust_effects.burn(self)
   end,
 
-  createWind = function (self)
-    local wind = (require "GameObjects.whirlwind"):new{
-      x = self.x, y = self.y,
-      layer = self.creator and self.creator.layer - 1 or self.layer + 1,
-    }
-    o.addToWorld(wind)
+  [GCON.md.reaction.wind] = function (self)
+    magic_dust_effects.blow(self)
   end,
 
-  conjureHeart = function (appearEffect)
-    local heart = (require "GameObjects.drops.heart"):new{
-      xstart = appearEffect.x, ystart = appearEffect.y,
-    }
-    o.addToWorld(heart)
-  end,
-
-  conjureFairy = function (appearEffect)
-    local fairy = (require "GameObjects.drops.fairy"):new{
-      xstart = appearEffect.x, ystart = appearEffect.y,
-      inertiaDuration = 0.5
-    }
-    o.addToWorld(fairy)
-  end,
-
-  create = function (self, something)
-    local appearEffect = (require "GameObjects.explode"):new{
-      x = self.x, y = self.y,
-      layer = self.layer,
-      image_speed = 0.3,
-      explosion_sprite = im.spriteSettings.playerAppearEffect,
-      sound = glsounds.appearVanish,
-      onExplEnd = something
-    }
-    o.addToWorld(appearEffect)
-  end,
-
-  createHeart = function (target) MagicDust.functions.create(target, MagicDust.functions.conjureHeart) end,
-  createFairy = function (target) MagicDust.functions.create(target, MagicDust.functions.conjureFairy) end,
-
-  createFrozenBlock = function (freezee)
-    snd.play(glsounds.ice)
-    local layer
-    if pl1 and pl1.exists then
-      layer = math.min(freezee.layer + 1, pl1.layer - 1)
-    else
-      layer = freezee.layer + 1
-    end
-    local frBlock = (require "GameObjects.frozenBox"):new{
-      xstart = freezee.x,
-      ystart = freezee.y,
-      x = freezee.x,
-      y = freezee.y,
-      layer = layer,
-      sprite_info = freezee.sprite_info,
-      image_index = math.floor(freezee.image_index),
-    }
-    if freezee.fixture then
-      frBlock.physical_properties.shape = freezee.fixture:getShape()
-    end
-    o.addToWorld(frBlock)
-  end,
-
-  createBomb = function (bombee)
-    local layer
-    if pl1 and pl1.exists then
-      layer = math.min(bombee.layer + 1, pl1.layer - 1)
-    else
-      layer = bombee.layer + 1
-    end
-    local bomb = (require "GameObjects.Items.thrown"):new{
-      xstart = bombee.x,
-      ystart = bombee.y,
-      x = bombee.x,
-      y = bombee.y,
-      layer = layer,
-      iAmBomb = true,
-      dustBomb = true,
-      bounces = 1,
-      timer = 2,
-      sprite_info = bombee.sprite_info,
-      image_index = math.floor(bombee.image_index),
-      zo = 0,
-      vx = 0,
-      vy = 0,
-    }
-    o.addToWorld(bomb)
-  end,
-
-  createStone = function (stonee)
-    snd.play(glsounds.stone)
-    local layer
-    if pl1 and pl1.exists then
-      layer = math.min(stonee.layer + 1, pl1.layer - 1)
-    else
-      layer = stonee.layer + 1
-    end
-    local stBlock = (require "GameObjects.RockTest"):new{
-      xstart = stonee.x,
-      ystart = stonee.y,
-      x = stonee.x,
-      y = stonee.y,
-      layer = layer,
-      sprite_info = stonee.sprite_info,
-      image_index = math.floor(stonee.image_index),
-      lift_info = stonee.petrifiedLI or "petrified",
-      petrified = true
-    }
-    if stonee.fixture then
-      stBlock.physical_properties.shape = stonee.fixture:getShape()
-    end
-    o.addToWorld(stBlock)
-  end,
-
-  createPlant = function (plantee)
-    snd.play(glsounds.plant)
-    local layer
-    if pl1 and pl1.exists then
-      layer = math.min(plantee.layer + 1, pl1.layer - 1)
-    else
-      layer = plantee.layer + 1
-    end
-    local plBlock = (require "GameObjects.softLiftable"):new{
-      xstart = plantee.x,
-      ystart = plantee.y,
-      x = plantee.x,
-      y = plantee.y,
-      layer = layer,
-      sprite_info = plantee.sprite_info,
-      image_index = math.floor(plantee.image_index),
-      lift_info = plantee.plantifiedLI or "plantified",
-      plantified = true
-    }
-    if plantee.fixture then
-      plBlock.physical_properties.shape = plantee.fixture:getShape()
-    end
-    o.addToWorld(plBlock)
-  end,
-
-  vanish = function (self)
-    local appearEffect = (require "GameObjects.explode"):new{
-      x = self.x, y = self.y,
-      layer = self.layer,
-      image_speed = 0.2,
-      explosion_sprite = im.spriteSettings.playerDissapearMbox,
-      sound = glsounds.appearVanish,
-    }
-    o.addToWorld(appearEffect)
-  end,
-
-  hasFocusEquipped = function (focus)
-    -- Check if I have the given focus equipped
-    if session.getEquippedTargetlessFocus() == focus and focus then
-      return true
-    end
-
-    return false
-  end,
+  [GCON.md.reaction.heart] = function (self) magic_dust_effects.createHeart(self) end,
+  [GCON.md.reaction.fairy] = function (self) magic_dust_effects.createFairy(self) end,
 
   -- this methods will deplete focuses
   -- useFocus = function (focus)
-  --   if session.save.targetlessFocus == focus then
+  --   if session.save.focus == focus then
   --     local result = session.removeItem(focus)
   --     if result == 1 then
   --       async.realTime{
@@ -283,7 +122,7 @@ MagicDust.functions = {
   --     end
   --     -- Unequip focus if ran out
   --     if result <= 0 then
-  --       session.save.targetlessFocus = nil
+  --       session.save.focus = nil
   --     end
   --     if result >= 0 then
   --       return true
@@ -291,40 +130,82 @@ MagicDust.functions = {
   --   end
   -- end,
 
+  noReagentReact = function (self)
+    local r = GCON.md.reaction
+    return u.chooseFromChanceTable{
+      -- If you have nayrusWisdom, no explosions
+      {value = r.boom, chance = self.poweredUp and 0 or 0.08},
+      {value = r.kaboom, chance = self.poweredUp and 0 or 0.02},
+      -- If you have nayrusWisdom, you may get healing instead
+      {value = r.heart, chance = self.poweredUp and 0.08 or 0},
+      {value = r.fairy, chance = self.poweredUp and 0.02 or 0},
+      -- Inconsequential
+      {value = r.fire, chance = 0.1},
+      {value = r.wind, chance = 0.1},
+      -- If you hit a wall, no magic block
+      {value = r.block, chance = not self.hitSolid and 0.4 or 0},
+      -- If you hit a wall, no decoy
+      {value = r.decoy, chance = not self.hitSolid and 0.2 or 0},
+      -- If none of the above happens, nothing happens
+      {value = r.nothing, chance = 1},
+    }
+  end,
+
   update = function (self, dt)
 
+    -- Delete and clean fixture data because it can only react during its first frame.
     if self.fixture then
       self.fixture:setUserData(nil)
       self.fixture:destroy()
       self.fixture = nil
     end
 
-    if not self.hasReacted or self.reactAnyway then
-      -- Make an untargeted reaction
-      local reaction = u.chooseFromChanceTable{
-        -- If you have nayrusWisdom, no explosions
-        {value = self.explode, chance = self.poweredUp and 0 or 0.08},
-        {value = self.chainReaction, chance = self.poweredUp and 0 or 0.02},
-        -- If you have nayrusWisdom, you may get healing instead
-        {value = self.createHeart, chance = self.poweredUp and 0.08 or 0},
-        {value = self.createFairy, chance = self.poweredUp and 0.02 or 0},
-        -- Inconsequential
-        {value = self.createFire, chance = self.noFire and 0 or 0.1},
-        {value = self.createWind, chance = self.noWind and 0 or 0.1},
-        -- If you hit a wall, no magic block
-        {value = self.createBlock, chance = not self.hitSolid and 0.4 or 0},
-        -- If you hit a wall, no decoy
-        {value = self.createDecoy, chance = not self.hitSolid and 0.2 or 0},
-        -- If none of the above happens, nothing happens
-        {value = u.emptyFunc, chance = 1},
-      }
-      -- Check if I have to force some reaction because of some focus
-      if self.hasFocusEquipped("focusDoll") and not self.hitSolid then
-        reaction = self.createDecoy
+    if not self.hasReacted then
+      local r = GCON.md.reaction
+      local reactionID
+      if self.reagent then
+        -- Check if I will react with reagent and run its choice function if yes.
+        reactionID = self.reagent[GCON.md.choose](self.reagent, self)
+      else
+        -- Or run my choice function.
+        reactionID = self:noReagentReact()
       end
-      if reaction then reaction(self) end
+
+      -- Check if I have to force some reaction because of some focus
+      if session.hasFocusEquipped("focusDoll") then
+        reactionID = r.decoy
+      end
+
+      -- Check if reactionID must be overriden because of reagent special focus behaviour
+      if session.hasFocusEquipped() and self.reagent and self.reagent.exists and self.reagent[GCON.md.focus] then
+        local id = self.reagent[GCON.md.focus]()
+        if id then reactionID = id end
+      end
+
+      -- Check if chosen reaction gets canceled for some reason.
+      if self.hitSolid then
+        local i = reactionID
+        if i == r.decoy or i == r.block then
+          reactionID = r.nothing
+        end
+      end
+
+      -- Run Reaction.
+      if self.reagent and self.reagent.exists then
+        -- Run reaction on reagent
+        if self.reagent[reactionID] then
+          self.reagent[reactionID](self.reagent, self)
+
+        -- If reaction doesn't exist on reagent and cascade is enabled then react without reagent
+        elseif self.reagent[GCON.md.cascade] and self.reagent[GCON.md.cascade](self.reagent, reactionID) and self[reactionID] then
+          self[reactionID](self)
+        end
+      elseif self[reactionID] then
+        -- React without reagent
+        self[reactionID](self)
+      end
+
       self.hasReacted = true
-      self.reactAnyway = nil
     end
 
     -- determine shader
@@ -369,7 +250,7 @@ MagicDust.functions = {
     self.x, self.y = x, y
 
     local sprite = self.sprite
-    local frame = sprite[floor(self.image_index)]
+    local frame = sprite[math.floor(self.image_index)]
     local worldShader = love.graphics.getShader()
     local ymod
     if self.side == "down" then
@@ -389,7 +270,7 @@ MagicDust.functions = {
     love.graphics.setShader(worldShader)
 
     -- Debug
-    if self.fixture then love.graphics.circle("line", x, y, self.fixture:getShape():getRadius()) end
+    -- if self.fixture then love.graphics.circle("line", x, y, self.fixture:getShape():getRadius()) end
   end,
 
   trans_draw = function(self)
@@ -401,8 +282,12 @@ MagicDust.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-    if not otherF:isSensor() then
+    if not otherF:isSensor() and not other.floor then
       self.hitSolid = true
+    end
+
+    if other[GCON.md.choose] and not self.reagent then
+      self.reagent = other
     end
   end,
 }

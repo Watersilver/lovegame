@@ -137,9 +137,6 @@ Enemy.functions = {
     ebh.propelledByHit(self, other, myF, otherF)
   end,
 
-  hitByMdust = function (self, other, myF, otherF)
-  end,
-
   touchedBySword = function (self, other, myF, otherF)
   end,
 
@@ -153,9 +150,6 @@ Enemy.functions = {
   end,
 
   touchedByBullrush = function (self, other, myF, otherF)
-  end,
-
-  touchedByMdust = function (self, other, myF, otherF)
   end,
 
   hitPlayer = function (self, other, myF, otherF)
@@ -404,14 +398,9 @@ Enemy.functions = {
     -- Check if hit by magic dust
     if other.immamdust == true and not other.hasReacted then
       self.attemtedToBeAttacked = "mdust"
-      self:touchedByMdust(other, myF, otherF)
-      if not self.invulnerable and not self.undamageable then
-        self.lastHit = "mdust"
-        self.lastHitEmpowered = other.poweredUp
-        self.attacked = true
-        other.hasReacted = true
-        self:hitByMdust(other, myF, otherF)
-      end
+      self.lastHit = "mdust"
+      self.lastHitEmpowered = other.poweredUp
+      self.attacked = true
     end
 
     self:enemyBeginContact(other, myF, otherF, coll)

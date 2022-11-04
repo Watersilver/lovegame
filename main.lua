@@ -18,12 +18,9 @@ if not success then love.errhand("Failed to create save directory") end
 
 -- game constants
 GCON = {
-  -- pieces of heart in world:
-  -- 4 random
-  maxRandomPOHs = 4,
-  -- maxPOHs = 4,
-  maxPOHs = 84,
-  -- Day and night music breaking points
+  maxRandomPOHs = 4, -- Random drop pieces of heart
+  maxPOHs = 84, -- Number of existing pieces of heart in world
+  -- Day and night music time(in 24 hour clock) breaking points
   music = {
     daySilence = 6,
     dayMusic = 7.5,
@@ -54,7 +51,32 @@ GCON = {
     mage = "Lethe",
     warrior = "Aite", -- Esmen
     oracle = "Farore" -- clementia
-  }
+  },
+
+  -- Contains magic dust method/type/other ids and tables thereof (uses empty tables as ids)
+  md = {
+    -- Magic dust reaction method ids
+    reaction = {
+      fire = {}, -- A flame that burns what it touches
+      wind = {}, -- A small tornado that blows things away
+      ice = {}, -- Freezes stuff solid
+      stone = {}, -- Turns stuff to stone
+      plant = {}, -- Turns stuff to plants
+      bomb = {}, -- Turns stuff to bombs
+      heart = {}, -- Conjures heart
+      fairy = {}, -- Conjures fairy
+      block = {}, -- Conjures block
+      boom = {}, -- Blows up
+      kaboom = {}, -- Chain reaction of expolosions
+      decoy = {}, -- Creates a decoy, making user invisible
+      disappear = {}, -- Makes target disappear
+      nothing = {}, -- Nothing happens
+    },
+
+    choose = {}, -- Choice function. Returns reaction id. All reactives must have one.
+    focus = {}, -- Special reaction to focus for when default focus id does not suffice
+    cascade = {}, -- Determine if chosen reaction will cascade to targetless if target doesn't react with it.
+  },
 }
 
 -- global variables
@@ -317,12 +339,21 @@ session = {
   hasItem = function(itemid)
     return type(session.save[itemid]) == "number"
   end,
-  getEquippedTargetlessFocus = function()
-    if session.save.targetlessFocus and not session.hasItem(session.save.targetlessFocus) then
-      session.save.targetlessFocus = nil
-      return nil
+
+  -- If no focus is specified return true if any focus is equipped,
+  -- else return true if the particular focus given is equipped.
+  ---@param focus? string
+  hasFocusEquipped = function(focus)
+    if session.save.focus and not session.hasItem(session.save.focus) then
+      session.save.focus = nil
+      return false
     end
-    return session.save.targetlessFocus
+
+    if type(focus) ~= "string" then
+      return session.save.focus ~= nil
+    end
+
+    return session.save.focus == focus
   end,
   addItem = function(itemid)
     if session.save[itemid] then

@@ -6,6 +6,7 @@ local ebh = require "enemy_behaviours"
 local td = require "movement"; td = td.top_down
 local u = require "utilities"
 local o = require "GameObjects.objects"
+local magic_dust_effects = require "GameObjects.Helpers.magic_dust_effects"
 
 local Antifairy = {}
 
@@ -29,18 +30,25 @@ Antifairy.functions = {
     self.body:setLinearVelocity(u.polarToCartesian(self.maxspeed, self.direction))
   end,
 
-  hitByMdust = function (self, other, myF, otherF)
+  [GCON.md.choose] = function (self, other, myF, otherF)
     local pUp = other.poweredUp and 1 or 0
-    local reaction = u.chooseFromChanceTable{
+    return u.chooseFromChanceTable{
       -- Chance of vanishing
-      {value = other.vanish, chance = 0.1 + session.save.magicLvl * 0.05 - pUp * 0.25},
-      -- Chance of truning into fairy
-      {value = other.createFairy, chance = 0.1 + session.save.magicLvl * 0.05 + pUp},
+      {value = GCON.md.reaction.disappear, chance = 0.1 + session.save.magicLvl * 0.05 - pUp * 0.25},
+      -- Chance of turning into fairy
+      {value = GCON.md.reaction.fairy, chance = 0.1 + session.save.magicLvl * 0.05 + pUp},
       -- If none of the above happens, nothing happens
-      {value = nil, chance = 1},
+      {value = GCON.md.reaction.nothing, chance = 1},
     }
-    if not reaction then return end
-    reaction(self)
+  end,
+
+  [GCON.md.reaction.disappear] = function (self)
+    magic_dust_effects.disappearEffect(self)
+    o.removeFromWorld(self)
+  end,
+
+  [GCON.md.reaction.fairy] = function (self)
+    magic_dust_effects.createFairy(self)
     o.removeFromWorld(self)
   end,
 

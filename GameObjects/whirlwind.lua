@@ -26,14 +26,9 @@ Fire.functions = {
   end,
 
   destroy = function (self)
-    -- if self.eye then
-    --   if self.eye.grass then
-    --     self.eye.noExplosion = true
-    --     self.eye:getDestroyed(nil, self.fuel.fixture)
-    --   elseif self.eye.onFireEnd then
-    --     self.eye:onFireEnd()
-    --   end
-    -- end
+    if self.timer == 0 and self.eye and self.eye.exists and self.eye.onWhirlwindEnd then
+      self.eye:onWhirlwindEnd(self)
+    end
   end,
 
   update = function (self, dt)
@@ -60,6 +55,10 @@ Fire.functions = {
     -- Determine x scale
     self.x_scale = u.sign(math.sin(self.timer * 30))
     if self.x_scale == 0 then self.x_scale = 1 end
+
+    if self.timer == 0 and self.eye and self.eye.exists and self.eye.onWhirlwindStart then
+      self.eye:onWhirlwindStart(self)
+    end
 
     -- update timer
     self.timer = self.timer + dt

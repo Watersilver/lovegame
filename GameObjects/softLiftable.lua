@@ -13,6 +13,7 @@ local drops = require "GameObjects.drops.drops"
 local shdrs = require "Shaders.shaders"
 local FM = require ("GameObjects.FloorDetectors.floorMarker")
 local FU = require ("GameObjects.FloorDetectors.floorUnmarker")
+local magic_dust_effects = require("GameObjects.Helpers.magic_dust_effects")
 
 local function throw_collision(self)
   local explOb = expl:new{
@@ -60,116 +61,129 @@ function Brick.initialize(instance)
 end
 
 Brick.functions = {
+  [GCON.md.choose] = function ()
+    return u.chooseFromChanceTable{
+      -- chance of stoning
+      {value = GCON.md.reaction.stone, chance = 0.1},
+      -- chance of exploding
+      {value = GCON.md.reaction.bomb, chance = 0.02},
+      -- chance of freezing
+      {value = GCON.md.reaction.ice, chance = 0.25},
+      -- chance of burning
+      {value = GCON.md.reaction.fire, chance = 0.25},
+      -- chance of getting blown
+      {value = GCON.md.reaction.wind, chance = 0.25},
+      -- If none of the above happens, nothing happens
+      {value = GCON.md.reaction.nothing, chance = 1},
+    }
+  end,
 
-onMdustTouch = function (self, other)
-  local reaction = u.chooseFromChanceTable{
-    -- chance of stoning
-    {value = other.createStone, chance = 0.1},
-    -- chance of exploding
-    {value = other.createBomb, chance = 0.02},
-    -- chance of freezing
-    {value = other.createFrozenBlock, chance = 0.25},
-    -- chance of burning
-    {value = other.createFire, chance = 0.25},
-    -- chance of getting blown
-    {value = other.createWind, chance = 0.25},
-    -- If none of the above happens, nothing happens
-    -- {value = nil, chance = 1},
-  }
-  if not reaction then return end
-  if reaction == other.createFire then
-    self.onMdustTouch = nil
-  elseif reaction == other.createWind then
+  [GCON.md.reaction.stone] = function (self)
+    magic_dust_effects.createStone(self)
+  end,
+
+  [GCON.md.reaction.bomb] = function (self)
+    magic_dust_effects.createBomb(self)
+  end,
+
+  [GCON.md.reaction.ice] = function (self)
+    magic_dust_effects.createFrozenBlock(self)
+  end,
+
+  [GCON.md.reaction.fire] = function (self)
+    magic_dust_effects.burn(self)
+  end,
+
+  [GCON.md.reaction.wind] = function (self)
+    magic_dust_effects.blow(self)
+  end,
+
+  myDrops = function (self)
+    drops.cheap(self.x, self.y)
+  end,
+
+  onFireEnd = function (self)
+    if self.myDrops then
+      self:myDrops()
+    end
+    o.removeFromWorld(self)
+  end,
+
+  onWhirlwindStart = function (self)
     self:throw_collision()
     o.removeFromWorld(self)
-  else o.removeFromWorld(self) end
-  reaction(self)
-end,
+  end,
 
-myDrops = function (self)
-  drops.cheap(self.x, self.y)
-end,
+  load = function(self)
+    self.persistentData = {
+      drops = self.drops
+    }
 
-onFireEnd = function (self)
-  if self.myDrops then
-    self:myDrops()
+    self.image_speed = 0
+    if self.plantified then
+      self.myShader = shdrs.plantShader
+    end
+    local x, y = self.body:getPosition()
+    local myFm = FM:new{x = x, y = y}
+    o.addToWorld(myFm)
+  end,
+
+  destroy = function (self)
+    local myFu = FU:new{x = self.x, y = self.y}
+    o.addToWorld(myFu)
+  end,
+
+  draw = function (self)
+    local x, y = self.body and self.body:getPosition() or self.xstart, self.ystart
+    local sprite = self.sprite
+    self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
+    local frame = sprite[self.image_index]
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
+    love.graphics.draw(
+    sprite.img, frame, x, y, 0,
+    sprite.res_x_scale, sprite.res_y_scale,
+    sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
+    -- if self.body then
+    --   for i, fixture in ipairs(self.fixtures) do
+    --     local shape = fixture:getShape()
+    --     love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
+    --   end
+    -- end
+  end,
+
+  trans_draw = function (self)
+    local xtotal, ytotal = trans.still_objects_coords(self)
+
+    local sprite = self.sprite
+    self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
+    local frame = sprite[self.image_index]
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
+    love.graphics.draw(
+    sprite.img, frame, xtotal, ytotal, 0,
+    sprite.res_x_scale, sprite.res_y_scale,
+    sprite.cx, sprite.cy)
+    love.graphics.setShader(worldShader)
+    -- if self.body then
+    --   for i, fixture in ipairs(self.fixtures) do
+    --     local shape = fixture:getShape()
+    --     love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
+    --   end
+    -- end
+  end,
+
+  beginContact = function(self, a, b, coll, aob, bob)
+
+    -- Find which fixture belongs to whom
+    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+    if other.immasword or other.immabombsplosion then
+      self:throw_collision()
+      o.removeFromWorld(self)
+      self.beginContact = nil
+    end
   end
-  o.removeFromWorld(self)
-end,
-
-load = function(self)
-  self.persistentData = {
-    drops = self.drops
-  }
-
-  self.image_speed = 0
-  if self.plantified then
-    self.myShader = shdrs.plantShader
-  end
-  local x, y = self.body:getPosition()
-  local myFm = FM:new{x = x, y = y}
-  o.addToWorld(myFm)
-end,
-
-destroy = function (self)
-  local myFu = FU:new{x = self.x, y = self.y}
-  o.addToWorld(myFu)
-end,
-
-draw = function (self)
-  local x, y = self.body and self.body:getPosition() or self.xstart, self.ystart
-  local sprite = self.sprite
-  self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
-  local frame = sprite[self.image_index]
-  local worldShader = love.graphics.getShader()
-  love.graphics.setShader(self.myShader)
-  love.graphics.draw(
-  sprite.img, frame, x, y, 0,
-  sprite.res_x_scale, sprite.res_y_scale,
-  sprite.cx, sprite.cy)
-  love.graphics.setShader(worldShader)
-  -- if self.body then
-  --   for i, fixture in ipairs(self.fixtures) do
-  --     local shape = fixture:getShape()
-  --     love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
-  --   end
-  -- end
-end,
-
-trans_draw = function (self)
-  local xtotal, ytotal = trans.still_objects_coords(self)
-
-  local sprite = self.sprite
-  self.image_index = math.floor((self.image_index + self.image_speed) % sprite.frames)
-  local frame = sprite[self.image_index]
-  local worldShader = love.graphics.getShader()
-  love.graphics.setShader(self.myShader)
-  love.graphics.draw(
-  sprite.img, frame, xtotal, ytotal, 0,
-  sprite.res_x_scale, sprite.res_y_scale,
-  sprite.cx, sprite.cy)
-  love.graphics.setShader(worldShader)
-  -- if self.body then
-  --   for i, fixture in ipairs(self.fixtures) do
-  --     local shape = fixture:getShape()
-  --     love.graphics.line(self.body:getWorldPoints(shape:getPoints()))
-  --   end
-  -- end
-end,
-
-beginContact = function(self, a, b, coll, aob, bob)
-
-  -- Find which fixture belongs to whom
-  local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
-  if other.immasword or other.immabombsplosion then
-    self:throw_collision()
-    o.removeFromWorld(self)
-    self.beginContact = nil
-  elseif not self.plantified and other.immamdust and not other.hasReacted and self.onMdustTouch then
-    other.hasReacted = true
-    self.onMdustTouch(self, other)
-  end
-end
 }
 
 function Brick:new(init)
