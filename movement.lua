@@ -145,7 +145,12 @@ local universalWalk = function(object, dt, inputForceFunc)
 
   local inversemaxspeed = 1/(maxspeed * normalisedSpeed) -- could be inf, don't worry
 
-  local grounded = object.sideScroll and object:grounded() or (object.zo == 0 or object.actAszo0)
+  local grounded
+  if object.sideScroll then
+    grounded = object:grounded()
+  else
+    grounded = object.zo == 0 or object.actAszo0
+  end
 
   -- if on ground check how floor affects movement
   if grounded then
@@ -165,7 +170,7 @@ local universalWalk = function(object, dt, inputForceFunc)
     brakes = 0
     if object.player then
       if object.double_jumping then
-        mobility = 0
+        mobility = 1 -- Not 0 to avoid possible softlocks
       elseif not session.save.nayrusWisdom then
         mobility = mobility / 3
       end
