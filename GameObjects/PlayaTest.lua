@@ -2755,19 +2755,29 @@ Playa.functions = {
 
   end,
 
-  draw = function(self)
+  customDraw = function(self, transitioning)
+    if self.animation_state.state == "dontdraw" then return end
     if self.invisible then return end
 
     local x, y = self.x, self.y
+
     local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
+
+    if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
+
+    if transitioning then
+      -- x, y modifications because of transition
+      xtotal = xtotal + game.transitioning.xmod + trans.xtransform - game.transitioning.progress * trans.xadjust
+      ytotal = ytotal + game.transitioning.ymod + trans.ytransform - game.transitioning.progress * trans.yadjust
+    else
+      -- Only update spritejoint outside transitions otherwise junkiness ensues
+      self.spritebody:setPosition(xtotal, ytotal)
+      self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    end
 
     -- After done with coords draw light source (gets drawn later, this just sets it up)
     -- check during pause screen if session.save.playerGlowAvailable to enable and disable
     self:drawMyLights(xtotal, ytotal)
-
-    if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
-    self.spritebody:setPosition(xtotal, ytotal)
-    self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
 
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames
@@ -2826,76 +2836,12 @@ Playa.functions = {
     -- love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
   end,
 
+  draw = function(self)
+    self:customDraw()
+  end,
+
   trans_draw = function(self)
-    if self.animation_state.state == "dontdraw" then return end
-    if self.invisible then return end
-
-    local x, y = self.x, self.y
-
-    -- x, y modifications because of transition
-    x = x + game.transitioning.xmod + trans.xtransform - game.transitioning.progress * trans.xadjust
-    y = y + game.transitioning.ymod + trans.ytransform - game.transitioning.progress * trans.yadjust
-
-    local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
-
-    -- After done with coords draw light source (gets drawn later, this just sets it up)
-    -- check during pause screen if session.save.playerGlowAvailable to enable and disable
-    self:drawMyLights(xtotal, ytotal)
-
-    -- destroy joint to avoid funkyness during transition
-    if self.spritejoint then
-      self.spritejoint:destroy();
-      self.spritejoint = nil
-    end
-
-    local sprite = self.sprite
-    -- Check again in case animation changed to something with fewer frames
-    while self.image_index >= sprite.frames do
-      self.image_index = self.image_index - sprite.frames
-    end
-    local frame = sprite[floor(self.image_index)]
-    local worldShader = love.graphics.getShader()
-    love.graphics.setShader(self.playerShader)
-    love.graphics.draw(
-    sprite.img, frame, xtotal, ytotal, self.angle,
-    sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
-    sprite.cx, sprite.cy)
-    love.graphics.setShader(worldShader)
-
-    -- Draw Grass
-    if self.ongrass then
-      local grassSprite = self.ongrass
-      local imgIndexFrameMod = (0.5*self.image_index)%1
-      local grassFrame = grassSprite[floor(grassSprite.frames*imgIndexFrameMod)]
-      love.graphics.draw(
-      grassSprite.img, grassFrame, xtotal, ytotal, self.angle,
-      grassSprite.res_x_scale*self.x_scale, grassSprite.res_y_scale*self.y_scale,
-      grassSprite.cx, grassSprite.cy)
-    end
-
-    -- Draw Water Ripples
-    if self.inShallowWater then
-      local shwSprite = self.inShallowWater
-      local imgIndex = im.globimage_index1234
-      local shwFrame = shwSprite[floor(imgIndex)]
-      love.graphics.draw(
-      shwSprite.img, shwFrame, xtotal, ytotal + 8, self.angle,
-      shwSprite.res_x_scale*self.x_scale, shwSprite.res_y_scale*self.y_scale,
-      shwSprite.cx, shwSprite.cy)
-    end
-
-    -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-    -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
-    --
-    -- love.graphics.setColor(COLORCONST, self.db.downcol, self.db.downcol, COLORCONST)
-    -- love.graphics.polygon("line", self.body:getWorldPoints(self.downfixture:getShape():getPoints()))
-    -- love.graphics.setColor(COLORCONST, self.db.upcol, self.db.upcol, COLORCONST)
-    -- love.graphics.polygon("line", self.body:getWorldPoints(self.upfixture:getShape():getPoints()))
-    -- love.graphics.setColor(COLORCONST, self.db.leftcol, self.db.leftcol, COLORCONST)
-    -- love.graphics.polygon("line", self.body:getWorldPoints(self.leftfixture:getShape():getPoints()))
-    -- love.graphics.setColor(COLORCONST, self.db.rightcol, self.db.rightcol, COLORCONST)
-    -- love.graphics.polygon("line", self.body:getWorldPoints(self.rightfixture:getShape():getPoints()))
-    -- love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    self:customDraw(true)
   end,
 
   load = function(self)
