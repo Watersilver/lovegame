@@ -172,7 +172,7 @@ Enemy.functions = {
     if self.invulnerable then
       self.invulnerable = self.invulnerable - dt
       -- if not self.shielded or self.shieldDown then
-      self.myShader = nil
+      self.myShader = self.nonInvulnShdr
       if floor(7 * self.invulnerable % 2) == 1 then
         self.myShader = hitShader
       end
@@ -182,7 +182,7 @@ Enemy.functions = {
         self.invulnerableEnd = true
       end
     else
-      self.myShader = nil
+      self.myShader = self.nonInvulnShdr
       if self.hp <= 0 or self.shouldDie then
         self.die(self)
       end

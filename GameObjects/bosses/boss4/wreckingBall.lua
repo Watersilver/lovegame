@@ -462,6 +462,7 @@ WreckingBall.functions = {
   enemyUpdate = function (self, dt)
     dlgCtrl.functions.update(self, dt)
     if not self.creator or not self.creator.exists then return o.removeFromWorld(self) end
+    self.nonInvulnShdr = self.creator.nonInvulnShdr
     if self.creator.hp <= 0 then
       self.harmless = true
       self.dying = true

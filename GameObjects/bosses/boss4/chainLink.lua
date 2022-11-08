@@ -9,7 +9,6 @@ local game = require "game"
 local im = require "image"
 local ebh = require "enemy_behaviours"
 
-local shdrs = require "Shaders.shaders"
 local deathShader = shdrs.bossDeathShader
 
 local WreckingBall = {}
@@ -27,6 +26,7 @@ function WreckingBall.initialize(instance)
   instance.attackDodger = true
   instance.sprite_info = im.spriteSettings.boss4
   instance.physical_properties.shape = ps.shapes.missile
+  instance.physical_properties.bodyType = "kinematic"
 end
 
 WreckingBall.functions = {
@@ -54,6 +54,7 @@ WreckingBall.functions = {
 
   enemyUpdate = function (self, dt)
     if not self.creator or not self.creator.exists then return o.removeFromWorld(self) end
+    self.nonInvulnShdr = self.creator.nonInvulnShdr
     if self.creator.dying then
       self.harmless = true
       self.dying = true

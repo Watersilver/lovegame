@@ -95,6 +95,12 @@ local states = {
       end
     end,
     end_state = function(instance, dt)
+      if instance:isShieldBroken() and not instance.musicHasChanged then
+        instance.musicHasChanged = true
+        game.room.music_info = "AcidicAggression"
+        snd.bgmV2.getMusicAndload()
+        instance.nonInvulnShdr = shdrs.boss4angry
+      end
     end
   },
 
@@ -877,12 +883,12 @@ Boss4.functions = {
     if self.hp <= 0 then
       self.myShader = deathShader
     elseif self.invulnerable then
-      self.myShader = nil
+      self.myShader = self.nonInvulnShdr
       if math.floor(7 * self.invulnerable % 2) == 1 then
         self.myShader = hitShader
       end
     else
-      self.myShader = nil
+      self.myShader = self.nonInvulnShdr
     end
 
     sh.handleShadow(self)
@@ -910,6 +916,8 @@ Boss4.functions = {
 
             if self:isShieldBroken() then
               self.shieldJustBroke = true
+              game.room.music_info = snd.silence
+              snd.bgmV2.getMusicAndload()
             end
           end
         end
