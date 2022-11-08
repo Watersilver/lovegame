@@ -184,16 +184,18 @@ local states = {
     run_state = function(instance, dt)
     end,
     start_state = function(instance, dt)
+      instance.fixture:setRestitution(1)
     end,
     check_state = function(instance, dt)
     end,
     end_state = function(instance, dt)
+      instance.fixture:setRestitution(0)
     end
   },
 
   grabchance = {
     run_state = function(instance, dt)
-      instance.body:setLinearVelocity(0, 0)
+      -- instance.body:setLinearVelocity(0, 0)
       instance.timer = instance.timer - dt
       if instance.timer <= 0 then
         instance.timer = 0
@@ -202,6 +204,9 @@ local states = {
     end,
     start_state = function(instance, dt)
       instance.timer = 1
+      local vx, vy = instance.body:getLinearVelocity()
+      local speed = u.magnitude2d(vx, vy)
+      instance.body:setLinearDamping(math.max(1, speed / 25))
     end,
     check_state = function(instance, dt)
       if pl1 and pl1.exists and pl1.grippedOb == instance then
@@ -210,6 +215,7 @@ local states = {
     end,
     end_state = function(instance, dt)
       instance.timer = nil
+      instance.body:setLinearDamping(0)
     end
   },
 
@@ -520,7 +526,6 @@ WreckingBall.functions = {
 
   hitSolidStatic = function (self, other, myF, otherF)
     if self.state.state == "spikedcharge" then
-      self.body:setLinearVelocity(0, 0)
       self.state:change_state(self, 1, "grabchance")
       snd.play(glsounds.smallBoom)
       gsh.newShake(mainCamera, "displacement")
