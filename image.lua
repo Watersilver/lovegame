@@ -354,10 +354,28 @@ im.spriteSettings = {
   },
 
   boss5 = {
-    {'Bosses/boss5/head', 3, 3, padding = 2, width = 24, height = 21},
-    {'Bosses/boss5/down', 2, 2, padding = 2, width = 33, height = 20},
-    {'Bosses/boss5/left', 2, 2, padding = 2, width = 24, height = 19},
-    {'Bosses/boss5/up', 2, 2, padding = 2, width = 32, height = 20},
+    -- Head components
+    {'Bosses/boss5/headOutline', 3, 3, padding = 2, width = 24, height = 21},
+    {'Bosses/boss5/headShadows', 3, 3, padding = 2, width = 24, height = 21},
+    {'Bosses/boss5/headHighlights', 3, 3, padding = 2, width = 24, height = 21},
+    {'Bosses/boss5/headStem', 3, 3, padding = 2, width = 24, height = 21},
+    {'Bosses/boss5/headFeatures', 3, 3, padding = 2, width = 24, height = 21},
+    {'Bosses/boss5/headBackground', 3, 3, padding = 2, width = 24, height = 21},
+
+    -- Down facing components
+    {'Bosses/boss5/downOutline', 2, 2, padding = 2, width = 33, height = 20},
+    {'Bosses/boss5/downShadows', 2, 2, padding = 2, width = 33, height = 20},
+    {'Bosses/boss5/downHighlights', 2, 2, padding = 2, width = 33, height = 20},
+
+    -- Left facing components
+    {'Bosses/boss5/leftOutline', 2, 2, padding = 2, width = 24, height = 19},
+    {'Bosses/boss5/leftShadows', 2, 2, padding = 2, width = 24, height = 19},
+    {'Bosses/boss5/leftHighlights', 2, 2, padding = 2, width = 24, height = 19},
+
+    -- Up facing components
+    {'Bosses/boss5/upOutline', 2, 2, padding = 2, width = 32, height = 20},
+    {'Bosses/boss5/upShadows', 2, 2, padding = 2, width = 32, height = 20},
+    {'Bosses/boss5/upHighlights', 2, 2, padding = 2, width = 32, height = 20},
   },
 
   -- Misc

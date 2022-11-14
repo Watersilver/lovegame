@@ -83,9 +83,9 @@ function u.middle2d(x0, y0, x1, y1)
 end
 
 function u.gradualAdjust(dt, xcurrent, xtarget, as)
-  -- adjustment speed can't be more than 30
   if math.abs(xcurrent - xtarget) < .0000000000000004 then return xtarget end
   as = as or 15
+  -- adjustment speed can't be more than 30
   if as > 30 then as = 30 end
   as = as * dt
   local dx = (xtarget - xcurrent)
@@ -461,17 +461,54 @@ function u.storeColour()
   return function() u.changeColour(prevColour) end
 end
 
--- Create a list of triangles that cover the same area as the polygon you are given. If your polygon is convex it is easier, since you can have all triangles share a common vertex. If your polygons are not guaranteed to be convex, then you'll have to find a better polygon triangulation technique. Here's the relevant Wikipedia article. https://en.wikipedia.org/wiki/Polygon_triangulation
---
--- Randomly choose which triangle to use, weighted by its area. So if triangle A is 75% of the area and triangle B is 25% of the area, triangle A should be picked 75% of the time and B 25%. This means find the fraction of the total area that each triangle takes up, and store that in a list. Then generate a random double number from 0 - 1 (Math.random() does this), and subtract each value in the list until the next subtraction would make it negative. That will pick a triangle at random with the area weights considered.
---
--- Randomly pick a point within the chosen triangle. You can use this formula : sample random point in triangle.
-
-
--- you can generate a random point, P, uniformly from within triangle ABC by the following convex combination of the vertices:
---
--- P = (1 - sqrt(r1)) * A + (sqrt(r1) * (1 - r2)) * B + (sqrt(r1) * r2) * C
---
--- where r1 and r2 are uniformly drawn from [0, 1], and sqrt is the square root function.
+local mt = {
+  __newindex = function(t, k, v)
+    if k == "t" and type(v) == "number" then
+      v = u.clamp(0, t, 1)
+    end
+    t[k] = v
+  end
+}
+function u.colorTable(r,g,b,a)
+  local start = {r,g,b,a}
+  local target = {r,g,b,a}
+  local getVal = function(i, t)
+    t = u.clamp(0, t, 1)
+    return u.lerp(start[i], target[i] - start[i], t)
+  end
+  local t = {
+    -- values between 0 and 1 (forced via metatable)
+    t = 1,
+    setTarget = function (self, rc,gc,bc,ac)
+      start[1] = self:getRed()
+      start[2] = self:getGreen()
+      start[3] = self:getBlue()
+      start[4] = self:getAlpha()
+      self.t = 0
+      target[1] = rc
+      target[2] = gc
+      target[3] = bc
+      target[4] = ac
+    end,
+    set = function (self, rc,gc,bc,ac)
+      self:setTarget(rc,gc,bc,ac)
+      self.t = 1
+    end,
+    getRed = function (self) return getVal(1, self.t) end,
+    getGreen = function (self) return getVal(2, self.t) end,
+    getBlue = function (self) return getVal(3, self.t) end,
+    getAlpha = function (self) return getVal(4, self.t) end,
+    getTable = function (self)
+      return {
+        self:getRed(),
+        self:getGreen(),
+        self:getBlue(),
+        self:getAlpha()
+      }
+    end
+  }
+  setmetatable(t, mt)
+  return t
+end
 
 return u

@@ -64,17 +64,15 @@ obj.functions = {
   load = function (self)
   end,
 
-  enemyUpdate = function (self, dt)
-    -- Get tricked by decoy
-    self.target = session.decoy or pl1
+  -- enemyUpdate = function (self, dt)
+  --   -- Get tricked by decoy
+  --   self.target = session.decoy or pl1
 
-    -- do stuff depending on state
-    local state = self.state
-    state.states[state.state].check_state(self, dt)
-    state.states[state.state].run_state(self, dt)
-
-    -- fuck = self.head.canSeePlayer and "Yo" or "no"
-  end,
+  --   -- do stuff depending on state
+  --   local state = self.state
+  --   state.states[state.state].check_state(self, dt)
+  --   state.states[state.state].run_state(self, dt)
+  -- end,
 
   draw = function (self)
   end,
