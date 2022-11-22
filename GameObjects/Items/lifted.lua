@@ -216,7 +216,8 @@ Lifted.functions = {
     local prevx, prevy = cr.body:getLinearVelocity()
     prevx, prevy = 1.5 * prevx, 1.5 * prevy
     local power
-    if session.save.dinsPower then
+
+    if session.save.dinsPower and cr:holdingDirectionalKey() then
       power = 250
     else
       power = 100

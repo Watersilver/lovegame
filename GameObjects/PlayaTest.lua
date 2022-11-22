@@ -2836,6 +2836,15 @@ Playa.functions = {
     -- love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
   end,
 
+  holdingDirectionalKey = function(self)
+    if self.input then
+      if self.input.down + self.input.up > 0 then return true end
+      if self.input.left + self.input.right > 0 then return true end
+    end
+
+    return false
+  end,
+
   draw = function(self)
     self:customDraw()
   end,
