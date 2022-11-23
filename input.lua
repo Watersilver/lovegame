@@ -1,5 +1,6 @@
 local verh = require "version_handling"
 local id = require "input_defaults"
+local u = require "utilities"
 
 local input = {}
 input.controllers = {}
@@ -12,10 +13,8 @@ input.keys = {
   held = {}
 }
 
-local player1defaults = id.player1
-
 function input.set_input(arg)
-  input.controllers.player1 = arg or player1defaults
+  input.controllers.player1 = u.initializeTable(arg or id.player1, id.player1)
 
   input.current = {}
   input.previous = {}

@@ -11,6 +11,14 @@ local atan2 = math.atan2
 function u.emptyFunc()
 end
 
+-- initializes table t with values from init
+function u.initializeTable(t, init)
+  for key, v in pairs(init) do
+    if t[key] == nil then t[key] = v end
+  end
+  return t
+end
+
 -- Round to closest int
 function u.round(x)
   return x + 0.5 - (x + 0.5) % 1

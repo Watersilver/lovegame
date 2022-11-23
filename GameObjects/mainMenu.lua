@@ -53,7 +53,7 @@ local function start_game(saveName)
     if type(value) ~= "table" and type(value) ~= "function" then session[key] = nil end
   end
   -- Nilify save
-  for key, value in pairs(session.save) do
+  for key in pairs(session.save) do
     session.save[key] = nil
   end
   -- Load imported save values to save
@@ -145,6 +145,7 @@ local function change_key_config(menuHandler)
   -- Variable to store string to be written
   local key_config_body = ""
   for keyName, key in pairs(menuHandler.tempKt.player1) do
+    if type(keyName) == "number" then keyName = "[" .. keyName .. "]" end
     key_config_body = key_config_body .. keyName .. " = \"" .. key .. "\",\n"
   end
   local success = love.filesystem.append("key_config.lua", key_config_body .. "}\nreturn kc\n")
@@ -864,12 +865,27 @@ load = function (self)
           y = 177,
           repeats = 19,
           scale = 0.5,
-          keyNameTable = {"Up: ", "Right: ", "Left: ", "Down: ", "Start (aka space): ",
-            "Item1 (aka a): ", "Item2 (aka s): ", "Item3 (aka d): ",
-            "Item4 (aka z): ", "Item5 (aka x): ", "Item6 (aka c): "},
+          keyNameTable = {"Up: ", "Right: ", "Left: ", "Down: ", "Menu (space): ",
+            "Item1 (c): ", "Item2 (x): ", "Item3 (z): ",
+            "Item4 (d): ", "Item5 (s): ", "Item6 (a): ",
+            "Item7 (e): ", "Item8 (w): ", "Item9 (q): ",
+            "Hotkey1 (1): ",
+            "Hotkey2 (2): ",
+            "Hotkey3 (3): ",
+            "Hotkey4 (4): ",
+            "Hotkey5 (5): ",
+            "Hotkey6 (6): ",
+            "Hotkey7 (7): ",
+            "Hotkey8 (8): ",
+            "Hotkey9 (9): ",
+            "Hotkey10 (0): ",
+          },
           keyTable = {"up", "right", "left", "down", "start",
-            "a", "s", "d",
-            "z", "x", "c"},
+            "c", "x", "z",
+            "d", "s", "a",
+            "e", "w", "q",
+            1,2,3,4,5,6,7,8,9,10
+          },
           load = function (self, menuHandler)
             text.key = ""
             self.keyCounter = 1
@@ -881,7 +897,9 @@ load = function (self)
           end,
           update = function (self, menuHandler, dt)
             if self.keyCounter <= #self.keyTable then
-              if menuHandler.enterPressed and text.key ~= "" then
+              -- if menuHandler.enterPressed and text.key ~= "" then
+              if menuHandler.enterPressed then
+                if text.key == "" then text.key = nil end
                 menuHandler.tempKt.player1[self.keyTable[self.keyCounter]] = text.key
                 self.keyCounter = self.keyCounter + 1
                 self.currentKeyText = self.keyNameTable[self.keyCounter]
