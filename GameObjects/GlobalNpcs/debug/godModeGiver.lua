@@ -68,6 +68,7 @@ NPC.functions = {
         session.save.customTunicAvailable = true
         session.save.walkOnWater = true
         session.save.playerGlowAvailable = true
+        session.save.hotkeys = true
         asp.emptySpellSlots()
         if pl1 then pl1:readSave() end
       end

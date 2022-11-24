@@ -15,6 +15,7 @@ local o = require "GameObjects.objects"
 local trans = require "transitions"
 local dlg = require "dialogue"
 local gsh = require "gamera_shake"
+local items = require "items"
 
 local hps = require "GameObjects.Helpers.player_states"
 local ors = require "GameObjects.Helpers.object_read_save"
@@ -2557,6 +2558,16 @@ Playa.functions = {
       )
     then
       game.pause(self)
+    end
+
+    -- use hotkeys
+    for i=1,10 do
+      if self.input[i] == 1 and self.previnput[i] == 0 then
+        local itemid = session.save["keybind" .. i]
+        local used = items.useItem(itemid)
+        local overlay = require "GameObjects.overlayText.overplayer"
+        if used and session.usedItemComment ~= "" then overlay.createNew(session.usedItemComment) end
+      end
     end
 
     -- Check if I must try to activate activatable

@@ -113,7 +113,59 @@ pam.middle = {
   missileSkillSprite = im.sprites["missileSkill"],
   mobilitySkillSprite = im.sprites["mobilitySkill"],
 }
+local function determineHotkeyDisplayPosition(i)
+  local j = 0
+  local k = 0
+  if i == 8 then
+    k = 0.5
+  elseif i == 9 then
+    k = 1.5
+  end
+  while i > 3 do
+    i = i - 4
+    j = j + 1
+  end
+
+  return (i + k) * 100, 11 + j * 9
+end
 pam.middle.draw = function(l, t, w, h)
+  local resetcol = u.storeColour()
+
+  if session.save.hotkeys then
+    love.graphics.print("Day " .. session.save.days, w*0.05, h*0.2, 0, 0.5)
+    local boxHeight = 7
+    local boxWidth = 98
+    local textScale = 0.13
+    local yPadding = (boxHeight - love.graphics.getFont():getHeight() * textScale) * 0.5
+
+    -- hotkeys
+    for i=0,9 do
+
+      local x, y = determineHotkeyDisplayPosition(i)
+
+      love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+      love.graphics.rectangle("fill", x + 1, y, boxWidth, boxHeight)
+      love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+      love.graphics.rectangle("line", x + 1, y, boxWidth, boxHeight)
+      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      love.graphics.print((i + 1) .. ".", x + 2, y + yPadding, 0, textScale)
+
+      local itemname = "--"
+      local kbitem = session.save["keybind" .. (i + 1)]
+      if kbitem then
+        local iname = items[kbitem] and items[kbitem].name or "no data..."
+        if type(iname) == "function" then iname = iname() end
+        local duplicates = session.save[kbitem] or "?"
+        if duplicates ~= 1 then iname = iname .. " x" .. duplicates end
+        itemname = iname
+      end
+      local xPadding = (boxWidth - love.graphics.getFont():getWidth(itemname) * textScale) * 0.5
+      love.graphics.print(itemname, x + xPadding, y + yPadding, 0, textScale)
+    end
+    resetcol()
+  else
+    love.graphics.print("Day " .. session.save.days, w*0.05, h*0.1, 0, 0.5)
+  end
 
   local trifx, trify = w * 0.5, h * 0.5 - 8
   local triforceSprite = pam.middle.triforceSprite
@@ -209,19 +261,25 @@ end
 local logicFuncs = {
   items = function()
     basicListLogic("itemCursor", session.save.items)
+    local plinp
+    local plprevinp
+    if pl1 then
+      plinp = pl1.input
+      plprevinp = pl1.previnput
+    end
     local itemid = session.save.items[pam.left.itemCursor]
     if inp.enterPressed then
-      if items[itemid] and items[itemid].use then
-        local glsound = items[itemid].use()
-        if not items[itemid].handleUseSound then
-          if glsound then
-            snd.play(glsounds[glsound])
-          else
+      items.useItem(itemid)
+    elseif plinp and plprevinp then
+      for i=1,10 do
+        if plinp[i] == 1 and plprevinp[i] == 0 then
+          if items[itemid] and items[itemid].use then
+            session.save["keybind" .. i] = itemid
             snd.play(glsounds.useItem)
+          else
+            snd.play(glsounds.error)
           end
         end
-      else
-        snd.play(glsounds.error)
       end
     end
   end,

@@ -4,8 +4,6 @@ local txt = require "text"
 
 local Text = {}
 
-Text.scale = 0.25
-
 function Text.initialize(instance)
   instance.x = 0
   instance.y = 0
@@ -32,10 +30,14 @@ local function printOutlinedText(txt, x, y, s)
 end
 
 Text.functions = {
+  getHeight = function (self)
+    return txt.font.default:getLineHeight() * txt.font.default:getHeight() * self.scale * u.get_line_count(self.text)
+  end,
+
   draw_overlay = function (self)
     local restoreFont = txt.storeFont()
     love.graphics.setFont(txt.font.default)
-    printOutlinedText(self.text, self.x, self.y, Text.scale * self.scaleMod)
+    printOutlinedText(self.text, self.x, self.y, self.scale)
     restoreFont()
   end
 }

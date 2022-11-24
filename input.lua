@@ -60,7 +60,7 @@ function input.check_input()
         input.previous[playername][keyname] = isPressed
       end
       -- Set the current input to inactive
-      for name, key in pairs(controller) do
+      for name in pairs(controller) do
         player[name] = 0
       end
     end

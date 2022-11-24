@@ -19,7 +19,8 @@ function NPC.initialize(instance)
     "Water Walk",
     "Light",
     "Customize",
-    "Piece of Heart"
+    "Piece of Heart",
+    "Hotkeys"
   }
   instance.question = "Choose Special."
   instance.image_speed = 0.05
@@ -51,6 +52,8 @@ NPC.functions = {
     elseif self.hookReturn == "ssbChose" then
       if self.choiceReturn.a == "Power" then
         session.save.dinsPower = not session.save.dinsPower
+      elseif self.choiceReturn.a == "Hotkeys" then
+        session.save.hotkeys = not session.save.hotkeys
       elseif self.choiceReturn.a == "Wisdom" then
         session.save.nayrusWisdom = not session.save.nayrusWisdom
       elseif self.choiceReturn.a == "Courage" then

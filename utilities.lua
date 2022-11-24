@@ -341,6 +341,19 @@ function u.utf8_backspace(t, chars)
     return ""
 end
 
+function u.findIndex(list, value, predicate)
+  if predicate then
+    for i, v in pairs(list) do
+      if predicate(v) then return i end
+    end
+  else
+    for i, v in pairs(list) do
+      if v == value then return i end
+    end
+  end
+  return nil
+end
+
 -- Queue data structure
 function u.newQueue(maxLength)
   return {
@@ -467,6 +480,16 @@ function u.storeColour()
   local r, g, b, a = love.graphics.getColor()
   local prevColour = { r = r, g = g, b = b, a = a }
   return function() u.changeColour(prevColour) end
+end
+
+function u.get_line_count(str)
+  local lines = 1
+  for i = 1, #str do
+      local c = str:sub(i, i)
+      if c == '\n' then lines = lines + 1 end
+  end
+
+  return lines
 end
 
 local mt = {

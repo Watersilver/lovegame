@@ -29,6 +29,7 @@ local itemGetFunc = function ()
     session.addItem("mateMagicDust")
     session.addItem("mateBlastSeed")
     session.addItem("focusDoll")
+    session.addItem("foodFrittata")
   end
   session.addItem("keySpellbook")
 end

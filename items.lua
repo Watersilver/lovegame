@@ -62,6 +62,24 @@ local function useWhenStill(useCallback, failedToUseCallback)
 end
 
 
+items.useItem = function(itemid)
+  if items[itemid] and items[itemid].use then
+    local glsound = items[itemid].use()
+    if not items[itemid].handleUseSound then
+      if glsound then
+        snd.play(glsounds[glsound])
+      else
+        snd.play(glsounds.useItem)
+      end
+    end
+    return true
+  else
+    snd.play(glsounds.error)
+    return false
+  end
+end
+
+
 items.testi = {
   name = "Ganon's penis",
   description = "Quite large",

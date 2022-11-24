@@ -280,9 +280,9 @@ session = {
     return (from and to) or game.room.blockTeleport
   end,
   journalEntryNotification = function()
-    local Txtx = assert(love.filesystem.load("GameObjects/overlayText/newNote.lua"))()
-    local txtx = Txtx:new()
-    o.addToWorld(txtx)
+    -- local Txtx = assert(love.filesystem.load("GameObjects/overlayText/newNote.lua"))()
+    local Txtx = require "GameObjects.overlayText.overplayer"
+    Txtx.createNew("Journal entry added")
     snd.play(glsounds.journalEntry)
   end,
   startQuest = function(questid, startingStage)
@@ -1030,13 +1030,13 @@ function love.update(dt)
       or (not pam.quitting and inp.cancelPressed and not pam.left.selectedHeader)
       or session.forceCloseInv
     then
-      session.forceCloseInv = false
       game.pause(false)
       inv.closeInv()
     end
     pam.left.logic()
     pam.top_menu_logic()
   end
+  session.forceCloseInv = false
 
   -- Handle dialogues
   if dialogue.enable then dialogue.enabled = true; dialogue.enable = false end
@@ -1406,7 +1406,6 @@ local function hudDraw(l,t,w,h)
       love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
       love.graphics.rectangle("fill", l, t, w, h)
       love.graphics.setColor(pr, pg, pb, pa)
-      love.graphics.print("Day " .. session.save.days, w*0.05, h*0.1, 0, 0.5)
       inv.draw(l,t,w,h)
       pam.middle.draw(l,t,w,h)
       pam.left.draw(l, t, w, h)
