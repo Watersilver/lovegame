@@ -212,7 +212,7 @@ items.focusDoll = {
         session.forceCloseInv = true
         if pl1 then
           local mdust = require "GameObjects.Items.mdust"
-          mdust.functions.chainReaction(pl1)
+          mdust.functions[GCON.md.reaction.kaboom](pl1)
         end
       end
       return "error"
