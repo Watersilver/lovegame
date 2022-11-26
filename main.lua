@@ -963,8 +963,7 @@ function love.update(dt)
     end
   end
 
-  -- Run unpausable_update methods
-  -- (note they don't run on transitions so name is a bit misleading)
+  -- Run unstoppable_update methods
   local usUpnum = #o.unstoppableUpdaters
   if usUpnum > 0 then
     for i = 1, usUpnum do

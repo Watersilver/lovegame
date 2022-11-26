@@ -705,7 +705,7 @@ local drawFuncs = {
     if type(pamleft.tooltip) == "function" then
       pamleft.tooltip(w, h)
     else
-      love.graphics.print(pamleft.tooltip, 5, 5, 0, 0.15)
+      love.graphics.printf(pamleft.tooltip, 5, 5, 24 * 25, "left", 0, 0.15)
     end
   end
 }

@@ -9,36 +9,51 @@ function Text.initialize(instance)
   instance.y = 0
   instance.yoff = 0
   instance.scaleMod = 1
-  instance.text = "erty"
+  instance.text = love.graphics.newText(txt.font.default)
 end
 
-local function printOutlinedText(txt, x, y, s)
+local w = 2
+local function printOutlinedText(text, x, y, s)
   local resetColour = u.storeColour()
-  local w = 2
   u.changeColour{"black"}
-  love.graphics.print(txt, x, y, 0, s, s, -w, -w)
-  love.graphics.print(txt, x, y, 0, s, s, 0, -w)
-  love.graphics.print(txt, x, y, 0, s, s, w, -w)
-  love.graphics.print(txt, x, y, 0, s, s, -w)
-  love.graphics.print(txt, x, y, 0, s, s, w)
-  love.graphics.print(txt, x, y, 0, s, s, -w, w)
-  love.graphics.print(txt, x, y, 0, s, s, 0, w)
-  love.graphics.print(txt, x, y, 0, s, s, w, w)
+  love.graphics.draw(text, x, y, 0, s, s, -w, -w)
+  love.graphics.draw(text, x, y, 0, s, s, 0, -w)
+  love.graphics.draw(text, x, y, 0, s, s, w, -w)
+  love.graphics.draw(text, x, y, 0, s, s, -w)
+  love.graphics.draw(text, x, y, 0, s, s, w)
+  love.graphics.draw(text, x, y, 0, s, s, -w, w)
+  love.graphics.draw(text, x, y, 0, s, s, 0, w)
+  love.graphics.draw(text, x, y, 0, s, s, w, w)
   u.changeColour{"white"}
-  love.graphics.print(txt, x, y, 0, s)
+  love.graphics.draw(text, x, y, 0, s)
   resetColour()
 end
 
 Text.functions = {
   getHeight = function (self)
-    return txt.font.default:getLineHeight() * txt.font.default:getHeight() * self.scale * u.get_line_count(self.text)
+    return self.text:getHeight() * self.scale
+  end,
+
+  getWidth = function (self)
+    return (self.wraplimit or self.text:getWidth()) * self.scale
+  end,
+
+  setText = function (self, text)
+    self.raw = text
+    if self.wraplimit then
+      self.text:setf(text, self.wraplimit, "center")
+    else
+      self.text:set(text)
+    end
+  end,
+
+  setWraplimit = function (self, newLimit)
+    self.wraplimit = newLimit
+    self:setText(self.raw)
   end,
 
   draw_overlay = function (self)
-    local restoreFont = txt.storeFont()
-    love.graphics.setFont(txt.font.default)
     printOutlinedText(self.text, self.x, self.y, self.scale)
-    restoreFont()
   end
 }
 

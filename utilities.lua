@@ -354,6 +354,20 @@ function u.findIndex(list, value, predicate)
   return nil
 end
 
+-- Splits a given string
+function u.split(str, delimiter)
+  local result = { }
+  local from  = 1
+  local delim_from, delim_to = string.find( str, delimiter, from  )
+  while delim_from do
+    table.insert( result, string.sub( str, from , delim_from-1 ) )
+    from  = delim_to + 1
+    delim_from, delim_to = string.find( str, delimiter, from  )
+  end
+  table.insert( result, string.sub( str, from  ) )
+  return result
+end
+
 -- Queue data structure
 function u.newQueue(maxLength)
   return {

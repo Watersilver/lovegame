@@ -1,13 +1,11 @@
 local im = require "image"
 local shdrs = require "Shaders.shaders"
 local altSkins = require "altSkins"
-local inp = require "input"
 local snd = require "sound"
 
 local items = {}
 
 -- max name line: nnnnnnnnnnnnnnnn
--- max description line: dddddddddddddddddddddddddd
 
 -- Rings should only affect save directly via equippedRing
 -- Everything else via session, (effects applied on init when loading)
@@ -29,7 +27,7 @@ end
 local function useFood(type, bonus, duration, eatComment, notIdleComment)
   if pl1 then
     eatComment = eatComment or "Yum!"
-    notIdleComment = notIdleComment or "You must stand idle\nto do that."
+    notIdleComment = notIdleComment or "You must stand idle to do that."
     if pl1.movement_state.state == "normal" and pl1.animation_state.state:find("still") then
       session.forceCloseInv = true
       session.usedItemComment = eatComment
@@ -54,7 +52,7 @@ local function useWhenStill(useCallback, failedToUseCallback)
       session.usedItemComment = ""
       if useCallback then useCallback() end
     else
-      session.usedItemComment = "You must stand idle\nto do that."
+      session.usedItemComment = "You must stand idle to do that."
       if failedToUseCallback then return failedToUseCallback() end
       return "error"
     end
@@ -146,7 +144,7 @@ items.mateBlastSeed = {
 
 items.mateMagicDust = {
   name = "Magic dust",
-  description = "Sprinkle for variety of\neffects\n\n\n\n\n\n*Highly volatile and\nunpredictable",
+  description = "Sprinkle for variety of effects.\n\n\n\n\n\n*Highly volatile and unpredictable",
   limit = 20
 }
 
@@ -155,8 +153,8 @@ items.focusDoll = {
   name = "Doll",
   description = function()
     local desc =
-    "Dolls like this were\n\z
-    placed in kids' rooms,\n\z
+    "Dolls like this were \z
+    placed in kids' rooms, \z
     to confuse nightmares."
     -- if session.save.keySpellbook then
     if session.save.hasMystery then
@@ -175,10 +173,10 @@ items.focusDoll = {
       -- session.removeItem("focusDoll")
       -- session.focus = "decoy"
       if session.save.focus == "focusDoll" then
-        session.usedItemComment = "Unequipped doll as\nspell focus"
+        session.usedItemComment = "Unequipped doll as spell focus"
         session.save.focus = nil
       else
-        session.usedItemComment = "Equipped doll as\nspell focus"
+        session.usedItemComment = "Equipped doll as spell focus"
         session.save.focus = "focusDoll"
       end
     else
@@ -186,13 +184,13 @@ items.focusDoll = {
       if session.save.dollFail < 10 or session.save.dollFail > 20 then
         session.usedItemComment = "You can't use it like that"
       elseif session.save.dollFail < 11 then
-        session.usedItemComment = "You can't use it like that\n\nHow many times do I need\nto tell you?"
+        session.usedItemComment = "You can't use it like that\n\nHow many times do I need to tell you?"
       elseif session.save.dollFail < 12 then
-        session.usedItemComment = "You chew on it. Still\ndoesn't work"
+        session.usedItemComment = "You chew on it. Still doesn't work"
       elseif session.save.dollFail < 13 then
         session.usedItemComment = "You play with the doll.\nNothing happens"
       elseif session.save.dollFail < 14 then
-        session.usedItemComment = "You keep playing with the\ndoll until the world blows\nup. You are dead now.\n\nGame Over"
+        session.usedItemComment = "You keep playing with the doll until the world blows up. You are dead now.\n\nGame Over"
       elseif session.save.dollFail < 15 then
         session.usedItemComment = "It eats your face off"
       elseif session.save.dollFail < 16 then
@@ -200,13 +198,13 @@ items.focusDoll = {
       elseif session.save.dollFail < 17 then
         session.usedItemComment = "You can't fit it there"
       elseif session.save.dollFail < 18 then
-        session.usedItemComment = "Some kids come and ask to\n\z
-        play with you.\nYou make your dolls\nfight and yours wins.\n\z
-        The kids are so angry\nthey kill you.\n\nGame Over"
+        session.usedItemComment = "Some kids come and ask to \z
+        play with you.\nYou make your dolls fight and yours wins.\n\z
+        The kids are so angry they kill you.\n\nGame Over"
       elseif session.save.dollFail < 19 then
         session.usedItemComment = "You choke on it"
       elseif session.save.dollFail < 20 then
-        session.usedItemComment = "It WILL blow up and\nyou WILL be sorry!!"
+        session.usedItemComment = "It WILL blow up and you WILL be sorry!!"
       else
         session.usedItemComment = "BOOM"
         session.forceCloseInv = true
@@ -226,7 +224,7 @@ items.foodFrittata = {
   name = "Frittata",
   description = "It's not a verb.",
   use = function()
-    return useFood("foodFrittata", 1, 4, "It was Italian omelette\nwith diced meat\nand vegetables")
+    return useFood("foodFrittata", 1, 4, "It was Italian omelette with diced meat and vegetables.")
   end,
 }
 
@@ -234,7 +232,7 @@ items.foodFrittata = {
 -- Gameplay
 items.ringWindSlice = {
   name = "Windslice Ring",
-  description = "Slice with sword at\nfirst recall of mark.",
+  description = "Slice with sword at first recall of mark.",
   equip = function()
     session.usedItemComment = "Equipped Windslice Ring!"
     session.ringRecallSlice = 1
@@ -250,13 +248,13 @@ items.ringWindSlice = {
 
 items.ringMyriadCuts = {
   name = "Myriad Cuts Ring",
-  description = "Slice with sword\nat every recall.",
+  description = "Slice with sword at every recall.",
   equip = function()
-    session.usedItemComment = "Equipped Myriad\nCuts Ring!"
+    session.usedItemComment = "Equipped Myriad Cuts Ring!"
     session.ringRecallSlice = math.huge
   end,
   unequip = function()
-    session.usedItemComment = "Unequipped Myriad\nCuts Ring!"
+    session.usedItemComment = "Unequipped Myriad Cuts Ring!"
     session.ringRecallSlice = nil
   end,
   use = function()
@@ -266,7 +264,7 @@ items.ringMyriadCuts = {
 
 items.ringTimeflow = {
   name = "Timeflow Ring",
-  description = "Helps with reflexes\na lot!",
+  description = "Helps with reflexes a lot!",
   equip = function()
     session.usedItemComment = "Equipped Timeflow Ring!"
     session.ringTimeflow = 1.2
@@ -331,7 +329,7 @@ items.ringGlide = {
 -- Skins
 items.ringMage = {
   name = "Mage Ring",
-  description = "Transform into\nMage!",
+  description = "Transform into Mage!",
   equip = function()
     session.usedItemComment = "Equipped Mage Ring!"
     for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
@@ -350,7 +348,7 @@ items.ringMage = {
 -- screen effects
 items.ringOld = {
   name = "Old Ring",
-  description = "See the world\nthrough a\ndifferent lens!",
+  description = "See the world through a different lens!",
   equip = function()
     session.usedItemComment = "Equipped Old Ring!"
     session.ringShader = shdrs.sepia
@@ -366,7 +364,7 @@ items.ringOld = {
 
 items.ringScreen = {
   name = "Screen Ring",
-  description = "See the world\nthrough a\ndifferent lens!",
+  description = "See the world through a different lens!",
   equip = function()
     session.usedItemComment = "Equipped Screen Ring!"
     session.ringShader = shdrs.oldScreen
@@ -382,7 +380,7 @@ items.ringScreen = {
 
 items.ringGrey = {
   name = "Grey Ring",
-  description = "See the world\nthrough a\ndifferent lens!",
+  description = "See the world through a different lens!",
   equip = function()
     session.usedItemComment = "Equipped Grey Ring!"
     session.ringShader = shdrs.grayscale
@@ -398,13 +396,13 @@ items.ringGrey = {
 
 items.ringVignette = {
   name = "Vignette Ring",
-  description = "See the world\nthrough a\ndifferent lens!",
+  description = "See the world through a different lens!",
   equip = function()
-    session.usedItemComment = "Equipped Vignette\nRing!"
+    session.usedItemComment = "Equipped Vignette Ring!"
     session.ringShader = shdrs.vignette
   end,
   unequip = function()
-    session.usedItemComment = "Unequipped Vignette\nRing!"
+    session.usedItemComment = "Unequipped Vignette Ring!"
     session.ringShader = nil
   end,
   use = function()

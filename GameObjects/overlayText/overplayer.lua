@@ -1,23 +1,23 @@
 local o = require "GameObjects.objects"
 local p = require "GameObjects.prototype"
 local OverlayText = require "GameObjects.overlayText.default"
-local txt = require "text"
 local utilities = require "utilities"
 
 local Text = {}
 
 local existing = {}
 
-function Text.initialize(instance)
+function Text.initialize()
 end
 
+local wraplimit = 24 * 25
 function Text.createNew(text, options)
   local t = Text:new()
   options = options or {}
-  t.text = text or "text goes here"
+  t:setText(text or "text goes here")
+  t:setWraplimit(wraplimit)
   t.scale = options.scale or 0.1625
   t.timer = options.timer or 2.5
-  t.textWidth = txt.font.default:getWidth(text) * t.scale
 
   table.insert(existing, t)
 
@@ -40,7 +40,7 @@ Text.functions = {
 
   updatePosition = function(self)
     if pl1 and pl1.exists then
-      self.x = pl1.x - self.textWidth * 0.5
+      self.x = pl1.x - self:getWidth() * 0.5
       self.y = self:getTop()
     end
   end,
@@ -48,10 +48,6 @@ Text.functions = {
   unpausable_update = function (self, dt)
     self.timer = self.timer - dt
     if self.timer < 0 then o.removeFromWorld(self) end
-    self:updatePosition()
-  end,
-
-  late_update = function (self)
     self:updatePosition()
   end,
 
