@@ -2117,6 +2117,8 @@ local animation_states = {
 
   cutscene = {
     run_state = function(instance, dt)
+      inp.disable_controller(instance.player)
+      instance:setGhost(true)
     end,
 
     check_state = function(instance, dt)

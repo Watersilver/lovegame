@@ -206,7 +206,7 @@ end
 
 -- Function that returns whether only one inv key is being held
 -- If previnput is provided, it returns if only one is being pressed
-local function single_inv_key_press(object, input, previnput)
+local function single_inv_key_press(input, previnput)
   local keys = 0
   local key
   for _, content in ipairs(inv.slots) do
@@ -250,10 +250,16 @@ local function checkJumpingSword(input)
 end
 
 
+local open = false
 function inv.closeInv()
+  open = false
   inv.spellSelection = nil
 end
 inv.closeInv()
+
+function inv.isOpen()
+  return open
+end
 
 
 function inv.check_use(instance, trig, side, dt)
@@ -321,7 +327,7 @@ function inv.determine_equipment_triggers(object, dt)
   local previnput = object.previnput
   local trig = object.triggers
 
-  local keypressing, keyspressing = single_inv_key_press(object, myinput)
+  local keypressing, keyspressing = single_inv_key_press(myinput)
   if keypressing then
     if keyspressing == 1 then
       local item = inv.slots[keypressing].item
@@ -336,8 +342,8 @@ function inv.determine_equipment_triggers(object, dt)
   end
 end
 
-
 function inv.manage(pauser)
+  open = true
 
   local myinput = inp.current[pauser.player]
   local previnput = inp.previous[pauser.player]
@@ -348,7 +354,7 @@ function inv.manage(pauser)
   -- end
 
   -- figure out which key was pressed (not held), and if only one
-  local keypressed, keyspressed = single_inv_key_press(object, myinput, previnput)
+  local keypressed, keyspressed = single_inv_key_press(myinput, previnput)
   -- if one key was pressed proceed
   if keypressed and keyspressed == 1 then
     if inv.spellSelection then

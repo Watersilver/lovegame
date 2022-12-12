@@ -128,11 +128,11 @@ end
 local silentSource = {
   getVolume = function() return 0 end,
   isPlaying = function() return false end,
-  setLooping = function() end,
-  setVolume = function() end,
+  setLooping = function(loop) end,
+  setVolume = function(self, vol) end,
   play = function() end,
   stop = function() end,
-  update = function() end,
+  update = function(self, dt) end,
 }
 
 -- bgm with intro
@@ -175,12 +175,12 @@ bgmV2Source.new = function(sourceInfo)
   bgmV2Source.main = love.audio.newSource( sourceInfo.folder .. sourceInfo.name .. sourceInfo.extension, "stream" )
   return bgmV2Source
 end
-bgmV2Source.update = function(dt)
-  if bgmV2Source.section == "intro" then
-    if not bgmV2Source.intro:isPlaying() then
-      bgmV2Source.section = "main"
-      bgmV2Source.main:setVolume(bgmV2Source.intro:getVolume())
-      bgmV2Source.main:play()
+bgmV2Source.update = function(self, dt)
+  if self.section == "intro" then
+    if not self.intro:isPlaying() then
+      self.section = "main"
+      self.main:setVolume(self.intro:getVolume())
+      self.main:play()
     end
   end
 end
@@ -256,7 +256,7 @@ end
 function snd.bgmV2:update(dt)
   if gs.musicOn then
     -- bgm with intro
-    self.source.update(dt)
+    self.source:update(dt)
 
     -- Count silence time
     if self.source:getVolume() == 0 then self.silenceTimer = self.silenceTimer + dt end

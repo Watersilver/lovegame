@@ -11,9 +11,11 @@ if not verh.fileExists("game_settings.lua") then
   local newfile = love.filesystem.newFile("game_settings.lua")
   newfile:close()
   local success = love.filesystem.write("game_settings.lua", gsdcontents)
+---@diagnostic disable-next-line: undefined-field
   if not success then love.errhand("Failed to write game_settings") end
 end
 local success = love.filesystem.createDirectory("Saves")
+---@diagnostic disable-next-line: undefined-field
 if not success then love.errhand("Failed to create save directory") end
 
 -- game constants
@@ -433,12 +435,12 @@ session = {
         if type(value) == "boolean" then value = value and "true" or "false" end
 
         -- Quests are in a table in session.save. Get them out and save them with a prefix
-        if key == "quests" then
+        if key == "quests" and type(value) == "table" then
           for qindex, questid in ipairs(value) do
             saveContent = saveContent .. "\nsave.__quest__" .. qindex .. ' = "' .. questid .. '"'
           end
         -- Items are in a table in session.save. Get them out and save them with a prefix
-        elseif key == "items" then
+        elseif key == "items" and type(value) == "table" then
           for iindex, itemid in ipairs(value) do
             saveContent = saveContent .. "\nsave.__item__" .. iindex .. ' = "' .. itemid .. '"'
           end
@@ -1023,19 +1025,18 @@ function love.update(dt)
     end
 
   elseif not game.transitioning and not game.cutscene then -- not game.paused
-
     inv.manage(game.paused)
-    if (inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0)
+    pam.left.logic()
+    pam.top_menu_logic()
+    if game.paused ~= true and (inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0)
       or (not pam.quitting and inp.cancelPressed and not pam.left.selectedHeader)
       or session.forceCloseInv
     then
       game.pause(false)
       inv.closeInv()
+      session.forceCloseInv = false
     end
-    pam.left.logic()
-    pam.top_menu_logic()
   end
-  session.forceCloseInv = false
 
   -- Handle dialogues
   if dialogue.enable then dialogue.enabled = true; dialogue.enable = false end
@@ -1210,7 +1211,6 @@ function love.update(dt)
 
   -- Shake camera
   gsh.shake(cam, dt)
-
 end
 
 
@@ -1506,10 +1506,13 @@ function love.draw()
   setCurrentCam()
   -- debug
   love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
+---@diagnostic disable-next-line: undefined-global
   if currentEnemyName then love.graphics.print(currentEnemyName, 0, love.graphics.getHeight()-77) end
   if fuck then love.graphics.print(fuck, 0, 177+120) end
   local debiter = 0
+---@diagnostic disable-next-line: undefined-global
   if triggersdebug then
+---@diagnostic disable-next-line: undefined-global
     for trigger, _ in pairs(triggersdebug) do
       debiter = debiter + 24
       love.graphics.print(trigger, 0, 20+debiter+120)

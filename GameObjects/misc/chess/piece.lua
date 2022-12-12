@@ -1,6 +1,7 @@
 local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local u = require "utilities"
+local ls = require "lightSources"
 
 local lp = love.physics
 

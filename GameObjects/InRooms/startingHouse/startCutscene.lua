@@ -28,8 +28,6 @@ local states = {
   wakingup = {
   run_state = function(instance, dt)
     instance.stateTimer = instance.stateTimer - dt
-    instance.playa.x = 56
-    instance.playa.y = 41
     if instance.stateTimer < 0 then
       instance.playa.image_index = 1
       game.timeScreenEffect = "fullLight"
@@ -42,8 +40,6 @@ local states = {
     pl.sprite = im.sprites["Witch/sleeping_down"]
     pl.image_index = 0
     pl.image_speed = 0
-    pl.x = 56
-    pl.y = 41
     instance.rescuer = o.identified.rescuer[1]
     instance.stateTimer = 4
   end,
@@ -187,7 +183,7 @@ local states = {
 
   jumping = {
   run_state = function(instance, dt)
-    instance.playa.x = instance.playa.x + 50 * dt
+    instance.plx = instance.plx + 50 * dt
   end,
   start_state = function(instance, dt)
     instance.playa.zvel = 60
@@ -211,7 +207,7 @@ local states = {
   run_state = function(instance, dt)
   end,
   start_state = function(instance, dt)
-    o.removeFromWorld(self)
+    o.removeFromWorld(instance)
   end,
   check_state = function(instance, dt)
   end,
@@ -231,6 +227,8 @@ Cutscene.functions = {
     game.room.timeScreenEffect = "midnight"
     game.timeScreenEffect = "midnight"
     self.state = "start"
+
+    self.plx = 56
   end,
 
   update = function (self, dt)
@@ -243,7 +241,7 @@ Cutscene.functions = {
     ms.states[ms.state].run_state(self, dt)
 
     -- Control gameobject position
-    self.playa.body:setPosition(self.playa.x, self.playa.y)
+    self.playa.body:setPosition(self.plx, 42)
     self.rescuer.body:setPosition(self.rescuer.x, self.rescuer.y)
 
     -- Stop time from going too far

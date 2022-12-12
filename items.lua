@@ -2,6 +2,11 @@ local im = require "image"
 local shdrs = require "Shaders.shaders"
 local altSkins = require "altSkins"
 local snd = require "sound"
+local inv = require "inventory"
+
+local function forceCloseInv()
+  if inv.isOpen() then session.forceCloseInv = true end
+end
 
 local items = {}
 
@@ -29,7 +34,7 @@ local function useFood(type, bonus, duration, eatComment, notIdleComment)
     eatComment = eatComment or "Yum!"
     notIdleComment = notIdleComment or "You must stand idle to do that."
     if pl1.movement_state.state == "normal" and pl1.animation_state.state:find("still") then
-      session.forceCloseInv = true
+      forceCloseInv()
       session.usedItemComment = eatComment
       session.removeItem(type)
       pl1.item_health_bonus = bonus
@@ -48,7 +53,7 @@ local function useWhenStill(useCallback, failedToUseCallback)
     if pl1.movement_state.state == "normal" and
     pl1.animation_state.state:find("still")
     then
-      session.forceCloseInv = true
+      forceCloseInv()
       session.usedItemComment = ""
       if useCallback then useCallback() end
     else
@@ -120,7 +125,7 @@ items.keyLyre = {
   end,
   failedToUseCallback = function()
     if pl1 and pl1.animation_state.state == "downharp" then
-      session.forceCloseInv = true
+      forceCloseInv()
       session.usedItemComment = ""
       pl1.animation_state:change_state(pl1, "noDt", "downstill")
     else
@@ -207,7 +212,7 @@ items.focusDoll = {
         session.usedItemComment = "It WILL blow up and you WILL be sorry!!"
       else
         session.usedItemComment = "BOOM"
-        session.forceCloseInv = true
+        forceCloseInv()
         if pl1 then
           local mdust = require "GameObjects.Items.mdust"
           mdust.functions[GCON.md.reaction.kaboom](pl1)

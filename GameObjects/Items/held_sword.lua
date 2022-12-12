@@ -98,7 +98,7 @@ HeldSword.functions = {
     if self.weld and (not self.weld:isDestroyed()) then self.weld:destroy() end
 
     -- Calculate offset due to HeldSword swinging
-    local sox, soy, angle = calculate_offset(self.side, phase)
+    local sox, soy, angle = calculate_offset(self.side)
     local creatorx, creatory = cr.body:getPosition()
 
     -- Determine offset due to falling

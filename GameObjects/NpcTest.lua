@@ -71,6 +71,7 @@ NPC.functions = {
   end,
 
   unpausable_update = function (self, dt)
+    if game.transitioning then return end
     if self.activated then
       self:activate(dt)
       self.activated = false

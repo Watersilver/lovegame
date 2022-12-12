@@ -125,6 +125,7 @@ if not verh.fileExists("key_config.lua") then
   local newfile = love.filesystem.newFile("key_config.lua")
   newfile:close()
   local success = love.filesystem.write("key_config.lua", inpcontents)
+---@diagnostic disable-next-line: undefined-field
   if not success then love.errhand("Failed to write key_config") end
 end
 
