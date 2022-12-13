@@ -954,25 +954,6 @@ function love.update(dt)
 
   end
 
-  if not game.transitioning then
-    -- Run unpausable_update methods
-    -- (note they don't run on transitions so name is a bit misleading)
-    local uUpnum = #o.unpausableUpdaters
-    if uUpnum > 0 then
-      for i = 1, uUpnum do
-        o.unpausableUpdaters[i]:unpausable_update(dt)
-      end
-    end
-  end
-
-  -- Run unstoppable_update methods
-  local usUpnum = #o.unstoppableUpdaters
-  if usUpnum > 0 then
-    for i = 1, usUpnum do
-      o.unstoppableUpdaters[i]:unstoppable_update(dt)
-    end
-  end
-
   if not game.paused then
     -- Make sure missiles don't exceed mslLim game setting
     if session.mslQueue.length > gs.mslLim then
@@ -1035,6 +1016,28 @@ function love.update(dt)
       game.pause(false)
       inv.closeInv()
       session.forceCloseInv = false
+    end
+  end
+
+  -- If unpausable_update doesn't run after physics and/or(?) the other updates,
+  -- pausing during an unpausable update after transition causes wrong positioning.
+  -- See when adding the first journal entry durning a scrolling transition
+  if not game.transitioning then
+    -- Run unpausable_update methods
+    -- (note they don't run on transitions so name is a bit misleading)
+    local uUpnum = #o.unpausableUpdaters
+    if uUpnum > 0 then
+      for i = 1, uUpnum do
+        o.unpausableUpdaters[i]:unpausable_update(dt)
+      end
+    end
+  end
+
+  -- Run unstoppable_update methods
+  local usUpnum = #o.unstoppableUpdaters
+  if usUpnum > 0 then
+    for i = 1, usUpnum do
+      o.unstoppableUpdaters[i]:unstoppable_update(dt)
     end
   end
 

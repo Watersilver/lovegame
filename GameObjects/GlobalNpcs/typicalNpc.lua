@@ -6,9 +6,6 @@ local dlg = require "dialogue"
 local npcTest = require "GameObjects.npcTest"
 local game = require "game"
 
-
-local floor = math.floor
-
 local NPC = {}
 
 local cc = COLORCONST
