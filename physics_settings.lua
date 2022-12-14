@@ -168,6 +168,7 @@ function ps.shapes.edgeToTiles(instance)
   local newf = love.physics.newFixture(instance.body, shape)
   u.push(instance.fixtures, newf)
   newf:setMask(SPRITECAT, PLAYERJUMPATTACKCAT)
+---@diagnostic disable-next-line: missing-parameter
   newf:setCategory(FLOORCOLLIDECAT)
   -- WARNING: HATCHET JOB
 
@@ -177,6 +178,7 @@ function ps.shapes.edgeToTiles(instance)
     instance.body:setFixedRotation(true)
     instance.body:setMass(pp.mass or 40)
     instance.body:setLinearDamping(pp.linearDamping or 40)
+---@diagnostic disable-next-line: undefined-field
     for _, fixture in ipairs(instance.body:getFixtureList()) do
       fixture:setRestitution(pp.restitution or 0)
     end
@@ -185,8 +187,11 @@ function ps.shapes.edgeToTiles(instance)
 end
 
 function ps.getFixtureInfo(fixture)
+  local categories, mask, group = fixture:getFilterData( )
   local fixtureInfo = {
-    categories, mask, group = fixture:getFilterData(),
+    categories = categories,
+    mask = mask,
+    group = group,
     restitution = fixture:getRestitution(),
     density = fixture:getDensity(),
     friction = fixture:getFriction(),

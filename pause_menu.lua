@@ -113,6 +113,12 @@ pam.middle = {
   missileSkillSprite = im.sprites["missileSkill"],
   mobilitySkillSprite = im.sprites["mobilitySkill"],
 }
+local function isEquipped(itemid)
+  return session.save.equippedRing == itemid or session.save.focus == itemid
+end
+local function setColorToEquipped()
+  love.graphics.setColor(COLORCONST*0.7, COLORCONST*0.4, COLORCONST, COLORCONST*0.2)
+end
 local function determineHotkeyDisplayPosition(i)
   local j = 0
   local k = 0
@@ -141,24 +147,34 @@ pam.middle.draw = function(l, t, w, h)
     -- hotkeys
     for i=0,9 do
 
-      local x, y = determineHotkeyDisplayPosition(i)
-
-      love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
-      love.graphics.rectangle("fill", x + 1, y, boxWidth, boxHeight)
-      love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
-      love.graphics.rectangle("line", x + 1, y, boxWidth, boxHeight)
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
-      love.graphics.print((i + 1) .. ".", x + 2, y + yPadding, 0, textScale)
-
       local itemname = "--"
       local kbitem = session.save["keybind" .. (i + 1)]
+      local equipped = false
       if kbitem then
+        equipped = isEquipped(kbitem)
         local iname = items[kbitem] and items[kbitem].name or "no data..."
         if type(iname) == "function" then iname = iname() end
         local duplicates = session.save[kbitem] or "?"
         if duplicates ~= 1 then iname = iname .. " x" .. duplicates end
         itemname = iname
       end
+      local x, y = determineHotkeyDisplayPosition(i)
+
+      if equipped then
+        setColorToEquipped()
+      else
+        love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+      end
+      love.graphics.rectangle("fill", x + 1, y, boxWidth, boxHeight)
+      if equipped then
+        setColorToEquipped()
+      else
+        love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+      end
+      love.graphics.rectangle("line", x + 1, y, boxWidth, boxHeight)
+      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      love.graphics.print((i + 1) .. ".", x + 2, y + yPadding, 0, textScale)
+
       local xPadding = (boxWidth - love.graphics.getFont():getWidth(itemname) * textScale) * 0.5
       love.graphics.print(itemname, x + xPadding, y + yPadding, 0, textScale)
     end
@@ -454,6 +470,7 @@ local tooltipFuncs = {
   customise = function()
     local setting = pam.left.customise[pam.left.customiseCursor]
     if pam.left.selectedSetting then
+---@diagnostic disable-next-line: assign-type-mismatch
       pam.left.tooltip = settingsTooltipFuncs[setting]
     else
       if setting == "lightStyle" then
@@ -557,10 +574,8 @@ local drawFuncs = {
       for iindex, itemid in ipairs(session.save.items) do
         local pr, pg, pb, pa = love.graphics.getColor()
         love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
-        if session.save.equippedRing == itemid or
-        session.save.focus == itemid
-        then
-          love.graphics.setColor(COLORCONST*0.7, COLORCONST*0.4, COLORCONST, COLORCONST*0.2)
+        if isEquipped(itemid) then
+          setColorToEquipped()
           love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
         elseif pamleft.itemCursor == iindex then
           love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)

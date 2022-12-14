@@ -116,9 +116,10 @@ items.testi2 = {
 
 items.keyLyre = {
   name = "Lyre",
-  description = "wat",
+  description = "Select to play, escape or backspace to stop.",
   limit = 1,
   useCallback = function()
+    session.usedItemComment = nil
     if pl1 then
       pl1.animation_state:change_state(pl1, "noDt", "downharp")
     end
@@ -126,7 +127,7 @@ items.keyLyre = {
   failedToUseCallback = function()
     if pl1 and pl1.animation_state.state == "downharp" then
       forceCloseInv()
-      session.usedItemComment = ""
+      session.usedItemComment = nil
       pl1.animation_state:change_state(pl1, "noDt", "downstill")
     else
       return "error"

@@ -1797,7 +1797,14 @@ local animation_states = {
 
   downharp = {
   run_state = function(instance, dt)
+    inp.disable_controller(instance.player)
+    if instance.skipFirstUpdate then instance.skipFirstUpdate = false; return end
     local notesPlayed = 0
+
+    if inp.cancelPressed then
+      items.keyLyre.use()
+      return
+    end
 
     for key, pressed in pairs(inp.keys.pressed) do
       if pressed then
@@ -1853,6 +1860,7 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
+    instance.skipFirstUpdate = true
     instance.noteObj = require "GameObjects.note"
     instance.image_index = 0
     instance.image_speed = 0
@@ -1863,6 +1871,7 @@ local animation_states = {
     instance.movement_state:change_state(pl1, dt, "stand_still")
     instance.wasMusicOn = gs.musicOn
     gs.musicOn = false
+    inp.disable_controller(instance.player)
 
     if not instance.harpSoundTable then
       instance.harpSoundTable = {
@@ -1914,6 +1923,7 @@ local animation_states = {
     instance.prevHarpTimer = nil
     instance.noteObj = nil
     instance.movement_state:change_state(pl1, dt, "normal")
+    inp.enable_controller(instance.player)
   end
   },
 
@@ -2568,7 +2578,7 @@ Playa.functions = {
         local itemid = session.save["keybind" .. i]
         local used = items.useItem(itemid)
         local overlay = require "GameObjects.overlayText.overplayer"
-        if used and session.usedItemComment ~= "" then overlay.createNew(session.usedItemComment) end
+        if used and session.usedItemComment and session.usedItemComment ~= "" then overlay.createNew(session.usedItemComment) end
       end
     end
 
