@@ -99,6 +99,7 @@ local function SaveMap()
   gObjString .. "----------End of gameObjects----------\n\z
   }\n\z
   return room")
+---@diagnostic disable-next-line: undefined-field
   if not success then love.errhand("Failed to write new_room") end
 end
 
@@ -241,7 +242,7 @@ Re.functions = {
 
     -- input
     if love.keyboard.isDown("up") then up = true else up = false end
-    upP = up and not uppr
+    local upP = up and not uppr
     uppr = up
     if love.keyboard.isDown("left") then left = true else left = false end
     leftP = left and not leftpr
@@ -377,7 +378,9 @@ Re.functions = {
     love.graphics.setColor(pr, pg, pb, pa)
     love.graphics.print(worldMouseX, love.graphics.getWidth()-100)
     love.graphics.print(worldMouseY, love.graphics.getWidth()-100, 50)
+---@diagnostic disable-next-line: param-type-mismatch
     love.graphics.print(tileMouseX or -1, love.graphics.getWidth()-100, 150)
+---@diagnostic disable-next-line: param-type-mismatch
     love.graphics.print(tileMouseY or -1, love.graphics.getWidth()-100, 200)
     if currentRoomPart then
       love.graphics.print("rpx:" .. currentRoomPart.x_that_I_start, twidth, 0)
@@ -404,7 +407,7 @@ Re.functions = {
     tsize)
     love.graphics.setColor(pr, pg, pb, pa)
 
-    if states[self.state].noCamDraw then states[self.state].noCamDraw(self, dt) end
+    if states[self.state].noCamDraw then states[self.state].noCamDraw(self, delta_time) end
   end
 }
 

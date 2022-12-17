@@ -51,7 +51,6 @@ end
 function NPC.initialize(instance)
   instance.myText = myText
   instance.activateFuncs = activateFuncs
-  instance.onDialogueRealEnd = onDialogueRealEnd
   instance.sprite_info = im.spriteSettings.npcTest3Sprites
   instance.counter = 1
 end

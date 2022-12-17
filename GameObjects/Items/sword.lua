@@ -196,6 +196,7 @@ Sword.functions = {
   load = function (self)
     if self.spin then
       self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwingWide, 0)
+---@diagnostic disable-next-line: missing-parameter
       self.fixture:setMask(SPRITECAT)
       self.spinFreq = 1 / 60
       self.spinPhase = self.spinFreq
@@ -315,6 +316,7 @@ Sword.functions = {
         elseif phase == 2 then
           self.fixture = love.physics.newFixture(self.body, ps.shapes.swordStill, 0)
         end
+---@diagnostic disable-next-line: missing-parameter
         self.fixture:setMask(SPRITECAT)
         self.fixture:setSensor(true)
 
@@ -326,8 +328,10 @@ Sword.functions = {
     end
 
     if self.onAir then
+---@diagnostic disable-next-line: missing-parameter
       self.fixture:setCategory(PLAYERJUMPATTACKCAT)
     else
+---@diagnostic disable-next-line: missing-parameter
       self.fixture:setCategory(PLAYERATTACKCAT)
     end
 

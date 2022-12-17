@@ -182,7 +182,7 @@ local states = {
       if not instance.target then return end
       if not instance.target.x then return end
 
-      local tarx, tary, targetingSide = getTargetPos(instance, instance.target, instance.targetingSide)
+      local tarx, tary = getTargetPos(instance, instance.target)
 
       local _, dir = u.cartesianToPolar(tarx, tary)
       instance.direction = dir

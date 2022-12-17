@@ -228,7 +228,7 @@ BlueHand.functions = {
     if self.grabbedPlayer then return end
     self.grabbedPlayer = other.zo == 0 and other.animation_state.state ~= "dontdraw" and other.body:getType() == "dynamic" and not other.deathState
     if self.grabbedPlayer then
-      other.animation_state:change_state(other, dt, "dontdraw")
+      other.animation_state:change_state(other, delta_time, "dontdraw")
       self.grabbedPlayer = other
       self.undamageable = true
     end

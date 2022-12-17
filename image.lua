@@ -1,5 +1,5 @@
 -- removes scaled sprite blurriness
-love.graphics.setDefaultFilter("nearest")
+love.graphics.setDefaultFilter("nearest", "nearest")
 
 local floor = math.floor
 

@@ -56,6 +56,7 @@ function si.lookFor(seer, target, options)
   end
   if seer.canSeeThroughWalls then return true end
   -- If there are obstacles between self and target, don't see target
+---@diagnostic disable-next-line: missing-parameter, param-type-mismatch
   ps.pw:rayCast(sx, sy, tx, ty, control)
 
   if options.ignore then

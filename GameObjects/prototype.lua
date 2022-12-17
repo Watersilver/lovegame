@@ -97,6 +97,7 @@ p.functions = {
     body:setGravityScale(0)
     body:setFixedRotation(true)
     self.spritefixture = love.physics.newFixture(body, sp.shape, 0)
+---@diagnostic disable-next-line: missing-parameter
     self.spritefixture:setCategory(SPRITECAT)
     self.spritefixture_properties = nil
   end,
