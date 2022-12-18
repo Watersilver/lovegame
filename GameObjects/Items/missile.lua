@@ -7,6 +7,9 @@ local game = require "game"
 local im = require "image"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
+local utilities = require "utilities"
+local counter   = require "counter"
+local mdust     = require "GameObjects.Items.mdust"
 
 -- missile light
 local ls = require "lightSources"
@@ -118,6 +121,8 @@ Missile.functions = {
     self.x, self.y = 0, 0
     session.mslQueue:add(self)
     self.outlineSprite = im.sprites["Inventory/UseMissileOutlineL1"]
+
+    self.sparkCounter = counter.new(.2)
   end,
 
   early_update = function(self, dt)
@@ -125,7 +130,17 @@ Missile.functions = {
 
     if self.weld and not self.weld:isDestroyed() then self.weld:destroy(); self.weld = nil end
 
+    if self.charged and self.sparkCounter:update(dt) then
+      local dx, dy = utilities.randomPointFromEllipse(4, 4, true)
+      session.particles:addSpark{x = self.x + dx, y = self.y + dy}
+    end
+
     if not self.fired then
+
+      if not cr or not cr.exists then
+        self.broken = true
+        return
+      end
 
       if cr.missile_cooldown then
         local stage = cr.missile_cooldown/session.getMagicCooldown()
@@ -156,6 +171,13 @@ Missile.functions = {
   end,
 
   update = function(self, dt)
+    local cr = self.creator
+
+    if not cr or not cr.exists then
+      self.broken = true
+      return
+    end
+
     -- if self.spritejoint then self.spritejoint:destroy() end
     local x, y = self.body:getPosition()
     -- self.spritebody:setPosition(x, y)
@@ -163,17 +185,38 @@ Missile.functions = {
 
     self.x, self.y = x, y
 
-    if self.broken and self.fired and self.image_index ~= 0 then
-      self.body:setLinearVelocity(0, 0)
-      self.image_index = self.image_index - dt * 60
-      if self.image_index < 0 then
-        self.image_index = 0
-        self.trans_draw = emptyFunc
-        self.draw = emptyFunc
-        self.update = emptyFunc
-        self.early_update = emptyFunc
-        -- Stop colliding
-        self.fixture:setMask(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)
+    if self.broken then
+      if self.dust and not self.outOfBounds then
+        o.addToWorld(self.dust)
+      end
+      self.dust = nil
+
+      if self.fired and self.image_index ~= 0 then
+        self.body:setLinearVelocity(0, 0)
+        self.image_index = self.image_index - dt * 60
+        if self.image_index < 0 then
+          self.image_index = 0
+          self.trans_draw = emptyFunc
+          self.draw = emptyFunc
+          self.update = emptyFunc
+          self.early_update = emptyFunc
+          -- Stop colliding
+          self.fixture:setMask(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)
+        end
+      end
+    else
+      if self.charged then
+        if not self.dust then
+          self.dust = mdust:new{
+            creator = cr,
+            side = cr:getFacing(),
+            layer = cr:getFacing() == "up" and cr.layer - 1 or cr.layer + 1
+          }
+        end
+        self.dust.x = self.x
+        self.dust.y = self.y
+        self.dust.xstart = self.x
+        self.dust.ystart = self.y
       end
     end
     if self.pastMslLim then
@@ -291,9 +334,7 @@ Missile.functions = {
   end,
 
   delete = function(self)
-    if self.pastMslLim then
-
-    else
+    if not self.pastMslLim then
       session.mslQueue:remove()
     end
     if self == self.creator.missile then self.creator.missile = nil end

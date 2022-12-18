@@ -120,8 +120,7 @@ local movement_states = {
             elseif trig.recall then
               instance.movement_state:change_state(instance, dt, "using_recall")
             elseif trig.mystery then
-              local removeResult = session.removeItem("mateMagicDust")
-              if removeResult < 0 then return end
+              if not session.removeMDust() then return end
               -- Animation state gets checked after this
               -- so mark a new trigger here to also change animation
               -- because I can't removeItem again to check removeResult
@@ -2265,6 +2264,7 @@ function Playa.initialize(instance)
     jump = {"Effects/Oracle_Link_Jump"},
     land = {"Effects/Oracle_Link_LandRun"},
     magicMissile = {"Effects/Magic_Missile"},
+    magicMissileCharge = {"Effects/MagicMissileCharge"},
     pickUp = {"Effects/Oracle_Link_PickUp"},
     throw = {"Effects/Oracle_Link_Throw"},
     hurt = {"Effects/Oracle_Link_Hurt"},

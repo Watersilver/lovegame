@@ -375,6 +375,33 @@ session = {
       )
     end
   end,
+  -- Removes magic dust on usage taking into account cost modifiers
+  removeMDust = function(missile, bomb)
+    local multiplier = 1
+    if missile then multiplier = 2 end -- Check for rings that change missiles here too.
+    if bomb then multiplier = 3 end
+    if session.hasFocusEquipped() then
+      return session.removeItems("mateMagicDust", 2 * multiplier)
+    end
+    return session.removeItems("mateMagicDust", 1 * multiplier)
+  end,
+  -- Removes specified amount of items or fails if there are not enough items.
+  -- If amount is decimal it gets floored.
+  removeItems = function(itemid, amount)
+    if not session.save[itemid] then return false end
+    amount = math.floor(amount)
+    if session.save[itemid] > amount then
+      session.save[itemid] = session.save[itemid] - amount
+      return true
+    end
+    if session.save[itemid] == amount then
+      session.save[itemid] = nil
+      local index = u.getFirstIndexByValue(session.save.items, itemid)
+      table.remove(session.save.items, index)
+      return true
+    end
+    return false
+  end,
   removeItem = function(itemid)
     if not session.save[itemid] then return -1 end
     session.save[itemid] = session.save[itemid] - 1

@@ -350,6 +350,14 @@ end
 player_states.run_missile = function(instance, dt, side)
   instance.missile_cooldown = instance.missile_cooldown + dt
   img_speed_and_footstep_sound(instance, dt)
+
+  if not instance.missile.charged and instance.triggers.mystery then
+    if session.removeMDust(true) then
+      snd.play(instance.sounds.magicMissileCharge)
+      instance.missile.charged = true
+    end
+  end
+
   if instance.speed < 5 then
     if floor(instance.image_index) ~= 3 then
       instance.image_index = 1

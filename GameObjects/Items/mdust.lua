@@ -37,6 +37,10 @@ function MagicDust.initialize(instance)
   instance.lvl = session.save.magicLvl
   instance.chargedShaderFreq = 1 / 30
   instance.chargedShaderPhase = instance.chargedShaderFreq
+
+  if session.hasFocusEquipped("focusDoll") then
+    instance.focusID = "focusDoll"
+  end
 end
 
 MagicDust.functions = {
@@ -151,6 +155,14 @@ MagicDust.functions = {
     }
   end,
 
+  focus = function (self, focusID)
+    if focusID then
+      return self.focusID == focusID
+    end
+
+    return self.focusID ~= nil
+  end,
+
   update = function (self, dt)
 
     -- Delete and clean fixture data because it can only react during its first frame.
@@ -172,13 +184,13 @@ MagicDust.functions = {
       end
 
       -- Check if I have to force some reaction because of some focus
-      if session.hasFocusEquipped("focusDoll") then
+      if self:focus("focusDoll") then
         reactionID = r.decoy
       end
 
       -- Check if reactionID must be overriden because of reagent special focus behaviour
-      if session.hasFocusEquipped() and self.reagent and self.reagent.exists and self.reagent[GCON.md.focus] then
-        local id = self.reagent[GCON.md.focus]()
+      if self:focus() and self.reagent and self.reagent.exists and self.reagent[GCON.md.focus] then
+        local id = self.reagent[GCON.md.focus](self)
         if id then reactionID = id end
       end
 
