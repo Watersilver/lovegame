@@ -496,6 +496,7 @@ player_states.start_gripping = function(instance, dt, side)
         startingTimer = other.startingTimer,
         lift_update = other.lift_update,
         myDrops = other.myDrops,
+        dustBomb = other.dustBomb,
         throw_update = other.throw_update,
         explosionNumber = other.explosionNumber,
         explosionSprite = other.explosionSprite,
@@ -503,7 +504,7 @@ player_states.start_gripping = function(instance, dt, side)
         explosionSound = other.explosionSound,
         lifterSpeedMod = other.lifterSpeedMod or 0.5,
         throw_collision = other.throw_collision or emptyFunc,
-        inheritedShader = other.myShader
+        inheritedShader = other.myShader or other.inheritedShader
       }
       o.removeFromWorld(other)
       -- other.destroy = other.on_replaced_by_lifted
@@ -534,8 +535,23 @@ player_states.end_gripping = function(instance, dt, side)
   if instance.grip and not instance.grip:isDestroyed() then instance.grip:destroy(); instance.grip = nil end
 end
 
+
+local function chargeLifted(lifted, lifter)
+  if not lifted.undustable and not lifted.persistentData.charged and lifter.triggers.mystery then
+    local success = lifted.iAmBomb and session.removeMDust(nil, nil, true) or session.removeMDust(nil, true)
+    if success then
+      snd.play(lifter.sounds.magicMissileCharge)
+      lifted.persistentData.charged = true
+      lifted.persistentData.focus = session.save.focus
+    end
+  end
+end
+
 player_states.run_lifting = function(instance, dt, side)
-  -- instance.liftingStage = instance.liftingStage + dt * 12
+  if instance.liftedOb then
+    chargeLifted(instance.liftedOb, instance)
+  end
+
   instance.liftingStage = 1 + 3 * instance.item_use_counter * instance.invGripTime
 
   if instance.liftingStage >= 4 then instance.liftingStage = 4 end
@@ -593,6 +609,7 @@ player_states.run_lifted = function(instance, dt, side)
   end
   if instance.liftedOb then
     instance.liftedOb.side = side
+    chargeLifted(instance.liftedOb, instance)
   end
 end
 

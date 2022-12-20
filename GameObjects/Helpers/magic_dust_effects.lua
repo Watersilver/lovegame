@@ -1,3 +1,4 @@
+local ps = require "physics_settings"
 local snd = require "sound"
 local o = require "GameObjects.objects"
 local im = require "image"
@@ -115,6 +116,8 @@ local magic_dust_effects = {
       zo = 0,
       vx = 0,
       vy = 0,
+      shape = ps.shapes.circleAlmost1,
+      persistentData = {noshdr = true}
     }
 
     -- -- Can't react anymore... Right?

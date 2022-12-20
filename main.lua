@@ -376,14 +376,26 @@ session = {
     end
   end,
   -- Removes magic dust on usage taking into account cost modifiers
-  removeMDust = function(missile, bomb)
-    local multiplier = 1
-    if missile then multiplier = 2 end -- Check for rings that change missiles here too.
-    if bomb then multiplier = 3 end
-    if session.hasFocusEquipped() then
-      return session.removeItems("mateMagicDust", 2 * multiplier)
+  removeMDust = function(missile, lifted, bomb)
+    local amount = 1
+
+    if missile then
+      -- Check for rings that change missiles here too, to further affect amount maybe.
+      amount = 2
+      if session.hasFocusEquipped() then
+        amount = 4
+      end
     end
-    return session.removeItems("mateMagicDust", 1 * multiplier)
+
+    if lifted then
+      amount = 2
+    end
+
+    if bomb then
+      amount = 3
+    end
+
+    return session.removeItems("mateMagicDust", amount)
   end,
   -- Removes specified amount of items or fails if there are not enough items.
   -- If amount is decimal it gets floored.

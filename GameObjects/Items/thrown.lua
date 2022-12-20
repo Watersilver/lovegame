@@ -8,17 +8,16 @@ local expl = require "GameObjects.explode"
 local im = require "image"
 local snd = require "sound"
 local bspl = require "GameObjects.Items.bombsplosion"
+local chnr = require "GameObjects.Items.chainReaction"
 local shdrs = require "Shaders.shaders"
+local counter = require "counter"
+local utilities = require "utilities"
 
-local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
 
 local sh = require "GameObjects.shadow"
 
 local Thrown = {}
-
-local floor = math.floor
-local pi = math.pi
 
 local function destroyself(self)
   if not self.destroyedself then
@@ -28,11 +27,19 @@ local function destroyself(self)
     if self.shadow then o.removeFromWorld(self.shadow) end
     self.shadow = nil
     if self.iAmBomb then
-      local newBspl = bspl:new{
-        x = self.x, y = self.y, layer = self.layer,
-        dustAccident = self.dustBomb
-      }
-      o.addToWorld(newBspl)
+      if self.persistentData.charged then
+        local newChnr = chnr:new{
+          x = self.x, y = self.y, layer = self.layer,
+          dustAccident = u.ternaryOp(self.dustBomb, true, false)
+        }
+        o.addToWorld(newChnr)
+      else
+        local newBspl = bspl:new{
+          x = self.x, y = self.y, layer = self.layer,
+          dustAccident = u.ternaryOp(self.dustBomb, true, false)
+        }
+        o.addToWorld(newBspl)
+      end
     end
   end
 end
@@ -40,8 +47,8 @@ end
 local function touchGround(self)
   if self.iAmBomb then
     if not self.planted then snd.play(glsounds.bombDrop) end
+    self.cantGrab = false
     if self.bounces == 0 then
-      self.cantGrab = false
       self.bounces = 1
       self.zvel = 55
       self.zo = -1
@@ -91,16 +98,22 @@ function Thrown.initialize(instance)
     masks = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT},
     -- This means that it is considered both a player attack,
     -- a player jump attack and can collide with the floor
-    categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT}
+    categories = {PLAYERATTACKCAT, PLAYERJUMPATTACKCAT, FLOORCOLLIDECAT,
+
+      -- This is here so bombs are liftable. Remove if issues arise
+      DEFAULTCAT
+    }
   }
   instance.seeThrough = true
   instance.immathrown = true
   instance.bounces = 0
   instance.thrownGoesThrough = true
-  instance.zo = - 1.5 * ps.shapes.plshapeHeight
+  instance.zo = instance.zo or (-1.5 * ps.shapes.plshapeHeight)
 
   instance.liftable = true
   instance.cantGrab = true
+
+  instance.persistentData = instance.persistentData or {}
 end
 
 Thrown.functions = {
@@ -117,9 +130,16 @@ Thrown.functions = {
       self.xvscale = self.xvscale or 0
       self.yvscale = self.yvscale or 0
     end
+
+    self.sparkCounter = counter.new(.1)
   end,
 
   update = function(self, dt)
+
+    if self.persistentData.charged and self.sparkCounter:update(dt) then
+      local dx, dy = utilities.randomPointFromEllipse(self.sprite.width, self.sprite.height)
+      session.particles:addSpark{x = self.x + dx, y = self.y + dy}
+    end
 
     -- Handle zaxis
     if not game.room.sideScrolling then
@@ -217,8 +237,9 @@ Thrown.functions = {
     -- Debug
     -- love.graphics.polygon("line",
     -- self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
-    -- love.graphics.polygon("line",
-    -- self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+    -- if not self.shape then love.graphics.polygon("line",
+    -- self.body:getWorldPoints(self.fixture:getShape():getPoints())) end
+    -- love.graphics.circle("line", self.x, self.y, self.shape:getRadius())
   end,
 
   trans_draw = function(self)
@@ -263,8 +284,8 @@ Thrown.functions = {
 }
 
 function Thrown:new(init)
-  local instance = p:new() -- add parent functions and fields
-  p.new(Thrown, instance, init) -- add own functions and fields
+  local instance = p:new(init) -- add parent functions and fields
+  p.new(Thrown, instance) -- add own functions and fields
   return instance
 end
 

@@ -556,4 +556,59 @@ function u.colorTable(r,g,b,a)
   return t
 end
 
+local function printPropsRecursive(obj, path, maxDepth, printed, tab)
+  path = path or "root"
+  printed = printed or {}
+  tab = tab or ""
+  printed[path] = obj
+
+  if type(obj) ~= "table" then
+    printPropsRecursive({[path] = obj})
+    return
+  end
+
+  for key, value in pairs(obj) do
+    local tv = type(value)
+    if tv == "function" or tv == "thread" or tv == "userdata" then
+      print(tab .. key .. ": unprintable type '" .. tv .. "'")
+    elseif tv == "table" then
+      local alreadyPrintedPath = ""
+
+      for n, o in pairs(printed) do
+        if o == value then
+          alreadyPrintedPath = n
+          break
+        end
+      end
+
+      if alreadyPrintedPath ~= "" then
+        print(tab .. key .. ": table already printed at path '" .. alreadyPrintedPath .. "'")
+      elseif maxDepth and maxDepth == 0 then
+        print(tab .. key .. ": table")
+      else
+        print(tab .. key .. ":")
+        printPropsRecursive(value, path .. "." .. key, maxDepth - 1, printed, tab .. " ")
+      end
+    elseif tv == "string" then
+      print(tab .. key .. ': "' .. value .. '"')
+    elseif tv == "boolean" then
+      print(tab .. key .. ': ' .. (value and "true" or "false"))
+    elseif tv == "nil" then
+      print(tab .. key .. ': nil')
+    else
+      print(tab .. key .. ': ' .. value)
+    end
+  end
+end
+function u.printTable(id, obj, maxDepth)
+  print("=== Start printing table " .. id .. "===")
+  printPropsRecursive(obj, id, maxDepth)
+  print("=== Finish printing table " .. id .. "===")
+end
+
+-- condition and v1 or v2 doesn't work for falsy values. Use this func instead.
+function u.ternaryOp(condition, valIfTrue, valIfFalse)
+  if condition then return valIfTrue else return valIfFalse end
+end
+
 return u

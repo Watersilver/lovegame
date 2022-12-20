@@ -5,6 +5,10 @@ local o = require "GameObjects.objects"
 local ps = require "physics_settings"
 local bspl = require "GameObjects.Items.bombsplosion"
 local shdrs = require "Shaders.shaders"
+local counter = require "counter"
+local utilities = require "utilities"
+local u = require "utilities"
+local chnr = require "GameObjects.Items.chainReaction"
 
 local thr = require "GameObjects.Items.thrown"
 
@@ -14,11 +18,22 @@ local function destroyself(self)
     o.removeFromWorld(self)
     if self.shadow then o.removeFromWorld(self.shadow) end
     self.shadow = nil
-    self.creator.triggers.bomb = true
     self.creator.liftedOb = nil
     if self.iAmBomb then
-      local newBspl = bspl:new{x = self.x, y = self.y, layer = self.layer}
-      o.addToWorld(newBspl)
+      self.creator.triggers.bomb = true
+      if self.persistentData.charged then
+        local newChnr = chnr:new{
+          x = self.x, y = self.y, layer = self.layer,
+          dustAccident = u.ternaryOp(self.dustBomb, true, false)
+        }
+        o.addToWorld(newChnr)
+      else
+        local newBspl = bspl:new{
+          x = self.x, y = self.y, layer = self.layer,
+          dustAccident = u.ternaryOp(self.dustBomb, true, false)
+        }
+        o.addToWorld(newBspl)
+      end
     end
   end
 end
@@ -89,6 +104,7 @@ local Lifted = {}
 function Lifted.initialize(instance)
   instance.transPersistent = true
   instance.seeThrough = true
+  instance.persistentData = instance.persistentData or {}
 end
 
 Lifted.functions = {
@@ -109,10 +125,17 @@ Lifted.functions = {
     self.vibrPhase = 0
     self.startingTimer = self.timer
     if session.save.dinsPower and self.iAmBomb then self.myShader = shdrs["bombRedShader"] end
+
+    self.sparkCounter = counter.new(.1)
   end,
 
   update = function (self, dt)
     local cr = self.creator
+
+    if self.persistentData.charged and self.sparkCounter:update(dt) then
+      local dx, dy = utilities.randomPointFromEllipse(self.sprite.width, self.sprite.height)
+      session.particles:addSpark{x = self.x + dx, y = self.y + dy}
+    end
 
     -- Determine offset due to falling
     local fy = 0
@@ -193,7 +216,9 @@ Lifted.functions = {
     local frame = sprite[self.image_index]
     local worldShader = love.graphics.getShader()
 
-    love.graphics.setShader(self.inheritedShader or self.myShader)
+    if not self.persistentData.noshdr then
+      love.graphics.setShader(self.inheritedShader or self.myShader)
+    end
     if self.creator and not self.creator.invisible then
       love.graphics.draw(
       sprite.img, frame, x, y, self.angle,
@@ -249,6 +274,7 @@ Lifted.functions = {
       iAmBomb = self.iAmBomb,
       timer = self.timer,
       vibrPhase = self.vibrPhase,
+      dustBomb = self.dustBomb,
       startingTimer = self.startingTimer,
       inheritedShader = self.inheritedShader
     }

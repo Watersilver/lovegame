@@ -33,10 +33,6 @@ end
 local Brick = {}
 
 function Brick.initialize(instance)
-  -- instance.physical_properties = {
-  --   tile = true,
-  --   edgetable = ps.shapes.edgeRect1x1
-  -- }
   instance.physical_properties = {
     shape = ps.shapes.circleAlmost1,
     masks = {PLAYERJUMPATTACKCAT}
@@ -66,7 +62,7 @@ Brick.functions = {
       -- chance of stoning
       {value = GCON.md.reaction.stone, chance = 0.1},
       -- chance of exploding
-      {value = GCON.md.reaction.bomb, chance = 0.02},
+      {value = GCON.md.reaction.bomb, chance = 10.02},
       -- chance of freezing
       {value = GCON.md.reaction.ice, chance = 0.25},
       -- chance of burning

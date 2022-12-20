@@ -9,6 +9,8 @@ function ChainReaction.initialize(instance)
   instance.freq = 0.1
   instance.radius = 16 * 10
   instance.explosions = 20
+  print(instance.dustAccident)
+  instance.dustAccident = u.ternaryOp(instance.dustAccident == true, true, false)
 end
 
 ChainReaction.functions = {
@@ -31,7 +33,7 @@ ChainReaction.functions = {
         x = self.x + xmod,
         y = self.y + ymod,
         layer = self.layer,
-        dustAccident = true
+        dustAccident = self.dustAccident
       }
       o.addToWorld(boom)
       if self.currentExplosionNum >= self.explosions then
