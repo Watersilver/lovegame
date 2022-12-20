@@ -132,7 +132,7 @@ Missile.functions = {
 
     if self.charged and self.sparkCounter:update(dt) then
       local dx, dy = utilities.randomPointFromEllipse(4, 4, true)
-      session.particles:addSpark{x = self.x + dx, y = self.y + dy}
+      session.particles:addColouredSpark{x = self.x + dx, y = self.y + dy}
     end
 
     if not self.fired then

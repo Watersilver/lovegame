@@ -40,6 +40,12 @@ local function destroyself(self)
         }
         o.addToWorld(newBspl)
       end
+    elseif self.persistentData.charged then
+      local newBspl = bspl:new{
+        x = self.x, y = self.y, layer = self.layer,
+        dustAccident = true
+      }
+      o.addToWorld(newBspl)
     end
   end
 end
@@ -138,7 +144,7 @@ Thrown.functions = {
 
     if self.persistentData.charged and self.sparkCounter:update(dt) then
       local dx, dy = utilities.randomPointFromEllipse(self.sprite.width, self.sprite.height)
-      session.particles:addSpark{x = self.x + dx, y = self.y + dy}
+      session.particles:addColouredSpark{x = self.x + dx, y = self.y + dy}
     end
 
     -- Handle zaxis

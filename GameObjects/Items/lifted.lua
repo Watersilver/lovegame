@@ -134,7 +134,7 @@ Lifted.functions = {
 
     if self.persistentData.charged and self.sparkCounter:update(dt) then
       local dx, dy = utilities.randomPointFromEllipse(self.sprite.width, self.sprite.height)
-      session.particles:addSpark{x = self.x + dx, y = self.y + dy}
+      session.particles:addColouredSpark{x = self.x + dx, y = self.y + dy}
     end
 
     -- Determine offset due to falling
