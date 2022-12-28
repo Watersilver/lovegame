@@ -1,9 +1,5 @@
 delta_time = 0
 
--- Setup canvases
-local ringCanvas = love.graphics.newCanvas()
-local drugCanvas = love.graphics.newCanvas()
-
 local verh = require "version_handling"
 -- Set up save directory
 if not verh.fileExists("game_settings.lua") then
@@ -114,7 +110,8 @@ local rm = require("RoomBuilding.room_manager")
 local gamera = require "gamera.gamera"
 
 local globs = {
-  particles = require "GameObjects.misc.particles"
+  particles = require "GameObjects.misc.particles",
+  screenEffects = require "screenEffects"
 }
 
 -- Create table to save temporary stuff for current session
@@ -1335,6 +1332,21 @@ local function afterScreenEffects(l,t,w,h)
     love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
   end
 end
+local function noEffectsDraw()
+  cam:setScale(sh.get_total_scale())
+  -- local l, t, w, h = cam:getWindow()
+  -- cam:setWindow(cam.noisel,cam.noiset,w,h)
+  local l, t, w, h = sh.get_current_window()
+  cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
+  cam:setPosition(cam.xt, cam.yt)
+  setCurrentCam(mainCamera)
+  cam:draw(mainCameraDraw)
+
+  -- Draw screen effect due to game time
+  dtse.draw()
+
+  cam:draw(afterScreenEffects)
+end
 local function hudDraw(l,t,w,h)
   local transing = game.transitioning
   if pl1 and not (transing and transing.type == "whiteScreen") then
@@ -1454,76 +1466,33 @@ local function hudDraw(l,t,w,h)
     end
   end
 end
+local prevs = {
+  drug = "uninitialised",
+  ring = "uninitialised"
+}
 function love.draw()
 
-  -- drug effects
-  if session.drug and session.drug.shader then
-    -- delete following lines and the resetting of canvas below to disable drug canvas
-    love.graphics.setCanvas(drugCanvas)
-    love.graphics.clear()
+  local resetScreenEffects = false
 
-    cam:setScale(sh.get_total_scale())
-    -- local l, t, w, h = cam:getWindow()
-    -- cam:setWindow(cam.noisel,cam.noiset,w,h)
-    local l, t, w, h = sh.get_current_window()
-    cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
-    cam:setPosition(cam.xt, cam.yt)
-    setCurrentCam(mainCamera)
-    cam:draw(mainCameraDraw)
+  if prevs.drug == "uninitialised" then resetScreenEffects = true end
+  if prevs.ring == "uninitialised" then resetScreenEffects = true end
+  if prevs.drug ~= (session.drug and session.drug.shader) then resetScreenEffects = true end
+  if prevs.ring ~= session.ringShader then resetScreenEffects = true end
 
-    -- Draw screen effect due to game time
-    dtse.draw()
+  prevs.drug = session.drug and session.drug.shader
+  prevs.ring = session.ringShader
 
-    cam:draw(afterScreenEffects)
-
-    -- delete following lines and the setting of canvas above to disable drug canvas
-    love.graphics.setCanvas()
-
-    -- delete following lines and the resetting of canvas below to disable ring canvas
-    love.graphics.setCanvas(ringCanvas)
-    love.graphics.clear()
-    -- set drug shader
-    session.drug.shader:send("invScale", 0.9 + 0.1*math.cos(session.drug.duration - session.drug.maxDuration))
-    love.graphics.setShader(session.drug.shader)
-    love.graphics.draw(drugCanvas)
-    -- Disable drug shader
-    love.graphics.setShader()
-    love.graphics.setCanvas()
-
-    -- set ring shader
-    love.graphics.setShader(session.ringShader)
-    love.graphics.draw(ringCanvas)
-    -- Disable ring shader
-    love.graphics.setShader()
-  else
-    -- normal effects
-    -- delete following lines and the resetting of canvas below to disable drug canvas
-    love.graphics.setCanvas(ringCanvas)
-    love.graphics.clear()
-
-    cam:setScale(sh.get_total_scale())
-    -- local l, t, w, h = cam:getWindow()
-    -- cam:setWindow(cam.noisel,cam.noiset,w,h)
-    local l, t, w, h = sh.get_current_window()
-    cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
-    cam:setPosition(cam.xt, cam.yt)
-    setCurrentCam(mainCamera)
-    cam:draw(mainCameraDraw)
-
-    -- Draw screen effect due to game time
-    dtse.draw()
-
-    cam:draw(afterScreenEffects)
-
-    -- delete following lines and the setting of canvas above to disable drug canvas
-    love.graphics.setCanvas()
-
-    -- set ring shader
-    love.graphics.setShader(session.ringShader)
-    love.graphics.draw(ringCanvas)
-    -- Disable ring shader
-    love.graphics.setShader()
+  if resetScreenEffects then
+    globs.screenEffects.clear()
+    if session.drug and session.drug.shader then
+      globs.screenEffects.push(session.drug.shader, function(s) s:send("invScale", 0.9 + 0.1*math.cos(session.drug.duration - session.drug.maxDuration)) end)
+    end
+    if session.ringShader then
+      globs.screenEffects.push(session.ringShader)
+    end
   end
+
+  globs.screenEffects.draw(noEffectsDraw)
 
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)
@@ -1726,9 +1695,7 @@ function love.resize( w, h )
   hud:setWindow(sh.get_resized_window( w, h ))
   textCam:setWindow(sh.get_resized_text_window( w, h ))
 
-  -- Reset Canvases
-  ringCanvas = love.graphics.newCanvas(w, h)
-  drugCanvas = love.graphics.newCanvas(w, h)
+  globs.screenEffects.resize(w, h)
 
   -- Determine camera scale due to window size
   sh.calculate_total_scale{resized=true}
