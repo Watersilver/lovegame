@@ -3,13 +3,10 @@
 ---@field canvas love.Canvas
 ---@field prepare? fun(shader: love.Shader)
 
----@type Effect[]
-local effects = {}
-
+---@param draw fun()|love.Canvas
 ---@param canvas? love.Canvas
 ---@param shader? love.Shader
 ---@param prepare? fun(shader: love.Shader)
----@param draw fun()|love.Canvas
 local function drawEffects(draw, canvas, shader, prepare)
   -- Prepare: set canvas and prepare shader
   if canvas then
@@ -42,6 +39,9 @@ table.insert(canvases, {c = love.graphics.newCanvas(), inUse = false})
 table.insert(canvases, {c = love.graphics.newCanvas(), inUse = false})
 table.insert(canvases, {c = love.graphics.newCanvas(), inUse = false})
 
+---@type Effect[]
+local effects = {}
+
 local screenEffects = {
   ---@param shader love.Shader
   ---@param prepare? fun(shader: love.Shader)
@@ -49,20 +49,22 @@ local screenEffects = {
     ---@type love.Canvas?
     local canvas
 
+    -- Assign unused canvas for the effect
     for _, c in ipairs(canvases) do
       if not c.inUse then
         canvas = c.c
         c.inUse = true
-        print("reused canvas")
         break
       end
     end
 
+    -- Create canvas if none are available
     if not canvas then
       canvas = love.graphics.newCanvas()
       table.insert(canvases, {c = canvas, inUse = true})
     end
 
+    -- Push new effect to table
     table.insert(effects, {
       canvas = canvas,
       shader = shader,
@@ -91,6 +93,7 @@ local screenEffects = {
   end,
 
   ---@type fun(drawfunc: fun())
+  -- Draws given draw function and then applies effects
   draw = function(drawfunc)
     ---@type fun()|love.Canvas
     local drawable = drawfunc
@@ -110,8 +113,23 @@ local screenEffects = {
   ---@param w number
   ---@param h number
   resize = function( w, h )
-    for _, effect in ipairs(effects) do
-      effect.canvas = love.graphics.newCanvas(w, h)
+    for _, c in ipairs(canvases) do
+
+      -- Find effect that uses this canvas if it exists
+      ---@type Effect | nil
+      local e
+      for _, effect in ipairs(effects) do
+        if effect.canvas == c.c then
+          e = effect
+          break
+        end
+      end
+
+      -- Resize canvases
+      c.c = love.graphics.newCanvas(w, h)
+
+      -- update effect canvas to use resized one
+      if e then e.canvas = c.c end
     end
   end
 }
