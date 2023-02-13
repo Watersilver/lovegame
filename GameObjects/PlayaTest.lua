@@ -16,6 +16,7 @@ local trans = require "transitions"
 local dlg = require "dialogue"
 local gsh = require "gamera_shake"
 local items = require "items"
+local lighting = require "ScreenEffects.lighting"
 
 local hps = require "GameObjects.Helpers.player_states"
 local ors = require "GameObjects.Helpers.object_read_save"
@@ -2324,6 +2325,19 @@ Playa.functions = {
   end,
 
   drawMyLights = function (self, x, y)
+    lighting.applyLight({
+      type = "smoothCircle24",
+      -- type = "torch", image_index = 0,
+      -- type = "owlStatue",
+      x = x,
+      y = y,
+      rgba = {
+        r = 1,
+        g = 0,
+        b = 1,
+        a = 1
+      }
+    })
     if session.save.playerGlowAvailable then
       self.lightSource.kind = session.save.playerGlow
       if self.lightSource.kind then

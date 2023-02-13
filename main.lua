@@ -111,7 +111,8 @@ local gamera = require "gamera.gamera"
 
 local globs = {
   particles = require "GameObjects.misc.particles",
-  screenEffects = require "screenEffects"
+  screenEffects = require "screenEffects",
+  lighting = require "ScreenEffects.lighting"
 }
 
 -- Create table to save temporary stuff for current session
@@ -1467,6 +1468,7 @@ local function hudDraw(l,t,w,h)
   end
 end
 local prevs = {
+  firstDraw = true,
   drug = "uninitialised",
   ring = "uninitialised"
 }
@@ -1474,16 +1476,17 @@ function love.draw()
 
   local resetScreenEffects = false
 
-  if prevs.drug == "uninitialised" then resetScreenEffects = true end
-  if prevs.ring == "uninitialised" then resetScreenEffects = true end
+  if prevs.firstDraw then resetScreenEffects = true end
   if prevs.drug ~= (session.drug and session.drug.shader) then resetScreenEffects = true end
   if prevs.ring ~= session.ringShader then resetScreenEffects = true end
 
+  prevs.firstDraw = false
   prevs.drug = session.drug and session.drug.shader
   prevs.ring = session.ringShader
 
   if resetScreenEffects then
     globs.screenEffects.clear()
+    globs.lighting.applyScreenEffect()
     if session.drug and session.drug.shader then
       globs.screenEffects.push(session.drug.shader, function(s) s:send("invScale", 0.9 + 0.1*math.cos(session.drug.duration - session.drug.maxDuration)) end)
     end
@@ -1492,6 +1495,7 @@ function love.draw()
     end
   end
 
+  globs.lighting.draw()
   globs.screenEffects.draw(noEffectsDraw)
 
   hud:setScale(sh.get_window_scale()*2)
@@ -1699,6 +1703,8 @@ function love.resize( w, h )
 
   -- Determine camera scale due to window size
   sh.calculate_total_scale{resized=true}
+
+  globs.lighting.resize(w, h)
 end
 
 

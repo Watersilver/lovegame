@@ -84,29 +84,29 @@ end
 
 -- draws light source then DELETES it!!!
 function ls.drawSources(dw, dh) -- size difference from main camera
-  local mode, alphamode = love.graphics.getBlendMode()
-  love.graphics.setBlendMode( "lighten", "premultiplied" )
-  local worldShader = love.graphics.getShader()
-  for index, source in ipairs(sources) do
-    -- Use shader to premultiply to be able to use lighten blend mode
-    love.graphics.setShader(multiply)
-    local sx, sy = mainCamera:toScreen(source.x, source.y)
-    local deadSpaceX, deadSpaceY = mainCamera:getWindow()
-    local ws = sh.get_window_scale()
-    sx, sy = (sx - (deadSpaceX - dw)) / ws, (sy - (deadSpaceY - dh)) / ws
-    local skind = lights[source.kind]
-    local sc = sh.get_game_scale()
-    if skind.img then
-      love.graphics.draw(skind.img, sx, sy, 0, sc * skind.scale, sc * skind.scale, skind.centerOffset, skind.centerOffset)
-    elseif source.image_index then
-      -- if light doesn't show, check the source to see if I remembered to set index
-      local sprite = skind.sprite
-      love.graphics.draw(sprite.img, sprite[source.image_index], sx, sy, 0, sc * sprite.res_x_scale, sc * sprite.res_x_scale, sprite.cx, sprite.cy)
-    end
-    sources[index] = nil
-  end
-  love.graphics.setShader(worldShader)
-  love.graphics.setBlendMode( mode, alphamode )
+  -- local mode, alphamode = love.graphics.getBlendMode()
+  -- love.graphics.setBlendMode( "lighten", "premultiplied" )
+  -- local worldShader = love.graphics.getShader()
+  -- for index, source in ipairs(sources) do
+  --   -- Use shader to premultiply to be able to use lighten blend mode
+  --   love.graphics.setShader(multiply)
+  --   local sx, sy = mainCamera:toScreen(source.x, source.y)
+  --   local deadSpaceX, deadSpaceY = mainCamera:getWindow()
+  --   local ws = sh.get_window_scale()
+  --   sx, sy = (sx - (deadSpaceX - dw)) / ws, (sy - (deadSpaceY - dh)) / ws
+  --   local skind = lights[source.kind]
+  --   local sc = sh.get_game_scale()
+  --   if skind.img then
+  --     love.graphics.draw(skind.img, sx, sy, 0, sc * skind.scale, sc * skind.scale, skind.centerOffset, skind.centerOffset)
+  --   elseif source.image_index then
+  --     -- if light doesn't show, check the source to see if I remembered to set index
+  --     local sprite = skind.sprite
+  --     love.graphics.draw(sprite.img, sprite[source.image_index], sx, sy, 0, sc * sprite.res_x_scale, sc * sprite.res_x_scale, sprite.cx, sprite.cy)
+  --   end
+  --   sources[index] = nil
+  -- end
+  -- love.graphics.setShader(worldShader)
+  -- love.graphics.setBlendMode( mode, alphamode )
 end
 
 return ls

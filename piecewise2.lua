@@ -45,8 +45,8 @@ local function newPiecewise(leftEndpoint)
     local r = clone(rightEndpoint)
 
     assert(rightmost.value, "Right most endpoint is infinite. Cannot add more subfunctions...")
-    assert(r.value > leftmost.value or (leftmost.open and not r.open), "rightEndpoint provided is not bigger that leftmost endpoint...")
-    assert(r.value > rightmost.value or (rightmost.open and not r.open), "rightEndpoint provided is not bigger that rightmost endpoint...")
+    assert((r.value > leftmost.value) or (leftmost.open and not r.open), "rightEndpoint provided is not bigger that leftmost endpoint...")
+    assert((r.value > rightmost.value) or (rightmost.open and not r.open), "rightEndpoint provided is not bigger that rightmost endpoint...")
 
     rightmost = clone(r)
 

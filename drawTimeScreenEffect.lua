@@ -215,18 +215,17 @@ local function draw()
   love.graphics.draw(dtsCanvas, canvX - dw, canvY - dw, 0, sh.get_window_scale())
   love.graphics.setColor(pr, pg, pb, pa)
   love.graphics.setBlendMode( mode, alphamode )
-
 end
 
 -- The function that only draws dtse if appropriate
 function dtse.draw()
-  -- Draw screen effect due to game time
-  if game.timeScreenEffect then
-    draw()
-  else
-    -- clear sources for rooms without timeScreenEffects
-    ls.clearSources()
-  end
+  -- -- Draw screen effect due to game time
+  -- if game.timeScreenEffect then
+  --   draw()
+  -- else
+  --   -- clear sources for rooms without timeScreenEffects
+  --   ls.clearSources()
+  -- end
 end
 
 return dtse
