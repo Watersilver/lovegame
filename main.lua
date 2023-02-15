@@ -112,7 +112,7 @@ local gamera = require "gamera.gamera"
 local globs = {
   particles = require "GameObjects.misc.particles",
   screenEffects = require "screenEffects",
-  lighting = require "ScreenEffects.lighting"
+  lighting = require "ScreenEffects.lighting.lighting"
 }
 
 -- Create table to save temporary stuff for current session
@@ -1486,7 +1486,7 @@ function love.draw()
 
   if resetScreenEffects then
     globs.screenEffects.clear()
-    globs.lighting.applyScreenEffect()
+    globs.lighting.pushScreenEffect()
     if session.drug and session.drug.shader then
       globs.screenEffects.push(session.drug.shader, function(s) s:send("invScale", 0.9 + 0.1*math.cos(session.drug.duration - session.drug.maxDuration)) end)
     end

@@ -15,6 +15,7 @@ local dh = dw
 local canvW, canvH = 800 + dw*2, 450 + dh*2
 local dtsCanvas = love.graphics.newCanvas ( canvW, canvH )
 
+-- TODO: Delete
 
 local function currentToTarget(dt)
   cr = u.gradualAdjust(dt, cr, tr)

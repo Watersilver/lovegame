@@ -16,7 +16,7 @@ local trans = require "transitions"
 local dlg = require "dialogue"
 local gsh = require "gamera_shake"
 local items = require "items"
-local lighting = require "ScreenEffects.lighting"
+local lighting = require "ScreenEffects.lighting.lighting"
 
 local hps = require "GameObjects.Helpers.player_states"
 local ors = require "GameObjects.Helpers.object_read_save"
@@ -2333,8 +2333,8 @@ Playa.functions = {
       y = y,
       rgba = {
         r = 1,
-        g = 0,
-        b = 1,
+        g = 1,
+        b = 0,
         a = 1
       }
     })
