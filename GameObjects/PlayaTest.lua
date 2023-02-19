@@ -1,7 +1,6 @@
 local gs = require "game_settings"
 local ps = require "physics_settings"
 local im = require "image"
-local ls = require "lightSources"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
 local inp = require "input"
@@ -2250,7 +2249,6 @@ function Playa.initialize(instance)
   }
   instance.spritefixture_properties = {shape = ps.shapes.rect1x1}
   instance.sprite_info = im.spriteSettings.playerSprites
-  instance.lightSource = {}
   instance.lowGlow = {}
   instance.flickerPeriod = 1 / 30 -- in secs
   instance.flickerTick = 0

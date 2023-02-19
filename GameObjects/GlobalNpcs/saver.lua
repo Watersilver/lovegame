@@ -1,8 +1,5 @@
 local im = require "image"
 local p = require "GameObjects.prototype"
-local inp = require "input"
-local inv = require "inventory"
-local u = require "utilities"
 local cd = require "GameObjects.DialogueBubble.controlDefaults"
 local npcP = require "GameObjects.npcPrototype"
 local dlgCtrl = require "GameObjects.DialogueBubble.DialogueControl"
@@ -22,7 +19,14 @@ function NPC.initialize(instance)
   instance.question = "Save game?"
   instance.image_speed = 0
   instance.sprite_info = im.spriteSettings.owlStatue
-  instance.lightSource = {kind = "owlStatue"}
+
+  ---@type Light[]
+  instance.lights = {
+    {
+      type = "owlStatue",
+      rgba = {r = 0, g = 0.5, b = 1, a = 1}
+    }
+  }
 
   instance.pushback = true
   instance.ballbreaker = true

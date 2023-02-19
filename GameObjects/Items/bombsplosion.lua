@@ -10,20 +10,17 @@ local snd = require "sound"
 local gsh = require "gamera_shake"
 
 -- xplosion light
-local ls = require "lightSources"
+local lighting = require 'ScreenEffects.lighting.lighting'
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
 local Bombsplosion = {}
 
 local floor = math.floor
-local clamp = u.clamp
-local pi = math.pi
 
 function Bombsplosion.initialize(instance)
 
   -- xplosion light
-  instance.lightSource = {kind = "playerGlow"}
   instance.immabombsplosion = true
   instance.x_scale = 1
   instance.y_scale = 1
@@ -112,8 +109,11 @@ Bombsplosion.functions = {
     self.x, self.y = x, y
 
     -- bomb light
-    self.lightSource.x, self.lightSource.y = x, y
-    ls.drawSource(self.lightSource)
+    lighting.applyLight{
+      type = 'playerGlow',
+      x = x,
+      y = y
+    }
 
     local sprite = self.sprite
     local frame = sprite[floor(self.image_index)]

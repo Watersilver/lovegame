@@ -2,9 +2,8 @@ local ps = require "physics_settings"
 local im = require "image"
 local p = require "GameObjects.prototype"
 local trans = require "transitions"
-local inp = require "input"
-local ls = require "lightSources"
 local dlgCtrl = require "GameObjects.DialogueBubble.DialogueControl"
+local lighting = require "ScreenEffects.lighting.lighting"
 
 local floor = math.floor
 
@@ -34,6 +33,20 @@ function NPC.initialize(instance)
 end
 
 NPC.functions = {
+  applyLights = function(self, x, y)
+    if self.lights then
+      local l = {}
+      for _, light in ipairs(self.lights) do
+        for key, value in pairs(light) do
+          l[key] = value
+        end
+        if l.x == nil then l.x = x end
+        if l.y == nil then l.y = y end
+      end
+      lighting.applyLight(l)
+    end
+  end,
+
   load = function (self)
     dlgCtrl.functions.load(self)
   end,
@@ -50,11 +63,7 @@ NPC.functions = {
     local xtotal, ytotal = self.body:getPosition()
     self.x, self.y = xtotal, ytotal
 
-    if self.lightSource then
-      -- After done with coords draw light source (gets drawn later, this just sets it up)
-      self.lightSource.x, self.lightSource.y = xtotal, ytotal
-      ls.drawSource(self.lightSource)
-    end
+    self:applyLights(xtotal, ytotal)
 
     if self.spritebody then
       if self.spritejoint then self.spritejoint:destroy() end
@@ -92,11 +101,7 @@ NPC.functions = {
 
     local xtotal, ytotal = trans.moving_objects_coords(self)
 
-    if self.lightSource then
-      -- After done with coords draw light source (gets drawn later, this just sets it up)
-      self.lightSource.x, self.lightSource.y = xtotal, ytotal
-      ls.drawSource(self.lightSource)
-    end
+    self:applyLights(xtotal, ytotal)
 
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames

@@ -1,15 +1,10 @@
 local p = require "GameObjects.prototype"
-local u = require "utilities"
-local o = require "GameObjects.objects"
-local im = require "image"
-local snd = require "sound"
 local trans = require "transitions"
-local ls = require "lightSources"
+local lighting = require 'ScreenEffects.lighting.lighting'
 
 local Light = {}
 
 function Light.initialize(instance)
-  instance.lightSource = {kind = "downEntranceLight"}
 end
 
 Light.functions = {
@@ -30,19 +25,23 @@ Light.functions = {
   draw = function(self, td)
     local x, y = self.x, self.y
 
-    -- Draw lightsource
-    self.lightSource.x, self.lightSource.y = x, y
-    ls.drawSource(self.lightSource)
+    lighting.applyLight{
+      type = "door",
+      x = x,
+      y = y
+    }
   end,
 
   trans_draw = function(self)
     self.x, self.y = self.xlast, self.ylast
 
-    x, y = trans.moving_objects_coords(self)
+    local x, y = trans.moving_objects_coords(self)
 
-    -- Draw lightsource
-    self.lightSource.x, self.lightSource.y = x, y
-    ls.drawSource(self.lightSource)
+    lighting.applyLight{
+      type = "door",
+      x = x,
+      y = y
+    }
   end,
 }
 

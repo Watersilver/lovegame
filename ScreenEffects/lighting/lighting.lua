@@ -87,13 +87,13 @@ local prepShader = function(s)
   -- s:send("greenAmbient", {20, 0.5, 0.2, 1})
   -- s:send("blueAmbient", {0.2, 30, 0.5, 1})
 
-  -- s:send("redAmbient", {0.1, 0, 0, 1})
-  -- s:send("greenAmbient", {0, 0.1, 0, 1})
-  -- s:send("blueAmbient", {0, 0, 0.1, 1})
+  s:send("redAmbient", {0.05, 0, 0.1, 1})
+  s:send("greenAmbient", {0, 0.1, 0, 1})
+  s:send("blueAmbient", {0, 0, 0.1, 1})
 
-  s:send("redAmbient", {0, 0, 0, 1})
-  s:send("greenAmbient", {0, 0, 0, 1})
-  s:send("blueAmbient", {0, 0, 0, 1})
+  -- s:send("redAmbient", {0, 0, 0, 1})
+  -- s:send("greenAmbient", {0, 0, 0, 1})
+  -- s:send("blueAmbient", {0, 0, 0, 1})
 end
 
 local lighting = {}
@@ -137,16 +137,14 @@ local function drawLightOnCanvas(sources, canvas)
     local _, _, w, h = mainCamera:getWindow()
     x, y = (canvasW / ratioW) * x / w, (canvasH / ratioH) * y / h
     local type = sourceTypes[light.type]
-    local resetColor
-    if light.rgba then
-      u.changeColour({
-        r = light.rgba.r * COLORCONST,
-        g = light.rgba.g * COLORCONST,
-        b = light.rgba.b * COLORCONST,
-        a = light.rgba.a * COLORCONST
-      })
-      resetColor = u.storeColour()
-    end
+    light.rgba = light.rgba or {r=1,g=1,b=1,a=1}
+    u.changeColour({
+      r = (light.rgba.r * COLORCONST) or COLORCONST,
+      g = (light.rgba.g * COLORCONST) or COLORCONST,
+      b = (light.rgba.b * COLORCONST) or COLORCONST,
+      a = (light.rgba.a * COLORCONST) or COLORCONST
+    })
+    local resetColor = u.storeColour()
     if type then
       if type.type == "sprite" then
         if light.image_index then
@@ -170,7 +168,7 @@ local function drawLightOnCanvas(sources, canvas)
         )
       end
     end
-    if resetColor then resetColor() end
+    resetColor()
     lights[index] = nil
   end
 

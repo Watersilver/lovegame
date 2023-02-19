@@ -1,38 +1,6 @@
 local u = require 'utilities'
 local im = require 'image'
 
-local gradFuncs = {
-  smoothEdgeCircle = function(dist, radius)
-    local x = dist / radius -- This division stretches the function horizontally!!!
-    -- calculated from https://mycurvefit.com/
-    -- almost circle
-    return -0.9360318 + (1 + 0.9360318)/(1 + (x/0.9981175)^35.08253)
-    -- return -0.5820536 + (1 + 0.5820536)/(1 + (x/0.9798232)^26.55095)
-  end,
-
-  linear = function(dist, radius)
-    return 1 - (1/radius) * dist
-  end,
-
-  -- Hope to figure out one day why I name this like that
-  elipseQuadrant = function(dist, radius)
-    return math.sqrt(1 - dist^2/radius^2)
-  end
-}
-
-local function radialGradient(radius, kwargs)
-  local data = love.image.newImageData(radius * 2, radius * 2)
-  kwargs = kwargs or {}
-
-  data:mapPixel(function(x, y)
-    local dist = u.distance2d(radius, radius, x, y)
-    local alpha = (dist <= radius and gradFuncs[kwargs.gradFunc or "smoothEdgeCircle"](dist, radius) or 0) * (kwargs.a or 1) * COLORCONST
-    return (kwargs.r or 1) * COLORCONST, (kwargs.g or 1) * COLORCONST, (kwargs.b or 1) * COLORCONST, alpha
-  end)
-
-  return {img = love.graphics.newImage(data), centerOffset = radius + 0.5, type = "drawn"}
-end
-
 local function squareGradient(side, kwargs)
   local data = love.image.newImageData(side, side)
   kwargs = kwargs or {}
@@ -99,12 +67,12 @@ local function radGrad(layers)
   return {img = love.graphics.newImage(data), centerOffset = totalRadius + 0.5, type = "drawn"}
 end
 
----@alias SourceType "torch" | "owlStatue" | "playerGlow" | "massive"
+---@alias SourceType "torch" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile'
 
 ---@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown}}
 local sourceTypes = {
-  torch = {sprite = im.load_sprite({'flickeringLight', 2, padding = 1, width = 48, height = 48})},
-  owlStatue = radialGradient(24, {r = 0, g = 0.7, b = 1}),
+  torch = {type = "sprite", sprite = im.load_sprite({'flickeringLight', 2, padding = 1, width = 48, height = 48})},
+  owlStatue = radGrad{{r = 23, a = 1}, {r = 30, a = 0}},
 
   playerGlow = radGrad{
     {r = 8, a = 0.5},
@@ -118,7 +86,12 @@ local sourceTypes = {
     {r = 174, a = 0}
   },
 
-  doorLight = squareGradient(16, {a = 1}),
+  missile = radGrad{
+    {r = 2, a = 1},
+    {r = 5, a = 0}
+  },
+
+  door = squareGradient(16, {a = 1}),
 }
 
 return sourceTypes

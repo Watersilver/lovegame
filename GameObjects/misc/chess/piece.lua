@@ -1,7 +1,6 @@
 local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local u = require "utilities"
-local ls = require "lightSources"
 
 local lp = love.physics
 
@@ -85,12 +84,6 @@ bt.functions = {
     self.x, self.y = self.xlast, self.ylast - self.spriteOffset
 
     local xtotal, ytotal = trans.moving_objects_coords(self)
-
-    if self.lightSource then
-      -- After done with coords draw light source (gets drawn later, this just sets it up)
-      self.lightSource.x, self.lightSource.y = xtotal, ytotal
-      ls.drawSource(self.lightSource)
-    end
 
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames
