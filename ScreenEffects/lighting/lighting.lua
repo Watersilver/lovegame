@@ -11,11 +11,13 @@ local sourceTypes = require 'ScreenEffects.lighting.sourceTypes'
 
 local lightingShdr
 
-local shdrExists = pcall(
+local shdrExists, err = pcall(
   function ()
     lightingShdr = love.graphics.newShader("ScreenEffects/lighting/lighting.fs")
   end
 )
+
+if not shdrExists then print(err) end
 
 ---@class Light
 ---@field x number
@@ -77,21 +79,21 @@ local prepShader = function(s)
   -- determine ambient light from time or location
   -- session.save.time
 
-  -- s:send("redBacklight", {1, 0, 0})
-  -- s:send("greenBacklight", {0, 0.5, 0.2})
-  -- s:send("blueBacklight", {0.2, 0, 0.5})
+  -- s:send("redAmbient", {1, 0, 0, 1})
+  -- s:send("greenAmbient", {0, 0.5, 0.2, 1})
+  -- s:send("blueAmbient", {0.2, 0, 0.5, 1})
 
-  -- s:send("redBacklight", {11, 0, 0})
-  -- s:send("greenBacklight", {20, 0.5, 0.2})
-  -- s:send("blueBacklight", {0.2, 30, 0.5})
+  -- s:send("redAmbient", {11, 0, 0, 1})
+  -- s:send("greenAmbient", {20, 0.5, 0.2, 1})
+  -- s:send("blueAmbient", {0.2, 30, 0.5, 1})
 
-  s:send("redBacklight", {0.2, 0, 0})
-  s:send("greenBacklight", {0, 0.2, 0})
-  s:send("blueBacklight", {0, 0, 0.2})
+  -- s:send("redAmbient", {0.1, 0, 0, 1})
+  -- s:send("greenAmbient", {0, 0.1, 0, 1})
+  -- s:send("blueAmbient", {0, 0, 0.1, 1})
 
-  -- s:send("redBacklight", {0, 0, 0})
-  -- s:send("greenBacklight", {0, 0, 0})
-  -- s:send("blueBacklight", {0, 0, 0})
+  s:send("redAmbient", {0, 0, 0, 1})
+  s:send("greenAmbient", {0, 0, 0, 1})
+  s:send("blueAmbient", {0, 0, 0, 1})
 end
 
 local lighting = {}
