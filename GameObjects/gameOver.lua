@@ -34,7 +34,7 @@ Go.functions = {
     end
   end,
 
-  draw = function (self)
+  draw_overlay = function (self)
     local camx, camy = mainCamera:getPosition()
     local drawx, drawy
 

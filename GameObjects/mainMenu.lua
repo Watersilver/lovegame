@@ -1049,7 +1049,7 @@ update = function (self, dt)
   self.menus_to_be_drawn = drawMenus[self.currentMenu]
 end,
 
-draw = function (self)
+draw_overlay = function (self)
   for menuIndex, menu in ipairs(self.menus_to_be_drawn) do
 
     -- Determine which menus just started getting drawn

@@ -97,7 +97,6 @@ local sh = require "scaling_handler"
 local pam = require "pause_menu"
 local inp = require "input"
 local im = require "image"
-local dtse = require "drawTimeScreenEffect"
 local snd = require "sound"
 local text = require "text"
 local dialogue = require "dialogue"
@@ -818,11 +817,6 @@ function love.update(dt)
   moub["2prev"] = moub[2]
   moup.x, moup.y = love.mouse.getX(), love.mouse.getY()
 
-  -- Determine screen effect due to game time
-  if game.timeScreenEffect then
-    dtse.logic(game.timeScreenEffect, dt)
-  end
-
   -- Calculate clock stuff
   if session.clockAngleTarget then
     session.clockAngleTarget = session.getClockAngleTarget()
@@ -1342,11 +1336,6 @@ local function noEffectsDraw()
   cam:setPosition(cam.xt, cam.yt)
   setCurrentCam(mainCamera)
   cam:draw(mainCameraDraw)
-
-  -- Draw screen effect due to game time
-  dtse.draw()
-
-  cam:draw(afterScreenEffects)
 end
 local function hudDraw(l,t,w,h)
   local transing = game.transitioning
@@ -1495,14 +1484,10 @@ function love.draw()
     end
   end
 
-  if (o.identified.mainMenu) then
-    -- Ignore effects if on main menu
-    noEffectsDraw()
-  else
-    -- Draw effects if not on main menu
-    globs.lighting.draw()
-    globs.screenEffects.draw(noEffectsDraw)
-  end
+  globs.lighting.draw()
+  globs.screenEffects.draw(noEffectsDraw)
+
+  cam:draw(afterScreenEffects)
 
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)
