@@ -2324,31 +2324,25 @@ Playa.functions = {
     self.health = math.min(self.health + addedHealth, self.maxHealth)
   end,
 
-  drawMyLights = function (self, x, y)
-    lighting.applyLight({
-      type = "smoothCircle24",
-      -- type = "torch", image_index = 0,
-      -- type = "owlStatue",
-      x = x,
-      y = y,
-      rgba = {
-        r = 1,
-        g = 1,
-        b = 0,
-        a = 1
-      }
-    })
+  applyLights = function (self, x, y)
     if session.save.playerGlowAvailable then
-      self.lightSource.kind = session.save.playerGlow
-      if self.lightSource.kind then
-        self.lightSource.x, self.lightSource.y = x, y
-        self.lightSource.image_index = self.flickerIndex
-        ls.drawSource(self.lightSource)
+      lighting.sendNightVision(session.save.playerGlow == "Both" or session.save.playerGlow == "No Glow")
+      if session.save.playerGlow == "Both" or session.save.playerGlow == "No Night Vision" then
+        lighting.applyLight({
+          type = "playerGlow",
+          -- type = "torch", image_index = 0,
+          -- type = "owlStatue",
+          x = x,
+          y = y,
+          rgba = {
+            r = 1,
+            g = 0.3,
+            b = 0,
+            a = 1
+          },
+          image_index = self.flickerIndex
+        });
       end
-
-      self.lowGlow.kind = "lowGlow"
-      self.lowGlow.x, self.lowGlow.y = x, y
-      ls.drawSource(self.lowGlow)
     end
   end,
 
@@ -2814,7 +2808,7 @@ Playa.functions = {
 
     -- After done with coords draw light source (gets drawn later, this just sets it up)
     -- check during pause screen if session.save.playerGlowAvailable to enable and disable
-    self:drawMyLights(xtotal, ytotal)
+    self:applyLights(xtotal, ytotal)
 
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames

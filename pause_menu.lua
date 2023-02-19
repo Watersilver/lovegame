@@ -407,7 +407,7 @@ local function recolor(w, h, subsetting)
 end
 local settingsTooltipFuncs = {
   lightStyle = function(w, h)
-    local currentStyle = (session.save.playerGlow or "None"):gsub("player", "")
+    local currentStyle = session.save.playerGlow or "None"
     love.graphics.polygon("line", w*0.5, 5, w*0.5-3, 10, w*0.5+3, 10)
     love.graphics.polygon("line", w*0.5, h - 5, w*0.5-3, h - 10, w*0.5+3, h - 10)
     local txtWd2 = love.graphics.getFont():getWidth(currentStyle) * 0.075
@@ -481,7 +481,7 @@ local tooltipFuncs = {
     else
       if setting == "lightStyle" then
         if session.save.playerGlowAvailable then
-          pam.left.tooltip = "Customise light style."
+          pam.left.tooltip = "Customise light."
         else
           pam.left.tooltip = "???"
         end
@@ -683,7 +683,7 @@ local drawFuncs = {
       love.graphics.setColor(pr, pg, pb, pa)
       if setting == "lightStyle" then
         if session.save.playerGlowAvailable then
-          love.graphics.print("Light Style", paddingHor, paddingVert + t, 0, textScale)
+          love.graphics.print("Light", paddingHor, paddingVert + t, 0, textScale)
         else
           love.graphics.print("???", paddingHor, paddingVert + t, 0, textScale)
         end
@@ -767,7 +767,7 @@ pam.left = {
   customise = {"lightStyle", "tunic", "sword", "missile", "mark"},
   customiseCursor = 1,
   selectedSetting = false,
-  lightStyles = {"playerTorch", "playerGlow", "playerSpotlight"},
+  lightStyles = {"Both", "No Glow", "No Night Vision"},
   itemTop = 0,
   itemCursor = 1,
 }

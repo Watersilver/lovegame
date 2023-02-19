@@ -600,6 +600,9 @@ local function printPropsRecursive(obj, path, maxDepth, printed, tab)
     end
   end
 end
+---@param id string
+---@param obj table
+---@param maxDepth number
 function u.printTable(id, obj, maxDepth)
   print("=== Start printing table " .. id .. "===")
   printPropsRecursive(obj, id, maxDepth)

@@ -20,7 +20,7 @@ local shdrExists = pcall(
 ---@class Light
 ---@field x number
 ---@field y number
----@field type "torch" | "owlStatue" | "smoothCircle8" | "smoothCircle16" | "smoothCircle24" | "doorLight"
+---@field type SourceType
 ---@field scale? number
 ---@field rgba? {r: number; g: number; b: number; a: number;}
 ---@field image_index? number
@@ -77,13 +77,21 @@ local prepShader = function(s)
   -- determine ambient light from time or location
   -- session.save.time
 
-  s:send("redBacklight", {1, 0, 0})
-  s:send("greenBacklight", {0, 0.5, 0.2})
-  s:send("blueBacklight", {0.2, 0, 0.5})
+  -- s:send("redBacklight", {1, 0, 0})
+  -- s:send("greenBacklight", {0, 0.5, 0.2})
+  -- s:send("blueBacklight", {0.2, 0, 0.5})
 
   -- s:send("redBacklight", {11, 0, 0})
   -- s:send("greenBacklight", {20, 0.5, 0.2})
   -- s:send("blueBacklight", {0.2, 30, 0.5})
+
+  s:send("redBacklight", {0.2, 0, 0})
+  s:send("greenBacklight", {0, 0.2, 0})
+  s:send("blueBacklight", {0, 0, 0.2})
+
+  -- s:send("redBacklight", {0, 0, 0})
+  -- s:send("greenBacklight", {0, 0, 0})
+  -- s:send("blueBacklight", {0, 0, 0})
 end
 
 local lighting = {}
@@ -96,6 +104,17 @@ lighting.applyShadow = function(shadow) table.insert(shadows, shadow) end
 
 lighting.pushScreenEffect = function()
   if shdrExists then screenEffects.push(lightingShdr, prepShader) end
+end
+
+---@type boolean | nil
+local prevNV = nil
+---@param nv boolean
+lighting.sendNightVision = function(nv)
+  if nv == prevNV then return end
+  if shdrExists then
+    lightingShdr:send("nightVision", nv)
+  end
+  prevNV = nv
 end
 
 ---@param sources Light[]
@@ -127,15 +146,17 @@ local function drawLightOnCanvas(sources, canvas)
       resetColor = u.storeColour()
     end
     if type then
-      if type.sprite then
-        local s = type.sprite
-        love.graphics.draw(
-          s.img, s[light.image_index],
-          x, y, 0,
-          canvScale * s.res_x_scale,
-          canvScale * s.res_x_scale,
-          s.cx, s.cy
-        )
+      if type.type == "sprite" then
+        if light.image_index then
+          local s = type.sprite
+          love.graphics.draw(
+            s.img, s[light.image_index],
+            x, y, 0,
+            canvScale * s.res_x_scale,
+            canvScale * s.res_x_scale,
+            s.cx, s.cy
+          )
+        end
       else
         love.graphics.draw(
           type.img,

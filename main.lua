@@ -1495,8 +1495,14 @@ function love.draw()
     end
   end
 
-  globs.lighting.draw()
-  globs.screenEffects.draw(noEffectsDraw)
+  if (o.identified.mainMenu) then
+    -- Ignore effects if on main menu
+    noEffectsDraw()
+  else
+    -- Draw effects if not on main menu
+    globs.lighting.draw()
+    globs.screenEffects.draw(noEffectsDraw)
+  end
 
   hud:setScale(sh.get_window_scale()*2)
   hud:setPosition(hud.xt, hud.yt)

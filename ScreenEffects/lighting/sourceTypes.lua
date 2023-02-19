@@ -30,7 +30,7 @@ local function radialGradient(radius, kwargs)
     return (kwargs.r or 1) * COLORCONST, (kwargs.g or 1) * COLORCONST, (kwargs.b or 1) * COLORCONST, alpha
   end)
 
-  return {img = love.graphics.newImage(data), centerOffset = radius + 0.5}
+  return {img = love.graphics.newImage(data), centerOffset = radius + 0.5, type = "drawn"}
 end
 
 local function squareGradient(side, kwargs)
@@ -46,35 +46,77 @@ local function squareGradient(side, kwargs)
   return {img = love.graphics.newImage(data), centerOffset = side * 0.5}
 end
 
----@param r1 number
----@param r2 number
----@return {img: love.Image, centerOffset: number}
-local function radialGrad2(r1, r2)
-  local data = love.image.newImageData(r2 * 2, r2 * 2)
+---@param layers {r: number; a: number}[]
+---@return {img: love.Image, centerOffset: number, type: "drawn"}
+local function radGrad(layers)
+  local first = layers[1]
+  local last = layers[#layers]
+  local totalRadius = last.r
+  local data = love.image.newImageData(totalRadius * 2, totalRadius * 2)
 
-  data:mapPixel(function(x, y)
-    local dist = u.distance2d(r2, r2, x, y)
+  ---@type {rmin: number; rmax: number; rdiff: number; avar: number; astart: number;}[]
+  -- areas between layers
+  local pairs = {
+    -- first pair
+    {rmin = 0, rmax = first.r, rdiff = first.r, avar = 0, astart = first.a}
+  }
 
-    ---@type number
-    local alpha
+  -- middle pairs
+  local prev = pairs[1]
+  for i = 2, #layers do
+    local layer = layers[i]
+    pairs[i] = {
+      rmin = prev.rmax,
+      rmax = layer.r,
+      rdiff = layer.r - prev.rmax,
+      avar = (prev.astart - prev.avar) - layer.a,
+      astart = prev.astart - prev.avar
+    }
+    prev = pairs[i]
+  end
 
-    if dist > r2 then alpha = 0
-    elseif dist > r1 then alpha = 1 - (dist - r1) / (r2 - r1)
-    else alpha = 1 end
+  -- last pair
+  table.insert(pairs, {rmin = last.r, rmax = last.r, rdiff = 0, avar = 0, astart = 0})
 
-    return COLORCONST, COLORCONST, COLORCONST, alpha * COLORCONST
-  end)
+  data:mapPixel(
+    function(x, y)
+      local dist = u.distance2d(totalRadius, totalRadius, x, y)
 
-  return {img = love.graphics.newImage(data), centerOffset = r2 + 0.5}
+      -- Between two layers
+      for i = #pairs, 1, -1 do
+        local pair = pairs[i]
+        if dist > pair.rmin then
+          local alpha = pair.astart - pair.avar * (dist - pair.rmin) / (pair.rdiff)
+          return COLORCONST, COLORCONST, COLORCONST, alpha * COLORCONST
+        end
+      end
+
+      -- smaller than first
+      return COLORCONST, COLORCONST, COLORCONST, first.a * COLORCONST
+    end
+  )
+
+  return {img = love.graphics.newImage(data), centerOffset = totalRadius + 0.5, type = "drawn"}
 end
 
+---@alias SourceType "torch" | "owlStatue" | "playerGlow" | "massive"
+
+---@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown}}
 local sourceTypes = {
   torch = {sprite = im.load_sprite({'flickeringLight', 2, padding = 1, width = 48, height = 48})},
   owlStatue = radialGradient(24, {r = 0, g = 0.7, b = 1}),
 
-  smoothCircle8 = radialGrad2(8, 16),
-  smoothCircle16 = radialGrad2(16, 24),
-  smoothCircle24 = radialGrad2(24, 48),
+  playerGlow = radGrad{
+    {r = 8, a = 0.5},
+    {r = 16, a = 0.2},
+    {r = 48, a = 0}
+  },
+  massive = radGrad{
+    {r = 24, a = 1},
+    {r = 48, a = 0.5},
+    {r = 150, a = 0.1},
+    {r = 174, a = 0}
+  },
 
   doorLight = squareGradient(16, {a = 1}),
 }

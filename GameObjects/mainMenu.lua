@@ -1,6 +1,5 @@
 local verh = require "version_handling"
 local p = require "GameObjects.prototype"
-local trans = require "transitions"
 local game = require "game"
 local im = require "image"
 local snd = require "sound"
@@ -62,15 +61,15 @@ local function start_game(saveName)
   for key, value in pairs(readSave) do
     -- if saved thing is quest place on different table, minus prefix
     if key:find("__quest__") then
+      -- value is quest id
       local questIndex = string.gsub(key, "__quest__", "")
-      -- Two steps because gsub returns two values, so tonumber will thing second is base
       questIndex = tonumber(questIndex)
-      session.save.quests[questIndex] = value -- key is index, value quest id
+      if questIndex then session.save.quests[questIndex] = value end
     elseif key:find("__item__") then
+      -- value is item id
       local itemIndex = string.gsub(key, "__item__", "")
-      -- Two steps because gsub returns two values, so tonumber will thing second is base
       itemIndex = tonumber(itemIndex)
-      session.save.items[itemIndex] = value -- key is index, value item id
+      if itemIndex then session.save.items[itemIndex] = value end
     else
       session.save[key] = value
     end
@@ -134,7 +133,7 @@ local function change_game_settings(menuHandler)
     end
     game_settings_body = game_settings_body .. "gs." .. setting .. " = " .. value .. "\n"
   end
-  local success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
+  success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
   if not success then love.errhand("Failed to write game_settings body") end
 end
 
@@ -148,7 +147,7 @@ local function change_key_config(menuHandler)
     if type(keyName) == "number" then keyName = "[" .. keyName .. "]" end
     key_config_body = key_config_body .. keyName .. " = \"" .. key .. "\",\n"
   end
-  local success = love.filesystem.append("key_config.lua", key_config_body .. "}\nreturn kc\n")
+  success = love.filesystem.append("key_config.lua", key_config_body .. "}\nreturn kc\n")
   if not success then love.errhand("Failed to write key_config body") end
 end
 
@@ -243,6 +242,8 @@ function MainMenu.initialize(instance)
     {'cursor'}
   }
   Hud.visible = false
+
+  instance.ids[#instance.ids+1] = "mainMenu"
 end
 
 MainMenu.functions = {
