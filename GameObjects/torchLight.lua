@@ -1,6 +1,7 @@
 local p = require "GameObjects.prototype"
 local trans = require "transitions"
 local lighting = require 'ScreenEffects.lighting.lighting'
+local game = require 'game'
 
 local TorchLight = {}
 
@@ -39,7 +40,7 @@ TorchLight.functions = {
     lighting.applyLight{
       type = 'torch',
       rgba = {
-        r = 0.8,
+        r = 1,
         g = 0.3,
         b = 0,
         a = 1
@@ -69,7 +70,7 @@ TorchLight.functions = {
     lighting.applyLight{
       type = 'torch',
       rgba = {
-        r = 0.8,
+        r = 1,
         g = 0.3,
         b = 0,
         a = 1
@@ -78,16 +79,13 @@ TorchLight.functions = {
       y = y,
       image_index = self.flickerIndex
     }
-
-    -- TODO: Outgoing lights shrink and incoming grow
-    -- to avoid uglyness of suddenly appearing dissapearing lights
     lighting.applyLight{
       type = 'massive',
       rgba = {
         r = 0.8,
         g = 0.3,
         b = 0,
-        a = 0.5
+        a = session.transitionValue(self, 0.5)
       },
       x = x,
       y = y

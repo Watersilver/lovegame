@@ -190,6 +190,18 @@ session = {
       purge = true
     }
   end,
+  ---@param obj table
+  ---@param to number
+  ---@param from? number
+  -- Transitions a value from 'from' to 'to' if object comes from
+  -- the next room or the opposite if it was on the previous room
+  transitionValue = function(obj, to, from)
+    if obj.onPreviousRoom then
+      return 0.5 * (1 - game.transitioning.progress)
+    else
+      return 0.5 * game.transitioning.progress
+    end
+  end,
   updateTime = function(hoursPassed)
     local preUpdate = session.checkTimeOfDayForMusic()
 
@@ -889,6 +901,8 @@ function love.update(dt)
       trans.determine_coordinates_transformation()
 
     elseif game.transitioning.progress < 1 then
+      -- local transSpeed = 1
+      -- if game.transitioning.type ~= 'whiteScreen' then transSpeed = 0.1 end
       game.transitioning.progress = game.transitioning.progress + 1 * dt
       if game.transitioning.progress > 1 then game.transitioning.progress = 1 end
       trans.determine_coordinates_transformation()

@@ -127,8 +127,11 @@ local function drawLightOnCanvas(sources, canvas)
   local prevShader = love.graphics.getShader()
 
   -- Dunno if necessary but put here to be safe
+  -- TODO: lights overwrite each other... fix
   love.graphics.setShader()
   love.graphics.clear()
+  local mode, alphamode = love.graphics.getBlendMode()
+  love.graphics.setBlendMode("lighten", "premultiplied")
   local canvasW, canvasH = canvas:getDimensions()
   local ratioW = canvasW / canvW
   local ratioH = canvasH / canvH
@@ -171,6 +174,8 @@ local function drawLightOnCanvas(sources, canvas)
     resetColor()
     lights[index] = nil
   end
+
+  love.graphics.setBlendMode(mode, alphamode)
 
   -- Dunno if necessary but put here to be safe
   love.graphics.setShader(prevShader)

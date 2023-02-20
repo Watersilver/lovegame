@@ -55,12 +55,12 @@ local function radGrad(layers)
         local pair = pairs[i]
         if dist > pair.rmin then
           local alpha = pair.astart - pair.avar * (dist - pair.rmin) / (pair.rdiff)
-          return COLORCONST, COLORCONST, COLORCONST, alpha * COLORCONST
+          return alpha * COLORCONST, alpha * COLORCONST, alpha * COLORCONST, alpha * COLORCONST
         end
       end
 
       -- smaller than first
-      return COLORCONST, COLORCONST, COLORCONST, first.a * COLORCONST
+      return first.a * COLORCONST, first.a * COLORCONST, first.a * COLORCONST, first.a * COLORCONST
     end
   )
 

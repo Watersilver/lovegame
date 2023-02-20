@@ -113,7 +113,7 @@ Intro.functions = {
     end
   end,
 
-  draw = function(self)
+  draw_overlay = function(self)
     if self.counter < flashPoint then
       local bSprite = im.sprites.introBackground
       love.graphics.draw(bSprite.img, bSprite[0], camWidth * 0.5, camHeight * 0.5 - 15, 0,

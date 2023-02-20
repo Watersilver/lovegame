@@ -2327,14 +2327,21 @@ Playa.functions = {
       lighting.sendNightVision(session.save.playerGlow == "Both" or session.save.playerGlow == "No Glow")
       if session.save.playerGlow == "Both" or session.save.playerGlow == "No Night Vision" then
         lighting.applyLight({
-          type = "playerGlow",
+          -- type = "playerGlow",
+          type = "owlStatue",
           -- type = "torch", image_index = 0,
           -- type = "owlStatue",
           x = x,
           y = y,
+          -- rgba = {
+          --   r = 1,
+          --   g = 0.3,
+          --   b = 0,
+          --   a = 1
+          -- },
           rgba = {
-            r = 1,
-            g = 0.3,
+            r = 0,
+            g = 0,
             b = 0,
             a = 1
           },
