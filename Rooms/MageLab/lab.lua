@@ -8,7 +8,7 @@ room.newType = true
 
 room.music_info = snd.ovrwrld1
 room.music_info = nil
-room.timeScreenEffect = 'dull'
+room.ambientLightType = 'dull'
 
 room.width = 160
 room.height = 112

@@ -1,6 +1,7 @@
 local newPiecewise = require "piecewise2"
 local screenEffects = require "screenEffects"
 local u = require 'utilities'
+local determineAmbient = require 'ScreenEffects.lighting.determineAmbient'
 
 local sourceTypes = require 'ScreenEffects.lighting.sourceTypes'
 
@@ -76,8 +77,12 @@ if shdrExists then lightingShdr:send("shadowMap", shadowMap) end
 
 ---@param s love.Shader
 local prepShader = function(s)
-  -- determine ambient light from time or location
-  -- session.save.time
+  -- determine ambient light
+  local ambientTarget = determineAmbient(s)
+
+  s:send("redAmbient", ambientTarget.r)
+  s:send("greenAmbient", ambientTarget.g)
+  s:send("blueAmbient", ambientTarget.b)
 
   -- s:send("redAmbient", {1, 0, 0, 1})
   -- s:send("greenAmbient", {0, 0.5, 0.2, 1})
@@ -87,9 +92,9 @@ local prepShader = function(s)
   -- s:send("greenAmbient", {20, 0.5, 0.2, 1})
   -- s:send("blueAmbient", {0.2, 30, 0.5, 1})
 
-  s:send("redAmbient", {0.05, 0, 0.1, 1})
-  s:send("greenAmbient", {0, 0.1, 0, 1})
-  s:send("blueAmbient", {0, 0, 0.1, 1})
+  -- s:send("redAmbient", {0.05, 0, 0.1, 1})
+  -- s:send("greenAmbient", {0, 0.1, 0, 1})
+  -- s:send("blueAmbient", {0, 0, 0.1, 1})
 
   -- s:send("redAmbient", {0, 0, 0, 1})
   -- s:send("greenAmbient", {0, 0, 0, 1})
@@ -127,7 +132,6 @@ local function drawLightOnCanvas(sources, canvas)
   local prevShader = love.graphics.getShader()
 
   -- Dunno if necessary but put here to be safe
-  -- TODO: lights overwrite each other... fix
   love.graphics.setShader()
   love.graphics.clear()
   local mode, alphamode = love.graphics.getBlendMode()

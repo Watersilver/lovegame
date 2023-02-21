@@ -8,7 +8,7 @@ local room = {}
 
 room.music_info = snd.ovrwrld1
 
-room.timeScreenEffect = "default"
+room.ambientLightType = 'daynight1'
 
 room.width = 496 -- 31
 room.height = 448 -- 28

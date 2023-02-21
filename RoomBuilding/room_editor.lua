@@ -71,7 +71,7 @@ local function SaveMap()
     \n\z
     room.music_info ToBeADDED -- = snd.ovrwrld1\n\z
     room.timeDoesntPass ToBeADDED\n\z
-    room.timeScreenEffect ToBeADDED -- = 'default'\n\z
+    room.ambientLightType ToBeADDED -- = 'default'\n\z
     \n\z
     room.width = " .. room.width .. "\n\z
     room.height = " .. room.height .. "\n\z

@@ -6,7 +6,7 @@ local snd = require "sound"
 local room = {}
 room.newType = true
 
-room.timeScreenEffect = 'forestCurse1'
+room.ambientLightType = 'forestCurse1'
 
 room.width = 512
 room.height = 512

@@ -39,12 +39,12 @@ local function newPiecewise(leftEndpoint)
   ---@class Piecewise
   local piwi = {}
 
-  ---@alias Formula fun(parameter:number):any
+  ---@alias Formula fun(parameter:number, fraction?:number):any
   ---@type fun(subfunction:Formula, rightEndpoint?:Endpoint):Piecewise
   function piwi.newSubfunction(subfunction, rightEndpoint)
     local r = clone(rightEndpoint)
 
-    assert(rightmost.value, "Right most endpoint is infinite. Cannot add more subfunctions...")
+    assert(rightmost.value ~= nil, "Right most endpoint is infinite. Cannot add more subfunctions...")
     assert((r.value > leftmost.value) or (leftmost.open and not r.open), "rightEndpoint provided is not bigger that leftmost endpoint...")
     assert((r.value > rightmost.value) or (rightmost.open and not r.open), "rightEndpoint provided is not bigger that rightmost endpoint...")
 
@@ -63,7 +63,12 @@ local function newPiecewise(leftEndpoint)
     local left = leftmost
     for _, subfunction in ipairs(subfunctions) do
       if betweenInterval({left = left, right = subfunction.right}, parameter) then
-        return subfunction.subfunction(parameter)
+        ---@type number | nil
+        local normal = nil
+        if left and left.value and subfunction.right and subfunction.right.value then 
+          normal = (parameter - left.value) / (subfunction.right.value - left.value)
+        end
+        return subfunction.subfunction(parameter, normal)
       end
       left = clone(subfunction.right)
       left.open = not left.open

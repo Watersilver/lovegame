@@ -9,7 +9,7 @@ room.newType = true
 room.sideScrolling = true
 
 room.music_info = snd.ovrwrld1
-room.timeScreenEffect = 'default'
+room.ambientLightType = 'daynight1'
 
 room.width = 400
 room.height = 400

@@ -7,7 +7,7 @@ local room = {}
 room.newType = true
 
 room.music_info = snd.silence
-room.timeScreenEffect = 'fullLight'
+room.ambientLightType = 'fullLight'
 
 room.width = 512
 room.height = 512

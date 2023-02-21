@@ -7,7 +7,7 @@ local room = {}
 room.newType = true
 
 room.music_info = snd.ovrwrld1
-room.timeScreenEffect = 'forestCurse1'
+room.ambientLightType = 'forestCurse1'
 -- no 11
 -- 1, 4, 5, 6, 7, 8, 10, 12
 room.width = 512

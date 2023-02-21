@@ -7,7 +7,7 @@ local room = {}
 room.newType = true
 
 room.music_info = "StartingHouse"
-room.timeScreenEffect = 'fullLight'
+room.ambientLightType = 'fullLight'
 
 room.width = 144
 room.height = 144

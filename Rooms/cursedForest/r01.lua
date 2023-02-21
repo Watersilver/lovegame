@@ -11,7 +11,7 @@ room.music_info = snd.ovrwrld1
 room.width = 512
 room.height = 512
 if session.save.forestCurseLifted then
-  room.timeScreenEffect = 'default'
+  room.ambientLightType = 'daynight1'
   room.downTrans = {
     {
       roomTarget = "Rooms/w096x104.lua",
@@ -41,7 +41,7 @@ if session.save.forestCurseLifted then
     }
   }
 else
-  room.timeScreenEffect = 'forestCurse1'
+  room.ambientLightType = 'forestCurse1'
   room.downTrans = {
     {
       roomTarget = "Rooms/cursedForest/r07.lua", -- DONEx2

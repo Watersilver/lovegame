@@ -12,12 +12,12 @@ room.width = 512
 room.height = 512
 local upTarget, downTarget, leftTarget
 if session.save.forestCurseLifted then
-  room.timeScreenEffect = 'default'
+  room.ambientLightType = 'daynight1'
   upTarget = "Rooms/cursedForest/north.lua"
   downTarget = "Rooms/cursedForest/south.lua"
   leftTarget = "Rooms/cursedForest/r01.lua"
 else
-  room.timeScreenEffect = 'forestCurse1'
+  room.ambientLightType = 'forestCurse1'
   upTarget = "Rooms/cursedForest/Maze.lua"
   downTarget = "Rooms/cursedForest/dungeonRoute1.lua"
   leftTarget = "Rooms/cursedForest/Maze.lua"

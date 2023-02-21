@@ -6,7 +6,7 @@ local snd = require "sound"
 local room = {}
 
 room.music_info = snd.ovrwrld1
-room.timeScreenEffect = "default"
+room.ambientLightType = 'daynight1'
 room.allsides = true
 
 room.width = 496
