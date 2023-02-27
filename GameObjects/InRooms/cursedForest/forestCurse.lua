@@ -64,23 +64,20 @@ Curse.functions = {
           }
         }
       elseif roomName:find("Rooms/w096x102.lua") then
-        if game.lastSide == "up" then
-          game.room.downTrans = {
-            {
-              roomTarget = "Rooms/cursedForest/r08.lua",
-              xleftmost = 0, xrightmost = 520,
-              xmod = 0, ymod = 0
-            }
+        game.room.downTrans = {
+          {
+            roomTarget = "Rooms/cursedForest/r08.lua",
+            xleftmost = 0, xrightmost = 520,
+            xmod = 0, ymod = 0
           }
-        else
-          game.room.rightTrans = {
-            {
-              roomTarget = self.getFirstRoom(),
-              yupper = 0, ylower = 520,
-              xmod = 0, ymod = 0
-            }
+        }
+        game.room.rightTrans = {
+          {
+            roomTarget = self.getFirstRoom(),
+            yupper = 0, ylower = 520,
+            xmod = 0, ymod = 0
           }
-        end
+        }
       elseif roomName:find("cursedForest") then
         -- game.room.music_info = "ambient1"
         game.room.music_info = {name = "mystical", introName = "mysticalIntro"}

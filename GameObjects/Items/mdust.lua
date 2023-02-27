@@ -10,6 +10,8 @@ local magic_dust_effects = require "GameObjects.Helpers.magic_dust_effects"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
+local lighting = require 'ScreenEffects.lighting.lighting'
+
 local MagicDust = {}
 
 function MagicDust.initialize(instance)
@@ -227,14 +229,14 @@ MagicDust.functions = {
       if self.chargedShaderPhase > self.chargedShaderFreq then
         self.chargedShaderPhase = self.chargedShaderPhase - self.chargedShaderFreq
         local randHue = COLORCONST * love.math.random()
-        local r1, g1, b1, a = HSL(randHue, 1 * COLORCONST, 0.5 * COLORCONST, COLORCONST)
-        local r2, g2, b2, a = HSL(randHue, 1 * COLORCONST, 0.75 * COLORCONST, COLORCONST)
+        local r1, g1, b1 = HSL(randHue, 1 * COLORCONST, 0.5 * COLORCONST, COLORCONST)
+        local r2, g2, b2 = HSL(randHue, 1 * COLORCONST, 0.75 * COLORCONST, COLORCONST)
         local ccInv = 1 / COLORCONST
         r1, g1, b1, r2, g2, b2 =
         r1 * ccInv, g1 * ccInv, b1 * ccInv,
         r2 * ccInv, g2 * ccInv, b2 * ccInv
         if self.chargedShader then
-          self.chargedShader:send("rgb", r1, g1, b1, r2, g2, b2, a)
+          self.chargedShader:send("rgb", r1, g1, b1, r2, g2, b2, 1)
         end
         self.currentShader = self.chargedShader
       end
@@ -255,6 +257,8 @@ MagicDust.functions = {
   draw = function(self, td)
     local x, y = self.x, self.y
 
+    local ii = math.floor(self.image_index)
+
     if td then
       x, y = trans.moving_objects_coords(self)
     end
@@ -262,7 +266,7 @@ MagicDust.functions = {
     self.x, self.y = x, y
 
     local sprite = self.sprite
-    local frame = sprite[math.floor(self.image_index)]
+    local frame = sprite[ii]
     local worldShader = love.graphics.getShader()
     local ymod
     if self.side == "down" then
@@ -272,6 +276,13 @@ MagicDust.functions = {
     else
       ymod = 0
     end
+
+    lighting.applyLight{
+      type = "sprinkle",
+      x = self.x,
+      y = self.y + 4 + ymod,
+      image_index = ii
+    }
 
     love.graphics.setShader(self.currentShader)
     love.graphics.draw(

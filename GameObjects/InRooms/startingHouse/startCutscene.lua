@@ -30,7 +30,7 @@ local states = {
     instance.stateTimer = instance.stateTimer - dt
     if instance.stateTimer < 0 then
       instance.playa.image_index = 1
-      game.ambientLightType = "fullLight"
+      game.room.ambientLightType = instance.prevLightType
     end
   end,
   start_state = function(instance, dt)
@@ -224,8 +224,8 @@ Cutscene.functions = {
   load = function (self)
     if session.save.startCutsceneDone then return o.removeFromWorld(self) end
     self.startingTime = session.save.time
+    self.prevLightType = game.room.ambientLightType
     game.room.ambientLightType = "midnight"
-    game.ambientLightType = "midnight"
     self.state = "start"
 
     self.plx = 56

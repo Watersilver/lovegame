@@ -1,6 +1,6 @@
-extern vec4 redMap = vec4(1, 0, 0, 1); // helps map redness of a pixel to another colour
-extern vec4 greenMap = vec4(0, 1, 0, 1); // helps map greenness of a pixel to another colour
-extern vec4 blueMap = vec4(0, 0, 1, 1); // helps map blueness of a pixel to another colour
+extern vec4 redPalette = vec4(1, 0, 0, 1); // helps map redness of a pixel to another colour
+extern vec4 greenPalette = vec4(0, 1, 0, 1); // helps map greenness of a pixel to another colour
+extern vec4 bluePalette = vec4(0, 0, 1, 1); // helps map blueness of a pixel to another colour
 extern vec4 redAmbient = vec4(1, 0, 0, 1); // helps map redness of a pixel to another colour
 extern vec4 greenAmbient = vec4(0, 1, 0, 1); // helps map greenness of a pixel to another colour
 extern vec4 blueAmbient = vec4(0, 0, 1, 1); // helps map blueness of a pixel to another colour
@@ -9,6 +9,8 @@ extern Image lightMap; // Image that holds info about light sources
 extern Image shadowMap; // Image that holds info about shadows
 
 // WARNING: Do not use max for vectors, it behaves weirdly
+
+// Idea: backlight could be gradient
 
 float max3(vec4 v) {
   return max(max(v.r, v.g), v.b);
@@ -29,11 +31,11 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
   // -----------------
 
   // red transformation to some colour r determined by its map and intensity of pixel's red colour
-  vec4 r = redMap * pixel.r;
+  vec4 r = redPalette * pixel.r;
   // green transformation to some colour g determined by its map and intensity of pixel's green colour
-  vec4 g = greenMap * pixel.g;
+  vec4 g = greenPalette * pixel.g;
   // blue transformation to some colour b determined by its map and intensity of pixel's blue colour
-  vec4 b = blueMap * pixel.b;
+  vec4 b = bluePalette * pixel.b;
 
   // brightest colours are chosen
   pixel.r = max(r.r, max(g.r, b.r));

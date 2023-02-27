@@ -47,7 +47,9 @@ Bombsplosion.functions = {
     self.startingTimer = self.timer
     self.body:setPosition(self.x, self.y)
 
-    if session.save.dinsPower and not self.dustAccident then
+    self.red = session.save.dinsPower and not self.dustAccident
+
+    if self.red then
       self.myShader = shdrs["itemRedShader"]
       self.blowUpForce = 200
       self.damCounter = 1.7
@@ -63,7 +65,7 @@ Bombsplosion.functions = {
 
     -- determine the explosion's effects based pldistance and explosions power
     local magn, freq, dur = 1, 0.05, 1
-    if session.save.dinsPower and not self.dustAccident then
+    if self.red then
       -- < 85 is close, > 95 is far
       if pldistance < 20 then
         magn, dur = 1.5, 2
@@ -108,11 +110,23 @@ Bombsplosion.functions = {
 
     self.x, self.y = x, y
 
+    local progress = (1 - self.timer / self.startingTimer)
+
+    local a = 0
+    if progress < 0.2 then
+      a = progress / 0.2
+    elseif progress < 0.7 then
+      a = 1
+    else
+      a = 1 - (progress - 0.7) / 0.3
+    end
+
     -- bomb light
     lighting.applyLight{
-      type = 'playerGlow',
+      type = 'owlStatue',
       x = x,
-      y = y
+      y = y,
+      rgba = self.red and {r = 1, g = 0.5, b = 0, a = a} or {r = 1, g = 0, b = 1, a = a}
     }
 
     local sprite = self.sprite

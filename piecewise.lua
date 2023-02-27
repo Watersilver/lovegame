@@ -1,80 +1,83 @@
-local piwi = {}
+---@class Endpoint
+---@field value number|nil
+---@field open boolean|nil
 
+---@class Interval
+---@field left Endpoint
+---@field right Endpoint
 
--- TO DO. CONNECT DOMAIN FUNCTION??
+---@class SubfunctionDef
+---@field right Endpoint
+---@field subfunction Formula
 
-
-local emptyTable = {}
-
-local function greaterThan(value1, value2, strict)
-
-  if strict then
-    return value1 > value2
-  else
-    return value1 >= value2
-  end
-
+---@type fun(endpoint?: Endpoint):Endpoint
+local function clone(endpoint)
+  return endpoint and {
+    value = endpoint.value,
+    open = endpoint.open
+  } or {value = nil, open = nil}
 end
 
--- WARNING not optimal at all
-local function determineDomain(domains, t)
-  for _, domain in ipairs(domains) do
-    if greaterThan(t, domain.x1.value, not domain.x1.closed) and greaterThan(domain.x2.value, t, not domain.x2.closed) then
-      return domain
-    end
-  end
+---@type fun(interval: Interval, parameter: number):boolean
+local function betweenInterval(interval, parameter)
+  if parameter == interval.left.value and interval.left.open then return false end
+  if parameter == interval.right.value and interval.right.open then return false end
+  if interval.left.value and parameter < interval.left.value then return false end
+  if interval.right.value and parameter > interval.right.value then return false end
+  return true
 end
 
-function piwi.new()
-  local newPiwi = {}
+-- Starts definition of continuous piecewise function by defining leftmost endpoint.
+---@type fun(leftEndpoint?:Endpoint):Piecewise
+local function newPiecewise(leftEndpoint)
+  local leftmost = clone(leftEndpoint)
+  local rightmost = clone(leftEndpoint)
 
-  -- init
-  newPiwi.domains = {}
-  newPiwi.namedDomains = {}
+  ---@type SubfunctionDef[]
+  local subfunctions = {}
 
-  -- assumed domain input structure:
-  -- dom = {x1 = {value = x, closed = bool1}, x2 = {value = y, closed = bool2}}
-  -- x1 value is assumend bigger than x2 value
-  function newPiwi.newSubfunction(newDomain, subfunction, settings)
-    settings = settings or emptyTable
+  ---@class Piecewise
+  local piwi = {}
 
-    local nx1 = newDomain.x1
-    local nx2 = newDomain.x2
+  ---@alias Formula fun(parameter:number, fraction?:number):any
+  ---@type fun(subfunction:Formula, rightEndpoint?:Endpoint):Piecewise
+  function piwi.newSubfunction(subfunction, rightEndpoint)
+    local r = clone(rightEndpoint)
 
-    -- ensure there are no overlapping domains
-    for _, prevDomain in ipairs(newPiwi.domains) do
-      local px1 = prevDomain.x1
-      local px2 = prevDomain.x2
-      if not (greaterThan(nx1.value, px2.value, nx1.closed and px2.closed) or
-        greaterThan(px1.value, nx2.value, px1.closed and nx2.closed)) then
-          return false
+    assert(rightmost.value ~= nil, "Right most endpoint is infinite. Cannot add more subfunctions...")
+    assert((r.value > leftmost.value) or (leftmost.open and not r.open), "rightEndpoint provided is not bigger that leftmost endpoint...")
+    assert((r.value > rightmost.value) or (rightmost.open and not r.open), "rightEndpoint provided is not bigger that rightmost endpoint...")
+
+    rightmost = clone(r)
+
+    table.insert(subfunctions, {
+      right = r,
+      subfunction = subfunction
+    })
+
+    return piwi
+  end
+
+  ---@type fun(parameter:number):any
+  function piwi.call(parameter)
+    local left = leftmost
+    for _, subfunction in ipairs(subfunctions) do
+      if betweenInterval({left = left, right = subfunction.right}, parameter) then
+        ---@type number | nil
+        local normal = nil
+        if left and left.value and subfunction.right and subfunction.right.value then 
+          normal = (parameter - left.value) / (subfunction.right.value - left.value)
+        end
+        return subfunction.subfunction(parameter, normal)
       end
+      left = clone(subfunction.right)
+      left.open = not left.open
     end
 
-    local startVars = settings.startVars
-    local endVars = settings.endVars
-
-    newDomain.subfunction = {
-      run = subfunction,
-      startVars = startVars,
-      endVars = endVars
-    }
-
-    table.insert(newPiwi.domains, newDomain)
-
-    if settings.name then
-      newPiwi.namedDomains[settings.name] = newDomain
-    end
-
-    return true
+    error("Piecewise is undefined for the value of the provided parameter: " .. parameter)
   end
 
-  function newPiwi.run(t)
-    local currentDomain = determineDomain(newPiwi.domains, t)
-    return currentDomain.subfunction.run(t, currentDomain)
-  end
-
-  return newPiwi
+  return piwi
 end
 
-return piwi
+return newPiecewise

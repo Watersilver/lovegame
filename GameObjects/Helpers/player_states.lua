@@ -725,6 +725,8 @@ player_states.check_sprintcharge = function(instance, dt, side)
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif not instance:grounded() then
     instance.animation_state:change_state(instance, dt, side .. "fall")
+  elseif trig.jump and instance:grounded() then
+    instance.animation_state:change_state(instance, dt, side .. "jump")
   elseif not trig.speed then
     instance.animation_state:change_state(instance, dt, side .. "still")
   elseif instance.sprintCharge < 0 then
@@ -741,6 +743,10 @@ player_states.start_sprintcharge = function(instance, dt, side)
   end
   instance.image_speed = 0.3
   instance.sprintCharge = 0.5
+
+  if instance.speed > 185 then
+    instance.sprintCharge = -1
+  end
 end
 
 player_states.end_sprintcharge = function(instance, dt, side)
@@ -826,6 +832,8 @@ player_states.check_sprint = function(instance, dt)
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif not instance:grounded() then
     instance.animation_state:change_state(instance, dt, instance.sprintSide .. "fall")
+  elseif trig.jump and instance:grounded() then
+    instance.animation_state:change_state(instance, dt, instance.sprintSide .. "jump")
   elseif not trig.speed then
     instance.animation_state:change_state(instance, dt, instance.sprintSide .. "still")
   end

@@ -1,14 +1,9 @@
-local newPiecewise = require "piecewise2"
 local screenEffects = require "screenEffects"
 local u = require 'utilities'
 local determineAmbient = require 'ScreenEffects.lighting.determineAmbient'
+local determinePalette = require 'ScreenEffects.lighting.determinePalette'
 
 local sourceTypes = require 'ScreenEffects.lighting.sourceTypes'
-
--- TODO: should light be able to turn something white?
--- Right now it turns it at most its unodified color.
--- Could be that up to .5 alpha it makes things be their color but above that it whitens.
--- Maybe that should be different effect.
 
 local lightingShdr
 
@@ -24,6 +19,7 @@ if not shdrExists then print(err) end
 ---@field x number
 ---@field y number
 ---@field type SourceType
+---@field rad? number
 ---@field scale? number
 ---@field rgba? {r: number; g: number; b: number; a: number;}
 ---@field image_index? number
@@ -75,14 +71,96 @@ if shdrExists then lightingShdr:send("lightMap", lightMap) end
 local shadowMap = love.graphics.newCanvas(getCanvasiDims(initial_w, initial_h))
 if shdrExists then lightingShdr:send("shadowMap", shadowMap) end
 
+---@type { r: number[], g: number[], b: number[] }
+local palette
+---@type { r: number[], g: number[], b: number[] }
+local ambient
+
+---@param v number
+---@param t number
+---@param step number
+local function moveTowardsValue(v, t, step)
+  if v > t then
+    v = v - step * delta_time
+    if v < t then v = t end
+  elseif v < t then
+    v = v + step * delta_time
+    if v > t then v = t end
+  end
+  return v
+end
+
+local function rgbMoveTowardsValue(v, t, step)
+  v.r[1] = moveTowardsValue(v.r[1], t.r[1], step)
+  v.r[2] = moveTowardsValue(v.r[2], t.r[2], step)
+  v.r[3] = moveTowardsValue(v.r[3], t.r[3], step)
+  v.g[1] = moveTowardsValue(v.g[1], t.g[1], step)
+  v.g[2] = moveTowardsValue(v.g[2], t.g[2], step)
+  v.g[3] = moveTowardsValue(v.g[3], t.g[3], step)
+  v.b[1] = moveTowardsValue(v.b[1], t.b[1], step)
+  v.b[2] = moveTowardsValue(v.b[2], t.b[2], step)
+  v.b[3] = moveTowardsValue(v.b[3], t.b[3], step)
+
+  return v
+end
+
 ---@param s love.Shader
 local prepShader = function(s)
-  -- determine ambient light
-  local ambientTarget = determineAmbient(s)
+  -- determine palette
+  local paletteTarget = determinePalette()
+  palette = palette or {
+    r = {
+      paletteTarget.r[1],
+      paletteTarget.r[2],
+      paletteTarget.r[3],
+      paletteTarget.r[4]
+    },
+    g = {
+      paletteTarget.g[1],
+      paletteTarget.g[2],
+      paletteTarget.g[3],
+      paletteTarget.g[4]
+    },
+    b = {
+      paletteTarget.b[1],
+      paletteTarget.b[2],
+      paletteTarget.b[3],
+      paletteTarget.b[4]
+    }
+  }
+  rgbMoveTowardsValue(palette, paletteTarget, 1)
 
-  s:send("redAmbient", ambientTarget.r)
-  s:send("greenAmbient", ambientTarget.g)
-  s:send("blueAmbient", ambientTarget.b)
+  -- determine ambient light
+  local ambientTarget = determineAmbient()
+  ambient = ambient or {
+    r = {
+      ambientTarget.r[1],
+      ambientTarget.r[2],
+      ambientTarget.r[3],
+      ambientTarget.r[4]
+    },
+    g = {
+      ambientTarget.g[1],
+      ambientTarget.g[2],
+      ambientTarget.g[3],
+      ambientTarget.g[4]
+    },
+    b = {
+      ambientTarget.b[1],
+      ambientTarget.b[2],
+      ambientTarget.b[3],
+      ambientTarget.b[4]
+    }
+  }
+  rgbMoveTowardsValue(ambient, ambientTarget, 1)
+
+  s:send("redPalette", palette.r)
+  s:send("greenPalette", palette.g)
+  s:send("bluePalette", palette.b)
+
+  s:send("redAmbient", ambient.r)
+  s:send("greenAmbient", ambient.g)
+  s:send("blueAmbient", ambient.b)
 
   -- s:send("redAmbient", {1, 0, 0, 1})
   -- s:send("greenAmbient", {0, 0.5, 0.2, 1})
@@ -95,6 +173,10 @@ local prepShader = function(s)
   -- s:send("redAmbient", {0.05, 0, 0.1, 1})
   -- s:send("greenAmbient", {0, 0.1, 0, 1})
   -- s:send("blueAmbient", {0, 0, 0.1, 1})
+
+  -- s:send("redAmbient", {1, 0, 0, 1})
+  -- s:send("greenAmbient", {0, 1, 0, 1})
+  -- s:send("blueAmbient", {0, 0, 1, 1})
 
   -- s:send("redAmbient", {0, 0, 0, 1})
   -- s:send("greenAmbient", {0, 0, 0, 1})
@@ -146,9 +228,9 @@ local function drawLightOnCanvas(sources, canvas)
     local type = sourceTypes[light.type]
     light.rgba = light.rgba or {r=1,g=1,b=1,a=1}
     u.changeColour({
-      r = (light.rgba.r * COLORCONST) or COLORCONST,
-      g = (light.rgba.g * COLORCONST) or COLORCONST,
-      b = (light.rgba.b * COLORCONST) or COLORCONST,
+      r = ((light.rgba.r * COLORCONST) or COLORCONST) * light.rgba.a,
+      g = ((light.rgba.g * COLORCONST) or COLORCONST) * light.rgba.a,
+      b = ((light.rgba.b * COLORCONST) or COLORCONST) * light.rgba.a,
       a = (light.rgba.a * COLORCONST) or COLORCONST
     })
     local resetColor = u.storeColour()
@@ -158,7 +240,7 @@ local function drawLightOnCanvas(sources, canvas)
           local s = type.sprite
           love.graphics.draw(
             s.img, s[light.image_index],
-            x, y, 0,
+            x, y, light.rad or 0,
             canvScale * s.res_x_scale,
             canvScale * s.res_x_scale,
             s.cx, s.cy
@@ -167,7 +249,7 @@ local function drawLightOnCanvas(sources, canvas)
       else
         love.graphics.draw(
           type.img,
-          x, y, 0,
+          x, y, light.rad or 0,
           canvScale * (light.scale or 1),
           canvScale * (light.scale or 1),
           type.centerOffset,

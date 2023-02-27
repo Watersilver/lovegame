@@ -416,5 +416,22 @@ items.ringVignette = {
   end
 }
 
+-- other effects
+items.ringRainbow = {
+  name = "Rainbow Ring",
+  description = "Make your life more colourful!",
+  equip = function()
+    session.usedItemComment = "Equipped Rainbow Ring!"
+    session.wornRing = 'ringRainbow'
+  end,
+  unequip = function()
+    session.usedItemComment = "Unequipped Rainbow Ring!"
+    session.wornRing = nil
+  end,
+  use = function()
+    useRing("ringRainbow")
+  end
+}
+
 
 return items

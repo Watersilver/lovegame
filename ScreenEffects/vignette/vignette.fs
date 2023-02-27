@@ -5,6 +5,8 @@
 // Email:   LManning17@gmail.com
 
 // TODO: review and fix for stretched screen with dead space
+// TODO: Make it always active
+// TODO: Make all shaders somehow ignore screen stretching
 
 uniform bool  u_correct_ratio = false;
 uniform float u_radius        = 0.75;

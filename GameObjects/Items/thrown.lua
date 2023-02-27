@@ -180,6 +180,7 @@ Thrown.functions = {
       else
         self.zvel = self.zvel - self.gravity * dt
         if not self.shadow then
+          local x, y = self.body:getPosition()
           self.shadow = sh:new{
             caster = self, layer = self.layer-2,
             xstart = x, ystart = y

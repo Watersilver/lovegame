@@ -21,7 +21,7 @@ end
 
 -- Round to closest int
 function u.round(x)
-  return x + 0.5 - (x + 0.5) % 1
+  return x>=0 and math.floor(x+0.5) or math.ceil(x-0.5)
 end
 
 -- linear interpolation
@@ -612,6 +612,124 @@ end
 -- condition and v1 or v2 doesn't work for falsy values. Use this func instead.
 function u.ternaryOp(condition, valIfTrue, valIfFalse)
   if condition then return valIfTrue else return valIfFalse end
+end
+
+--- difference from simple lerp is this gives value between a and b even if b is smaller than a
+---@param a number
+---@param b number
+---@param progress number
+---@return number
+function u.lerp2(a, b, progress)
+  if b > a then
+    local diff = b - a
+    return a + diff * progress
+  else
+    local diff = a - b
+    return a - diff * progress
+  end
+end
+
+--- Lerps color a to color b (except a which doesn't need to be provided but is returned as forth value = 1)
+---@param a {r: number[], g: number[], b: number[]}
+---@param b {r: number[], g: number[], b: number[]}
+---@param t number
+---@return {r: number[], g: number[], b: number[]}
+function u.rgbLerp(a, b, t)
+  return {
+    r = {
+      u.lerp2(a.r[1], b.r[1], t),
+      u.lerp2(a.r[2], b.r[2], t),
+      u.lerp2(a.r[3], b.r[3], t),
+      1
+    },
+    g = {
+      u.lerp2(a.g[1], b.g[1], t),
+      u.lerp2(a.g[2], b.g[2], t),
+      u.lerp2(a.g[3], b.g[3], t),
+      1
+    },
+    b = {
+      u.lerp2(a.b[1], b.b[1], t),
+      u.lerp2(a.b[2], b.b[2], t),
+      u.lerp2(a.b[3], b.b[3], t),
+      1
+    }
+  }
+end
+
+-- Converts an RGB color value to HSL. Conversion formula
+-- adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+-- Assumes r, g, and b are contained in the set [0, COLORCONST] and
+-- returns h, s, and l in the set [0, 1].
+--
+---@param r number The red color value
+---@param g number The green color value
+---@param b number The blue color value
+---@return number h
+---@return number s
+---@return number l
+function u.rgbToHsl(r, g, b)
+  r, g, b = r / COLORCONST, g / COLORCONST, b / COLORCONST
+  local max, min = math.max(r, g, b), math.min(r, g, b)
+  local mid = (max + min) / 2
+  local h, s, l = mid, mid, mid
+
+  if max == min then
+    -- achromatic
+    h, s = 0, 0
+  else
+    local d = max - min;
+    s = (l > 0.5) and (d / (2 - max - min)) or (d / (max + min))
+
+    if max == r then
+      h = (g - b) / d + ((g < b) and 6 or 0)
+    elseif max == g then
+      h = (b - r) / d + 2
+    elseif max == b then
+      h = (r - g) / d + 4
+    else
+      h = h / 6
+    end
+  end
+
+  return h, s, l;
+end
+
+local function hue2rgb(p, q, t)
+  if t < 0 then t = t + 1 end
+  if t > 1 then t = t - 1 end
+  if t < 1/6 then return p + (q - p) * 6 * t end
+  if t < 1/2 then return q end
+  if t < 2/3 then return p + (q - p) * (2/3 - t) * 6 end
+  return p
+end
+
+-- Converts an HSL color value to RGB. Conversion formula
+-- adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+-- Assumes h, s, and l are contained in the set [0, 1] and
+-- returns r, g, and b in the set [0, COLORCONST].
+--
+---@param h number The hue
+---@param s number The saturation
+---@param l number The lightness
+---@return number r
+---@return number g
+---@return number b
+function u.hslToRgb(h, s, l)
+  ---@type number, number, number
+  local r, g, b
+
+  if s == 0 then
+    r, g, b = l, l, l -- achromatic
+  else
+    local q = l < 0.5 and l * (1 + s) or l + s - l * s;
+    local p = 2 * l - q;
+    r = hue2rgb(p, q, h + 1/3);
+    g = hue2rgb(p, q, h);
+    b = hue2rgb(p, q, h - 1/3);
+  end
+
+  return r * COLORCONST, g * COLORCONST, b * COLORCONST;
 end
 
 return u

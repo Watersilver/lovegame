@@ -218,6 +218,17 @@ session = {
       snd.bgmV2.getMusicAndload()
     end
   end,
+  ---@return "full" | "half" | "new"
+  getMoonPhase = function()
+    local adjustment = session.save.time < 12 and -1 or 0
+
+    --     v V v
+    -- 4 5 6 7 1 2 3
+    local cyclePosition = math.floor(session.save.days + 6 + adjustment) % 7
+    if (cyclePosition == 6) then return "full" end
+    if (cyclePosition == 5 or cyclePosition == 0) then return "half" end
+    return "new"
+  end,
   maxMoney = function()
     if session.save.wallet == 1 then -- wallet
       return 200
@@ -282,13 +293,23 @@ session = {
     -- Modifier due to temp speedBoosts or penalties
     return maxSpeed
   end,
-  canTeleport = function(mark)
-    local from =
-      (session.save.forestCurseLifted or not session.latestVisitedRooms:getLast():find("cursedForest"))
-    local to = mark and (
-      (session.save.forestCurseLifted or not mark.roomName:find("cursedForest"))
-    ) or true
-    return (from and to) or game.room.blockTeleport
+  canMarkPersist = function()
+    if game.room.blockTeleport then return false end
+
+    -- Check if from or to cursed forest
+    if not session.save.forestCurseLifted then
+      if session.latestVisitedRooms:getLast():find("cursedForest") then return false end
+
+      -- If in forest fake exit / secret truth lie path, cannot mark or recall
+      if game.lastSide == "up" and session.latestVisitedRooms:getLast():find("Rooms/w096x102.lua") then
+        return false
+      end
+    end
+
+    return true
+  end,
+  canRecallOtherRoom = function()
+    return session.canMarkPersist()
   end,
   journalEntryNotification = function()
     -- local Txtx = assert(love.filesystem.load("GameObjects/overlayText/newNote.lua"))()
@@ -837,12 +858,14 @@ function love.update(dt)
     end
   end
 
+  -- fuck = session.save.time
+
   -- -- display mouse position
   -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
   -- wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
   -- fuck = tostring(wmx) .. "/" .. tostring(wmy)
-  -- -- --
-  -- -- -- display room
+
+  -- -- display room
   -- fuck = fuck .. "\n" .. (session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or "")
   -- if not fook then fook = {} end
   -- fook[session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or ""] = true
@@ -1528,7 +1551,7 @@ function love.draw()
   love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
 ---@diagnostic disable-next-line: undefined-global
   if currentEnemyName then love.graphics.print(currentEnemyName, 0, love.graphics.getHeight()-77) end
-  if fuck then love.graphics.print(fuck, 0, 177+120) end
+  if fuck then love.graphics.print(tostring(fuck), 0, 177+120) end
   local debiter = 0
 ---@diagnostic disable-next-line: undefined-global
   if triggersdebug then

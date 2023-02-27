@@ -1668,7 +1668,7 @@ local animation_states = {
     if instance.mark and instance.mark.exists and instance.recallanim <= 0 and instance:canMark() then
 
       if session.latestVisitedRooms:getLast() ~= instance.mark.roomName then
-        if not game.transitioning and session.canTeleport(instance.mark) then
+        if not game.transitioning and session.canRecallOtherRoom() then
           instance.sounds.recallStart:stop()
           snd.play(instance.sounds.recall)
           instance.stateTriggers.poof = true

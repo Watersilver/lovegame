@@ -1,6 +1,7 @@
 local p = require "GameObjects.prototype"
 local u = require "utilities"
 local utilities = require "utilities"
+local lighting = require 'ScreenEffects.lighting.lighting'
 
 local Particles = {}
 
@@ -82,6 +83,11 @@ Particles.functions = {
   draw = function (self)
     for _, sparkInfo in ipairs(self.simpleSparks) do
       love.graphics.rectangle("fill", sparkInfo.x, sparkInfo.y, 1, 1);
+      lighting.applyLight{
+        type = 'pixel',
+        x = sparkInfo.x,
+        y = sparkInfo.y
+      }
     end
 
     local restoreColour = utilities.storeColour()
@@ -89,6 +95,17 @@ Particles.functions = {
       local c = sparkInfo.color
       love.graphics.setColor(c.r, c.g, c.b, c.a)
       love.graphics.rectangle("fill", sparkInfo.x, sparkInfo.y, 1, 1);
+      lighting.applyLight{
+        type = 'pixel',
+        x = sparkInfo.x,
+        y = sparkInfo.y,
+        rgba = {
+          r = c.r / COLORCONST,
+          g = c.g / COLORCONST,
+          b = c.b / COLORCONST,
+          a = 1
+        }
+      }
     end
     restoreColour()
   end

@@ -35,22 +35,22 @@ function Mark.initialize(instance)
   end
 
   -- for teleport between screens
-  if session.canTeleport() then instance.transPersistent = true end
+  if session.canMarkPersist() then instance.transPersistent = true end
   instance.roomName = session.latestVisitedRooms:getLast()
 end
 
 Mark.functions = {
   load = function (self)
-    framesSlice = 1/self.sprite.frames
+    self.framesSlice = 1/self.sprite.frames
   end,
 
   update = function (self, dt)
     image_indexProgress = image_indexProgress + dt * image_indexProgressDirection
     if image_indexProgress >= 1 then
-      image_indexProgress = 1 - framesSlice
+      image_indexProgress = 1 - self.framesSlice
       image_indexProgressDirection = - image_indexProgressDirection
     elseif image_indexProgress < 0 then
-      image_indexProgress = framesSlice
+      image_indexProgress = self.framesSlice
       image_indexProgressDirection = - image_indexProgressDirection
     end
     self.image_index = floor(image_indexProgress * self.sprite.frames)

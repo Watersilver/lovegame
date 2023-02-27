@@ -159,7 +159,7 @@ inv.speed = {
   powerUp = "faroresCourage",
   invImage = love.graphics.newImage("Sprites/Inventory/InvImgSpeed.png"),
   check_trigger = function(object, keyheld)
-    if keyheld == 0 then
+    if keyheld == 0 or object.triggers.land then
       return "speed_start"
     else
       return "speed"
@@ -236,7 +236,6 @@ inv.closeInv()
 function inv.isOpen()
   return open
 end
-
 
 function inv.check_use(instance, trig, side, dt)
   local returnValue = false

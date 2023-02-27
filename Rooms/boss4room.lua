@@ -7,7 +7,7 @@ local room = {}
 room.newType = true
 
 room.music_info = snd.silence
-room.ambientLightType = 'fullLight'
+room.ambientLightType = 'midnight'
 
 room.width = 400
 room.height = 304

@@ -1,14 +1,23 @@
 local u = require 'utilities'
 local im = require 'image'
 
+local function square(side, centerOffset)
+  local data = love.image.newImageData(side, side)
+
+  data:mapPixel(function()
+    return COLORCONST,COLORCONST,COLORCONST,COLORCONST
+  end)
+
+  return {img = love.graphics.newImage(data), centerOffset = centerOffset or 0}
+end
+
 local function squareGradient(side, kwargs)
   local data = love.image.newImageData(side, side)
   kwargs = kwargs or {}
 
   data:mapPixel(function(x, y)
-    -- local alpha = (y / side) * (kwargs.a or 1) * COLORCONST
     local alpha = (1 - 3 / (y + 3)) * (kwargs.a or 1) * COLORCONST
-    return (kwargs.r or 1) * COLORCONST, (kwargs.g or 1) * COLORCONST, (kwargs.b or 1) * COLORCONST, alpha
+    return (kwargs.r or 1) * alpha, (kwargs.g or 1) * alpha, (kwargs.b or 1) * alpha, alpha
   end)
 
   return {img = love.graphics.newImage(data), centerOffset = side * 0.5}
@@ -67,11 +76,12 @@ local function radGrad(layers)
   return {img = love.graphics.newImage(data), centerOffset = totalRadius + 0.5, type = "drawn"}
 end
 
----@alias SourceType "torch" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile'
+---@alias SourceType "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel'
 
 ---@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown}}
 local sourceTypes = {
   torch = {type = "sprite", sprite = im.load_sprite({'flickeringLight', 2, padding = 1, width = 48, height = 48})},
+  sprinkle = {type = "sprite", sprite = im.load_sprite{'Effects/UseSprinkleEffect', 6, padding = 2, width = 24, height = 10}},
   owlStatue = radGrad{{r = 23, a = 1}, {r = 30, a = 0}},
 
   playerGlow = radGrad{
@@ -92,6 +102,8 @@ local sourceTypes = {
   },
 
   door = squareGradient(16, {a = 1}),
+
+  pixel = square(1)
 }
 
 return sourceTypes

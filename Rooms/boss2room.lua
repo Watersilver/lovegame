@@ -7,7 +7,34 @@ local room = {}
 room.newType = true
 
 room.music_info = snd.silence
-room.ambientLightType = 'fullLight'
+
+local period1 = 0
+local period2 = 0
+room.ambientLightType = function()
+  period1 = period1 + delta_time
+  period1 = period1 % (math.pi * 2)
+  local mod1 = math.sin(period1) * 0.5 + 0.5
+
+  period2 = period2 + delta_time * 0.1 * math.pi
+  period2 = period2 % (math.pi * 2)
+  local mod2 = math.sin(period2) * 0.5 + 0.5
+
+  return {
+    r = {
+      0.3 + 0.3 * mod2,
+      0,
+      0.3 * mod1,
+      1
+    },
+    g = { 0, 0.2, 0, 1 },
+    b = {
+      0,
+      0,
+      0.3,
+      1
+    }
+  }
+end
 
 room.width = 400
 room.height = 240

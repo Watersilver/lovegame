@@ -7,7 +7,7 @@ local room = {}
 room.newType = true
 
 room.music_info = "StartingHouse"
-room.ambientLightType = 'fullLight'
+room.ambientLightType = 'cozy'
 
 room.width = 144
 room.height = 144

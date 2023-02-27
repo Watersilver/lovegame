@@ -70,20 +70,6 @@ function Missile.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.immamissile = true
-  if shdrs.missileCustomShader and session.save.customMissileAvailable and session.save.customMissileEnabled then
-    local secondaryR = 0.65 + session.save.missileR * 0.35
-    local secondaryG = 0.65 + session.save.missileG * 0.35
-    local secondaryB = 0.65 + session.save.missileB * 0.35
-    shdrs.missileCustomShader:send("rgb",
-    session.save.missileR,
-    session.save.missileG,
-    session.save.missileB,
-    secondaryR, secondaryG, secondaryB,
-    1) -- send one extra value to offset bug
-    instance.myShader = shdrs.missileCustomShader
-  else
-    if session.save.nayrusWisdom then instance.myShader = shdrs["itemBlueShader"] end
-  end
 end
 
 
@@ -122,9 +108,25 @@ Missile.functions = {
     self.outlineSprite = im.sprites["Inventory/UseMissileOutlineL1"]
 
     self.sparkCounter = counter.new(.2)
+
+    if session.save.nayrusWisdom then
+      self.poweredUp = true
+    end
+
+    local r, g, b = utilities.hslToRgb(love.math.random(), 1, 0.5)
+
+    if session.wornRing == 'ringRainbow' then
+      self.rgba = {
+        r= r / COLORCONST,
+        g= g / COLORCONST,
+        b= b / COLORCONST,
+        a= 1
+      }
+    end
   end,
 
   early_update = function(self, dt)
+
     local cr = self.creator
 
     if self.weld and not self.weld:isDestroyed() then self.weld:destroy(); self.weld = nil end
@@ -253,7 +255,8 @@ Missile.functions = {
       type = 'missile',
       x = x,
       y = y,
-      rgba = {r=0,g=0.5,b=1,a=1}
+      rgba = self.rgba and self.rgba or (self.poweredUp and {r=0,g=0.5,b=1,a=1} or {r=0,g=1,b=0,a=1}),
+      scale = (self.image_index + 1) / self.sprite.frames
     }
 
     self.x, self.y = x, y
@@ -264,6 +267,41 @@ Missile.functions = {
     end
     local frame = sprite[floor(self.image_index)]
     local worldShader = love.graphics.getShader()
+
+    if shdrs.missileCustomShader and session.save.customMissileAvailable and session.save.customMissileEnabled then
+      local secondaryR = 0.65 + session.save.missileR * 0.35
+      local secondaryG = 0.65 + session.save.missileG * 0.35
+      local secondaryB = 0.65 + session.save.missileB * 0.35
+      shdrs.missileCustomShader:send(
+        "rgb",
+        session.save.missileR,
+        session.save.missileG,
+        session.save.missileB,
+        secondaryR, secondaryG, secondaryB,
+        1
+      ) -- send one extra value to offset bug
+      self.myShader = shdrs.missileCustomShader
+    else
+      if self.poweredUp then self.myShader = shdrs["itemBlueShader"] end
+    end
+
+    if shdrs.missileCustomShader and self.rgba then
+      local r = 1 - self.rgba.r
+      local g = 1 - self.rgba.g
+      local b = 1 - self.rgba.b
+      local secondaryR = 0.65 + r * 0.35
+      local secondaryG = 0.65 + g * 0.35
+      local secondaryB = 0.65 + b * 0.35
+      shdrs.missileCustomShader:send(
+        "rgb",
+        r,
+        g,
+        b,
+        secondaryR, secondaryG, secondaryB,
+        1
+      ) -- send one extra value to offset bug
+      self.myShader = shdrs.missileCustomShader
+    end
 
     love.graphics.setShader(self.myShader)
     love.graphics.draw(
