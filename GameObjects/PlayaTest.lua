@@ -2324,8 +2324,8 @@ Playa.functions = {
 
   applyLights = function (self, x, y)
     if session.save.playerGlowAvailable then
-      lighting.sendNightVision(session.save.playerGlow == "Both" or session.save.playerGlow == "No Glow")
-      if session.save.playerGlow == "Both" or session.save.playerGlow == "No Night Vision" then
+      lighting.sendNightVision(not session.save.playerGlow or session.save.playerGlow == "No Glow")
+      if not session.save.playerGlow or session.save.playerGlow == "No Night Vision" then
         lighting.applyLight({
           type = "playerGlow",
           -- type = "torch", image_index = 0,

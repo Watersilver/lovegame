@@ -8,7 +8,7 @@ local u = require "utilities"
 local o = require "GameObjects.objects"
 local game = require "game"
 
-local npcTest = require "GameObjects.npcTest"
+local npcTest = require "GameObjects.NpcTest"
 local typicalNpc = require "GameObjects.GlobalNpcs.typicalNpc"
 
 

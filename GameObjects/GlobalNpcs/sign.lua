@@ -10,7 +10,7 @@ local game = require "game"
 local dc = require "GameObjects.Helpers.determine_colliders"
 local o = require "GameObjects.objects"
 
-local npcTest = require "GameObjects.npcTest"
+local npcTest = require "GameObjects.NpcTest"
 
 
 local function throw_collision(self)

@@ -173,9 +173,6 @@ Blob.functions = {
   end,
 }
 
-local npcTest = require "GameObjects.npcTest"
-local typicalNpc = require "GameObjects.GlobalNpcs.typicalNpc"
-
 function Blob:new(init)
   local instance = p:new() -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields

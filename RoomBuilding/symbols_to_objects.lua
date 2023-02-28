@@ -61,7 +61,7 @@ local symbols_to_objects_default = {
   twl = require("GameObjects.ThickWall.thickWallLeft"),
   twr = require("GameObjects.ThickWall.thickWallRight"),
   twu = require("GameObjects.ThickWall.thickWallUp"),
-  NpcTest = require("GameObjects.npcTest"),
+  NpcTest = require("GameObjects.NpcTest"),
   mainMenu = require("GameObjects.mainMenu")
 }
 

@@ -6,7 +6,7 @@ local trans = require "transitions"
 local game = require "game"
 local inp = require "input"
 local dlg = require "dialogue"
-local npcTest = require "GameObjects.npcTest"
+local npcTest = require "GameObjects.NpcTest"
 local snd = require "sound"
 
 

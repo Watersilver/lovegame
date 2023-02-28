@@ -321,6 +321,22 @@ local logicFuncs = {
           pam.left.selectedSetting = true
           pam.left.subsettingCursor = 1
           pam.left.subsettingsNumber = 4
+
+          --|---------------------------------------------------------|
+          --|Change customise subsetting cursor starting position here|
+          --|---------------------------------------------------------|
+
+          -- Ensure start from selected light setting
+          if pam.left.customiseCursor == 1 then
+            pam.left.subsettingsNumber = #pam.left.lightStyles + 1
+            pam.left.subsettingCursor = pam.left.subsettingsNumber
+            for i, s in ipairs(pam.left.lightStyles) do
+              if s == session.save.playerGlow then
+                pam.left.subsettingCursor = i
+              end
+            end
+          end
+
         else
           snd.play(glsounds.error)
         end
@@ -407,7 +423,7 @@ local function recolor(w, h, subsetting)
 end
 local settingsTooltipFuncs = {
   lightStyle = function(w, h)
-    local currentStyle = session.save.playerGlow or "None"
+    local currentStyle = session.save.playerGlow or "Both"
     love.graphics.polygon("line", w*0.5, 5, w*0.5-3, 10, w*0.5+3, 10)
     love.graphics.polygon("line", w*0.5, h - 5, w*0.5-3, h - 10, w*0.5+3, h - 10)
     local txtWd2 = love.graphics.getFont():getWidth(currentStyle) * 0.075
@@ -767,7 +783,7 @@ pam.left = {
   customise = {"lightStyle", "tunic", "sword", "missile", "mark"},
   customiseCursor = 1,
   selectedSetting = false,
-  lightStyles = {"Both", "No Glow", "No Night Vision"},
+  lightStyles = {"No Glow", "No Night Vision", "None"},
   itemTop = 0,
   itemCursor = 1,
 }

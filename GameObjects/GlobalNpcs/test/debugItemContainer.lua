@@ -1,5 +1,5 @@
 local p = require "GameObjects.prototype"
-local npcTest = require "GameObjects.npcTest"
+local npcTest = require "GameObjects.NpcTest"
 local chest = require "GameObjects.GlobalNpcs.chest"
 
 local floor = math.floor
