@@ -53,7 +53,7 @@ local canvH = 225 * canvScale
 
 ---@param w number
 ---@param h number
-local function getCanvasiDims(w, h)
+local function getCanvasDims(w, h)
   local newW, newH
   local ratio = w / h
   if (ratio) > 1.7777 then
@@ -66,9 +66,9 @@ local function getCanvasiDims(w, h)
   return newW, newH
 end
 
-local lightMap = love.graphics.newCanvas(getCanvasiDims(initial_w, initial_h))
+local lightMap = love.graphics.newCanvas(getCanvasDims(initial_w, initial_h))
 if shdrExists then lightingShdr:send("lightMap", lightMap) end
-local shadowMap = love.graphics.newCanvas(getCanvasiDims(initial_w, initial_h))
+local shadowMap = love.graphics.newCanvas(getCanvasDims(initial_w, initial_h))
 if shdrExists then lightingShdr:send("shadowMap", shadowMap) end
 
 ---@type { r: number[], g: number[], b: number[] }
@@ -284,7 +284,7 @@ end
 
 function lighting.resize(w, h)
   -- Canvas might be elongated on resize but fix that when feeding source positions
-  local newW, newH = getCanvasiDims(w, h)
+  local newW, newH = getCanvasDims(w, h)
   lightMap = love.graphics.newCanvas(newW, newH)
   shadowMap = love.graphics.newCanvas(newW, newH)
 

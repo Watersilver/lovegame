@@ -1,3 +1,5 @@
+local sh = require 'scaling_handler'
+
 ---@class Effect
 ---@field shader love.Shader
 ---@field canvas love.Canvas
@@ -130,6 +132,18 @@ local screenEffects = {
 
       -- update effect canvas to use resized one
       if e then e.canvas = c.c end
+    end
+
+    local dsx, dsy = sh.get_resized_window(w, h)
+    for _, effect in ipairs(effects) do
+---@diagnostic disable-next-line: undefined-field
+      if effect.shader:getExternVariable('deadSpaceX') then
+        effect.shader:send('deadSpaceX', dsx)
+      end
+---@diagnostic disable-next-line: undefined-field
+      if effect.shader:getExternVariable('deadSpaceY') then
+        effect.shader:send('deadSpaceY', dsy)
+      end
     end
   end
 }

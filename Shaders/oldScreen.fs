@@ -12,32 +12,46 @@
 
 // defaults crt
 vec2 distortionFactor = vec2(1.06, 1.065); // 1.06, 1.065
-vec2 scaleFactor = vec2(1.05, 1.05); // 1
+vec2 scaleFactor = vec2(1.02, 1.02); // 1
 number feather = 0; // Don't change
 
 // defaults chromasep
 vec2 direction = vec2(0.0015, 0.001);
 
-vec4 effect(vec4 c, Image tex, vec2 uv, vec2 px) {
+extern float deadSpaceX = 0.0;
+extern float deadSpaceY = 0.0;
+
+vec4 effect(vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords) {
+  // Active window size (without deadspace)
+  vec2 size = love_ScreenSize.xy - vec2(deadSpaceX, deadSpaceY) * 2;
+  // Normalized coordinates of active window size
+  vec2 coords = (screen_coords - vec2(deadSpaceX, deadSpaceY)) / size;
+  // Is vec4 zero when we're out of bounds and one when in to prevent out of bounds drawing
+  vec4 dead = (coords.x <= 0 || coords.y <= 0 || coords.x >= 1 || coords.y >= 1) ? vec4(0,0,0,0) : vec4(1,1,1,1);
 
   // crt
   // to barrel coordinates
-  uv = uv * 2.0 - vec2(1.0);
+  coords = coords * 2.0 - vec2(1.0);
   // distort
-  uv *= scaleFactor;
-  uv += (uv.yx*uv.yx) * uv * (distortionFactor - 1.0);
-  number mask = (1.0 - smoothstep(1.0-feather,1.0,abs(uv.x)))
-              * (1.0 - smoothstep(1.0-feather,1.0,abs(uv.y)));
+  coords *= scaleFactor;
+  coords += (coords.yx*coords.yx) * coords * (distortionFactor - 1.0);
+  number mask = (1.0 - smoothstep(1.0-feather,1.0,abs(coords.x)))
+              * (1.0 - smoothstep(1.0-feather,1.0,abs(coords.y)));
   // to cartesian coordinates
-  uv = (uv + vec2(1.0)) / 2.0;
+  coords = (coords + vec2(1.0)) / 2.0;
+
+  texture_coords = (coords * size + vec2(deadSpaceX, deadSpaceY)) / love_ScreenSize.xy;
 
   // chromasep
-  c = c * vec4(
-    Texel(tex, uv - direction).r,
-    Texel(tex, uv).g,
-    Texel(tex, uv + direction).b,
-    1.0);
+  color = color * vec4(
+    Texel(texture, texture_coords - direction).r,
+    Texel(texture, texture_coords).g,
+    Texel(texture, texture_coords + direction).b,
+    1.0
+  );
 
+  if (texture_coords.x <= 0 || texture_coords.y <= 0 || texture_coords.x >= 1 || texture_coords.y >= 1)
+    return vec4(0,0,0,0);
 
-  return c * mask;
+  return color * mask * dead;
 }

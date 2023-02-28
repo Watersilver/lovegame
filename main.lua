@@ -111,7 +111,8 @@ local gamera = require "gamera.gamera"
 local globs = {
   particles = require "GameObjects.misc.particles",
   screenEffects = require "screenEffects",
-  lighting = require "ScreenEffects.lighting.lighting"
+  lighting = require "ScreenEffects.lighting.lighting",
+  shdrs = require 'Shaders.shaders'
 }
 
 -- Create table to save temporary stuff for current session
@@ -1519,6 +1520,7 @@ function love.draw()
     if session.ringShader then
       globs.screenEffects.push(session.ringShader)
     end
+    globs.screenEffects.push(globs.shdrs.vignette)
   end
 
   globs.lighting.draw()

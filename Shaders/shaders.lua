@@ -1,14 +1,15 @@
+---@type table<string, love.Shader>
 local shdrs = {}
 
 local function shaderPcall(fieldName, fileName)
   if not fileName then fileName = fieldName end
-  if pcall(
+  local s, err = pcall(
     function ()
       shdrs[fieldName] = love.graphics.newShader("Shaders/" .. fileName .. ".fs")
     end
-    ) then
-    -- Shader works right
-      else
+  )
+  if err ~= nil then
+    print(err)
     shdrs[fieldName] = nil
   end
 end
