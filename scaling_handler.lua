@@ -18,6 +18,37 @@ function sh.get_window_scale()
   return window_scale
 end
 
+---@return number
+function sh.get_aspect_ratio()
+  return initial_w / initial_h
+end
+---@return number
+function sh.get_inv_aspect_ratio()
+  return initial_h / initial_w
+end
+
+---@param w number
+---@param h number
+function sh.fit_in_aspect_ratio(w, h)
+  local a = sh.get_aspect_ratio()
+  local givenAspectRatio = w / h
+
+  if givenAspectRatio == a then return w, h end
+
+  if a > givenAspectRatio then
+    return w, w * sh.get_inv_aspect_ratio()
+  else
+    return h * a, h
+  end
+end
+
+---@param w number
+---@param h number
+function sh.get_deadspace(w, h)
+  local fw, fh = sh.fit_in_aspect_ratio(w, h)
+  return (w - fw) * 0.5, (h - fh) * 0.5
+end
+
 -- Camera scaling due to in-game reasons
 local game_scale = 1
 function sh.get_game_scale()

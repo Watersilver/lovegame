@@ -5,10 +5,12 @@ local snd = {}
 snd.silence = {"Silence"}
 snd.ovrwrld1 = {day = {name = "zelOverworld", introName = "zelOverworldIntro"}, night = {name = "PaperMarioCrystalPalace"}}
 
+---@type table<string, love.Source>
 snd.sounds = {}
 snd.bgm = {} -- Background Music
-snd.bgs = nil -- Background Sound
+-- snd.bgs = nil -- Background Sound
 
+---@type love.Source[]
 local soundsToBePlayed = {}
 
 function snd.load_sound(snd_info)
@@ -22,6 +24,22 @@ function snd.load_sound(snd_info)
   end
 
   return snd.sounds[snd_name]
+end
+
+function snd.getMasterVolume()
+  return gs.master_volume or 1
+end
+
+local prevMasterVolume = snd.getMasterVolume()
+---@param newVol number
+function snd.setMasterVolume(newVol)
+  ---@diagnostic disable-next-line: undefined-field
+  if type(newVol) ~= 'number' then love.errhand("newVol wasn't number") end
+
+  prevMasterVolume = snd.getMasterVolume()
+  gs.master_volume = newVol
+  if snd.bgm.current then snd.bgm.current:setVolume(snd.getMasterVolume()) end
+  if snd.bgm.next then snd.bgm.next:setVolume(snd.getMasterVolume()) end
 end
 
 -- Function that returns a table with the sources to the object that calls it
@@ -48,7 +66,10 @@ end
 -- Used in the main update every frame to play soundsToBePlayed
 function snd.play_soundsToBePlayed()
   for i, sound in ipairs(soundsToBePlayed) do
-    if gs.soundsOn then sound:play() end
+    if gs.soundsOn then
+      sound:setVolume(snd.getMasterVolume())
+      sound:play()
+    end
     soundsToBePlayed[i] = nil
   end
 end
@@ -82,6 +103,7 @@ function snd.bgm:update(dt)
     if not gs.musicOn then return end
     self.current = self.next
     self.currentName = self.nextName
+    self.current:setVolume(snd.getMasterVolume())
     self.current:play()
   else
     if not gs.musicOn then
@@ -272,9 +294,9 @@ function snd.bgmV2:update(dt)
     elseif self.current.targetVolume ~= self.next.targetVolume then
       -- If same piece with diff target vol, set new target
       self.current.targetVolume = self.next.targetVolume
-    elseif self.source:getVolume() ~= self.current.targetVolume then
+    elseif self.source:getVolume() ~= self.current.targetVolume or prevMasterVolume ~= snd.getMasterVolume() then
       -- Fade to target volume
-      fadeToVolume(self.source, self.current.targetVolume, self.current.fadeSpeed, dt)
+      fadeToVolume(self.source, self.current.targetVolume * snd.getMasterVolume(), self.current.fadeSpeed, dt)
     elseif not self.source:isPlaying() and self.source.shouldBeLooping and self.source.shouldBePlaying then
       -- Hatchet job but fixes looping main stopping for no reason....
       self.source.main:rewind()

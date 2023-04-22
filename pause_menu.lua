@@ -1,9 +1,6 @@
 local gs = require "game_settings"
 local im = require "image"
 local inp = require "input"
-local game = require "game"
-local o = require "GameObjects.objects"
-local sm = require "state_machine"
 local shan = require "scaling_handler"
 local quests = require "quests"
 local items = require "items"
@@ -16,6 +13,16 @@ local moub, moup
 function pam.init()
   moub = mouseB
   moup = mouseP
+end
+
+pam.draggingVolume = false
+
+function pam.open()
+  pam.draggingVolume = false
+end
+
+function pam.close()
+  pam.draggingVolume = false
 end
 
 -- Button Bounding Boxes (Top menu: For music, sounds and quit game)
@@ -35,6 +42,8 @@ end
 --   bbb[i].y.d = bbb[i].y.u + bbb.height
 --   -- bbb[button_index][coordinate][side]
 -- end
+
+-- Button Bounding Boxes (Top menu: For music, sounds and quit game)
 local bbb = {w = 24, h = 5, xs = 5, ys = 5}
 bbb[1] = {x = {l = bbb.xs}}
 bbb[1].x.r = bbb[1].x.l + bbb.w
@@ -83,6 +92,15 @@ end
 
 function pam.top_menu_draw(l,t,w,h)
   local pr, pg, pb, pa = love.graphics.getColor()
+
+  local menuBGTop = 0
+  local scale = 0.2
+  local menuBGBottom = bbb[3].y.u + love.graphics.getFont():getHeight() * scale + 4
+  love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
+  love.graphics.rectangle("line", 0, menuBGTop, 400, menuBGBottom)
+  love.graphics.setColor(0, 0, 0, COLORCONST * 0.3)
+  love.graphics.rectangle("fill", 0, menuBGTop, 400, menuBGBottom)
+
   local alpha = COLORCONST
   if not gs.musicOn then alpha = 0.5 * COLORCONST end
   love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, alpha)
@@ -92,8 +110,61 @@ function pam.top_menu_draw(l,t,w,h)
   love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, alpha)
   love.graphics.print("Sound", bbb[2].x.l, bbb[2].y.u, 0, 0.2)
   alpha = COLORCONST
+
+  -- Volume control draw
+  local vcMaxWidth = 25
+  local vcGap = 3
+  local textWidth = love.graphics.getFont():getWidth("Volume") * scale
+  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  love.graphics.print("Volume", 200 - (textWidth + vcMaxWidth + vcGap) * 0.5, bbb[3].y.u, 0, scale)
+  love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
+  local vcL, vcT, vcW, vcH = 200 + (textWidth - vcMaxWidth + vcGap) * 0.5, bbb[2].y.u, vcMaxWidth, love.graphics.getFont():getHeight() * scale
+  love.graphics.rectangle('fill', vcL, vcT, vcW, vcH)
+
+  local vcWidth = snd.getMasterVolume() * vcMaxWidth
+
+  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  for i = 1, vcMaxWidth, 2 do
+    if i > vcWidth then
+      love.graphics.rectangle("fill", vcL + i - 1, vcT + 2, 1, 1)
+    else
+      love.graphics.rectangle("fill", vcL + i - 1, vcT + 1, 1, 3)
+    end
+  end
+
+  -- Volume control logic
+  if Pointer.left.getPressed() then
+    -- Check if we are draggin volume
+    local xnorm, ynorm = Pointer.left.getLastClickNormalViewportPos()
+    local x, y = xnorm * 400, ynorm * 225
+    if x >= vcL and x <= vcL + vcW and y >= vcT and y <= vcT + vcH then
+      pam.draggingVolume = true
+    end
+  end
+
+  if pam.draggingVolume then
+    local xnorm = Pointer.left.getNormalViewportPos()
+
+    local targetWidth = xnorm * 400 - vcL
+
+    if targetWidth <= 0 then
+      snd.setMasterVolume(0)
+    elseif targetWidth >= vcMaxWidth then
+      snd.setMasterVolume(1)
+    else
+      snd.setMasterVolume(targetWidth / vcMaxWidth)
+    end
+  end
+
+  if Pointer.left.getReleased() then
+    pam.draggingVolume = false
+  end
+
   love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
   love.graphics.print("Quit", bbb[3].x.l, bbb[3].y.u, 0, 0.2)
+
+  -- love.graphics.rectangle("fill", 0, bbb[3].y.u + love.graphics.getFont():getHeight() * scale + 4, 400, 0.5)
+
   if pam.quitting then
     love.graphics.setColor(0, 0, 0, COLORCONST * 0.6)
     love.graphics.rectangle("fill", l-1, t-1, w+2, h+2)
@@ -161,6 +232,7 @@ pam.middle.draw = function(l, t, w, h)
         itemname = iname
       end
       local x, y = determineHotkeyDisplayPosition(i)
+      y = y + 6
 
       if equipped then
         setColorToEquipped()

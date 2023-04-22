@@ -485,6 +485,24 @@ session = {
     plaObj.body:setLinearVelocity(200 * horDir, 200 * verDir)
   end,
   saveGame = function()
+    local game_settings = require 'game_settings'
+    -- Overwrite game_settings file
+    success = love.filesystem.write("game_settings.lua", "local gs = {}\n")
+    ---@diagnostic disable-next-line: undefined-field
+    if not success then love.errhand("Failed to write game_settings first line") end
+    local game_settings_body = ""
+    for setting, value in pairs(game_settings) do
+      -- Update already loaded table
+      gs[setting] = value
+      if type(value) == "string" then value = "\'" .. value .. "\'"
+      elseif type(value) == "boolean" then
+        if value then value = "true" else value = "false" end
+      end
+      game_settings_body = game_settings_body .. "gs." .. setting .. " = " .. value .. "\n"
+    end
+    success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
+    if not success then love.errhand("Failed to write game_settings body") end
+
     -- because Imma moron
     local saveKeysToBeIgnored = {
       hasSword = true, hasJump = true,
@@ -536,7 +554,7 @@ session = {
       end
     end
     saveContent = saveContent .. "\nreturn save"
-    local success = love.filesystem.write(saveName, saveContent)
+    success = love.filesystem.write(saveName, saveContent)
   end,
   placeEnemies = function (room, enemiesList)
     -- room name and enemiesList index can be
@@ -576,6 +594,64 @@ mouseB = {}
 local moub = mouseB
 mouseP = {x = 0, y = 0}
 local moup = mouseP
+
+---@param button number
+local function createMouseButton(button)
+
+  local function getNormalPos()
+    local x, y = love.mouse.getPosition()
+    local realW, realH = sh.fit_in_aspect_ratio(love.graphics.getWidth(), love.graphics.getHeight())
+    local deadW, deadH = sh.get_deadspace(love.graphics.getWidth(), love.graphics.getHeight())
+
+    local clickX = x - deadW
+    local clickY = y - deadH
+
+    local normalX = -1
+    local normalY = -1
+
+    if not (clickX < 0 or clickX > realW) then
+      normalX = clickX / realW
+    end
+    if not (clickY < 0 or clickY > realH) then
+      normalY = clickY / realH
+    end
+
+    return normalX, normalY
+  end
+
+  local pressed = false
+  local released = false
+  local down = false
+  local downPrev = false
+  local normPressedX = -1
+  local normPressedY = -1
+
+  ---@class MouseButton
+  local mb = {
+    getPosition = function() return love.mouse.getPosition() end,
+    getNormalViewportPos = function() return getNormalPos() end,
+    getPressed = function() return pressed end,
+    getReleased = function() return released end,
+    getLastClickNormalViewportPos = function() return normPressedX, normPressedY end
+  }
+  mb.update = function()
+    downPrev = down
+    down = love.mouse.isDown(button)
+
+    pressed = down and not downPrev
+    released = not down and downPrev
+
+    if pressed then
+      normPressedX, normPressedY = getNormalPos()
+    end
+  end
+  return mb
+end
+
+Pointer = {
+  left = createMouseButton(1),
+  right = createMouseButton(2)
+}
 
 -- global sounds
 glsounds = snd.load_sounds{
@@ -825,6 +901,9 @@ function postSolve(a, b, coll)
 end
 
 function love.update(dt)
+  Pointer.left.update()
+  Pointer.right.update()
+
   delta_time = dt
 
   -- Run async functions before messing with the timeflow (dt)
@@ -1021,6 +1100,18 @@ function love.update(dt)
 
     end
 
+  end
+
+  local justPaused = type(game.paused) == 'table' and (not game.paused_prev ~= not game.paused)
+  local justUnpaused = type(game.paused_prev) == 'table' and (not game.paused_prev ~= not game.paused)
+  game.paused_prev = game.paused
+
+  if justPaused then
+    pam.open()
+  end
+
+  if justUnpaused then
+    pam.close()
   end
 
   if not game.paused then
@@ -1653,10 +1744,53 @@ function love.mousepressed(x, y, button, isTouch)
   -- table.insert(enemarea, y)
 
   moub[button] = true
+
+  -- local realW, realH = sh.fit_in_aspect_ratio(love.graphics.getWidth(), love.graphics.getHeight())
+  -- local deadW, deadH = sh.get_deadspace(love.graphics.getWidth(), love.graphics.getHeight())
+
+  -- if button == 1 then
+  --   Pointer.left.clicked = true
+
+  --   local clickX = x - deadW
+  --   local clickY = y - deadH
+
+  --   if clickX < 0 or clickX > realW then
+  --     Pointer.left.viewport.position.normal.x = -1
+  --   else
+  --     Pointer.left.viewport.position.normal.x = clickX / realW
+  --   end
+  --   if clickY < 0 or clickY > realH then
+  --     Pointer.left.viewport.position.normal.y = -1
+  --   else
+  --     Pointer.left.viewport.position.normal.y = clickY / realH
+  --   end
+  -- elseif button == 2 then
+  --   Pointer.right.clicked = true
+
+  --   local clickX = x - deadW
+  --   local clickY = y - deadH
+
+  --   if clickX < 0 or clickX > realW then
+  --     Pointer.right.viewport.position.normal.x = -1
+  --   else
+  --     Pointer.right.viewport.position.normal.x = clickX / realW
+  --   end
+  --   if clickY < 0 or clickY > realH then
+  --     Pointer.right.viewport.position.normal.y = -1
+  --   else
+  --     Pointer.right.viewport.position.normal.y = clickY / realH
+  --   end
+  -- end
 end
 
 function love.mousereleased(x, y, button, isTouch)
   moub[button] = false
+
+  if button == 1 then
+    Pointer.left.clicked = false
+  elseif button == 2 then
+    Pointer.right.clicked = false
+  end
 end
 
 function love.keypressed(key, scancode)

@@ -121,6 +121,7 @@ local function change_game_settings(menuHandler)
   menuHandler.currentMenu = 1
   -- Overwrite game_settings file
   local success = love.filesystem.write("game_settings.lua", "local gs = {}\n")
+---@diagnostic disable-next-line: undefined-field
   if not success then love.errhand("Failed to write game_settings first line") end
   -- Variable to store string to be written
   local game_settings_body = ""
@@ -140,6 +141,7 @@ end
 local function change_key_config(menuHandler)
   -- Overwrite game_settings file
   local success = love.filesystem.write("key_config.lua", "local kc = {}\nkc.player1 = {\n")
+---@diagnostic disable-next-line: undefined-field
   if not success then love.errhand("Failed to write key_config 1") end
   -- Variable to store string to be written
   local key_config_body = ""
