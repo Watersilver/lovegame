@@ -216,23 +216,6 @@ local function normal_slider(self, x, y, sliderRepeats, xoffset)
   self:drawMe2(2, x + xoffmin1 + self.sliderRepeats * 16, y)
 end
 
-local function set_up_normal_slider(self, value, min, max)
-  self.slider = (value - min)/(max - min)
-end
-
-local function typical_slide(self, value, min, max, menuHandler, sliderImpulse)
-  self.slider = self.slider + sliderImpulse
-  if self.slider > 1 then self.slider = 1
-  elseif self.slider < 0 then self.slider = 0
-  end
-  menuHandler.tempGs[value] = floor(self.slider * (max - min) + min)
-end
-
-local function typical_preciseSlide(self, value, min, max, menuHandler, sliderImpulse)
-  menuHandler.tempGs[value] = clamp(min, menuHandler.tempGs[value] + sliderImpulse, max)
-  self.slider = (menuHandler.tempGs[value] - min)/(max - min)
-end
-
 local setFont = love.graphics.setFont
 
 local MainMenu = {}
@@ -578,7 +561,7 @@ load = function (self)
           end
         },
         {
-          -- Missile limit
+          -- Volume
           x = 250,
           y = 150,
           scale = 0.5,
@@ -588,16 +571,24 @@ load = function (self)
           sliderRepeats = 4,
           cursorable = {xoff = - 20, yoff = 0},
           slider = 0.5,
-          mslLimMin = 10,
-          mslLimMax = 700,
+          mslLimMin = 0,
+          mslLimMax = 1,
           load = function (self, menuHandler)
-            set_up_normal_slider(self, menuHandler.tempGs.mslLim, self.mslLimMin, self.mslLimMax)
+            self.slider = (menuHandler.tempGs.master_volume - self.mslLimMin)/(self.mslLimMax - self.mslLimMin)
+          end,
+          unload = function (self, menuHandler)
+            snd.setMasterVolume(menuHandler.tempGs.master_volume)
           end,
           slide = function (self, menuHandler, sliderImpulse)
-            typical_slide(self, "mslLim", self.mslLimMin, self.mslLimMax, menuHandler, sliderImpulse)
+            self.slider = self.slider + sliderImpulse
+            if self.slider > 1 then self.slider = 1
+            elseif self.slider < 0 then self.slider = 0
+            end
+            snd.setMasterVolume(self.slider * (self.mslLimMax - self.mslLimMin) + self.mslLimMin)
           end,
           preciseSlide = function (self, menuHandler, sliderImpulse)
-            typical_preciseSlide(self, "mslLim", self.mslLimMin, self.mslLimMax, menuHandler, sliderImpulse)
+            snd.setMasterVolume(0.01 * clamp(self.mslLimMin * 100, snd.getMasterVolume() * 100 + sliderImpulse, self.mslLimMax * 100))
+            self.slider = (snd.getMasterVolume() - self.mslLimMin)/(self.mslLimMax - self.mslLimMin)
           end,
           drawMe = function(self, image_index, x, y)
             typical_drawMe(self.sprite, image_index, x, y)
@@ -618,7 +609,7 @@ load = function (self)
             normal_slider(self, x, y, self.sliderRepeats, 230)
 
             setFont(font.prstartk)
-            love.graphics.print("Bullets limit: " .. menuHandler.tempGs.mslLim, x, y, 0, self.scale, self.scale, 0, 8)
+            love.graphics.print("Volume: " .. floor(snd.getMasterVolume() * 100), x, y, 0, self.scale, self.scale, 0, 8)
             setFont(font.default)
           end
         },
@@ -829,7 +820,9 @@ load = function (self)
           scale = 0.5,
           repeats = 8,
           action = function (self, menuHandler)
+            menuHandler.tempGs.master_volume = snd.getMasterVolume()
             change_game_settings(menuHandler)
+            snd.setMasterVolume(snd.getMasterVolume())
           end,
           drawMe = function (self, image_index, x, y)
             typical_drawMe(self.sprite, image_index, x, y)
@@ -1052,6 +1045,26 @@ update = function (self, dt)
 end,
 
 draw_overlay = function (self)
+  if self.menus_to_be_drawn_previous then
+    for i, prev in ipairs(self.menus_to_be_drawn_previous) do
+
+      local unload = true
+      -- Determine which menus just stopped getting drawn
+      for _, menu in ipairs(self.menus_to_be_drawn) do
+        if menu == prev then unload = false end
+      end
+
+      local drawMenu = self.menus[prev]
+      if unload then
+        for _, item in ipairs(drawMenu.items) do
+          if item.unload then
+            item:unload(self)
+          end
+        end
+      end
+    end
+  end
+
   for menuIndex, menu in ipairs(self.menus_to_be_drawn) do
 
     -- Determine which menus just started getting drawn
