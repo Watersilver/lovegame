@@ -1763,35 +1763,45 @@ local animation_states = {
   },
 
 
-  downeating = {
-  run_state = function(instance, dt)
-    -- inp.disable_controller(instance.player)
-  end,
+  downrecovery = {
+    run_state = function(instance, dt)
+      -- inp.disable_controller(instance.player)
+    end,
 
-  check_state = function(instance, dt)
-    local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-    if trig.damaged then
-      instance.animation_state:change_state(instance, dt, "downdamaged")
-    elseif otherstate == "normal" then
-      instance:addHealth(instance.item_health_bonus)
-      snd.play(glsounds.getHeart)
-      instance.animation_state:change_state(instance, dt, "downstill")
+    check_state = function(instance, dt)
+      local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+      if trig.damaged then
+        instance.animation_state:change_state(instance, dt, "downdamaged")
+        instance.movement_state:change_state(instance, dt, "normal")
+      elseif otherstate == "normal" then
+        if instance.item_health_bonus then
+          instance:addHealth(instance.item_health_bonus)
+          snd.play(glsounds.getHeart)
+        end
+        instance.animation_state:change_state(instance, dt, "downstill")
+      end
+    end,
+
+    start_state = function(instance, dt)
+      instance.image_index = 0
+      instance.image_speed = 0.05
+      if not instance.item_recovery_animation then
+        instance.sprite = im.sprites["Witch/eating_down"]
+      else
+        instance.image_index = instance.item_image_index or instance.image_index
+        instance.image_speed = instance.item_image_speed or instance.image_speed
+        instance.sprite = im.sprites["Witch/" .. instance.item_recovery_animation]
+      end
+      inp.disable_controller(instance.player)
+    end,
+
+    end_state = function(instance, dt)
+      instance.image_index = 0
+      instance.image_speed = 0
+      instance.item_health_bonus = nil
+      instance.item_recovery_animation = nil
+      inp.enable_controller(instance.player)
     end
-  end,
-
-  start_state = function(instance, dt)
-    instance.image_index = 0
-    instance.image_speed = 0.05
-    instance.sprite = im.sprites["Witch/eating_down"]
-    inp.disable_controller(instance.player)
-  end,
-
-  end_state = function(instance, dt)
-    instance.image_index = 0
-    instance.image_speed = 0
-    instance.item_health_bonus = nil
-    inp.enable_controller(instance.player)
-  end
   },
 
   downharp = {
@@ -2283,11 +2293,48 @@ function Playa.initialize(instance)
   instance.player = "player1"
   inp.enable_controller(instance.player)
   instance.layer = 20
+  instance.regen = 0
   instance.movement_state = sm.new_state_machine(movement_states)
   instance.animation_state = sm.new_state_machine(animation_states)
 end
 
 Playa.functions = {
+  ---@param effect any
+  ---@param id? string
+  addActiveEffect = function(self, effect, id)
+    if not self.activeEffects then self.activeEffects = {} end
+    self.activeEffects[id or effect] = effect
+
+    if effect.onAdd then
+      effect:onAdd(self)
+    end
+  end,
+
+  removeActiveEffect = function(self, effectOrID)
+    if not self.activeEffects then self.activeEffects = {} end
+    local found = self.activeEffects[effectOrID]
+    if found then
+      self.activeEffects[effectOrID] = nil
+
+      if found.onRemove then
+        found:onRemove(self)
+      end
+    else
+      if type(effectOrID) ~= "string" then
+        for key, effect in pairs(self.activeEffects) do
+          if effect == effectOrID then
+            self.activeEffects[key] = nil
+
+            if effect.onRemove then
+              effect:onRemove(self)
+            end
+            break
+          end
+        end
+      end
+    end
+  end,
+
   grounded = function(self)
     if game.room.sideScrolling then
       local _, vy = self.body:getLinearVelocity()
@@ -2772,6 +2819,18 @@ Playa.functions = {
     else
       self.shakex, self.shakey = 0, 0
     end
+
+    -- Apply active effects
+    if self.activeEffects then
+      for _, effect in pairs(self.activeEffects) do
+        if effect.update then
+          effect:update(self, dt)
+        end
+      end
+    end
+
+    local regen = dt * (self.regen or 0)
+    self:addHealth(regen)
 
     -- Turn off triggers
     -- triggersdebug = {}

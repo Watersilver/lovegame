@@ -29,20 +29,79 @@ local function useRing(ringid)
   end
 end
 
-local function useFood(type, bonus, duration, eatComment, notIdleComment)
+---@class RecoverySettings
+---@field onUse? fun()
+---@field power? number
+---@field duration? number
+---@field gradual? boolean
+---@field usageText? string
+---@field notIdleText? string
+---@field immobilizes? boolean
+---@field animation? boolean
+---@field mustBeStill? boolean
+
+---comment
+---@param id string
+---@param settings RecoverySettings
+local function useRecovery(id, settings)
   if pl1 then
-    eatComment = eatComment or "Yum!"
-    notIdleComment = notIdleComment or "You must stand idle to do that."
-    if pl1.movement_state.state == "normal" and pl1.animation_state.state:find("still") then
-      forceCloseInv()
-      session.usedItemComment = eatComment
-      session.removeItem(type)
-      pl1.item_health_bonus = bonus
-      pl1.item_use_duration = duration
-      pl1.movement_state:change_state(pl1, "noDt", "using_item")
-      pl1.animation_state:change_state(pl1, "noDt", "downeating")
+    local ut = settings.usageText or "Yum!"
+    local nit = settings.notIdleText or (settings.mustBeStill and "You must stand idle to do that." or "Can't use this rigth now.")
+    local useSuccess = pl1.movement_state.state == "normal"
+
+    if settings.mustBeStill then
+      useSuccess = useSuccess and pl1.animation_state.state:find("still")
     else
-      session.usedItemComment = notIdleComment
+      useSuccess = useSuccess
+      and (
+        pl1.animation_state.state:find("still")
+        or pl1.animation_state.state:find("walk")
+        or pl1.animation_state.state:find("halt")
+        or pl1.animation_state.state:find("push")
+        or pl1.animation_state.state:find("jump")
+        or pl1.animation_state.state:find("fall")
+      )
+    end
+    if useSuccess then
+      if settings.immobilizes then
+        forceCloseInv()
+        pl1.movement_state:change_state(pl1, "noDt", "using_item")
+        pl1.animation_state:change_state(pl1, "noDt", "downrecovery")
+        pl1.item_recovery_animation = settings.animation
+        pl1.item_use_duration = settings.duration or 4
+        if not settings.gradual then pl1.item_health_bonus = settings.power or 1 end
+      end
+
+      session.usedItemComment = ut
+
+      if settings.onUse then
+        settings.onUse()
+      else
+        session.removeItem(id)
+      end
+
+      if settings.gradual then
+        local activeDur = 0
+        local regen = (settings.power or 1) / (settings.duration or 4)
+        pl1:addActiveEffect({
+          onAdd = function()
+            pl1.regen = pl1.regen + regen
+          end,
+          onRemove = function()
+            pl1.regen = pl1.regen - regen
+          end,
+          update = function(effect, _, dt)
+            local expired = activeDur > (settings.duration or 4)
+            local stopped = settings.immobilizes and pl1.movement_state.state ~= "using_item"
+            if expired or stopped then
+              pl1:removeActiveEffect(effect)
+            end
+            activeDur = activeDur + dt
+          end
+        })
+      end
+    else
+      session.usedItemComment = nit
       return "error"
     end
   end
@@ -230,7 +289,13 @@ items.foodFrittata = {
   name = "Frittata",
   description = "It's not a verb.",
   use = function()
-    return useFood("foodFrittata", 1, 4, "It was Italian omelette with diced meat and vegetables.")
+    return useRecovery('foodFrittata', {
+      power = 1,
+      duration = 4,
+      usageText = "It was Italian omelette with diced meat and vegetables.",
+      gradual = true,
+      immobilizes = true,
+    })
   end,
 }
 
