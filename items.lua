@@ -46,7 +46,7 @@ end
 local function useRecovery(id, settings)
   if pl1 then
     local ut = settings.usageText or "Yum!"
-    local nit = settings.notIdleText or (settings.mustBeStill and "You must stand idle to do that." or "Can't use this rigth now.")
+    local nit = settings.notIdleText or (settings.mustBeStill and "You must stand idle to do that." or "Can't use this right now.")
     local useSuccess = pl1.movement_state.state == "normal"
 
     if settings.mustBeStill then
