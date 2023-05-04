@@ -1770,7 +1770,9 @@ local animation_states = {
 
     check_state = function(instance, dt)
       local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-      if trig.damaged then
+      if pddp(instance, trig, "down", dt) then
+        instance.movement_state:change_state(instance, dt, "normal")
+      elseif trig.damaged then
         instance.animation_state:change_state(instance, dt, "downdamaged")
         instance.movement_state:change_state(instance, dt, "normal")
       elseif otherstate == "normal" then
