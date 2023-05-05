@@ -426,7 +426,7 @@ room.gameObjects = {
 }
 
 room.manuallyPlacedObjects = {
-{ x = 184, y = 80, blueprint = "bosses.boss2.boss2"},
+{ x = 184, y = 80, blueprint = "bosses.boss2.spawner"},
 }
 
 return room

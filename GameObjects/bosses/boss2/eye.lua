@@ -10,6 +10,17 @@ local im = require "image"
 local ebh = require "enemy_behaviours"
 
 local proj = require "GameObjects.enemies.projectile"
+local function createProjectile(eye, dir)
+  o.addToWorld(proj:new{
+    xstart = eye.x, ystart = eye.y,
+    attackDmg = 2, layer = 15,
+    direction = dir,
+    enemFire = true,
+    doesntGoThroughSolids = true,
+    notBreakableByMissile = true,
+    ballbreaker = false
+  })
+end
 
 local function newAttackPattern(startingTimer)
   return {
@@ -33,15 +44,7 @@ local function newAttackPattern(startingTimer)
             self.times = self.times - 1
 
             local _, dir = u.cartesianToPolar(eye.head.target.x - eye.x, eye.head.target.y - eye.y)
-            o.addToWorld(proj:new{
-              xstart = eye.x, ystart = eye.y,
-              attackDmg = 2, layer = 14,
-              direction = dir,
-              enemFire = true,
-              doesntGoThroughSolids = true,
-              notBreakableByMissile = true,
-              ballbreaker = false
-            })
+            createProjectile(eye, dir)
 
             if self.times <= 0 then
               attackPattern.attack = nil
@@ -76,15 +79,7 @@ local function newAttackPattern(startingTimer)
               dir = dir + step * 0.5
             end
             while dir < maxDir do
-              o.addToWorld(proj:new{
-                xstart = eye.x, ystart = eye.y,
-                attackDmg = 2, layer = 14,
-                direction = dir,
-                enemFire = true,
-                doesntGoThroughSolids = true,
-                notBreakableByMissile = true,
-                ballbreaker = false
-              })
+              createProjectile(eye, dir)
               dir = dir + step
             end
 
@@ -115,15 +110,7 @@ local function newAttackPattern(startingTimer)
 
           if prevMod < self.timer % self.frequency then
             local dir = math.abs(math.sin(self.timer * self.rate + self.startingPhase)) * math.pi
-            o.addToWorld(proj:new{
-              xstart = eye.x, ystart = eye.y,
-              attackDmg = 2, layer = 14,
-              direction = dir,
-              enemFire = true,
-              doesntGoThroughSolids = true,
-              notBreakableByMissile = true,
-              ballbreaker = false
-            })
+            createProjectile(eye, dir)
           end
 
 
@@ -150,15 +137,7 @@ local function newAttackPattern(startingTimer)
 
           if prevMod < self.timer % self.frequency then
             local dir = (math.pi / 7) * (1 + 5 * love.math.random())
-            o.addToWorld(proj:new{
-              xstart = eye.x, ystart = eye.y,
-              attackDmg = 2, layer = 14,
-              direction = dir,
-              enemFire = true,
-              doesntGoThroughSolids = true,
-              notBreakableByMissile = true,
-              ballbreaker = false
-            })
+            createProjectile(eye, dir)
           end
 
 

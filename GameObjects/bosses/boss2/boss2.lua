@@ -44,24 +44,7 @@ local states = {
     end,
     check_state = function(instance, dt)
       if true then
-        instance.state:change_state(instance, dt, "preCutscene")
-      end
-    end,
-    end_state = function(instance, dt)
-    end
-  },
-
-  preCutscene = {
-    run_state = function(instance, dt)
-    end,
-    start_state = function(instance, dt)
-    end,
-    check_state = function(instance, dt)
-      if not pl1 or not pl1.exists then return end
-      -- if pl1.y < 162 then
-      if pl1.y < 146 then
         instance.state:change_state(instance, dt, "startCutscene")
-        session.setRoomMusic{previousFadeOut = 0.5}
       end
     end,
     end_state = function(instance, dt)
@@ -95,6 +78,7 @@ local states = {
       instance.stateDuration = 5
       snd.play(instance.sounds.crumble)
       gsh.newShake(mainCamera, "displacement")
+      session.setRoomMusic{previousFadeOut = 0.5}
     end,
     check_state = function(instance, dt)
       if instance.stateTimer > instance.stateDuration then
