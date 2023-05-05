@@ -131,6 +131,7 @@ session = {
   },
   mslQueue = u.newQueue(),
   initialize = function()
+    inv.initialize()
     -- Menu cursors
     pam.left.initCursors()
     -- Reload skin in case of skin change
@@ -802,6 +803,8 @@ function love.load()
   game.clockInactive = game.room.timeDoesntPass
   local FC = require("GameObjects.InRooms.cursedForest.forestCurse")
   o.addToWorld(FC:new())
+  local w = require("GameObjects.weather")
+  o.addToWorld(w:new())
 
   -- -- Room Creator
   -- -- 25 width 15 visible height (last tile mostly obscured) for zoom 2

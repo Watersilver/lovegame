@@ -231,7 +231,10 @@ function inv.closeInv()
   open = false
   inv.spellSelection = nil
 end
-inv.closeInv()
+
+function inv.initialize()
+  inv.closeInv()
+end
 
 function inv.isOpen()
   return open
