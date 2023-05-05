@@ -12,7 +12,6 @@ local expl = require "GameObjects.explode"
 local gsh = require "gamera_shake"
 
 local hitShader = shdrs.enemyHitShader
-local deathShader = shdrs.bossDeathShader
 
 -- At this y the hand perfectly grips the ground
 local handMinHeight = 98.75
@@ -32,8 +31,7 @@ local function initRaiseHand(instance, hand)
     snd.play(instance.sounds.handTouchGround)
     gsh.newShake(mainCamera, "displacement")
     instance.stateTimer = 0
-    game.room.music_info = "jabbajabba"
-    snd.bgmV2.getMusicAndload()
+    -- Previous start music location (When first hand lands)
   end
 end
 
@@ -63,6 +61,7 @@ local states = {
       -- if pl1.y < 162 then
       if pl1.y < 146 then
         instance.state:change_state(instance, dt, "startCutscene")
+        session.setRoomMusic{previousFadeOut = 0.5}
       end
     end,
     end_state = function(instance, dt)
@@ -204,6 +203,7 @@ local states = {
       instance.prevStateTimer = 0
       instance.stateDuration = nil
       instance.step = 0
+      session.setRoomMusic{name = "boss.local"}
     end,
     check_state = function(instance, dt)
       if instance.step == 6 and instance.stateTimer > 1 then

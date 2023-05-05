@@ -6,7 +6,7 @@ local snd = require "sound"
 local room = {}
 room.newType = true
 
-room.music_info = snd.silence
+room.music_info = "dung.local"
 
 local period1 = 0
 local period2 = 0

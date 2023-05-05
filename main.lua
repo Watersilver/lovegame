@@ -456,6 +456,11 @@ session = {
     end
     return session.save[itemid] or 0
   end,
+  ---@param music MusicInfo
+  setRoomMusic = function(music)
+    game.room.music_info = music
+    snd.bgmV2.getMusicAndload()
+  end,
   getMusic = function()
     local music_info = session.musicOverride or game.room.music_info
     if music_info and type(music_info) ~= "string" and music_info.day then

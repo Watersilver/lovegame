@@ -247,6 +247,17 @@ snd.bgmV2 = {
   source = silentSource
 }
 
+---@class MusicInfo
+---@field name string
+---@field introName string
+---@field folder? string
+---@field extension? string
+---@field targetVolume? number
+---@field forceRestart? boolean
+---@field previousFadeOut? number
+---@field fadeSpeed? number
+---@field silenceDuration? number
+
 function snd.bgmV2:load(piece_info)
   if not piece_info then
     piece_info = {}
