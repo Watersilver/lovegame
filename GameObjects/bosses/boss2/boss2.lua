@@ -463,6 +463,13 @@ Boss2.functions = {
     return false
   end,
 
+  oneEyed = function(self)
+    if self.blind then return false end
+    if not self.leftEye.exists then return true end
+    if not self.rightEye.exists then return true end
+    return false
+  end,
+
   finalHand = function (self)
     if not self:oneArmed() then return nil end
     if self.leftHand.exists then return self.leftHand end
@@ -585,7 +592,7 @@ Boss2.functions = {
     end
 
     if self.enabled then
-      self.image_index = self.greatPain and 2 or (self.blind and 1 or 0)
+      self.image_index = self.greatPain and 2 or (self.blind and 2 or (self:oneEyed() and 1 or 0))
 
       -- if self.blind and not self.dismembered then
       --   -- < 68 mouth visible
