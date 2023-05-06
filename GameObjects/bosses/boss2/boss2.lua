@@ -253,8 +253,8 @@ local states = {
       instance.prevStateTimer = instance.stateTimer
       instance.stateTimer = instance.stateTimer + dt
 
-      instance.angleTimer = instance.blind and instance.angleTimer + dt * 15 or 0
-      instance.angle = 0.05 * math.sin(instance.angleTimer)
+      instance.angleTimer = instance.blind and instance.angleTimer + dt * 15 or instance:oneEyed() and instance.angleTimer + dt * 45 or 0
+      instance.angle = instance.blind and 0.05 * math.sin(instance.angleTimer) or instance:oneEyed() and 0.005 * math.sin(instance.angleTimer) or 0
     end,
     start_state = function(instance, dt)
       instance.prevSlamHand = nil
