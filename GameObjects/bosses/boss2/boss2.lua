@@ -128,6 +128,7 @@ local states = {
           if instance.stateTimer > 0.05 then
             instance.step = 4
             instance.stateTimer = 0
+            snd.play(glsounds.swordShimmer)
           end
         elseif instance.step == 4 then
           instance.leftEye.eyelidState = 0
