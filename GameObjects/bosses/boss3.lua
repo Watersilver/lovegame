@@ -178,6 +178,7 @@ local states = {
         if instance.stateProgChange then
           instance.stateTimer = 1.5
           instance.wingTimer = 0
+          session.setRoomMusic({name = "boss.local"})
         end
         instance.zo = instance.zo - dt * 200
 
@@ -223,8 +224,6 @@ local states = {
     end,
     end_state = function(instance, dt)
       instance.cutscene = false
-      game.room.music_info = "SoMBelieveinVictory"
-      snd.bgmV2.getMusicAndload()
       instance.offscreenTime = 0
     end
   },
@@ -1169,8 +1168,7 @@ Boss3.functions = {
     }
     o.addToWorld(explOb)
     o.removeFromWorld(self)
-    game.room.music_info = snd.silence
-    snd.bgmV2.getMusicAndload()
+    session.setRoomMusic({})
     for _, door in ipairs(o.identified.DunDoor) do
       door:open()
     end
