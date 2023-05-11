@@ -7,6 +7,34 @@ game.room = nil
 
 game.paused = false --{player = "player1"}
 
+function game.getRoomElevation()
+  if not game.room then return 0 end
+  local roomName = session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last]
+  if not roomName then return 0 end
+  if u.ends_with(roomName, "h") then
+    return 1
+  end
+  return game.room.elevation or 0
+end
+
+---@return nil | {x: number, y: number}
+function game.getRoomGlobalCoords()
+  if not game.room then return nil end
+  local roomName = session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last]
+  if not roomName then return nil end
+  local i, j = string.find(roomName, "w%d+x%d+%a?")
+  if not i then return nil end
+  roomName = string.gsub(roomName, i, j)
+  local x = string.sub(roomName, string.find(roomName, "%d+"))
+  roomName = string.gsub(roomName, x, "", 1)
+  local y = string.sub(roomName, string.find(roomName, "%d+"))
+
+  return {
+    x = (tonumber(x) - 90) * 512,
+    y = (tonumber(y) - 95) * 512
+  }
+end
+
 function game.pause(pauser)
   if not game.unpausable or not pauser then
     game.paused = pauser
