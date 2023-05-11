@@ -2190,6 +2190,13 @@ local animation_states = {
 local Playa = {}
 
 function Playa.initialize(instance)
+  game.transition{
+    type = "whiteScreen",
+    -- noFade = true,
+    progress = 0,
+    roomTarget = session.save.room or "Rooms/LakeVillage/startingHouse.lua"
+  }
+
   -- Debug
   instance.db = {downcol = 255, upcol = 255, leftcol = 255, rightcol = 255}
   instance.floorFriction = 1 -- For testing. This info will normaly ba aquired through floor collisions
