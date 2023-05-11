@@ -732,4 +732,11 @@ function u.hslToRgb(h, s, l)
   return r * COLORCONST, g * COLORCONST, b * COLORCONST;
 end
 
+---@param str string
+---@param ending string
+---@return boolean
+function u.ends_with(str, ending)
+  return ending == "" or str:sub(-#ending) == ending
+end
+
 return u
