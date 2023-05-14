@@ -21,6 +21,7 @@ if not shdrExists then print(err) end
 ---@field type SourceType
 ---@field rad? number
 ---@field scale? number
+---@field x_scale? number
 ---@field rgba? {r: number; g: number; b: number; a: number;}
 ---@field image_index? number
 
@@ -185,6 +186,8 @@ end
 
 local lighting = {}
 
+--- rgba is [0, 1]
+---
 ---@param light Light
 lighting.applyLight = function(light) table.insert(lights, light) end
 
@@ -250,7 +253,7 @@ local function drawLightOnCanvas(sources, canvas)
         love.graphics.draw(
           type.img,
           x, y, light.rad or 0,
-          canvScale * (light.scale or 1),
+          canvScale * (light.x_scale or light.scale or 1),
           canvScale * (light.scale or 1),
           type.centerOffset,
           type.centerOffset

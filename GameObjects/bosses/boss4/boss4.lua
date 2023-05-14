@@ -22,6 +22,8 @@ local shdrs = require "Shaders.shaders"
 local hitShader = shdrs.enemyHitShader
 local deathShader = shdrs.bossDeathShader
 
+local lighting = require "ScreenEffects.lighting.lighting"
+
 local states = {
   -- WARNING STARTING STATE IN INITIALIZE!!!
   start = {
@@ -96,9 +98,10 @@ local states = {
     end,
     end_state = function(instance, dt)
       if instance:isShieldBroken() and not instance.musicHasChanged then
+        instance.angry = true
         instance.musicHasChanged = true
-        game.room.music_info = "AcidicAggression"
-        snd.bgmV2.getMusicAndload()
+        -- game.room.music_info = "AcidicAggression"
+        -- snd.bgmV2.getMusicAndload()
         instance.nonInvulnShdr = shdrs.boss4angry
       end
     end
@@ -533,8 +536,7 @@ local states = {
       instance.ball.dlgState = "done"
       instance.ball.updateHook = nil
 
-      game.room.music_info = "Tempestuous-Clash-LOOP"
-      snd.bgmV2.getMusicAndload()
+      session.setRoomMusic{name = "boss.local"}
     end
   }
 }
@@ -916,8 +918,8 @@ Boss4.functions = {
 
             if self:isShieldBroken() then
               self.shieldJustBroke = true
-              game.room.music_info = snd.silence
-              snd.bgmV2.getMusicAndload()
+              -- game.room.music_info = snd.silence
+              -- snd.bgmV2.getMusicAndload()
             end
           end
         end
@@ -938,6 +940,23 @@ Boss4.functions = {
   end,
 
   draw = function (self)
+    local angry = self.angry
+    lighting.applyLight{
+      type = "playerGlow",
+      x = self.x,
+      y = self.y + (self.zo or 0),
+      rgba={r = angry and 1 or 0, b = 1, g = 0, a = 1},
+      image_index = self.image_index
+    }
+
+    local lightColor = {r = 1, b = 1, g = 1, a = 0.2}
+    lighting.applyLight{
+      type = "boss4",
+      x = self.x,
+      y = self.y + (self.zo or 0),
+      rgba=lightColor,
+      image_index = self.image_index
+    }
 
     -- Draw enemy the default way
     et.functions.draw(self)
@@ -978,6 +997,16 @@ Boss4.functions = {
       shield_xscale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
       sprite.cx, sprite.cy)
       love.graphics.setShader(worldShader)
+
+      lighting.applyLight{
+        type = "boss4shield",
+        x = xtotal,
+        y = ytotal,
+        rgba=lightColor,
+        image_index = shield_index,
+        x_scale = shield_xscale * sprite.res_x_scale,
+        rad = self.angle
+      }
     end
 
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))

@@ -76,7 +76,27 @@ local function radGrad(layers)
   return {img = love.graphics.newImage(data), centerOffset = totalRadius + 0.5, type = "drawn"}
 end
 
----@alias SourceType "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel'
+local function shallowcopy(orig)
+  local orig_type = type(orig)
+  local copy
+  if orig_type == 'table' then
+      copy = {}
+      for orig_key, orig_value in pairs(orig) do
+          copy[orig_key] = orig_value
+      end
+  else -- number, string, boolean, etc
+      copy = orig
+  end
+  return copy
+end
+
+local function getLightsprite(spriteSettings)
+  local copy = shallowcopy(spriteSettings)
+  copy[1] = copy[1] .. "-light"
+  return copy
+end
+
+---@alias SourceType "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel'
 
 ---@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown}}
 local sourceTypes = {
@@ -103,7 +123,13 @@ local sourceTypes = {
 
   door = squareGradient(16, {a = 1}),
 
-  pixel = square(1)
+  pixel = square(1),
+
+  boss4 = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[1]))},
+  boss4shield = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[2]))},
+  boss4ball = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[3]))},
+  boss4spikes = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[4]))},
+  boss4link = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[5]))},
 }
 
 return sourceTypes

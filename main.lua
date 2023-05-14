@@ -131,6 +131,8 @@ session = {
   },
   mslQueue = u.newQueue(),
   initialize = function()
+    require("GameObjects.weather"):create()
+
     inv.initialize()
     -- Menu cursors
     pam.left.initCursors()
@@ -808,8 +810,6 @@ function love.load()
   game.clockInactive = game.room.timeDoesntPass
   local FC = require("GameObjects.InRooms.cursedForest.forestCurse")
   o.addToWorld(FC:new())
-  local w = require("GameObjects.weather")
-  o.addToWorld(w:new())
 
   -- -- Room Creator
   -- -- 25 width 15 visible height (last tile mostly obscured) for zoom 2
@@ -1014,7 +1014,7 @@ function love.update(dt)
     elseif game.transitioning.progress < 1 then
       -- local transSpeed = 1
       -- if game.transitioning.type ~= 'whiteScreen' then transSpeed = 0.1 end
-      game.transitioning.progress = game.transitioning.progress + 1 * dt
+      game.transitioning.progress = game.transitioning.progress + (game.transitioning.speed or 1) * dt
       if game.transitioning.progress > 1 then game.transitioning.progress = 1 end
       trans.determine_coordinates_transformation()
     else

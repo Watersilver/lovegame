@@ -16,10 +16,11 @@ local cd = require "GameObjects.DialogueBubble.controlDefaults"
 
 local dc = require "GameObjects.Helpers.determine_colliders"
 
-local shdrs = require "Shaders.shaders"
 local deathShader = shdrs.bossDeathShader
 
 local chainLink = require "GameObjects.bosses.boss4.chainLink"
+
+local lighting = require "ScreenEffects.lighting.lighting"
 
 local states = {
   -- WARNING STARTING STATE IN INITIALIZE!!!
@@ -547,6 +548,26 @@ WreckingBall.functions = {
   end,
 
   draw = function (self)
+    if self.creator and self.creator.exists then
+      local angry = self.creator.angry
+      lighting.applyLight{
+        type = "playerGlow",
+        x = self.x,
+        y = self.y + (self.zo or 0),
+        rgba={r = angry and 1 or 0, b = 1, g = 0, a = 1},
+        image_index = self.image_index
+      }
+    end
+
+    local lightColor = {r = 1, b = 1, g = 1, a = 0.2}
+
+    lighting.applyLight{
+      type = "boss4ball",
+      x = self.x,
+      y = self.y + (self.zo or 0),
+      rgba=lightColor,
+      image_index = self.image_index
+    }
 
     -- Draw enemy the default way
     et.functions.draw(self)
@@ -567,6 +588,14 @@ WreckingBall.functions = {
       self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
       sprite.cx, sprite.cy)
       love.graphics.setShader(worldShader)
+
+      lighting.applyLight{
+        type = "boss4spikes",
+        x = xtotal,
+        y = ytotal,
+        rgba=lightColor,
+        image_index = math.floor(self.spike_index) - 1
+      }
     end
 
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))

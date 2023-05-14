@@ -9,6 +9,8 @@ local game = require "game"
 local im = require "image"
 local ebh = require "enemy_behaviours"
 
+local lighting = require "ScreenEffects.lighting.lighting"
+
 local deathShader = shdrs.bossDeathShader
 
 local WreckingBall = {}
@@ -94,6 +96,25 @@ WreckingBall.functions = {
   end,
 
   draw = function (self)
+    if self.creator and self.creator.exists and self.creator.creator and self.creator.creator.exists then
+      local angry = self.creator.creator.angry
+      lighting.applyLight{
+        type = "missile",
+        x = self.x,
+        y = self.y + (self.zo or 0),
+        rgba={r = angry and 1 or 0, b = 1, g = 0, a = 1},
+        image_index = self.image_index
+      }
+    end
+
+    local lightColor = {r = 1, b = 1, g = 1, a = 0.2}
+    lighting.applyLight{
+      type = "boss4link",
+      x = self.x,
+      y = self.y,
+      rgba=lightColor,
+      image_index = self.image_index
+    }
 
     -- Draw enemy the default way
     et.functions.draw(self)
