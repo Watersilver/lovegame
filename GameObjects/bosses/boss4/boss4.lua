@@ -1003,8 +1003,8 @@ Boss4.functions = {
         x = xtotal,
         y = ytotal,
         rgba=lightColor,
-        image_index = shield_index,
-        x_scale = shield_xscale * sprite.res_x_scale,
+        image_index = math.floor(shield_index),
+        x_scale = shield_xscale,
         rad = self.angle
       }
     end

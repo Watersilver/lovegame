@@ -102,7 +102,7 @@ WreckingBall.functions = {
         type = "missile",
         x = self.x,
         y = self.y + (self.zo or 0),
-        rgba={r = angry and 1 or 0, b = 1, g = 0, a = 1},
+        rgba={r = angry and 1 or 0, b = 1, g = 0, a = 0.7},
         image_index = self.image_index
       }
     end

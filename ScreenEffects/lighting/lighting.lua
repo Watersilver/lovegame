@@ -244,8 +244,8 @@ local function drawLightOnCanvas(sources, canvas)
           love.graphics.draw(
             s.img, s[light.image_index],
             x, y, light.rad or 0,
-            canvScale * s.res_x_scale,
-            canvScale * s.res_x_scale,
+            canvScale * s.res_x_scale * (light.x_scale or light.scale or 1),
+            canvScale * s.res_x_scale * (light.scale or 1),
             s.cx, s.cy
           )
         end
