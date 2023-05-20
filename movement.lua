@@ -382,7 +382,8 @@ local mo = {}
       (
         obj.isTile or
         obj.isDungeonEdge or
-        obj.fixture and not obj.fixture:isSensor()
+        (obj.fixture and not obj.fixture:isSensor()) or
+        (obj.physical_properties and obj.physical_properties.thickWall)
       )
     end,
 
@@ -477,6 +478,7 @@ local mo = {}
           if up == 1 then
             for _, touchedOb in ipairs(sens.upTouchedObs) do
               if mo.top_down.__canPush(touchedOb) then
+                fuck = 3
                 trig.push_up = true
                 break
               end
