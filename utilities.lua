@@ -739,4 +739,29 @@ function u.ends_with(str, ending)
   return ending == "" or str:sub(-#ending) == ending
 end
 
+function u.shallow_copy(t)
+  local t2 = {}
+  for k,v in pairs(t) do
+    t2[k] = v
+  end
+  return t2
+end
+
+local function deep_copy(t, copied)
+  local t2 = {}
+  for k,v in pairs(t) do
+    if type(v) == "table" and not copied[v] then
+      copied[v] = true
+      t2[k] = deep_copy(v, copied)
+    else
+      t2[k] = v
+    end
+  end
+  return t2
+end
+
+function u.deep_copy(t)
+  return deep_copy(t, {})
+end
+
 return u
