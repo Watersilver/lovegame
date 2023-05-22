@@ -191,6 +191,8 @@ local lighting = {}
 ---@param light Light
 lighting.applyLight = function(light) table.insert(lights, light) end
 
+--- rgba is [0, 1]
+---
 ---@param shadow Light
 lighting.applyShadow = function(shadow) table.insert(shadows, shadow) end
 
@@ -211,7 +213,7 @@ end
 
 ---@param sources Light[]
 ---@param canvas love.Canvas
-local function drawLightOnCanvas(sources, canvas)
+local function drawSourceOnCanvas(sources, canvas)
   local prevCanv = love.graphics.getCanvas()
   love.graphics.setCanvas(canvas)
   local prevShader = love.graphics.getShader()
@@ -275,12 +277,12 @@ function lighting.draw()
   -------------------------------
   -- Draw light sources on canvas
   -------------------------------
-  drawLightOnCanvas(lights, lightMap)
+  drawSourceOnCanvas(lights, lightMap)
 
   -------------------------
   -- Draw shadows on canvas
   -------------------------
-  drawLightOnCanvas(shadows, shadowMap)
+  drawSourceOnCanvas(shadows, shadowMap)
 
   clearLights()
 end
