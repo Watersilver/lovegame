@@ -4,6 +4,7 @@ local snd = require "sound"
 local game = {}
 
 game.room = nil
+game.prevRoom = nil
 
 game.paused = false --{player = "player1"}
 
@@ -15,6 +16,24 @@ function game.getRoomElevation()
     return 1
   end
   return game.room.elevation or 0
+end
+
+function game.isWorldScreen()
+  if not game.room then return false end
+  local roomName = session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last]
+  if not roomName then return false end
+  local i = string.find(roomName, "w%d+x%d+%a?")
+  if not i then return false end
+  return true
+end
+
+function game.wasWorldScreen()
+  if not game.room then return false end
+  local roomName = session.latestVisitedRooms and #session.latestVisitedRooms > 1 and session.latestVisitedRooms[session.latestVisitedRooms.last - 1]
+  if not roomName then return false end
+  local i = string.find(roomName, "w%d+x%d+%a?")
+  if not i then return false end
+  return true
 end
 
 ---@return nil | {x: number, y: number}
@@ -46,6 +65,7 @@ function game.transition(trans)
   game.paused = true
   game.transitioning = trans
   game.lastSide = trans.side or "portal"
+  game.prevRoom = game.room
 end
 
 function game.cutscenePause(pause)
