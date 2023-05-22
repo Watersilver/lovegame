@@ -96,7 +96,7 @@ local function getLightsprite(spriteSettings)
   return copy
 end
 
----@alias SourceType "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel'
+---@alias SourceType "cloudCurve" | "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel'
 
 ---@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown}}
 local sourceTypes = {
@@ -119,6 +119,11 @@ local sourceTypes = {
   missile = radGrad{
     {r = 2, a = 1},
     {r = 5, a = 0}
+  },
+
+  cloudCurve = radGrad{
+    {r = 25, a = 1},
+    {r = 50, a = 0}
   },
 
   door = squareGradient(16, {a = 1}),
