@@ -111,6 +111,26 @@ function trans.camera_modification()
   return camxtmod, camytmod
 end
 
+---@param x number
+---@param y number
+---@param incoming? boolean
+function trans.transform(x, y, incoming)
+  if not incoming then
+    -- local side = game.transitioning.side
+    x = x + trans.xtransform
+      + game.transitioning.xmod
+    y = y + trans.ytransform
+      + game.transitioning.ymod
+  else
+    x = x + trans.xtransform
+      + trans.xdisplacement
+    y = y + trans.ytransform
+      + trans.ydisplacement
+  end
+
+  return x, y
+end
+
 function trans.still_objects_coords(instance)
   local xtotal, ytotal
   local zo = instance.zo or 0
