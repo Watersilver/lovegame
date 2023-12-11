@@ -11,7 +11,7 @@ end
 Curse.functions = {
 
   unstoppable_update = function (self)
-    local previousRoomName = session.latestVisitedRooms:get(session.latestVisitedRooms.length - 2)
+    local previousRoomName = session.latestVisitedRooms:get(-2)
 
     game.room.upTrans = {
       {

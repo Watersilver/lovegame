@@ -191,6 +191,10 @@ function u.projection2d(x, y, xdir, ydir)
   return projectionMagnitude * uvx, projectionMagnitude * uvy
 end
 
+---@param r any
+---@param th any
+---@return number
+---@return number
 function u.polarToCartesian(r, th)
   return r * cos( th ), r * sin( th ) -- x, y
 end
@@ -393,7 +397,7 @@ function u.newQueue(maxLength)
       return value
     end,
     get = function (self, index)
-      return self[self.first + index]
+      return self[self.first + (index % self.length)]
     end,
     getLast = function (self)
       return self[self.last]

@@ -39,7 +39,7 @@ GCON = {
   -- Names n stuff
   money = "rupee",
   moneys = "rupees",
-  heroWorld = "Hyrule",
+  heroWorld = "Tollaw",
   lakeVillage = "Kidwy",
   flowerVillage = "Anima",
   refugeeVillage = "Ancora",
@@ -48,7 +48,7 @@ GCON = {
     rescuer = "Tutela",
     mage = "Lethe",
     warrior = "Aite", -- Esmen
-    oracle = "Farore" -- clementia
+    oracle = "Clementia" -- clementia
   },
 
   -- Contains magic dust method/type/other ids and tables thereof (uses empty tables as ids)
@@ -169,7 +169,7 @@ session = {
     session.clockAngle = session.clockAngleTarget
     session.clockHandAngle = session.save.time
     session.timescale = 1
-    session.latestVisitedRooms = u.newQueue()
+    session.latestVisitedRooms = u.newQueue(GCON.rtr)
     session.deadEnemies = u.newFastAccessQueue(20)
 
     -- add global objects
@@ -547,7 +547,7 @@ session = {
       end
     end
     -- write coordinates and roomName
-    saveContent = saveContent .. '\nsave.room = "' .. session.latestVisitedRooms[session.latestVisitedRooms.last] .. '"'
+    saveContent = saveContent .. '\nsave.room = "' .. session.latestVisitedRooms:getLast() .. '"'
     if pl1 then
       saveContent = saveContent .. "\nsave.playerX = " .. pl1.x
       saveContent = saveContent .. "\nsave.playerY = " .. pl1.y
@@ -954,9 +954,9 @@ function love.update(dt)
   -- fuck = tostring(wmx) .. "/" .. tostring(wmy)
 
   -- -- display room
-  -- fuck = fuck .. "\n" .. (session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or "")
+  -- fuck = fuck .. "\n" .. (session.latestVisitedRooms and session.latestVisitedRooms:getLast() or "")
   -- if not fook then fook = {} end
-  -- fook[session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last] or ""] = true
+  -- fook[session.latestVisitedRooms and session.latestVisitedRooms:getLast() or ""] = true
   -- fuck = ""
   -- for room in pairs(fook) do
   --   fuck = fuck .. room .. "\n"

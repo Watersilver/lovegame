@@ -38,6 +38,12 @@ function im.updateGlobalImageIndexes(dt)
   im.globimage_index4loop = gii4loopTable[floor(gii4loopfloat)]
 end
 
+-- im.spriteSettings.floor,
+-- im.spriteSettings.walls,
+-- im.spriteSettings.portals,
+-- im.spriteSettings.edges,
+-- im.spriteSettings.clutter,
+
 im.spriteSettings = {
   testtiles = {'Tiles/TestTiles', 4, 7},
   floor = {'Tiles/Floor', 8, 33, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floor"},
@@ -45,7 +51,6 @@ im.spriteSettings = {
   portals = {'Tiles/Portals', 5, 3, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.portals"},
   edges = {'Tiles/Edges', 2, 2, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.edges"},
   clutter = {'Tiles/Clutter', 8, 11, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.clutter"},
-  zeldarip = {'Tiles/zeldarip', 16, 71, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.zeldarip"},
   floorOutside = {'Tiles/FloorOutside', 10, 10, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.floorOutside"},
   solidsOutside = {'Tiles/SolidsOutside', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.solidsOutside"},
   basicFriendlyInterior = {'Tiles/BasicFriendlyInterior', 11, 7, padding = 2, width = 16, height = 16, positionstring = "im.spriteSettings.basicFriendlyInterior"},
@@ -57,6 +62,7 @@ im.spriteSettings = {
   testsplosion = {'Testplosion', 5, padding = 2, width = 16, height = 16},
   testlift = {'LiftableTest', 1, width = 16, height = 16},
   liftableRock = {'LiftableRock', padding = 0, width = 15, height = 15},
+  rainSplash = {'RainSplash', 3, padding = 2, width = 7, height = 6},
   rockDestruction = {'RockDestruction', 4, padding = 2, width = 30, height = 22},
   woodDestruction = {'WoodDestruction', 4, padding = 2, width = 30, height = 22},
   rockPlummet = {'RockPlummet', 3, padding = 2, width = 10, height = 10},
@@ -547,7 +553,6 @@ im.load_sprite{'Test', 1, padding = 0}
 im.load_sprite(im.spriteSettings.note)
 im.load_sprite(im.spriteSettings.floorOutside)
 im.load_sprite(im.spriteSettings.solidsOutside)
-im.load_sprite(im.spriteSettings.zeldarip)
 im.load_sprite(im.spriteSettings.basicFriendlyInterior)
 im.load_sprite(im.spriteSettings.playerSword)
 im.load_sprite(im.spriteSettings.playerMissile)
@@ -556,6 +561,7 @@ im.load_sprite(im.spriteSettings.playerDust)
 im.load_sprite(im.spriteSettings.clock)
 im.load_sprite(im.spriteSettings.clockHand)
 im.load_sprite(im.spriteSettings.triforce)
+im.load_sprite(im.spriteSettings.rainSplash)
 im.load_sprite(im.spriteSettings.tunics)
 im.load_sprite(im.spriteSettings.swordSkill)
 im.load_sprite(im.spriteSettings.missileSkill)

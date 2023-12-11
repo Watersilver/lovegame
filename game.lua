@@ -10,7 +10,7 @@ game.paused = false --{player = "player1"}
 
 function game.getRoomElevation()
   if not game.room then return 0 end
-  local roomName = session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last]
+  local roomName = session.latestVisitedRooms and session.latestVisitedRooms:getLast()
   if not roomName then return 0 end
   if u.ends_with(roomName, "h") then
     return 1
@@ -20,7 +20,7 @@ end
 
 function game.isWorldScreen()
   if not game.room then return false end
-  local roomName = session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last]
+  local roomName = session.latestVisitedRooms and session.latestVisitedRooms:getLast()
   if not roomName then return false end
   local i = string.find(roomName, "w%d+x%d+%a?")
   if not i then return false end
@@ -29,7 +29,7 @@ end
 
 function game.wasWorldScreen()
   if not game.room then return false end
-  local roomName = session.latestVisitedRooms and #session.latestVisitedRooms > 1 and session.latestVisitedRooms[session.latestVisitedRooms.last - 1]
+  local roomName = session.latestVisitedRooms and session.latestVisitedRooms.length > 1 and session.latestVisitedRooms:get(-1)
   if not roomName then return false end
   local i = string.find(roomName, "w%d+x%d+%a?")
   if not i then return false end
@@ -39,7 +39,7 @@ end
 ---@return nil | {x: number, y: number}
 function game.getRoomGlobalCoords()
   if not game.room then return nil end
-  local roomName = session.latestVisitedRooms and session.latestVisitedRooms[session.latestVisitedRooms.last]
+  local roomName = session.latestVisitedRooms and session.latestVisitedRooms:getLast()
   if not roomName then return nil end
   local i, j = string.find(roomName, "w%d+x%d+%a?")
   if not i then return nil end
@@ -81,9 +81,6 @@ function game.change_room(roomTarget)
   -- If below, game will think last room visited is room0
   if session.latestVisitedRooms then
     session.latestVisitedRooms:add(roomTarget)
-    if session.latestVisitedRooms.length > GCON.rtr then
-      session.latestVisitedRooms:remove()
-    end
   end
   local newRoom = assert(love.filesystem.load(roomTarget))()
   return newRoom
