@@ -302,7 +302,7 @@ Weather.functions = {
     local maxRaindrops = math.floor(self.rainIntensity * #self.raindrops)
     local activatedRaindrop = false
     if not game.paused then
-      if self.rainIntensity > 0 then
+      if self.rainIntensity > 0 and game.isWorldScreen() then
         -- Timer before new raindrop is created
         self.rTimer = self.rTimer or 0.1
         self.rTimer = self.rTimer - dt
