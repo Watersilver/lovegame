@@ -5,8 +5,10 @@ local sh = {}
 -- Set dimensions
 local initial_w = love.graphics.getWidth()
 local initial_h = love.graphics.getHeight()
-real_w = initial_w
-real_h = initial_h
+local real_w = initial_w
+local real_h = initial_h
+local current_l = 0
+local current_t = 0
 local current_w = initial_w
 local current_h = initial_h
 local previous_w = current_w
@@ -105,12 +107,18 @@ function sh.calculate_resized_window( w, h )
   previous_w = current_w
   previous_h = current_h
 
-  -- Set current dimensions to new dimensions
-  current_w = new_w
-  current_h = new_h
+  -- return dead_space_w * 0.5, dead_space_h * 0.5, new_w, new_h
+  current_l, current_t, current_w, current_h = dead_space_w * 0.5, dead_space_h * 0.5, new_w, new_h
 
-  return dead_space_w * 0.5, dead_space_h * 0.5, new_w, new_h
+  return current_l, current_t, current_w, current_h
+end
 
+function sh.getCachedWindow()
+  return current_l, current_t, current_w, current_h
+end
+
+function sh.getCachedTextWindow()
+  return (real_w - current_w * 0.5) * 0.5, (real_h + current_h * 0.5) * 0.5, current_w * 0.5, current_h * 0.2
 end
 
 -- Return the result of calculate_resized_window without doing

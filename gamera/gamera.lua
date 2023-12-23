@@ -1,3 +1,5 @@
+local sh = require "scaling_handler"
+
 -- gamera.lua v1.0.1
 
 -- Copyright (c) 2012 Enrique García Cota
@@ -7,6 +9,64 @@
 -- Based on YaciCode, from Julien Patte and LuaObject, from Sebastien Rocca-Serra
 
 local gamera = {}
+
+local canvas = love.graphics.newCanvas()
+canvas:setFilter('linear', 'linear')
+local canvasScale = 1
+local prevTotalScale = -1
+local aspect_ratio = love.graphics.getWidth() / love.graphics.getHeight()
+function gamera.resize()
+  local _, _, w = sh.getCachedWindow()
+  local s = sh.get_total_scale()
+
+  -- I think 16 is our standard because we set the meter for physics at 16 pixels,
+  -- or maybe because of my sprite settings rescaling. Whatever the case, 16 represents
+  -- the side of a square tile even if the tile has more than 16x16 tiles (like 32x32 for example)
+  -- We're using 32x32 art so we multiply by 0.5 because all values including scale are tuned for 16x16
+  local screenPixelPerArtPixel = s * 0.5
+  local tileSize = screenPixelPerArtPixel * 32
+  local tileScreenPercentage = tileSize / w
+  -- For now always make canvas smaller, but consider using round instead of floor if something goes wrong
+  local canvasPixelPerArtPixel = math.floor(screenPixelPerArtPixel)
+  -- We need a minimum of 1 art pixel per canvas pixel always
+  canvasPixelPerArtPixel = canvasPixelPerArtPixel > 1 and canvasPixelPerArtPixel or 1
+  local canvw = canvasPixelPerArtPixel * 32 / tileScreenPercentage
+  local canvh = canvw / aspect_ratio
+
+  -- Floor values to avoid weirdness like making canvas with
+  -- float width but getWidth gives int pixels and stuff like that.
+  -- Dunno if getWidth can return float values. Don't care to find out.
+  if math.floor(canvw) ~= math.floor(canvas:getWidth()) then
+    -- We need to resize the canvas since our operations gave us a different width
+    canvas = love.graphics.newCanvas(math.floor(canvw), math.floor(canvh))
+    canvas:setFilter('linear', 'linear')
+  end
+
+  canvasScale = w / canvw
+end
+
+function gamera.setScissor(l,t,w,h)
+  local cl,ct = sh.getCachedWindow()
+  l, t = l - cl, t - ct
+  love.graphics.setScissor(l/canvasScale,t/canvasScale,w/canvasScale,h/canvasScale)
+end
+
+function gamera.drawCanvas()
+  love.graphics.setCanvas(canvas)
+  local w = canvas:getWidth()
+  local h = canvas:getHeight()
+  love.graphics.setScissor(w*0.25,h*0.25,w*0.5,h*0.5)
+  love.graphics.clear(0,0,255,55)
+  love.graphics.setScissor()
+  local wl,wt,ww,wh = sh.getCachedWindow()
+  gamera.setScissor(wl + ww*0.25,wt + wh*0.25,ww*0.5,wh*0.5)
+  love.graphics.clear(255,0,0,55)
+  love.graphics.setScissor()
+  love.graphics.setCanvas()
+
+  local l, t = sh.getCachedWindow()
+  love.graphics.draw(canvas, l, t, 0, canvasScale)
+end
 
 -- Private attributes and methods
 
@@ -170,6 +230,13 @@ function gamera:getVisibleCorners()
 end
 
 function gamera:draw(f)
+
+  local s = sh.get_total_scale()
+  if prevTotalScale ~= s then
+    gamera.resize()
+  end
+  prevTotalScale = s
+
   love.graphics.setScissor(self:getWindow())
 
   love.graphics.push()

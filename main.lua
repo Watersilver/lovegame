@@ -1648,6 +1648,9 @@ function love.draw()
   end
 
   setCurrentCam()
+
+  gamera.drawCanvas()
+
   -- debug
   love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
 ---@diagnostic disable-next-line: undefined-global
@@ -1865,11 +1868,14 @@ function love.keypressed(key, scancode)
 end
 
 function love.resize( w, h )
+  sh.calculate_resized_window( w, h )
+  gamera.resize()
 
   -- Set camera display window size and offset
-  cam:setWindow(sh.calculate_resized_window( w, h ))
-  hud:setWindow(sh.get_resized_window( w, h ))
-  textCam:setWindow(sh.get_resized_text_window( w, h ))
+  cam:setWindow(sh.getCachedWindow())
+  hud:setWindow(sh.getCachedWindow())
+  textCam:setWindow(sh.getCachedTextWindow())
+  -- textCam:setWindow(sh.getCachedTextWindow())
 
   globs.screenEffects.resize(w, h)
 
