@@ -159,7 +159,7 @@ im.spriteSettings = {
     {'Witch/hurt_down', 1, padding = 2, width = 16, height = 16},
     {'Witch/still_up', 1, padding = 2, width = 16, height = 16},
     {'Witch/still_left', 1, padding = 2, width = 16, height = 16},
-    {'Witch/still_down', 1, padding = 2, width = 16, height = 16},
+    {'Witch/still_down', 1, padding = 2, width = 20 * 0.5, height = 32 * 0.5},
     {'Witch/cape_up', 1, padding = 2, width = 16, height = 16},
     {'Witch/cape_left', 1, padding = 2, width = 16, height = 16},
     {'Witch/cape_down', 1, padding = 2, width = 16, height = 16},

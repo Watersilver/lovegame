@@ -270,7 +270,7 @@ local function drawSourceOnCanvas(sources, canvas)
 
   -- Dunno if necessary but put here to be safe
   love.graphics.setShader(prevShader)
-  if prevCanv then love.graphics.setCanvas(prevCanv) else love.graphics.setCanvas() end
+  love.graphics.setCanvas(prevCanv)
 end
 
 function lighting.draw()

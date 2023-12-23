@@ -6,6 +6,7 @@ local quests = require "quests"
 local items = require "items"
 local u = require "utilities"
 local snd = require "sound"
+local gamera = require "gamera.gamera"
 
 local pam = {}
 
@@ -827,7 +828,7 @@ local function drawScissoredArea(l, t, w, h, dsX, dsY, scale, drawFunc, pamleft)
   love.graphics.translate(l, t)
 
   -- Set scissor. Dead space is screen pixels. New origin must be scaled.
-  love.graphics.setScissor(
+  gamera.setScissor(
     l * scale + dsX, t * scale + dsY,
     w * scale, h * scale
   )

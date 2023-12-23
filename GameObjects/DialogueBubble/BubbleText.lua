@@ -1,4 +1,5 @@
 local textLib = require "text"
+local gamera  = require "gamera.gamera"
 local fonts = textLib.font
 local u = require "utilities"
 
@@ -113,7 +114,7 @@ local methods = {
     local sl, st = cam:toScreen(left, top)
     local sw, sh = cam:toScreen(left + width, top + height)
     sw, sh = sw - sl, sh - st
-    love.graphics.setScissor(sl, st, sw, sh)
+    gamera.setScissor(sl, st, sw, sh)
     -- This color gets combined with text colour
     -- Set to white to no modify text colour
     u.changeColour{"white"}

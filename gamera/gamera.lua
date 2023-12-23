@@ -45,23 +45,22 @@ function gamera.resize()
   canvasScale = w / canvw
 end
 
+function gamera.getCanvas()
+  return canvas
+end
+
 function gamera.setScissor(l,t,w,h)
   local cl,ct = sh.getCachedWindow()
   l, t = l - cl, t - ct
   love.graphics.setScissor(l/canvasScale,t/canvasScale,w/canvasScale,h/canvasScale)
 end
 
-function gamera.drawCanvas()
+function gamera.start()
   love.graphics.setCanvas(canvas)
-  local w = canvas:getWidth()
-  local h = canvas:getHeight()
-  love.graphics.setScissor(w*0.25,h*0.25,w*0.5,h*0.5)
-  love.graphics.clear(0,0,255,55)
-  love.graphics.setScissor()
-  local wl,wt,ww,wh = sh.getCachedWindow()
-  gamera.setScissor(wl + ww*0.25,wt + wh*0.25,ww*0.5,wh*0.5)
-  love.graphics.clear(255,0,0,55)
-  love.graphics.setScissor()
+  love.graphics.clear()
+end
+
+function gamera.stop()
   love.graphics.setCanvas()
 
   local l, t = sh.getCachedWindow()
@@ -237,13 +236,18 @@ function gamera:draw(f)
   end
   prevTotalScale = s
 
-  love.graphics.setScissor(self:getWindow())
+  local pc = love.graphics.getCanvas()
+  love.graphics.setCanvas(canvas)
+  gamera.setScissor(self:getWindow())
 
   love.graphics.push()
     local scale = self.scale
-    love.graphics.scale(scale)
+    love.graphics.scale(scale / canvasScale)
 
-    love.graphics.translate((self.w2 + self.l) / scale, (self.h2+self.t) / scale)
+    local cl,ct = sh.getCachedWindow()
+    local l, t = self.l - cl, self.t - ct
+
+    love.graphics.translate((self.w2 + l) / scale, (self.h2+t) / scale)
     love.graphics.rotate(-self.angle)
     love.graphics.translate(-self.x, -self.y)
 
@@ -252,6 +256,7 @@ function gamera:draw(f)
   love.graphics.pop()
 
   love.graphics.setScissor()
+  love.graphics.setCanvas(pc)
 end
 
 function gamera:toWorld(x,y)

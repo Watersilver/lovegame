@@ -10,6 +10,8 @@ local sh = require 'scaling_handler'
 ---@param shader? love.Shader
 ---@param prepare? fun(shader: love.Shader)
 local function drawEffects(draw, canvas, shader, prepare)
+  local prevCanvas = love.graphics.getCanvas()
+
   -- Prepare: set canvas and prepare shader
   if canvas then
     -- We will draw on this canvas
@@ -29,7 +31,7 @@ local function drawEffects(draw, canvas, shader, prepare)
 
   -- Clear: clear shader and canvas
   love.graphics.setShader()
-  love.graphics.setCanvas()
+  love.graphics.setCanvas(prevCanvas)
 end
 
 -- Canvas cache

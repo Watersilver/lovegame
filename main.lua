@@ -1599,6 +1599,7 @@ local prevs = {
   ring = "uninitialised"
 }
 function love.draw()
+  gamera.start()
 
   local resetScreenEffects = false
 
@@ -1623,7 +1624,8 @@ function love.draw()
   end
 
   globs.lighting.draw()
-  globs.screenEffects.draw(noEffectsDraw)
+  -- globs.screenEffects.draw(noEffectsDraw)
+  noEffectsDraw()
 
   cam:draw(afterScreenEffects)
 
@@ -1649,7 +1651,7 @@ function love.draw()
 
   setCurrentCam()
 
-  gamera.drawCanvas()
+  gamera.stop()
 
   -- debug
   love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
