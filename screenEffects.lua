@@ -1,38 +1,12 @@
-local sh = require 'scaling_handler'
+local gamera = require "gamera.gamera"
+local scaling_handler = require "scaling_handler"
+
+local prevScale = -1
 
 ---@class Effect
 ---@field shader love.Shader
 ---@field canvas love.Canvas
 ---@field prepare? fun(shader: love.Shader)
-
----@param draw fun()|love.Canvas
----@param canvas? love.Canvas
----@param shader? love.Shader
----@param prepare? fun(shader: love.Shader)
-local function drawEffects(draw, canvas, shader, prepare)
-  local prevCanvas = love.graphics.getCanvas()
-
-  -- Prepare: set canvas and prepare shader
-  if canvas then
-    -- We will draw on this canvas
-    love.graphics.setCanvas(canvas)
-
-    -- Only call clear if canvas exists because clear is called automatically
-    -- before love.draw in the default love.run function
-    love.graphics.clear()
-  end
-  if prepare and shader then
-    prepare(shader)
-  end
-
-  -- Draw: set shader and draw
-  if shader then love.graphics.setShader(shader) end
-  if type(draw) == "function" then draw() else love.graphics.draw(draw) end
-
-  -- Clear: clear shader and canvas
-  love.graphics.setShader()
-  love.graphics.setCanvas(prevCanvas)
-end
 
 -- Canvas cache
 ---@type {c: love.Canvas, inUse: boolean}[]
@@ -45,6 +19,51 @@ table.insert(canvases, {c = love.graphics.newCanvas(), inUse = false})
 
 ---@type Effect[]
 local effects = {}
+
+---@param w number
+---@param h number
+local resize = function( w, h )
+  local cw, ch = gamera.getCanvas():getWidth(), gamera.getCanvas():getHeight()
+  local scale = 1
+  if w < cw then
+    scale = cw / w
+  end
+  if h < ch then
+    scale = math.max(scale, ch / h)
+  end
+
+  for _, c in ipairs(canvases) do
+
+    -- Find effect that uses this canvas if it exists
+    ---@type Effect | nil
+    local e
+    for _, effect in ipairs(effects) do
+      if effect.canvas == c.c then
+        e = effect
+        break
+      end
+    end
+
+    -- Resize canvases
+    -- c.c = love.graphics.newCanvas(w, h)
+
+    c.c = love.graphics.newCanvas(w * scale, h * scale)
+
+    -- update effect canvas to use resized one
+    if e then e.canvas = c.c end
+  end
+
+  for _, effect in ipairs(effects) do
+---@diagnostic disable-next-line: undefined-field
+    if effect.shader:getExternVariable('deadSpaceX') then
+      effect.shader:send('deadSpaceX', 0)
+    end
+---@diagnostic disable-next-line: undefined-field
+    if effect.shader:getExternVariable('deadSpaceY') then
+      effect.shader:send('deadSpaceY', 0)
+    end
+  end
+end
 
 local screenEffects = {
   ---@param shader love.Shader
@@ -96,58 +115,43 @@ local screenEffects = {
     end
   end,
 
-  ---@type fun(drawfunc: fun())
-  -- Draws given draw function and then applies effects
-  draw = function(drawfunc)
-    ---@type fun()|love.Canvas
-    local drawable = drawfunc
-    local shdr
-    local prepare
+  ---apply pushed effects on given canvas in order
+  ---@param canvas love.Canvas
+  apply = function(canvas)
+    if #effects == 0 then return end
 
+    local s = scaling_handler.get_total_scale()
+    if s ~= prevScale then
+      resize(love.graphics.getWidth(), love.graphics.getHeight())
+    end
+    prevScale = s
+
+    local origCanvas = love.graphics.getCanvas()
+    local prevCanvas = canvas
+
+    -- apply effects
     for _, effect in ipairs(effects) do
-      drawEffects(drawable, effect.canvas, shdr, prepare)
-      shdr = effect.shader
-      prepare = effect.prepare
-      drawable = effect.canvas
+      if effect.prepare and effect.shader then
+        effect.prepare(effect.shader)
+      end
+      love.graphics.setShader(effect.shader)
+      love.graphics.setCanvas(effect.canvas)
+      love.graphics.clear()
+      love.graphics.draw(prevCanvas)
+      prevCanvas = effect.canvas
+      love.graphics.setShader()
     end
 
-    drawEffects(drawable, nil, shdr, prepare)
+    -- draw everything to original canvas
+    love.graphics.setCanvas(canvas)
+    love.graphics.clear()
+    love.graphics.draw(prevCanvas)
+
+    love.graphics.setCanvas(origCanvas)
+    love.graphics.draw(prevCanvas)
   end,
 
-  ---@param w number
-  ---@param h number
-  resize = function( w, h )
-    for _, c in ipairs(canvases) do
-
-      -- Find effect that uses this canvas if it exists
-      ---@type Effect | nil
-      local e
-      for _, effect in ipairs(effects) do
-        if effect.canvas == c.c then
-          e = effect
-          break
-        end
-      end
-
-      -- Resize canvases
-      c.c = love.graphics.newCanvas(w, h)
-
-      -- update effect canvas to use resized one
-      if e then e.canvas = c.c end
-    end
-
-    local dsx, dsy = sh.get_resized_window(w, h)
-    for _, effect in ipairs(effects) do
----@diagnostic disable-next-line: undefined-field
-      if effect.shader:getExternVariable('deadSpaceX') then
-        effect.shader:send('deadSpaceX', dsx)
-      end
----@diagnostic disable-next-line: undefined-field
-      if effect.shader:getExternVariable('deadSpaceY') then
-        effect.shader:send('deadSpaceY', dsy)
-      end
-    end
-  end
+  resize = resize
 }
 
 return screenEffects

@@ -55,16 +55,17 @@ local canvH = 225 * canvScale
 ---@param w number
 ---@param h number
 local function getCanvasDims(w, h)
-  local newW, newH
-  local ratio = w / h
-  if (ratio) > 1.7777 then
-    newW = ratio * canvH
-    newH = canvH
-  else
-    newW = canvW
-    newH = canvW / ratio
-  end
-  return newW, newH
+  return canvW, canvH
+  -- local newW, newH
+  -- local ratio = w / h
+  -- if (ratio) > 1.7777 then
+  --   newW = ratio * canvH
+  --   newH = canvH
+  -- else
+  --   newW = canvW
+  --   newH = canvW / ratio
+  -- end
+  -- return newW, newH
 end
 
 local lightMap = love.graphics.newCanvas(getCanvasDims(initial_w, initial_h))
@@ -228,7 +229,8 @@ local function drawSourceOnCanvas(sources, canvas)
   local ratioH = canvasH / canvH
   for index, light in ipairs(sources) do
     local x, y = mainCamera:toScreen(light.x, light.y)
-    local _, _, w, h = mainCamera:getWindow()
+    local l, t, w, h = mainCamera:getWindow()
+    x, y = x - l, y - t
     x, y = (canvasW / ratioW) * x / w, (canvasH / ratioH) * y / h
     local type = sourceTypes[light.type]
     light.rgba = light.rgba or {r=1,g=1,b=1,a=1}

@@ -1624,8 +1624,8 @@ function love.draw()
   end
 
   globs.lighting.draw()
-  -- globs.screenEffects.draw(noEffectsDraw)
   noEffectsDraw()
+  globs.screenEffects.apply(gamera.getCanvas())
 
   cam:draw(afterScreenEffects)
 
