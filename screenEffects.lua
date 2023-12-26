@@ -1,6 +1,8 @@
 local gamera = require "gamera.gamera"
 local scaling_handler = require "scaling_handler"
 
+-- TODO: Fix this bullshit system that needs one canvas per effect
+
 local prevScale = -1
 
 ---@class Effect

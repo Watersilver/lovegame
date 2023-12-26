@@ -760,7 +760,7 @@ cam.noisel = 0
 cam.noiset = 0
 
 if gs.fullscreen then
-  love.window.setFullscreen(true)
+  love.window.setFullscreen(true, "desktop")
 end
 
 HudWidth = 400
@@ -1810,7 +1810,8 @@ function love.keypressed(key, scancode)
   if key == "backspace" then
     text.input = u.utf8_backspace(text.input, 1)
   elseif key == "f11" then
-    love.window.setFullscreen(not love.window.getFullscreen())
+    local isFull = love.window.getFullscreen()
+    love.window.setFullscreen(not isFull, "desktop")
   end
 
   -- -- Enemarea code
