@@ -29,7 +29,7 @@ end
 
 function game.wasWorldScreen()
   if not game.room then return false end
-  local roomName = session.latestVisitedRooms and session.latestVisitedRooms.length > 1 and session.latestVisitedRooms:get(-1)
+  local roomName = session.latestVisitedRooms and session.latestVisitedRooms.length > 1 and session.latestVisitedRooms:get(-2)
   if not roomName then return false end
   local i = string.find(roomName, "w%d+x%d+%a?")
   if not i then return false end
