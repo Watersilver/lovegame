@@ -7,7 +7,7 @@ local lighting = require "ScreenEffects.lighting.lighting"
 local transitions = require "transitions"
 
 ---@class Cloud
----@field shape {radius: number, x: number, y: number}[]
+---@field shape {x: number, y: number}[]
 ---@field density number
 ---@field angle number
 ---@field x number
@@ -19,13 +19,14 @@ local transitions = require "transitions"
 ---@field side "left" | "right" | "up" | "down"
 
 -- TODOMAYBE: create better algorithm for cloud creation that creates non overlapping clouds efficiently
-
+-- Lots of magic numbers in here... Hope I remember why they're here...
 ---@param number number
 ---@param w number
 ---@param h number
 ---@param options? CreateCloudOptions
+---@param clouds? Cloud[][]
 ---@return Cloud[]
-local function createClouds(number, w, h, options)
+local function createClouds(number, w, h, options, clouds)
   ---@type Cloud[]
   local c = {}
 
@@ -35,29 +36,67 @@ local function createClouds(number, w, h, options)
 
   if options then
     if options.side == "left" then
+      x0 = x0 - 100
       dx = cloudW * 0.5
     elseif options.side == "right" then
-      x0 = cloudW * 0.5
+      x0 = cloudW * 0.5 + 100
       dx = x0
     elseif options.side == "up" then
+      y0 = y0 - 100
       dy = cloudH * 0.5
     elseif options.side == "down" then
-      y0 = cloudH * 0.5
+      y0 = cloudH * 0.5 + 100
       dy = y0
     end
   end
 
+  -- local minDist = ybound ^ 2
+  local minDist = 100 ^ 2
+
   for _ = 1, number do
+    local attempts = 0
+    local overlaps = true
+
     ---@type Cloud
     local cloud = {
       density = 1,
       angle = love.math.random() * 2 * math.pi,
-      x = x0 + love.math.random(w - dx),
-      y = y0 + love.math.random(h - dy),
+      x = 0,
+      y = 0,
       shape = {},
       w = cloudW,
       h = cloudH
     }
+
+    while overlaps and attempts < 10 do
+      cloud.x = x0 - 100 + love.math.random(w - dx + 200)
+      cloud.y = y0 - 100 + love.math.random(h - dy + 200)
+
+      overlaps = false
+
+      for _, cl in ipairs(c) do
+        if u.distanceSqared2d(cl.x, cl.y, cloud.x, cloud.y) < minDist then
+          overlaps = true
+          break
+        end
+      end
+
+      if clouds then
+        for _, cloudsOfLayer in ipairs(clouds) do
+          if overlaps then break end
+
+          for _, cl in ipairs(cloudsOfLayer) do
+            if u.distanceSqared2d(cl.x, cl.y, cloud.x, cloud.y) < minDist then
+              overlaps = true
+              break
+            end
+          end
+
+        end
+      end
+
+      attempts = attempts + 1
+    end
 
     for _ = 1, 3 + love.math.random(3) do
       local x, y = u.randomPointFromEllipse(xbound, ybound)
@@ -171,7 +210,9 @@ Weather.functions = {
   ---@param options? CreateCloudOptions
   createClouds = function(self, options)
     self.clouds = {}
-    self:setCloudLayer('l1', {opacity = .3, clouds = createClouds(25, game.room.width, game.room.height, options)})
+    self:setCloudLayer('l1', {opacity = 0.3, clouds = createClouds(25, game.room.width, game.room.height, options)})
+    self:setCloudLayer('l2', {opacity = 0.3, clouds = createClouds(25, game.room.width, game.room.height, options, {self:getCloudLayer('l1')})})
+    self:setCloudLayer('l3', {opacity = 0.4, clouds = createClouds(50, game.room.width, game.room.height, options, {self:getCloudLayer('l1', self:getCloudLayer('l2'))})})
   end,
 
   ---gets wind direction of room in rads
@@ -360,6 +401,7 @@ Weather.functions = {
     prevCamh = camh
 
     -- Rain
+    love.graphics.push("all")
     for _, drop in ipairs(self.raindrops) do
       if drop.init then
         drop.init = false
@@ -397,12 +439,11 @@ Weather.functions = {
         end
 
         -- Draw
-        local resetCol = u.storeColour()
         love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST * 0.5)
         love.graphics.line(drop.x, drop.y, drop.x - dropWidth, drop.y - raindropHeight)
-        resetCol()
       end
     end
+    love.graphics.pop()
   end,
 
   ---@param self WeatherType
