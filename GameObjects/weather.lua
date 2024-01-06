@@ -308,8 +308,10 @@ Weather.functions = {
         self.rTimer = self.rTimer - dt
         if self.rTimer <= 0 then
           self.rTimer = nil
-          rainSplash()
-          if math.random() < 0.15 then rainSplash() end
+          if math.random() < self.rainIntensity then
+            rainSplash()
+            if math.random() < 0.15 * self.rainIntensity then rainSplash() end
+          end
         end
       end
 
