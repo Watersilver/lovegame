@@ -1018,7 +1018,6 @@ function love.update(dt)
       if game.transitioning.progress > 1 then game.transitioning.progress = 1 end
       trans.determine_coordinates_transformation()
     else
-
       inp.transing = false
 
       o.to_be_deleted:remove_all()
@@ -1396,9 +1395,19 @@ local function mainCameraDraw(l,t,w,h)
   local layers = #o.draw_layers
   if layers > 0 then
 
+    local prevMode = trans.mode
+
     -- Normal drawing mode
     if not game.transitioning or
     (game.transitioning and not game.transitioning.startedTransition) then
+
+      trans.mode = 'none'
+
+      if prevMode == 'scrolling' and prevMode ~= trans.mode then
+        trans.just_stopped_scrolling = true
+      else
+        trans.just_stopped_scrolling = false
+      end
 
       for layer = 1, layers do
         local drawnum = #o.draw_layers[layer]
@@ -1410,6 +1419,7 @@ local function mainCameraDraw(l,t,w,h)
     -- Transition drawing mode
     elseif game.transitioning.type == "scrolling" then
 
+      trans.mode = 'scrolling'
       for layer = 1, layers do
         local drawnum = #o.draw_layers[layer]
         for i = 1, drawnum do

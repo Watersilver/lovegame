@@ -9,6 +9,11 @@ local emptyFunc = u.emptyFunc
 
 local trans = {}
 
+---@type 'none' | 'scrolling'
+trans.mode = 'none'
+
+trans.just_stopped_scrolling = false
+
 function trans.remove_from_world_previous_room()
   local removeType;
   if game.transitioning.purge then

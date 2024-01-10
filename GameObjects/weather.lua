@@ -11,36 +11,40 @@ local transitions = require "transitions"
 local data = love.image.newImageData(80 * 3, 45 * 3)
 local noiseImg = love.graphics.newImage(data)
 local noiseT = 0
+local gx, gy = -love.math.random() * 100000, -love.math.random() * 100000
+local xrest, yrest = 0, 0
 
 ---@param opacity? number
----@param trans? boolean
-local function drawNoise(opacity, trans)
+local function drawNoise(opacity)
 
   opacity = opacity or 1
 
   noiseT = noiseT + delta_time * 0.1 * 0
 
-  -- TODO: crashes when entering non global coords room, fix
-  local gx, gy = game.getRoomGlobalCoords(trans)
   local l, t = mainCamera:getVisible()
 
   local w, h = data:getDimensions()
   local sw, sh = 400 / w, 225 / h
 
-  -- TODO: clouds break when entering smaller room or room with x or y mod
-
   local dx, dy = 0, 0
-  if trans then
+  if transitions.mode == 'scrolling' then
     dx, dy = transitions.transform(0, 0)
   end
 
-  local xrest, yrest = gx + l - dx, gy + t - dy
+  local prevXrest, prevYrest = xrest, yrest
+
+  if transitions.just_stopped_scrolling then
+    gx = prevXrest + dx - l
+    gy = prevYrest + dy - t
+  end
+
+  xrest, yrest = gx + l - dx, gy + t - dy
 
   data:mapPixel(
     function(x, y)
       x = xrest + x * sw
       y = yrest + y * sh
-      local ass = love.math.noise(x*0.01, y*0.01, noiseT) * 0.5 * COLORCONST
+      local ass = love.math.noise(x*0.01, y*0.01, noiseT) * COLORCONST
       return ass, ass, ass, COLORCONST * opacity
     end
   )
@@ -508,11 +512,11 @@ Weather.functions = {
   trans_draw = function(self)
 
     if (game.wasWorldScreen() and game.isWorldScreen()) then
-      drawNoise(nil, true)
+      drawNoise(nil)
     elseif (game.wasWorldScreen() and not game.isWorldScreen()) then
-      drawNoise(1 - game.transitioning.progress, true)
+      drawNoise(1 - game.transitioning.progress)
     elseif (not game.wasWorldScreen() and game.isWorldScreen()) then
-      drawNoise(game.transitioning.progress, true)
+      drawNoise(game.transitioning.progress)
     end
 
     if game.wasWorldScreen() then
