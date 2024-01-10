@@ -96,9 +96,9 @@ local function getLightsprite(spriteSettings)
   return copy
 end
 
----@alias SourceType "cloudCurve" | "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel'
+---@alias SourceType "canvas" | "cloudCurve" | "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel'
 
----@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown}}
+---@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown} | {type: "canvas"}}
 local sourceTypes = {
   torch = {type = "sprite", sprite = im.load_sprite({'flickeringLight', 2, padding = 1, width = 48, height = 48})},
   sprinkle = {type = "sprite", sprite = im.load_sprite{'Effects/UseSprinkleEffect', 6, padding = 2, width = 24, height = 10}},
@@ -135,6 +135,8 @@ local sourceTypes = {
   boss4ball = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[3]))},
   boss4spikes = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[4]))},
   boss4link = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[5]))},
+
+  canvas = {type = 'canvas'}
 }
 
 return sourceTypes

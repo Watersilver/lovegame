@@ -24,6 +24,7 @@ if not shdrExists then print(err) end
 ---@field x_scale? number
 ---@field rgba? {r: number; g: number; b: number; a: number;}
 ---@field image_index? number
+---@field canvasImg? love.Image
 
 ---@type Light[]
 local lights = {}
@@ -253,7 +254,7 @@ local function drawSourceOnCanvas(sources, canvas)
             s.cx, s.cy
           )
         end
-      else
+      elseif type.type == 'drawn' then
         love.graphics.draw(
           type.img,
           x, y, light.rad or 0,
@@ -261,6 +262,16 @@ local function drawSourceOnCanvas(sources, canvas)
           canvScale * (light.scale or 1),
           type.centerOffset,
           type.centerOffset
+        )
+      else
+        local sx = canvasW / light.canvasImg:getWidth()
+        local sy = canvasH / light.canvasImg:getHeight()
+
+        love.graphics.draw(
+          light.canvasImg,
+          0, 0, 0,
+          sx,
+          sy
         )
       end
     end

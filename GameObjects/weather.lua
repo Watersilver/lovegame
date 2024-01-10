@@ -6,6 +6,62 @@ local im = require "image"
 local lighting = require "ScreenEffects.lighting.lighting"
 local transitions = require "transitions"
 
+
+-- Played with noise
+local data = love.image.newImageData(80 * 3, 45 * 3)
+local noiseImg = love.graphics.newImage(data)
+local noiseT = 0
+
+---@param opacity? number
+---@param trans? boolean
+local function drawNoise(opacity, trans)
+
+  opacity = opacity or 1
+
+  noiseT = noiseT + delta_time * 0.1 * 0
+
+  -- TODO: crashes when entering non global coords room, fix
+  local gx, gy = game.getRoomGlobalCoords(trans)
+  local l, t = mainCamera:getVisible()
+
+  local w, h = data:getDimensions()
+  local sw, sh = 400 / w, 225 / h
+
+  -- TODO: clouds break when entering smaller room or room with x or y mod
+
+  local dx, dy = 0, 0
+  if trans then
+    dx, dy = transitions.transform(0, 0)
+  end
+
+  local xrest, yrest = gx + l - dx, gy + t - dy
+
+  data:mapPixel(
+    function(x, y)
+      x = xrest + x * sw
+      y = yrest + y * sh
+      local ass = love.math.noise(x*0.01, y*0.01, noiseT) * 0.5 * COLORCONST
+      return ass, ass, ass, COLORCONST * opacity
+    end
+  )
+
+  noiseImg:refresh()
+
+  -- local l, t = mainCamera:getVisible()
+  -- love.graphics.push("all")
+  -- love.graphics.setBlendMode('lighten', 'premultiplied')
+  -- love.graphics.draw(noiseImg, l, t)
+  -- love.graphics.pop()
+
+  lighting.applyShadow{
+    x = 0,
+    y = 0,
+    type = 'canvas',
+    canvasImg = noiseImg
+  }
+end
+
+
 ---@class Cloud
 ---@field shape {x: number, y: number}[]
 ---@field density number
@@ -109,22 +165,22 @@ local function createClouds(number, w, h, options, clouds)
   return c
 end
 
-local function drawCloud(layer, cloud, x, y)
-  local w2, h2 = cloud.w * 0.5, cloud.h * 0.5
-  if not (x + w2 < caml or x - w2 > caml + camw or y + h2 < camt or y - h2 > camt + camh) then
-    lighting.applyShadow{
-      type = "cloudCurve",
-      x = x,
-      y = y,
-      rgba = {
-        r = 1,
-        g = 1,
-        b = 1,
-        a = cloud.density * layer.opacity --* game.transitioning.progress
-      },
-    }
-  end
-end
+-- local function drawCloud(layer, cloud, x, y)
+--   local w2, h2 = cloud.w * 0.5, cloud.h * 0.5
+--   if not (x + w2 < caml or x - w2 > caml + camw or y + h2 < camt or y - h2 > camt + camh) then
+--     lighting.applyShadow{
+--       type = "cloudCurve",
+--       x = x,
+--       y = y,
+--       rgba = {
+--         r = 1,
+--         g = 1,
+--         b = 1,
+--         a = cloud.density * layer.opacity --* game.transitioning.progress
+--       },
+--     }
+--   end
+-- end
 
 local raindropHeight = 10
 local raindropYSpeed = 200
@@ -337,7 +393,7 @@ Weather.functions = {
     --Rain
 
     -- TEMP
-    self.rainIntensity = 1
+    self.rainIntensity = 0
 
     local activeRaindrops = 0
     local maxRaindrops = math.floor(self.rainIntensity * #self.raindrops)
@@ -384,14 +440,16 @@ Weather.functions = {
     -- Only draw weather in world screen
     if not game.isWorldScreen() then return end
 
-    local ls = self:getCloudLayers()
-    for _, l in pairs(ls) do
-      for _, cloud in ipairs(l.clouds) do
-        for _, part in ipairs(cloud.shape) do
-          drawCloud(l, cloud, cloud.x + part.x, cloud.y + part.y)
-        end
-      end
-    end
+    drawNoise()
+
+    -- local ls = self:getCloudLayers()
+    -- for _, l in pairs(ls) do
+    --   for _, cloud in ipairs(l.clouds) do
+    --     for _, part in ipairs(cloud.shape) do
+    --       drawCloud(l, cloud, cloud.x + part.x, cloud.y + part.y)
+    --     end
+    --   end
+    -- end
 
     local vx = self:getWindVelocity()
 
@@ -448,17 +506,26 @@ Weather.functions = {
 
   ---@param self WeatherType
   trans_draw = function(self)
+
+    if (game.wasWorldScreen() and game.isWorldScreen()) then
+      drawNoise(nil, true)
+    elseif (game.wasWorldScreen() and not game.isWorldScreen()) then
+      drawNoise(1 - game.transitioning.progress, true)
+    elseif (not game.wasWorldScreen() and game.isWorldScreen()) then
+      drawNoise(game.transitioning.progress, true)
+    end
+
     if game.wasWorldScreen() then
-      local ls = self:getOutgoingCloudLayers()
-      for _, l in pairs(ls) do
-        for _, cloud in ipairs(l.clouds) do
-          for _, part in ipairs(cloud.shape) do
-            local x, y = cloud.x + part.x, cloud.y + part.y
-            x, y = transitions.transform(x, y)
-            drawCloud(l, cloud, x, y)
-          end
-        end
-      end
+      -- local ls = self:getOutgoingCloudLayers()
+      -- for _, l in pairs(ls) do
+      --   for _, cloud in ipairs(l.clouds) do
+      --     for _, part in ipairs(cloud.shape) do
+      --       local x, y = cloud.x + part.x, cloud.y + part.y
+      --       x, y = transitions.transform(x, y)
+      --       drawCloud(l, cloud, x, y)
+      --     end
+      --   end
+      -- end
 
       -- Rain
       for _, drop in ipairs(self.outgoingRaindrops) do
@@ -480,16 +547,16 @@ Weather.functions = {
 
     if not game.isWorldScreen() then return end
 
-    local ls = self:getCloudLayers()
-    for _, l in pairs(ls) do
-      for _, cloud in ipairs(l.clouds) do
-        for _, part in ipairs(cloud.shape) do
-          local x, y = cloud.x + part.x, cloud.y + part.y
-          x, y = transitions.transform(x, y, true)
-          drawCloud(l, cloud, x, y)
-        end
-      end
-    end
+    -- local ls = self:getCloudLayers()
+    -- for _, l in pairs(ls) do
+    --   for _, cloud in ipairs(l.clouds) do
+    --     for _, part in ipairs(cloud.shape) do
+    --       local x, y = cloud.x + part.x, cloud.y + part.y
+    --       x, y = transitions.transform(x, y, true)
+    --       drawCloud(l, cloud, x, y)
+    --     end
+    --   end
+    -- end
 
     -- Rain
     for _, drop in ipairs(self.raindrops) do
