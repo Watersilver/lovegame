@@ -8,7 +8,7 @@ local function square(side, centerOffset)
     return COLORCONST,COLORCONST,COLORCONST,COLORCONST
   end)
 
-  return {img = love.graphics.newImage(data), centerOffset = centerOffset or 0}
+  return {img = love.graphics.newImage(data), centerOffset = centerOffset or 0, type = "drawn"}
 end
 
 local function squareGradient(side, kwargs)
