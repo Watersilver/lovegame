@@ -138,7 +138,7 @@ im.spriteSettings = {
   playerSprites = {
     {'Witch/walk_left', 2, padding = 2, width = 16, height = 16},
     {'Witch/walk_up', 2, padding = 2, width = 16, height = 16},
-    {'Witch/walk_down', 2, padding = 2, width = 16, height = 16},
+    {'Witch/walk_down', 6, padding = 2, width = 23 / 2, height = 29 / 2},
     {'Witch/push_up', 2, padding = 2, width = 16, height = 16},
     {'Witch/push_left', 4, padding = 2, width = 16, height = 16},
     {'Witch/push_down', 2, padding = 2, width = 16, height = 16},

@@ -6,64 +6,76 @@ local im = require "image"
 local lighting = require "ScreenEffects.lighting.lighting"
 local transitions = require "transitions"
 
+-- -- Played with noise
+-- local data = love.image.newImageData(80 * 3, 45 * 3)
+-- local noiseImg = love.graphics.newImage(data)
+-- local noiseT = 0
+-- local gx, gy = -love.math.random() * 100000, -love.math.random() * 100000
+-- local xrest, yrest = 0, 0
 
--- Played with noise
-local data = love.image.newImageData(80 * 3, 45 * 3)
-local noiseImg = love.graphics.newImage(data)
-local noiseT = 0
-local gx, gy = -love.math.random() * 100000, -love.math.random() * 100000
-local xrest, yrest = 0, 0
+-- ---@param opacity? number
+-- local function drawNoise(opacity)
 
----@param opacity? number
-local function drawNoise(opacity)
+--   opacity = opacity or 1
 
-  opacity = opacity or 1
+--   noiseT = noiseT + delta_time * 0.1
 
-  noiseT = noiseT + delta_time * 0.1 * 0
+--   local l, t = mainCamera:getVisible()
 
-  local l, t = mainCamera:getVisible()
+--   local w, h = data:getDimensions()
+--   local sw, sh = 400 / w, 225 / h
 
-  local w, h = data:getDimensions()
-  local sw, sh = 400 / w, 225 / h
+--   local dx, dy = 0, 0
+--   if transitions.mode == 'scrolling' then
+--     dx, dy = transitions.transform(0, 0)
+--   end
 
-  local dx, dy = 0, 0
-  if transitions.mode == 'scrolling' then
-    dx, dy = transitions.transform(0, 0)
-  end
+--   local prevXrest, prevYrest = xrest, yrest
 
-  local prevXrest, prevYrest = xrest, yrest
+--   if transitions.just_stopped_scrolling then
+--     gx = prevXrest + dx - l
+--     gy = prevYrest + dy - t
+--   end
 
-  if transitions.just_stopped_scrolling then
-    gx = prevXrest + dx - l
-    gy = prevYrest + dy - t
-  end
+--   xrest, yrest = gx + l - dx, gy + t - dy
 
-  xrest, yrest = gx + l - dx, gy + t - dy
+--   data:mapPixel(
+--     function(x, y)
+--       x = xrest + x * sw
+--       y = yrest + y * sh
+--       local val = love.math.noise(x*0.0075, y*0.0075, noiseT) * COLORCONST
 
-  data:mapPixel(
-    function(x, y)
-      x = xrest + x * sw
-      y = yrest + y * sh
-      local ass = love.math.noise(x*0.01, y*0.01, noiseT) * COLORCONST
-      return ass, ass, ass, COLORCONST * opacity
-    end
-  )
+--       local op = 1 or love.math.noise(x*0.001, y*0.001, noiseT, 10000)
+--       -- if we have a different noise for each colour we get interesting rgb effect
+--       return val, val, val, COLORCONST * opacity * op
+--     end
+--   )
 
-  noiseImg:refresh()
+--   noiseImg:refresh()
 
-  -- local l, t = mainCamera:getVisible()
-  -- love.graphics.push("all")
-  -- love.graphics.setBlendMode('lighten', 'premultiplied')
-  -- love.graphics.draw(noiseImg, l, t)
-  -- love.graphics.pop()
+--   lighting.applyShadow{
+--     x = 0,
+--     y = 0,
+--     type = 'canvas',
+--     canvasImg = noiseImg
+--   }
 
-  lighting.applyShadow{
-    x = 0,
-    y = 0,
-    type = 'canvas',
-    canvasImg = noiseImg
-  }
-end
+--   -- debug
+--   -- local l, t = mainCamera:getVisible()
+--   -- love.graphics.push("all")
+--   -- love.graphics.setBlendMode('lighten', 'premultiplied')
+--   -- love.graphics.draw(noiseImg, l, t)
+--   -- love.graphics.pop()
+-- end
+
+-- TODO
+-- How to determine weather:
+-- snowy = 90x93 to 93x95
+-- grassland = 93-94x101 -> 92-94x102 -> 91x103 to 94x106
+-- tropical isle = 102x105 to 104x106
+-- * Split areas of worldmap to have their own weather patterns
+-- * roll two values for each area. Current weather value and duration.
+-- * Make sure to lerp between areas with different weather and also change weather gradually when it changes
 
 
 ---@class Cloud
@@ -169,22 +181,22 @@ local function createClouds(number, w, h, options, clouds)
   return c
 end
 
--- local function drawCloud(layer, cloud, x, y)
---   local w2, h2 = cloud.w * 0.5, cloud.h * 0.5
---   if not (x + w2 < caml or x - w2 > caml + camw or y + h2 < camt or y - h2 > camt + camh) then
---     lighting.applyShadow{
---       type = "cloudCurve",
---       x = x,
---       y = y,
---       rgba = {
---         r = 1,
---         g = 1,
---         b = 1,
---         a = cloud.density * layer.opacity --* game.transitioning.progress
---       },
---     }
---   end
--- end
+local function drawCloud(layer, cloud, x, y)
+  local w2, h2 = cloud.w * 0.5, cloud.h * 0.5
+  if not (x + w2 < caml or x - w2 > caml + camw or y + h2 < camt or y - h2 > camt + camh) then
+    lighting.applyShadow{
+      type = "cloudCurve",
+      x = x,
+      y = y,
+      rgba = {
+        r = 1,
+        g = 1,
+        b = 1,
+        a = cloud.density * layer.opacity --* game.transitioning.progress
+      },
+    }
+  end
+end
 
 local raindropHeight = 10
 local raindropYSpeed = 200
@@ -221,14 +233,45 @@ function Weather.initialize(instance)
   instance.incomingOpacityTarget = 0
 
   instance.clouds = {}
+  instance.cloudsOpacityTarget = {
+    l1 = 0,
+    l2 = 0,
+    l3 = 0,
+    l4 = 0
+  }
   instance.outgoingClouds = {}
   instance.rainIntensity = 0
+  instance.snowIntensity = 0
+  instance.weatherIntensityTarget = 0
   instance.raindrops = {}
   instance.outgoingRaindrops = {}
   for _ = 1,300 do
     table.insert(instance.raindrops, {x = 0, y = 0})
     table.insert(instance.outgoingRaindrops, {x = 0, y = 0})
   end
+
+  ---@type WeatherAnims
+  instance.weatherAnims = {
+    init = true,
+    areas = {
+      overworld = {
+        value = 0,
+        duration = 0
+      },
+      grassland = {
+        value = 0,
+        duration = 0
+      },
+      snowy = {
+        value = 0,
+        duration = 0
+      },
+      tropical = {
+        value = 0,
+        duration = 0
+      }
+    }
+  }
 end
 
 -- sun is a huge light source veeeery far away, therefore:
@@ -269,10 +312,193 @@ Weather.functions = {
   ---@param self WeatherType
   ---@param options? CreateCloudOptions
   createClouds = function(self, options)
+    if self.weatherAnims.init then
+      self:updateWeather()
+      self.weatherAnims.init = false
+    end
     self.clouds = {}
-    self:setCloudLayer('l1', {opacity = 0.3, clouds = createClouds(25, game.room.width, game.room.height, options)})
-    self:setCloudLayer('l2', {opacity = 0.3, clouds = createClouds(25, game.room.width, game.room.height, options, {self:getCloudLayer('l1')})})
-    self:setCloudLayer('l3', {opacity = 0.4, clouds = createClouds(50, game.room.width, game.room.height, options, {self:getCloudLayer('l1', self:getCloudLayer('l2'))})})
+    self:setCloudLayer('l1', {opacity = self.cloudsOpacityTarget.l1, clouds = createClouds(25, game.room.width, game.room.height, options)})
+    self:setCloudLayer('l2', {opacity = self.cloudsOpacityTarget.l2, clouds = createClouds(25, game.room.width, game.room.height, options)})
+    self:setCloudLayer('l3', {opacity = self.cloudsOpacityTarget.l3, clouds = createClouds(25, game.room.width, game.room.height, options)})
+    self:setCloudLayer('l4', {opacity = self.cloudsOpacityTarget.l4, clouds = createClouds(25, game.room.width, game.room.height, options)})
+  end,
+
+  -- ---@param self WeatherType
+  -- getBiomeArea = function(self)
+  --   local b = self:getBiome()
+  --   if b == 'grassland' then
+  --     return self.weatherAnims.areas.grassland
+  --   elseif b == 'snowy' then
+  --     return self.weatherAnims.areas.snowy
+  --   elseif b == 'tropical' then
+  --     return self.weatherAnims.areas.tropical
+  --   else
+  --     return self.weatherAnims.areas.overworld
+  --   end
+  -- end,
+
+  getBiome = function()
+    if not game.isWorldScreen() then return nil end
+    -- snowy = 90x93 to 93x95
+    -- grassland = 93-94x101 -> 92-94x102 -> 91x103 to 94x106
+    -- tropical isle = 102x105 to 104x106
+    local x, y = game.getRoomCoords()
+    ---@type 'overworld' | 'snowy' | 'grassland' | 'tropical'
+    local biome = 'overworld'
+    if x and y then
+      if x >= 90 and x <= 93 then
+        if y >= 93 and y <=95 then
+          biome = 'snowy'
+        end
+      end
+      if
+        ((x == 93 or x == 94) and y == 101)
+        or ((x >= 92 and x <= 94) and y == 102)
+        or ((x >= 91 and x <= 94) and (y >= 103 and y <= 106))
+      then
+        biome = 'grassland'
+      end
+      if x >= 102 and x <= 104 and y >= 105 and y <= 106 then
+        biome = 'tropical'
+      end
+    end
+    ---@type 'overworld' | 'snowy' | 'grassland' | 'tropical'
+    return biome
+  end,
+
+  ---@param self WeatherType
+  updateWeather = function(self)
+    if game.isWorldScreen() then
+
+      local biome = self:getBiome()
+
+      self.weatherIntensityTarget = 0
+      if biome == 'overworld' then
+        local w = self.weatherAnims.areas.overworld
+        if w.value < 0.1 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.4
+          self.weatherIntensityTarget = 1
+        elseif w.value < 0.15 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.0
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.0
+          self.weatherIntensityTarget = 0.5
+        elseif w.value < 0.17 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.0
+          self.cloudsOpacityTarget.l4 = 0.0
+          self.weatherIntensityTarget = 0.15
+        elseif w.value < 0.3 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.4
+        elseif w.value < 0.6 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.0
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.0
+        elseif w.value < 0.8 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.0
+        else
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.0
+          self.cloudsOpacityTarget.l4 = 0.0
+        end
+      elseif biome == 'snowy' then
+        local w = self.weatherAnims.areas.snowy
+        if w.value < 0.3 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.4
+          self.weatherIntensityTarget = 1
+        elseif w.value < 0.5 then
+          self.cloudsOpacityTarget.l1 = 0.4
+          self.cloudsOpacityTarget.l2 = 0.4
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.4
+          self.weatherIntensityTarget = 1
+        elseif w.value < 0.7 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.4
+          self.weatherIntensityTarget = 0.75
+        elseif w.value < 0.8 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.3
+          self.cloudsOpacityTarget.l4 = 0.0
+          self.weatherIntensityTarget = 0.5
+        elseif w.value < 0.9 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.0
+          self.cloudsOpacityTarget.l4 = 0.0
+          self.weatherIntensityTarget = 0.15
+        else
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.0
+          self.cloudsOpacityTarget.l3 = 0.0
+          self.cloudsOpacityTarget.l4 = 0.0
+        end
+      elseif biome == 'grassland' then
+        local w = self.weatherAnims.areas.grassland
+        if w.value < 0.4 then
+          self.cloudsOpacityTarget.l1 = 0.4
+          self.cloudsOpacityTarget.l2 = 0.4
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.4
+          self.weatherIntensityTarget = 1
+        elseif w.value < 0.8 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.4
+          self.weatherIntensityTarget = 1
+        elseif w.value < 0.9 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.4
+          self.weatherIntensityTarget = 0.3
+        else
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.4
+          self.cloudsOpacityTarget.l4 = 0.4
+        end
+      elseif biome == 'tropical' then
+        local w = self.weatherAnims.areas.tropical
+        if w.value < 0.4 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.0
+          self.cloudsOpacityTarget.l3 = 0.0
+          self.cloudsOpacityTarget.l4 = 0.0
+        elseif w.value < 0.9 then
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.0
+          self.cloudsOpacityTarget.l4 = 0.0
+        else
+          self.cloudsOpacityTarget.l1 = 0.3
+          self.cloudsOpacityTarget.l2 = 0.3
+          self.cloudsOpacityTarget.l3 = 0.0
+          self.cloudsOpacityTarget.l4 = 0.0
+          self.weatherIntensityTarget = 0.1
+        end
+      end
+    end
   end,
 
   ---gets wind direction of room in rads
@@ -293,6 +519,11 @@ Weather.functions = {
 
   ---@param self WeatherType
   unstoppable_update = function(self, dt)
+
+    if not game.isWorldScreen() then
+      self.weatherAnims.init = true
+    end
+
     if game.transitioning then
       if game.transitioning.firstFrame then
         -- Create weather effects
@@ -370,6 +601,64 @@ Weather.functions = {
 
   ---@param self WeatherType
   update = function (self, dt)
+
+    -- Refresh areas weather
+    for _,v in pairs(self.weatherAnims.areas) do
+      v.duration = v.duration - session.delta_hours
+      if v.duration <= 0 then
+        v.value = love.math.random()
+        v.duration = 1 + love.math.random() * 24
+      end
+    end
+
+    self:updateWeather()
+
+    -- Gradually move to new cloud opacity
+    for l, c in pairs(self.clouds) do
+      local target = self.cloudsOpacityTarget[l]
+      if type(target) == 'number' then
+        if c.opacity > target then
+          c.opacity = c.opacity - session.delta_hours
+          if c.opacity < target then
+            c.opacity = target
+          end
+        elseif c.opacity < target then
+          c.opacity = c.opacity + session.delta_hours
+          if c.opacity > target then
+            c.opacity = target
+          end
+        end
+      end
+    end
+
+    -- Gradually move to rain/snow intensity
+    local biome = self:getBiome()
+    fuck = biome
+    local rit = biome == 'snowy' and 0 or self.weatherIntensityTarget
+    local sit = biome ~= 'snowy' and 0 or self.weatherIntensityTarget
+    if self.rainIntensity > rit then
+      self.rainIntensity = self.rainIntensity - session.delta_hours
+      if self.rainIntensity < rit then
+        self.rainIntensity = rit
+      end
+    elseif self.rainIntensity < rit then
+      self.rainIntensity = self.rainIntensity + session.delta_hours
+      if self.rainIntensity > rit then
+        self.rainIntensity = rit
+      end
+    end
+    if self.snowIntensity > sit then
+      self.snowIntensity = self.snowIntensity - session.delta_hours
+      if self.snowIntensity < sit then
+        self.snowIntensity = sit
+      end
+    elseif self.snowIntensity < sit then
+      self.snowIntensity = self.snowIntensity + session.delta_hours
+      if self.snowIntensity > sit then
+        self.snowIntensity = sit
+      end
+    end
+
     -- Clouds
     local vx, vy = self:getWindVelocity()
     for _, l in pairs(self:getCloudLayers()) do
@@ -395,9 +684,6 @@ Weather.functions = {
     end
 
     --Rain
-
-    -- TEMP
-    self.rainIntensity = 0
 
     local activeRaindrops = 0
     local maxRaindrops = math.floor(self.rainIntensity * #self.raindrops)
@@ -444,16 +730,16 @@ Weather.functions = {
     -- Only draw weather in world screen
     if not game.isWorldScreen() then return end
 
-    drawNoise()
+    -- drawNoise()
 
-    -- local ls = self:getCloudLayers()
-    -- for _, l in pairs(ls) do
-    --   for _, cloud in ipairs(l.clouds) do
-    --     for _, part in ipairs(cloud.shape) do
-    --       drawCloud(l, cloud, cloud.x + part.x, cloud.y + part.y)
-    --     end
-    --   end
-    -- end
+    local ls = self:getCloudLayers()
+    for _, l in pairs(ls) do
+      for _, cloud in ipairs(l.clouds) do
+        for _, part in ipairs(cloud.shape) do
+          drawCloud(l, cloud, cloud.x + part.x, cloud.y + part.y)
+        end
+      end
+    end
 
     local vx = self:getWindVelocity()
 
@@ -511,25 +797,25 @@ Weather.functions = {
   ---@param self WeatherType
   trans_draw = function(self)
 
-    if (game.wasWorldScreen() and game.isWorldScreen()) then
-      drawNoise(nil)
-    elseif (game.wasWorldScreen() and not game.isWorldScreen()) then
-      drawNoise(1 - game.transitioning.progress)
-    elseif (not game.wasWorldScreen() and game.isWorldScreen()) then
-      drawNoise(game.transitioning.progress)
-    end
+    -- if (game.wasWorldScreen() and game.isWorldScreen()) then
+    --   drawNoise(nil)
+    -- elseif (game.wasWorldScreen() and not game.isWorldScreen()) then
+    --   drawNoise(1 - game.transitioning.progress)
+    -- elseif (not game.wasWorldScreen() and game.isWorldScreen()) then
+    --   drawNoise(game.transitioning.progress)
+    -- end
 
     if game.wasWorldScreen() then
-      -- local ls = self:getOutgoingCloudLayers()
-      -- for _, l in pairs(ls) do
-      --   for _, cloud in ipairs(l.clouds) do
-      --     for _, part in ipairs(cloud.shape) do
-      --       local x, y = cloud.x + part.x, cloud.y + part.y
-      --       x, y = transitions.transform(x, y)
-      --       drawCloud(l, cloud, x, y)
-      --     end
-      --   end
-      -- end
+      local ls = self:getOutgoingCloudLayers()
+      for _, l in pairs(ls) do
+        for _, cloud in ipairs(l.clouds) do
+          for _, part in ipairs(cloud.shape) do
+            local x, y = cloud.x + part.x, cloud.y + part.y
+            x, y = transitions.transform(x, y)
+            drawCloud(l, cloud, x, y)
+          end
+        end
+      end
 
       -- Rain
       for _, drop in ipairs(self.outgoingRaindrops) do
@@ -551,16 +837,16 @@ Weather.functions = {
 
     if not game.isWorldScreen() then return end
 
-    -- local ls = self:getCloudLayers()
-    -- for _, l in pairs(ls) do
-    --   for _, cloud in ipairs(l.clouds) do
-    --     for _, part in ipairs(cloud.shape) do
-    --       local x, y = cloud.x + part.x, cloud.y + part.y
-    --       x, y = transitions.transform(x, y, true)
-    --       drawCloud(l, cloud, x, y)
-    --     end
-    --   end
-    -- end
+    local ls = self:getCloudLayers()
+    for _, l in pairs(ls) do
+      for _, cloud in ipairs(l.clouds) do
+        for _, part in ipairs(cloud.shape) do
+          local x, y = cloud.x + part.x, cloud.y + part.y
+          x, y = transitions.transform(x, y, true)
+          drawCloud(l, cloud, x, y)
+        end
+      end
+    end
 
     -- Rain
     for _, drop in ipairs(self.raindrops) do
@@ -583,6 +869,7 @@ Weather.functions = {
 
 ---@class WeatherType : WeatherMethods
 ---@field clouds table<string, CloudLayer>
+---@field cloudsOpacityTarget CloudsOpacityTarget
 ---@field outgoingClouds table<string, CloudLayer> | nil
 ---@field windDir number | nil
 ---@field windSpeed number | nil
@@ -590,6 +877,29 @@ Weather.functions = {
 ---@field raindrops table<number, Raindrop>
 ---@field outgoingRaindrops table<number, Raindrop>
 ---@field rainIntensity number
+---@field snowIntensity number
+---@field weatherIntensityTarget number
+---@field weatherAnims WeatherAnims
+
+---@class CloudsOpacityTarget
+---@field l1 number between 0 - 1
+---@field l2 number between 0 - 1
+---@field l3 number between 0 - 1
+---@field l4 number between 0 - 1
+
+---@class Area
+---@field value number random between 0 - 1, determines weather
+---@field duration number number of in game hours current weather lasts
+
+---@class Areas
+---@field overworld Area
+---@field grassland Area
+---@field snowy Area
+---@field tropical Area
+
+---@class WeatherAnims
+---@field areas Areas
+---@field init? boolean if true area values will be initialized by current clouds opacity
 
 ---@class CloudLayer
 ---@field clouds Cloud[]

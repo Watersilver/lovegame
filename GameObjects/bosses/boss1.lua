@@ -218,7 +218,7 @@ local states = {
       -- wihch means I was moving LEFT. The opposite for -1
       if instance.orbAttacksNumber == 1 and ((i == rr and instance.patrolDir == 1) or (i == 1 and instance.patrolDir == -1)) then
         -- create liftable orb
-        liftableOrb = b1fo:new{
+        local liftableOrb = b1fo:new{
           xstart = i * tw + tw - tw * 0.5,
           -- Many free spots. (Commented out is old one free spot)
           -- ystart = freeSpot * tw + tw * 3 - tw * 0.5,

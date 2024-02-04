@@ -37,7 +37,7 @@ function game.wasWorldScreen()
 end
 
 ---@param prev? boolean
-function game.getRoomGlobalCoords(prev)
+function game.getRoomCoords(prev)
   if not game.room then return nil end
   local roomName = session.latestVisitedRooms and (
     prev
@@ -47,12 +47,20 @@ function game.getRoomGlobalCoords(prev)
   if not roomName then return nil end
   local i, j = string.find(roomName, "w%d+x%d+%a?")
   if not i then return nil end
-  roomName = string.gsub(roomName, i, j)
+  roomName = string.sub(roomName, i, j)
   local x = string.sub(roomName, string.find(roomName, "%d+"))
   roomName = string.gsub(roomName, x, "", 1)
   local y = string.sub(roomName, string.find(roomName, "%d+"))
 
-  return (tonumber(x) - 90) * 512, (tonumber(y) - 95) * 512
+  return tonumber(x), tonumber(y)
+end
+
+---@param prev? boolean
+function game.getRoomGlobalCoords(prev)
+  if not game.room then return nil end
+  local x, y = game.getRoomCoords(prev)
+
+  return x and ((tonumber(x) - 90) * 512), y and ((tonumber(y) - 95) * 512)
 end
 
 function game.pause(pauser)

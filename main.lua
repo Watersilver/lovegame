@@ -171,6 +171,7 @@ session = {
     session.timescale = 1
     session.latestVisitedRooms = u.newQueue(GCON.rtr)
     session.deadEnemies = u.newFastAccessQueue(20)
+    session.delta_hours = 0
 
     -- add global objects
     session.particles = globs.particles:new()
@@ -207,6 +208,9 @@ session = {
     end
   end,
   updateTime = function(hoursPassed)
+
+    session.delta_hours = hoursPassed
+
     local preUpdate = session.checkTimeOfDayForMusic()
 
     session.save.time = session.save.time + hoursPassed
