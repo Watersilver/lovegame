@@ -20,7 +20,7 @@ local function squareGradient(side, kwargs)
     return (kwargs.r or 1) * alpha, (kwargs.g or 1) * alpha, (kwargs.b or 1) * alpha, alpha
   end)
 
-  return {img = love.graphics.newImage(data), centerOffset = side * 0.5}
+  return {img = love.graphics.newImage(data), centerOffset = side * 0.5, type = "drawn"}
 end
 
 ---@param layers {r: number; a: number}[]
