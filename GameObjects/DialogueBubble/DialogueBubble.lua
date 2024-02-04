@@ -91,6 +91,7 @@ local resize = {
     -- k = ln(self.targetHeight) / dur =>
     -- h targetWidth
     -- Ta gamhsa ola edw anti na pollaplasiasw me dt stis diaforikes...
+    -- TODO: fix the whole bouncyness thing because it changes behaviour depending on dt
     local k = dt * logthdivdur
 
     -- dampingRatio ζ = c / 2 * sqrt(k*m) if >= 1 it's overdamped

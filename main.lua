@@ -926,7 +926,7 @@ function love.update(dt)
 	dt = math.min(GCON.MAX_DT, dt)
 
   if session.sleeping_danger then
-    dt = dt * 10
+    dt = 0.1
   end
 
   delta_time = dt
@@ -1146,6 +1146,7 @@ function love.update(dt)
 
     -- Update time
     if not game.room.timeDoesntPass then
+      local m = session.sleeping_danger and 0.2 or 0.08333
       -- dt * 0.08333 = ocarina of time
       session.updateTime(dt * 0.08333 * session.timescale)
       -- fuck = session.save.time

@@ -3,6 +3,7 @@ local shdrs = require "Shaders.shaders"
 local altSkins = require "altSkins"
 local snd = require "sound"
 local inv = require "inventory"
+local game= require "game"
 
 local function forceCloseInv()
   if inv.isOpen() then session.forceCloseInv = true end
@@ -171,7 +172,8 @@ items.keyBedroll = {
   use = function()
     if pl1 then
       if pl1.movement_state.state == "normal" and
-      pl1.animation_state.state:find("still")
+      pl1.animation_state.state:find("still") and
+      not game.room.timeDoesntPass
       then
         forceCloseInv()
         session.usedItemComment = ""
@@ -186,6 +188,8 @@ items.keyBedroll = {
         -- elseif
         if pl1.animation_state.state == 'sleeping' then
           session.usedItemComment = "You're already using that."
+        elseif game.room.timeDoesntPass then
+          session.usedItemComment = "Can't do that here."
         else
           session.usedItemComment = "You must stand idle to do that."
         end

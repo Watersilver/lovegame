@@ -24,7 +24,9 @@ function NPC.initialize(instance)
   instance.lights = {
     {
       type = "owlStatue",
-      rgba = {r = 0, g = 0.5, b = 1, a = 1}
+      rgba = {r = 0, g = 0.5, b = 1, a = 1},
+      x = instance.xstart,
+      y = instance.ystart
     }
   }
 
