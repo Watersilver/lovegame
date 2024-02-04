@@ -172,6 +172,7 @@ session = {
     session.latestVisitedRooms = u.newQueue(GCON.rtr)
     session.deadEnemies = u.newFastAccessQueue(20)
     session.delta_hours = 0
+    session.sleeping_danger = false
 
     -- add global objects
     session.particles = globs.particles:new()
@@ -916,12 +917,17 @@ function love.update(dt)
   Pointer.left.update()
   Pointer.right.update()
 
-  delta_time = dt
-
   -- Run async functions before messing with the timeflow (dt)
   async.realTimeUpdate(dt)
 
 	dt = math.min(0.03333333, dt)
+
+  if session.sleeping_danger then
+    dt = dt * 5
+  end
+
+  delta_time = dt
+
   local drugSlomo
   if session.drug then drugSlomo = session.drug.slomo end
   dt = dt * (drugSlomo or session.ringSlomo or 1)

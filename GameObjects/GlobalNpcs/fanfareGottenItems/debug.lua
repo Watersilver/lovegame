@@ -26,6 +26,7 @@ local itemGetFunc = function ()
   session.addItem("ringTimeflow")
   session.addItem("ringRainbow")
   session.addItem("keyLyre")
+  session.addItem("keyBedroll")
   for _ = 1, 22 do
     session.addItem("mateMagicDust")
     session.addItem("mateBlastSeed")

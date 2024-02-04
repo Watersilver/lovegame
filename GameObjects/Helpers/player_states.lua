@@ -744,7 +744,7 @@ player_states.start_sprintcharge = function(instance, dt, side)
   instance.image_speed = 0.3
   instance.sprintCharge = 0.5
 
-  if instance.speed > 185 then
+  if instance.speed > 110 then
     instance.sprintCharge = -1
   end
 end

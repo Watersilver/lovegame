@@ -163,15 +163,37 @@ items.testi2 = {
 }
 
 -- Key
--- items.keySpellbook = {
---   name = "Spellbook",
---   description =
---   "A Book on how to use\n\z
---   focuses to control\n\z
---   the effects of the\n\z
---   magic dust.",
---   limit = 1
--- }
+items.keyBedroll = {
+  name = "Bedroll",
+  description =
+  "Unroll and sleep, simple as that!",
+  limit = 1,
+  use = function()
+    if pl1 then
+      if pl1.movement_state.state == "normal" and
+      pl1.animation_state.state:find("still")
+      then
+        forceCloseInv()
+        session.usedItemComment = ""
+        session.usedItemComment = nil
+        if pl1 then
+          pl1.movement_state:change_state(pl1, "noDt", "stand_still")
+          pl1.animation_state:change_state(pl1, "noDt", "sleeping")
+        end
+      else
+        -- if not game.isWorldScreen() then
+        --   session.usedItemComment = "Can only use that in overworld."
+        -- elseif
+        if pl1.animation_state.state == 'sleeping' then
+          session.usedItemComment = "You're already using that."
+        else
+          session.usedItemComment = "You must stand idle to do that."
+        end
+        return "error"
+      end
+    end
+  end
+}
 
 items.keyLyre = {
   name = "Lyre",

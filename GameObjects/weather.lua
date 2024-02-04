@@ -633,7 +633,6 @@ Weather.functions = {
 
     -- Gradually move to rain/snow intensity
     local biome = self:getBiome()
-    fuck = biome
     local rit = biome == 'snowy' and 0 or self.weatherIntensityTarget
     local sit = biome ~= 'snowy' and 0 or self.weatherIntensityTarget
     if self.rainIntensity > rit then

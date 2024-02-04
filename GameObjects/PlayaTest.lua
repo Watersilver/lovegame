@@ -1574,6 +1574,63 @@ local animation_states = {
   },
 
 
+  sleeping = {
+  run_state = function(instance, dt)
+    instance.sleep_time = instance.sleep_time - session.delta_hours
+
+    if instance.sprite ~= im.sprites["Witch/die"] then
+      for k, v in pairs(instance.input) do
+        if
+          instance.sleep_time < 0
+          or (
+            v == 1
+            and k ~= 'start'
+            and k ~= 1
+            and k ~= 2
+            and k ~= 3
+            and k ~= 4
+            and k ~= 5
+            and k ~= 6
+            and k ~= 7
+            and k ~= 8
+            and k ~= 9
+            and k ~= 10
+          )
+          then
+            print(k)
+          instance.sprite = im.sprites["Witch/die"]
+          instance.image_speed = 0.1
+          instance.image_index = 0
+          session.sleeping_danger = false
+        end
+      end
+    end
+  end,
+
+  check_state = function(instance, dt)
+    local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+    if pddp(instance, trig, 'down', dt) then
+      instance.movement_state:change_state(instance, dt, "normal")
+    elseif instance.sprite == im.sprites["Witch/die"] and trig.animation_end then
+      instance.animation_state:change_state(instance, dt, "downstill")
+      instance.movement_state:change_state(instance, dt, "normal")
+    end
+  end,
+
+  start_state = function(instance, dt)
+    instance.sleep_time = 10
+    session.sleeping_danger = true
+  end,
+
+  end_state = function(instance, dt)
+    session.sleeping_danger = false
+    if instance.sleep_time < 0 then
+      instance:addHealth(1)
+    end
+  end
+  },
+
+
   downmark = {
   run_state = function(instance, dt)
     instance.markanim = instance.markanim - dt
