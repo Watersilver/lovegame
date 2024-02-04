@@ -5,7 +5,7 @@ local function square(side, centerOffset)
   local data = love.image.newImageData(side, side)
 
   data:mapPixel(function()
-    return COLORCONST,COLORCONST,COLORCONST,COLORCONST
+    return 1,1,1,1
   end)
 
   return {img = love.graphics.newImage(data), centerOffset = centerOffset or 0, type = "drawn"}
@@ -16,7 +16,7 @@ local function squareGradient(side, kwargs)
   kwargs = kwargs or {}
 
   data:mapPixel(function(x, y)
-    local alpha = (1 - 3 / (y + 3)) * (kwargs.a or 1) * COLORCONST
+    local alpha = (1 - 3 / (y + 3)) * (kwargs.a or 1)
     return (kwargs.r or 1) * alpha, (kwargs.g or 1) * alpha, (kwargs.b or 1) * alpha, alpha
   end)
 
@@ -64,12 +64,12 @@ local function radGrad(layers)
         local pair = pairs[i]
         if dist > pair.rmin then
           local alpha = pair.astart - pair.avar * (dist - pair.rmin) / (pair.rdiff)
-          return alpha * COLORCONST, alpha * COLORCONST, alpha * COLORCONST, alpha * COLORCONST
+          return alpha, alpha, alpha, alpha
         end
       end
 
       -- smaller than first
-      return first.a * COLORCONST, first.a * COLORCONST, first.a * COLORCONST, first.a * COLORCONST
+      return first.a, first.a, first.a, first.a
     end
   )
 

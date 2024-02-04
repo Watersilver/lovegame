@@ -14,8 +14,6 @@ local floor = math.floor
 
 local NPC = {}
 
-local cc = COLORCONST
-
 local function typical_activate(self, dt, textIndex)
   dlg.simpleWallOfText.setUp(
     self.myText[textIndex],
@@ -30,7 +28,7 @@ local function typical_activate(self, dt, textIndex)
 end
 
 local myText = {
-  {{{cc,cc*0.5,cc*0.5,cc}, "Up & down arrow keys to read textbox.\n", {cc,cc,cc,cc},"Default controls (changeable in main menu):\n-arrow keys: movement\n-a,s,d,z,x,c: spell slots\n-space: inventory/pause\nOther controls (Not changeable): \n-arrow keys: navigate main menu/dialogue/inventory\n-enter: accept/activate/choose\n-escape: back(main menu)\n-F11: fullscreen on/off"},-1, "left"},
+  {{{1,0.5,0.5,1}, "Up & down arrow keys to read textbox.\n", {1,1,1,1},"Default controls (changeable in main menu):\n-arrow keys: movement\n-a,s,d,z,x,c: spell slots\n-space: inventory/pause\nOther controls (Not changeable): \n-arrow keys: navigate main menu/dialogue/inventory\n-enter: accept/activate/choose\n-escape: back(main menu)\n-F11: fullscreen on/off"},-1, "left"},
 }
 
 local activateFuncs = {}

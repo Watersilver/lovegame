@@ -32,9 +32,9 @@ local dlgBoxBorderW = 25
 -- Functions to be used in dialogue.simpleWallOfText
 local function simpleWallOfTextDraw(l,t,w,h)
   local pr, pg, pb, pa = love.graphics.getColor()
-  love.graphics.setColor(0, 0, 0, COLORCONST)
+  love.graphics.setColor(0, 0, 0, 1)
   love.graphics.rectangle("fill", l-1, t-1, w+1, h+1)
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  love.graphics.setColor(1, 1, 1, 1)
   -- setFont(dialogue.font) -- Use if dialogue text ISN'T text object
   love.graphics.draw(
     dialogue.text, -- Text or ColouredText (rgbtable1, text1, ...etc)
@@ -48,25 +48,25 @@ local function simpleWallOfTextDraw(l,t,w,h)
     dialogue.xshear, -- Shearing factor (x-axis) (Can be used for italics)
     dialogue.yshear) -- Shearing factor (y-axis)
   -- setFont(font.default) -- Use if dialogue text ISN'T text object
-  love.graphics.setColor(0, 0, 0, COLORCONST)
+  love.graphics.setColor(0, 0, 0, 1)
   love.graphics.rectangle("fill", l-1, t-1, w+1, dlgBoxBorderH)
   love.graphics.rectangle("fill", l-1, t+h-dlgBoxBorderH, w+1, dlgBoxBorderH)
 
   local xsh, ysh -- Shape coordinates
   -- Arrows
   -- Downarrow
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, dialogue.downArrowAlpha)
+  love.graphics.setColor(1, 1, 1, dialogue.downArrowAlpha)
   local xsh = l+w*0.98
   local ysh = t+h*0.7
   love.graphics.polygon("fill", xsh, ysh, xsh+5, ysh-5, xsh-5, ysh-5)
   -- Uparrow
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, dialogue.upArrowAlpha)
+  love.graphics.setColor(1, 1, 1, dialogue.upArrowAlpha)
   xsh = l+w*0.98
   ysh = t+h*0.3
   love.graphics.polygon("fill", xsh, ysh-5, xsh+5, ysh, xsh-5, ysh)
 
   if dialogue.canSkip then
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    love.graphics.setColor(1, 1, 1, 1)
     xsh = l+w*0.98
     ysh = t+h*0.93
     love.graphics.circle("fill", xsh, ysh, dialogue.skipButtonRadius)
@@ -80,18 +80,18 @@ dialogue.simpleWallOfText ={
     if inp.up then dialogue.y = dialogue.y + dt * 60 end
     if inp.down then dialogue.y = dialogue.y - dt * 60 end
     dialogue.canSkip = false
-    dialogue.upArrowAlpha = COLORCONST
-    dialogue.downArrowAlpha = COLORCONST
+    dialogue.upArrowAlpha = 1
+    dialogue.downArrowAlpha = 1
     dialogue.counter = dialogue.counter + dt * 5
     dialogue.skipButtonRadius = 3+0.2*sin(dialogue.counter)
     if dialogue.y + dialogue.height <= tb.h-dlgBoxBorderH then
       dialogue.y = tb.h-dlgBoxBorderH-dialogue.height
       dialogue.canSkip = true
-      dialogue.downArrowAlpha = COLORCONST * 0.1
+      dialogue.downArrowAlpha = 0.1
     end
     if dialogue.y >= dialogue.ystart then
       dialogue.y = dialogue.ystart
-      dialogue.upArrowAlpha = COLORCONST * 0.1
+      dialogue.upArrowAlpha = 0.1
     end
     if dialogue.canSkip and inp.enterPressed then
       dialogue.enabled = false
@@ -159,19 +159,19 @@ dialogue.simpleBinaryChoice = {
     local pr, pg, pb, pa = love.graphics.getColor()
     local ts = sh.get_total_scale()
     local cbl, cbt, cbw, cbh = l+w*0.3, t+h*0.95, w*0.4, h*0.05 -- choice box
-    local choiceAlpha = 0.3 * COLORCONST
+    local choiceAlpha = 0.3
     if dialogue.canSkip then
-      choiceAlpha = COLORCONST
+      choiceAlpha = 1
     end
     -- choice box
     love.graphics.setColor(0, 0, 0, choiceAlpha)
     love.graphics.rectangle("fill", cbl, cbt-1, cbw, cbh)
     -- cursor box
-    love.graphics.setColor(0, COLORCONST*0.2, COLORCONST, choiceAlpha)
+    love.graphics.setColor(0, 0.2, 1, choiceAlpha)
     local halfw = cbw * 0.5
     love.graphics.rectangle("line", cbl+dialogue.cursor * halfw, cbt-1, halfw, cbh)
     -- choice text
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, choiceAlpha)
+    love.graphics.setColor(1, 1, 1, choiceAlpha)
     love.graphics.draw(
       dialogue.choiceL, -- Text or ColouredText (rgbtable1, text1, ...etc)
       cbl+cbw*0.02, -- x

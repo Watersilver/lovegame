@@ -179,7 +179,7 @@ function ps.shapes.edgeToTiles(instance)
     instance.body:setMass(pp.mass or 40)
     instance.body:setLinearDamping(pp.linearDamping or 40)
 ---@diagnostic disable-next-line: undefined-field
-    for _, fixture in ipairs(instance.body:getFixtureList()) do
+    for _, fixture in ipairs(instance.body:getFixtures()) do
       fixture:setRestitution(pp.restitution or 0)
     end
   end

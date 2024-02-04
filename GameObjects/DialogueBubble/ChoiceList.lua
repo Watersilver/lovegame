@@ -191,7 +191,7 @@ ChoiceList.functions = {
   drawCursor = function (self, x, y, a)
     a = a or 1
     local w2 = self.font:getWidth(self.choices[self.cursor]) * self.scale * 0.5 + self.padding * 0.7
-    u.changeColour{"red", a = a * COLORCONST}
+    u.changeColour{"red", a = a}
     love.graphics.polygon("fill",
       x - w2, y,
       x - (w2 + 2), y - 2,
@@ -207,7 +207,7 @@ ChoiceList.functions = {
   drawChoice = function (self, x, y, index, scaleMod, alphaMod, sear)
     local choice = self.choices[index]
     local s = self.scale * (scaleMod or 1)
-    local alpha = COLORCONST * (alphaMod or 1)
+    local alpha = (alphaMod or 1)
     -- local w = self.font:getWidth(choice) * s
     -- local h = self.font:getHeight() * s
     local w = self.font:getWidth(choice) * s

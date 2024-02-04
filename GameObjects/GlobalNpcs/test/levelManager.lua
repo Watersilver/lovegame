@@ -13,14 +13,12 @@ local floor = math.floor
 
 local NPC = {}
 
-local cc = COLORCONST
-
 local myText = {
-  {{{cc,cc,cc,cc},"I am the Level Manager."},-1, "left"},
-  {{{cc,cc,cc,cc},"I can raise the level of everything upgradable on you by 1."},-1, "left"},
-  {{{cc,cc,cc,cc},"If you're level 3, it'll reset to 0."},-1, "left"},
-  {{{cc,cc,cc,cc},"Done!"},-1, "left"},
-  {{{cc,cc,cc,cc},"All right then..."},-1, "left"}
+  {{{1,1,1,1},"I am the Level Manager."},-1, "left"},
+  {{{1,1,1,1},"I can raise the level of everything upgradable on you by 1."},-1, "left"},
+  {{{1,1,1,1},"If you're level 3, it'll reset to 0."},-1, "left"},
+  {{{1,1,1,1},"Done!"},-1, "left"},
+  {{{1,1,1,1},"All right then..."},-1, "left"}
 }
 
 local activateFuncs = {}

@@ -50,7 +50,7 @@ Go.functions = {
     -- Store Colour
     local r, g, b, a = love.graphics.getColor()
 
-    love.graphics.setColor(COLORCONST, COLORCONST*0.3, COLORCONST*0.1, COLORCONST*0.7)
+    love.graphics.setColor(1, 0.3, 0.1, 0.7)
     love.graphics.draw(self.text2, drawx, drawy, 0, self.text2size)
 
     -- Restore Colour

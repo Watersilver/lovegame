@@ -117,7 +117,8 @@ end,
 load = function (self)
   self.image_speed = 0
   if not self.height then
-    love.errhand("No height set: Edge at " .. self.x .. "/" .. self.y)
+    ---@diagnostic disable-next-line: undefined-field
+    love.errorhandler("No height set: Edge at " .. self.x .. "/" .. self.y)
     self.height = 0
   end
   if self.side == "left" then

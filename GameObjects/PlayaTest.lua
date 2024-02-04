@@ -1596,8 +1596,7 @@ local animation_states = {
             and k ~= 9
             and k ~= 10
           )
-          then
-            print(k)
+        then
           instance.sprite = im.sprites["Witch/die"]
           instance.image_speed = 0.1
           instance.image_index = 0
@@ -2978,15 +2977,15 @@ Playa.functions = {
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --
-    -- love.graphics.setColor(COLORCONST, self.db.downcol, self.db.downcol, COLORCONST)
+    -- love.graphics.setColor(1, self.db.downcol, self.db.downcol, 1)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.downfixture:getShape():getPoints()))
-    -- love.graphics.setColor(COLORCONST, self.db.upcol, self.db.upcol, COLORCONST)
+    -- love.graphics.setColor(1, self.db.upcol, self.db.upcol, 1)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.upfixture:getShape():getPoints()))
-    -- love.graphics.setColor(COLORCONST, self.db.leftcol, self.db.leftcol, COLORCONST)
+    -- love.graphics.setColor(1, self.db.leftcol, self.db.leftcol, 1)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.leftfixture:getShape():getPoints()))
-    -- love.graphics.setColor(COLORCONST, self.db.rightcol, self.db.rightcol, COLORCONST)
+    -- love.graphics.setColor(1, self.db.rightcol, self.db.rightcol, 1)
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.rightfixture:getShape():getPoints()))
-    -- love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    -- love.graphics.setColor(1, 1, 1, 1)
   end,
 
   holdingDirectionalKey = function(self)

@@ -34,7 +34,7 @@ local prevMasterVolume = snd.getMasterVolume()
 ---@param newVol number
 function snd.setMasterVolume(newVol)
   ---@diagnostic disable-next-line: undefined-field
-  if type(newVol) ~= 'number' then love.errhand("newVol wasn't number") end
+  if type(newVol) ~= 'number' then love.errorhandler("newVol wasn't number") end
 
   prevMasterVolume = snd.getMasterVolume()
   gs.master_volume = newVol
@@ -310,8 +310,10 @@ function snd.bgmV2:update(dt)
       fadeToVolume(self.source, self.current.targetVolume * snd.getMasterVolume(), self.current.fadeSpeed, dt)
     elseif not self.source:isPlaying() and self.source.shouldBeLooping and self.source.shouldBePlaying then
       -- Hatchet job but fixes looping main stopping for no reason....
-      self.source.main:rewind()
-      self.source.main:play()
+      -- self.source.main:rewind()
+      -- self.source.main:play()
+      self.source:seek(0)
+      self.source:play()
     end
   else
     self.source:setVolume(0)

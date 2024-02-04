@@ -16,12 +16,10 @@ local floor = math.floor
 
 local NPC = {}
 
-local cc = COLORCONST
-
 -- write the text
 local myText = {
-  {{{cc,cc,cc,cc},"Auto."},-1, "left"},
-  {{{cc,cc,cc,cc},"Activated!"},-1, "left"}
+  {{{1,1,1,1},"Auto."},-1, "left"},
+  {{{1,1,1,1},"Activated!"},-1, "left"}
 }
 
 -- do the funcs

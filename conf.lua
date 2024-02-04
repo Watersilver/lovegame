@@ -1,6 +1,6 @@
 function love.conf(t)
   t.identity = "Mage"
-  t.window.vsync = true
+  t.window.vsync = 1
   t.window.highdpi = false
   t.window.fullscreentype = "desktop"
   t.window.fullscreen = false

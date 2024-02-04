@@ -144,8 +144,7 @@ local states = {
   run_state = function(instance, dt)
   end,
   start_state = function(instance, dt)
-    local cc = COLORCONST
-    local ctable = {cc * 0.4,cc,cc * 0.6,cc}
+    local ctable = {0.4,1,0.6,1}
     local myText = {
       {{ctable,"Arrow keys to move."},-1, "left"},
       {{ctable,"Spacebar, Escape, and Backspace pause the game and open the in-game menu."},-1, "left"},

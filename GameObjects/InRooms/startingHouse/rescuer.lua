@@ -39,8 +39,7 @@ local initHook = function(dlgControl, dt)
   -- Check if I have to make tutorial box
   if dlgControl.speechIndicator then
     -- write the text
-    local cc = COLORCONST
-    local ctable = {cc * 0.4,cc,cc * 0.6,cc}
+    local ctable = {0.4,1,0.6,1}
     local myText = {
       {{ctable,"Press Enter to advance text in textboxes."},-1, "left"},
       {{ctable,"Also press Enter to interact with interactive stuff in the world."},-1, "left"},

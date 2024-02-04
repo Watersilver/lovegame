@@ -13,13 +13,11 @@ local floor = math.floor
 
 local NPC = {}
 
-local cc = COLORCONST
-
 local myText = {
-  {{{cc,cc,cc,cc},"Hey there. I am the Spell Giver!"},-1, "left"},
-  {{{cc,cc,cc,cc},"Wanna learn all spells?"}, -1, "left"},
-  {{{cc,cc,cc,cc},"Done!"},-1, "left"},
-  {{{cc,cc,cc,cc},"Suit yourself."},-1, "left"}
+  {{{1,1,1,1},"Hey there. I am the Spell Giver!"},-1, "left"},
+  {{{1,1,1,1},"Wanna learn all spells?"}, -1, "left"},
+  {{{1,1,1,1},"Done!"},-1, "left"},
+  {{{1,1,1,1},"Suit yourself."},-1, "left"}
 }
 
 local activateFuncs = {}

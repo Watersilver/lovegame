@@ -236,10 +236,10 @@ local function drawSourceOnCanvas(sources, canvas)
     local type = sourceTypes[light.type]
     light.rgba = light.rgba or {r=1,g=1,b=1,a=1}
     u.changeColour({
-      r = ((light.rgba.r * COLORCONST) or COLORCONST) * light.rgba.a,
-      g = ((light.rgba.g * COLORCONST) or COLORCONST) * light.rgba.a,
-      b = ((light.rgba.b * COLORCONST) or COLORCONST) * light.rgba.a,
-      a = (light.rgba.a * COLORCONST) or COLORCONST
+      r = ((light.rgba.r) or 1) * light.rgba.a,
+      g = ((light.rgba.g) or 1) * light.rgba.a,
+      b = ((light.rgba.b) or 1) * light.rgba.a,
+      a = (light.rgba.a) or 1
     })
     local resetColor = u.storeColour()
     if type then

@@ -18,11 +18,10 @@ local function hsl(h, s, l, a)
 end
 
 if love.getVersion() < 11 then
-  COLORCONST = 255
+---@diagnostic disable-next-line: undefined-field
   verh.fileExists = love.filesystem.exists
   HSL = hsl
 else
-  COLORCONST = 1
   verh.fileExists = love.filesystem.getInfo
   HSL = function(h, s, l, a)
     local r, g, b, a = hsl(h * 255, s * 255, l * 255, a * 255)

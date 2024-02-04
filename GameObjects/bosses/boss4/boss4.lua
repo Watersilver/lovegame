@@ -670,7 +670,7 @@ Boss4.functions = {
 
       self.content = dialogue[self.content_index]
       self.ssbStayOnScreen = true
-      self.ssbRGBA = {COLORCONST, 0, 0, COLORCONST}
+      self.ssbRGBA = {1, 0, 0, 1}
 
       if self.cutsceneland and self.speaker ~= self.ball then
         self.ssbPosition = "up"

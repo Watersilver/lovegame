@@ -138,13 +138,9 @@ HeldSword.functions = {
       self.chargedShaderPhase = self.chargedShaderPhase + dt
       if self.chargedShaderPhase > self.chargedShaderFreq then
         self.chargedShaderPhase = self.chargedShaderPhase - self.chargedShaderFreq
-        local randHue = COLORCONST * love.math.random()
-        local r1, g1, b1, a = HSL(randHue, 1 * COLORCONST, 0.5 * COLORCONST, COLORCONST)
-        local r2, g2, b2, a = HSL(randHue, 1 * COLORCONST, 0.75 * COLORCONST, COLORCONST)
-        local ccInv = 1 / COLORCONST
-        r1, g1, b1, r2, g2, b2 =
-        r1 * ccInv, g1 * ccInv, b1 * ccInv,
-        r2 * ccInv, g2 * ccInv, b2 * ccInv
+        local randHue = love.math.random()
+        local r1, g1, b1 = HSL(randHue, 1, 0.5, 1)
+        local r2, g2, b2, a = HSL(randHue, 1, 0.75, 1)
         if self.chargedShader then
           self.chargedShader:send("rgb", r1, g1, b1, r2, g2, b2, a)
         end

@@ -122,7 +122,7 @@ local function change_game_settings(menuHandler)
   -- Overwrite game_settings file
   local success = love.filesystem.write("game_settings.lua", "local gs = {}\n")
 ---@diagnostic disable-next-line: undefined-field
-  if not success then love.errhand("Failed to write game_settings first line") end
+  if not success then love.errorhandler("Failed to write game_settings first line") end
   -- Variable to store string to be written
   local game_settings_body = ""
   for setting, value in pairs(menuHandler.tempGs) do
@@ -135,14 +135,15 @@ local function change_game_settings(menuHandler)
     game_settings_body = game_settings_body .. "gs." .. setting .. " = " .. value .. "\n"
   end
   success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
-  if not success then love.errhand("Failed to write game_settings body") end
+  -- Overwrite game_settings file
+  if not success then love.errorhandler("Failed to write game_settings body") end
 end
 
 local function change_key_config(menuHandler)
   -- Overwrite game_settings file
   local success = love.filesystem.write("key_config.lua", "local kc = {}\nkc.player1 = {\n")
 ---@diagnostic disable-next-line: undefined-field
-  if not success then love.errhand("Failed to write key_config 1") end
+  if not success then love.errorhandler("Failed to write key_config 1") end
   -- Variable to store string to be written
   local key_config_body = ""
   for keyName, key in pairs(menuHandler.tempKt.player1) do
@@ -150,7 +151,8 @@ local function change_key_config(menuHandler)
     key_config_body = key_config_body .. keyName .. " = \"" .. key .. "\",\n"
   end
   success = love.filesystem.append("key_config.lua", key_config_body .. "}\nreturn kc\n")
-  if not success then love.errhand("Failed to write key_config body") end
+  ---@diagnostic disable-next-line: undefined-field
+  if not success then love.errorhandler("Failed to write key_config body") end
 end
 
 -- function make drawing take less lines

@@ -25,11 +25,11 @@ function obj.initialize(instance)
 
   instance.lookFor = si.lookFor
 
-  instance.faceRGBA = u.colorTable(0.729 * COLORCONST, 0.361 * COLORCONST, 0.04 * COLORCONST, COLORCONST)
-  instance.stemRGBA = u.colorTable(0.18 * COLORCONST, 0.427 * COLORCONST, 0.18 * COLORCONST, COLORCONST)
-  instance.darkRGBA = u.colorTable(1 * COLORCONST, 0.427 * COLORCONST, 0.18 * COLORCONST, COLORCONST)
-  instance.lightRGBA = u.colorTable(1 * COLORCONST, 0.839 * COLORCONST, 0.549 * COLORCONST, COLORCONST)
-  instance.insideRGBA = u.colorTable(0, 0, 0, COLORCONST)
+  instance.faceRGBA = u.colorTable(0.729, 0.361, 0.04, 1)
+  instance.stemRGBA = u.colorTable(0.18, 0.427, 0.18, 1)
+  instance.darkRGBA = u.colorTable(1, 0.427, 0.18, 1)
+  instance.lightRGBA = u.colorTable(1, 0.839, 0.549, 1)
+  instance.insideRGBA = u.colorTable(0, 0, 0, 1)
 end
 
 obj.functions = {
@@ -92,17 +92,17 @@ obj.functions = {
     self.litcounter = (self.litcounter + dt) % 5
     if self.litcounter < prevlc then
       if self.lit then
-        self.faceRGBA:setTarget(0.729 * COLORCONST, 0.361 * COLORCONST, 0.04 * COLORCONST, COLORCONST)
-        self.stemRGBA:setTarget(0.18 * COLORCONST, 0.427 * COLORCONST, 0.18 * COLORCONST, COLORCONST)
-        self.darkRGBA:setTarget(1 * COLORCONST, 0.427 * COLORCONST, 0.18 * COLORCONST, COLORCONST)
-        self.lightRGBA:setTarget(1 * COLORCONST, 0.839 * COLORCONST, 0.549 * COLORCONST, COLORCONST)
-        self.insideRGBA:setTarget(0, 0, 0, COLORCONST)
+        self.faceRGBA:setTarget(0.729, 0.361, 0.04, 1)
+        self.stemRGBA:setTarget(0.18, 0.427, 0.18, 1)
+        self.darkRGBA:setTarget(1, 0.427, 0.18, 1)
+        self.lightRGBA:setTarget(1, 0.839, 0.549, 1)
+        self.insideRGBA:setTarget(0, 0, 0, 1)
       else
-        self.faceRGBA:setTarget(1 * COLORCONST, 0.427 * COLORCONST, 0.18 * COLORCONST, COLORCONST)
-        self.stemRGBA:setTarget(0.11 * COLORCONST, 0.377 * COLORCONST, 0.11 * COLORCONST, COLORCONST)
-        self.darkRGBA:setTarget(0.729 * COLORCONST, 0.361 * COLORCONST, 0.04 * COLORCONST, COLORCONST)
-        self.lightRGBA:setTarget(1 * COLORCONST, 0.427 * COLORCONST, 0.18 * COLORCONST, COLORCONST)
-        self.insideRGBA:setTarget(COLORCONST, 0, 0, COLORCONST)
+        self.faceRGBA:setTarget(1, 0.427, 0.18, 1)
+        self.stemRGBA:setTarget(0.11, 0.377, 0.11, 1)
+        self.darkRGBA:setTarget(0.729, 0.361, 0.04, 1)
+        self.lightRGBA:setTarget(1, 0.427, 0.18, 1)
+        self.insideRGBA:setTarget(1, 0, 0, 1)
       end
       self.lit = not self.lit
     end

@@ -23,15 +23,15 @@ end
 
 bt.functions = {
   update = function(self)
-    self.mycolour = self.contacts>0 and 0 or COLORCONST
+    self.mycolour = self.contacts>0 and 0 or 1
     self.x, self.y = self.body:getPosition()
     -- self.mycolour = self.mycolour>254 and 255 or self.mycolour+1
   end
   ,
   draw = function(self)
-    love.graphics.setColor(COLORCONST, self.mycolour, self.mycolour, COLORCONST)
+    love.graphics.setColor(1, self.mycolour, self.mycolour, 1)
     love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    love.graphics.setColor(1, 1, 1, 1)
   end
   ,
   load = function(self)

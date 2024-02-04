@@ -69,7 +69,7 @@ Particles.functions = {
   end,
 
   addColouredSpark = function (self, sparkInfo)
-    local r, g, b, a = HSL(COLORCONST * love.math.random(), 1 * COLORCONST, (love.math.random() * 0.5 + 0.5) * COLORCONST, COLORCONST * 0.9)
+    local r, g, b, a = HSL(love.math.random(), 1, (love.math.random() * 0.5 + 0.5), 0.9)
     sparkInfo.color = sparkInfo.color or {r = r, g = g, b = b, a = a}
     addDefault(self, sparkInfo, "colouredSparks")
   end,
@@ -100,9 +100,9 @@ Particles.functions = {
         x = sparkInfo.x,
         y = sparkInfo.y,
         rgba = {
-          r = c.r / COLORCONST,
-          g = c.g / COLORCONST,
-          b = c.b / COLORCONST,
+          r = c.r,
+          g = c.g,
+          b = c.b,
           a = 1
         }
       }

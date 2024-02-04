@@ -120,7 +120,7 @@ local methods = {
     u.changeColour{"white"}
     local prevFont = love.graphics.getFont()
     love.graphics.setFont(self.font)
-    -- love.graphics.clear(123, 0, 0, COLORCONST)
+    -- love.graphics.clear(123, 0, 0, 1)
     -- Draw string loop
     love.graphics.draw(self.text, left, top + 0.5 - self.yOffset, 0, self.scale)
     love.graphics.setFont(prevFont)
@@ -150,7 +150,7 @@ function BubbleText.new(string, options)
   if not textRGBA and options.color then
     textRGBA = u.getComplementaryColourList{options.color}
   end
-  bubbleText.textRGBA = textRGBA or {0, 0, 0, COLORCONST}
+  bubbleText.textRGBA = textRGBA or {0, 0, 0, 1}
   bubbleText.alignmode = "left"
   bubbleText.colouredString = {}
   bubbleText:updateLength(0)

@@ -20,14 +20,12 @@ local floor = math.floor
 
 local NPC = {}
 
-local cc = COLORCONST
-
 -- write the text
 local myText = {
-  {{{cc,cc,cc,cc}, nil},-1, "left"},
-  {{{cc,cc,cc,cc}, nil},-1, "left"},
-  {{{cc * 0.4,cc,cc * 0.6,cc}, "You found your first item! Most items can be seen by navigating to the items tag of the pause menu. You can use some items by selecting them and pressing Enter."},-1, "left"},
-  {{{cc * 0.4,cc,cc * 0.6,cc}, GCON.fsm},-1, "left"}
+  {{{1,1,1,1}, nil},-1, "left"},
+  {{{1,1,1,1}, nil},-1, "left"},
+  {{{0.4,1,0.6,1}, "You found your first item! Most items can be seen by navigating to the items tag of the pause menu. You can use some items by selecting them and pressing Enter."},-1, "left"},
+  {{{0.4,1,0.6,1}, GCON.fsm},-1, "left"}
 }
 
 -- do the funcs

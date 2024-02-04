@@ -8,8 +8,6 @@ local game = require "game"
 
 local NPC = {}
 
-local cc = COLORCONST
-
 local function typical_activate(self, dt, textIndex)
   local yToAvoid = self.y
   if self.dontDrawOverPlayer and pl1 then
@@ -29,10 +27,10 @@ end
 
 -- Write the text
 local myText = {
-  {{{cc,cc,cc,cc},"Something something..."},-1, "left"},
-  {{{cc,cc,cc,cc},"Yes or no?"},-1, "left"},
-  {{{cc,cc,cc,cc},"Yes? Yes!"},-1, "left"},
-  {{{cc,cc,cc,cc},"No? No..."},-1, "left"}
+  {{{1,1,1,1},"Something something..."},-1, "left"},
+  {{{1,1,1,1},"Yes or no?"},-1, "left"},
+  {{{1,1,1,1},"Yes? Yes!"},-1, "left"},
+  {{{1,1,1,1},"No? No..."},-1, "left"}
 }
 
 -- do the funcs

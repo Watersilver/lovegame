@@ -211,7 +211,7 @@ Intro.functions = {
       )
     end
     local pr, pg, pb, pa = love.graphics.getColor()
-    local fogAlpha = (math.floor((1 - self.counter / 6) * 14) / 14) * COLORCONST
+    local fogAlpha = (math.floor((1 - self.counter / 6) * 14) / 14)
     love.graphics.setColor(pr, pg, pb, fogAlpha)
     love.graphics.rectangle("fill", 0, 0, camWidth, camHeight)
     love.graphics.setColor(pr, pg, pb, pa)

@@ -54,7 +54,7 @@ NPC.functions = {
           end
           snd.play(glsounds.letter)
           dlg.simpleWallOfText.setUp(
-            {{{COLORCONST,COLORCONST,COLORCONST,COLORCONST},
+            {{{1,1,1,1},
             "Hi, I'm a sign!"},
             -1, "left"},
             self.y,
@@ -73,7 +73,7 @@ NPC.functions = {
         end
         snd.play(glsounds.letter)
         dlg.simpleWallOfText.setUp(
-          {{{COLORCONST,COLORCONST,COLORCONST,COLORCONST},
+          {{{1,1,1,1},
           "Can't read it from here..."},
           -1, "left"},
           self.y,

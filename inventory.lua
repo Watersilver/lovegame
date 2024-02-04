@@ -348,8 +348,6 @@ end
 
 
 function inv.draw(l,t,w,h)
-  local cc = COLORCONST
-
   -- pieces of heart
   local pocx, pocy = w - invPieceOfHeart.width * 2, h * 0.5
   love.graphics.print("PIECES",
@@ -380,7 +378,7 @@ function inv.draw(l,t,w,h)
     h * 0.5 + invPieceOfHeart.height + 3
   )
   local pr, pg, pb, pa = love.graphics.getColor()
-  love.graphics.setColor(cc, cc, cc*pohColourMod, cc)
+  love.graphics.setColor(1, 1, pohColourMod, 1)
   love.graphics.print(
     "x" .. pohCounter,
     w - invPieceOfHeart.width * 2.6 + 16,
@@ -420,14 +418,14 @@ function inv.draw(l,t,w,h)
     local prevBm = love.graphics.getBlendMode()
     if inv.spellSelection == index then
       -- love.graphics.setColor(cc*0.5, cc, cc, cc)
-      love.graphics.setColor(cc * 0.1, cc * 0.1, cc * 0.1, cc * 0.5)
+      love.graphics.setColor(0.1, 0.1, 0.1, 0.5)
       love.graphics.rectangle("line", x, y, itemBoxSide, itemBoxSide)
-      love.graphics.setColor(cc * 0.2, cc * 0.2, cc * 0.2, cc * 0.1)
+      love.graphics.setColor(0.2, 0.2, 0.2, 0.1)
       love.graphics.rectangle("fill", x, y, itemBoxSide, itemBoxSide)
     else
-      love.graphics.setColor(0, 0, 0, cc * 0.5)
+      love.graphics.setColor(0, 0, 0, 0.5)
       love.graphics.rectangle("line", x, y, itemBoxSide, itemBoxSide)
-      love.graphics.setColor(0, 0, 0, cc * 0.3)
+      love.graphics.setColor(0, 0, 0, 0.3)
       love.graphics.rectangle("fill", x, y, itemBoxSide, itemBoxSide)
     end
 
@@ -447,16 +445,16 @@ function inv.draw(l,t,w,h)
   local wwImg = love.graphics.newImage("Sprites/Inventory/Jesus.png")
   local pr, pg, pb, pa = love.graphics.getColor()
   if session.save.walkOnWater then
-    love.graphics.setColor(0, 0, 0, cc * 0.5)
+    love.graphics.setColor(0, 0, 0, 0.5)
     love.graphics.rectangle("line", wwx, wwy, itemBoxSide, itemBoxSide)
-    love.graphics.setColor(cc * 0.2, cc * 0.2, cc * 0.2, cc * 0.1)
+    love.graphics.setColor(0.2, 0.2, 0.2, 0.1)
     love.graphics.rectangle("fill", wwx, wwy, itemBoxSide, itemBoxSide)
-    love.graphics.setColor(cc, cc, cc, cc)
+    love.graphics.setColor(1, 1, 1, 1)
     love.graphics.draw(wwImg, wwx+1, wwy+1)
   else
-    love.graphics.setColor(0, 0, 0, cc * 0.5)
+    love.graphics.setColor(0, 0, 0, 0.5)
     love.graphics.rectangle("line", wwx, wwy, itemBoxSide, itemBoxSide)
-    love.graphics.setColor(0, 0, 0, cc * 0.3)
+    love.graphics.setColor(0, 0, 0, 0.3)
     love.graphics.rectangle("fill", wwx, wwy, itemBoxSide, itemBoxSide)
   end
   love.graphics.setColor(pr, pg, pb, pa)
@@ -467,16 +465,16 @@ function inv.draw(l,t,w,h)
   local lImg = love.graphics.newImage("Sprites/Inventory/Devil2.png")
   local pr, pg, pb, pa = love.graphics.getColor()
   if session.save.playerGlowAvailable then
-    love.graphics.setColor(0, 0, 0, cc * 0.5)
+    love.graphics.setColor(0, 0, 0, 0.5)
     love.graphics.rectangle("line", lx, ly, itemBoxSide, itemBoxSide)
-    love.graphics.setColor(cc * 0.2, cc * 0.2, cc * 0.2, cc * 0.1)
+    love.graphics.setColor(0.2, 0.2, 0.2, 0.1)
     love.graphics.rectangle("fill", lx, ly, itemBoxSide, itemBoxSide)
-    love.graphics.setColor(cc, cc, cc, cc)
+    love.graphics.setColor(1, 1, 1, 1)
     love.graphics.draw(lImg, lx+1, ly+1)
   else
-    love.graphics.setColor(0, 0, 0, cc * 0.5)
+    love.graphics.setColor(0, 0, 0, 0.5)
     love.graphics.rectangle("line", lx, ly, itemBoxSide, itemBoxSide)
-    love.graphics.setColor(0, 0, 0, cc * 0.3)
+    love.graphics.setColor(0, 0, 0, 0.3)
     love.graphics.rectangle("fill", lx, ly, itemBoxSide, itemBoxSide)
   end
   love.graphics.setColor(pr, pg, pb, pa)

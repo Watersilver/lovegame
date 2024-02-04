@@ -117,9 +117,9 @@ Missile.functions = {
 
     if session.wornRing == 'ringRainbow' then
       self.rgba = {
-        r= r / COLORCONST,
-        g= g / COLORCONST,
-        b= b / COLORCONST,
+        r= r,
+        g= g,
+        b= b,
         a= 1
       }
     end

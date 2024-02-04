@@ -43,14 +43,15 @@ local transitions = require "transitions"
 --     function(x, y)
 --       x = xrest + x * sw
 --       y = yrest + y * sh
---       local val = love.math.noise(x*0.0075, y*0.0075, noiseT) * COLORCONST
+--       local val = love.math.noise(x*0.0075, y*0.0075, noiseT)
 
 --       local op = 1 or love.math.noise(x*0.001, y*0.001, noiseT, 10000)
 --       -- if we have a different noise for each colour we get interesting rgb effect
---       return val, val, val, COLORCONST * opacity * op
+--       return val, val, val, opacity * op
 --     end
 --   )
 
+--   -- v1 Removed Image:getData and Image:refresh, use Image:replacePixels instead
 --   noiseImg:refresh()
 
 --   lighting.applyShadow{
@@ -786,7 +787,7 @@ Weather.functions = {
         end
 
         -- Draw
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST * 0.5)
+        love.graphics.setColor(1, 1, 1, 0.5)
         love.graphics.line(drop.x, drop.y, drop.x - dropWidth, drop.y - raindropHeight)
       end
     end
@@ -826,7 +827,7 @@ Weather.functions = {
 
           -- Draw
           local resetCol = u.storeColour()
-          love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST * 0.5)
+          love.graphics.setColor(1, 1, 1, 0.5)
           local x, y = transitions.transform(drop.x, drop.y)
           love.graphics.line(x, y, x - dropWidth, y - raindropHeight)
           resetCol()
@@ -857,7 +858,7 @@ Weather.functions = {
 
         -- Draw
         local resetCol = u.storeColour()
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST * 0.5)
+        love.graphics.setColor(1, 1, 1, 0.5)
         local x, y = transitions.transform(drop.x, drop.y, true)
         love.graphics.line(x, y, x - dropWidth, y - raindropHeight)
         resetCol()

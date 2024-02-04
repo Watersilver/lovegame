@@ -428,17 +428,21 @@ function u.newFastAccessQueue(capacity)
 end
 
 -- Obliterate Body
+---@param body love.Body
 function u.obliterateBody(body)
-  for _, fixture in pairs(body:getFixtureList()) do
+  for _, fixture in pairs(body:getFixtures()) do
     fixture:setUserData(nil)
     fixture:destroy()
+    fixture:release()
   end
-  for _, joint in pairs(body:getJointList()) do
+  for _, joint in pairs(body:getJoints()) do
     joint:setUserData(nil)
     joint:destroy()
+    joint:release()
   end
   body:setUserData(nil)
   body:destroy()
+  body:release()
 end
 
 function u.rememberFloorTile(self, other)
@@ -478,8 +482,8 @@ function u.isOutsideRoom(position, room)
 end
 
 local coloursEnum = {
-  white = {r = COLORCONST, g = COLORCONST, b = COLORCONST},
-  red = {r = COLORCONST, g = 0, b = 0},
+  white = {r = 1, g = 1, b = 1},
+  red = {r = 1, g = 0, b = 0},
   black = {r = 0, g = 0, b = 0}
 }
 function u.changeColour(cTable)
@@ -491,7 +495,7 @@ end
 function u.getComplementaryColourList(cTable)
   local colour = cTable.colour or cTable[1]
   local rgb = colour and coloursEnum[colour] or cTable
-  return {COLORCONST - rgb.r, COLORCONST - rgb.g, COLORCONST - rgb.b, cTable.a or COLORCONST}
+  return {1 - rgb.r, 1 - rgb.g, 1 - rgb.b, cTable.a or 1}
 end
 
 function u.storeColour()
@@ -663,7 +667,7 @@ end
 
 -- Converts an RGB color value to HSL. Conversion formula
 -- adapted from http://en.wikipedia.org/wiki/HSL_color_space.
--- Assumes r, g, and b are contained in the set [0, COLORCONST] and
+-- Assumes r, g, and b are contained in the set [0, 1] and
 -- returns h, s, and l in the set [0, 1].
 --
 ---@param r number The red color value
@@ -673,7 +677,6 @@ end
 ---@return number s
 ---@return number l
 function u.rgbToHsl(r, g, b)
-  r, g, b = r / COLORCONST, g / COLORCONST, b / COLORCONST
   local max, min = math.max(r, g, b), math.min(r, g, b)
   local mid = (max + min) / 2
   local h, s, l = mid, mid, mid
@@ -711,7 +714,7 @@ end
 -- Converts an HSL color value to RGB. Conversion formula
 -- adapted from http://en.wikipedia.org/wiki/HSL_color_space.
 -- Assumes h, s, and l are contained in the set [0, 1] and
--- returns r, g, and b in the set [0, COLORCONST].
+-- returns r, g, and b in the set [0, 1].
 --
 ---@param h number The hue
 ---@param s number The saturation
@@ -733,7 +736,7 @@ function u.hslToRgb(h, s, l)
     b = hue2rgb(p, q, h - 1/3);
   end
 
-  return r * COLORCONST, g * COLORCONST, b * COLORCONST;
+  return r, g, b;
 end
 
 ---@param str string

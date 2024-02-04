@@ -43,7 +43,7 @@ bt.functions = {
 
   setColour = function (self)
     if self.black then
-      u.changeColour{r = 0.6 * COLORCONST, g = 0, b = 0}
+      u.changeColour{r = 0.6, g = 0, b = 0}
     else
       u.changeColour{"white"}
     end

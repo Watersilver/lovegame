@@ -100,7 +100,7 @@ local function SaveMap()
   }\n\z
   return room")
 ---@diagnostic disable-next-line: undefined-field
-  if not success then love.errhand("Failed to write new_room") end
+  if not success then love.errorhandler("Failed to write new_room") end
 end
 
 -- Return x, y and worldSlice of tile of mouse
@@ -373,7 +373,7 @@ Re.functions = {
     local pr, pg, pb, pa = love.graphics.getColor()
     local alpha
     alpha = 1
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST * alpha)
+    love.graphics.setColor(1, 1, 1, alpha)
     love.graphics.draw(self.tileset.img, 0, - selectyOffset)
     love.graphics.setColor(pr, pg, pb, pa)
     love.graphics.print(worldMouseX, love.graphics.getWidth()-100)
@@ -393,12 +393,12 @@ Re.functions = {
     -- Show layer. If not same as roompart tile set, make transparent
     alpha = 1
     local pr, pg, pb, pa = love.graphics.getColor()
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST * alpha)
+    love.graphics.setColor(1, 1, 1, alpha)
     love.graphics.print("Layer:" .. layerTable[layerIndex], twidth, 350)
     love.graphics.setColor(pr, pg, pb, pa)
 
     local pr, pg, pb, pa = love.graphics.getColor()
-    love.graphics.setColor(COLORCONST, 0, 0, COLORCONST * 0.5)
+    love.graphics.setColor(1, 0, 0, 0.5)
     love.graphics.rectangle(
     "fill",
     selectx,

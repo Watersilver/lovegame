@@ -20,14 +20,11 @@ vec4 effect(vec4 color, sampler2D texture, vec2 texCoords, vec2 screenCoords) {
 
 	vec3 sepia = vec3(grey);
 
-	switch (u_color) {
-	case 0:
+	if (u_color == 0) {
 		sepia *= SEPIA[0];
-		break;
-	case 1:
+	} else if (u_color == 1) {
 		sepia *= SEPIA[1];
-		break;
-	default:
+	} else {
 		sepia *= SEPIA[0];
 	}
 

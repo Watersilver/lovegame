@@ -336,7 +336,7 @@ DialogueBubble.functions = {
       love.graphics.circle("fill", nbx, nby, rad2)
     elseif self.nextExists then
       local timeMod = math.sin(self.buttonTimer) * 0.2
-      u.changeColour{"red"}--, a = (timeMod * 2.5 + 0.5) * COLORCONST}
+      u.changeColour{"red"}--, a = (timeMod * 2.5 + 0.5)}
       local nbtw2 = 2
       local nbth2 = 1 + timeMod
       local nbrw2 = 0.75

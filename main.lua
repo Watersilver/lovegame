@@ -8,11 +8,11 @@ if not verh.fileExists("game_settings.lua") then
   newfile:close()
   local success = love.filesystem.write("game_settings.lua", gsdcontents)
 ---@diagnostic disable-next-line: undefined-field
-  if not success then love.errhand("Failed to write game_settings") end
+  if not success then love.errorhandler("Failed to write game_settings") end
 end
 local success = love.filesystem.createDirectory("Saves")
 ---@diagnostic disable-next-line: undefined-field
-if not success then love.errhand("Failed to create save directory") end
+if not success then love.errorhandler("Failed to create save directory") end
 
 -- game constants
 GCON = {
@@ -75,6 +75,9 @@ GCON = {
     focus = {}, -- Special reaction to focus for when default focus id does not suffice
     cascade = {}, -- Determine if chosen reaction will cascade to targetless if target doesn't react with it.
   },
+
+  MAX_DT = 0.03333333,
+  MAX_PHYSICS_DT = 0.03333333
 }
 
 -- global variables
@@ -182,6 +185,7 @@ session = {
   toMainMenu = function()
     session.drug = nil
     session.ringShader = nil
+    session.sleeping_danger = false
 
     -- remove/clean global objects
     if session.particles and session.particles.exists then
@@ -334,8 +338,7 @@ session = {
     session.save[questid] = startingStage or "stage1"
     if session.save.gotFirstQuest then return end
     session.save.gotFirstQuest = true
-    local cc = COLORCONST
-    local ctable = {cc * 0.4,cc,cc * 0.6,cc}
+    local ctable = {0.4,1,0.6,1}
     local myText = {
       {{ctable,"You've got your first note."},-1, "left"},
       {{ctable,"Pause and navigate to the journal tag to see it."},-1, "left"},
@@ -502,7 +505,7 @@ session = {
     -- Overwrite game_settings file
     success = love.filesystem.write("game_settings.lua", "local gs = {}\n")
     ---@diagnostic disable-next-line: undefined-field
-    if not success then love.errhand("Failed to write game_settings first line") end
+    if not success then love.errorhandler("Failed to write game_settings first line") end
     local game_settings_body = ""
     for setting, value in pairs(game_settings) do
       -- Update already loaded table
@@ -514,7 +517,7 @@ session = {
       game_settings_body = game_settings_body .. "gs." .. setting .. " = " .. value .. "\n"
     end
     success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
-    if not success then love.errhand("Failed to write game_settings body") end
+    if not success then love.errorhandler("Failed to write game_settings body") end
 
     -- because Imma moron
     local saveKeysToBeIgnored = {
@@ -920,10 +923,10 @@ function love.update(dt)
   -- Run async functions before messing with the timeflow (dt)
   async.realTimeUpdate(dt)
 
-	dt = math.min(0.03333333, dt)
+	dt = math.min(GCON.MAX_DT, dt)
 
   if session.sleeping_danger then
-    dt = dt * 5
+    dt = dt * 10
   end
 
   delta_time = dt
@@ -1164,7 +1167,12 @@ function love.update(dt)
     end
 
     -- update physical world
-    ps.pw:update(dt)
+    local dtpart = dt
+    while dtpart > GCON.MAX_PHYSICS_DT do
+      ps.pw:update(GCON.MAX_PHYSICS_DT)
+      dtpart = dtpart - GCON.MAX_PHYSICS_DT
+    end
+    ps.pw:update(dtpart)
 
     -- Run update methods
     local upnum = #o.updaters
@@ -1398,9 +1406,9 @@ end
 local function mainCameraDraw(l,t,w,h)
 
   -- local curcol = love.graphics.getColor()
-  -- love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.6, COLORCONST*0.6, COLORCONST)
+  -- love.graphics.setColor(0.6, 0.6, 0.6, 1)
   -- love.graphics.rectangle("fill", 0, 0, 800, 450)
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  love.graphics.setColor(1, 1, 1, 1)
 
   local layers = #o.draw_layers
   if layers > 0 then
@@ -1459,7 +1467,7 @@ local function mainCameraDraw(l,t,w,h)
   --   -- love.graphics.polygon("line", triangle)
   --
   --   local resetColour = u.storeColour()
-  --   u.changeColour{"white", a = COLORCONST * 0.5}
+  --   u.changeColour{"white", a = 0.5}
   --   love.graphics.polygon("fill", triangle)
   --   resetColour()
   -- end
@@ -1476,12 +1484,12 @@ local function afterScreenEffects(l,t,w,h)
     end
   elseif game.transitioning.type == "whiteScreen" then
     -- Draw Whitescreen
-    love.graphics.setColor(COLORCONST*0.9, COLORCONST*0.9, COLORCONST*0.9, COLORCONST)
+    love.graphics.setColor(0.9, 0.9, 0.9, 1)
     -- love.graphics.rectangle("fill", 0, 0, 800, 450)
     local wl, lt = cam:toWorld(0, 0)
     local ww, wh = cam:toWorld(love.graphics.getWidth(), love.graphics.getHeight())
     love.graphics.rectangle("fill", wl, lt, ww-wl, wh-lt)
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    love.graphics.setColor(1, 1, 1, 1)
   end
 end
 local function noEffectsDraw()
@@ -1526,7 +1534,7 @@ local function hudDraw(l,t,w,h)
     local rupees = string.format("%0"..rupeeDigits.."d", (session.save.rupees or 0))
     local rspr = im.sprites["rupees"]
     love.graphics.draw(rspr.img, rspr[0], w-9, h-9,  0, rspr.res_x_scale, rspr.res_y_scale)
-    love.graphics.setColor(0, 0, 0, COLORCONST)
+    love.graphics.setColor(0, 0, 0, 1)
     local rupeeOffset = rupeeDigits * 6.1 + 10
     local rupeeYBase = h-7.5
     love.graphics.print(rupees, w - rupeeOffset + rno, rupeeYBase, 0, 0.255)
@@ -1534,18 +1542,18 @@ local function hudDraw(l,t,w,h)
     love.graphics.print(rupees, w - rupeeOffset, rupeeYBase + rno, 0, 0.255)
     love.graphics.print(rupees, w - rupeeOffset, rupeeYBase - rno, 0, 0.255)
     if maxMoney == session.save.rupees then
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST * 0.2, COLORCONST)
+      love.graphics.setColor(1, 1, 0.2, 1)
     else
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      love.graphics.setColor(1, 1, 1, 1)
     end
     love.graphics.print(rupees, w - rupeeOffset, rupeeYBase, 0, 0.255)
 
     -- Draw clock
     if game.clockInactive then
-      love.graphics.setColor(COLORCONST, 0.3*COLORCONST, 0.3*COLORCONST, COLORCONST)
-      love.graphics.setColor(0.3*COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      love.graphics.setColor(1, 0.3, 0.3, 1)
+      love.graphics.setColor(0.3, 1, 1, 1)
     else
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      love.graphics.setColor(1, 1, 1, 1)
     end
     local cspr = im.sprites["clock"]
     local clockX = w * 0.9 - ((rupeeDigits < 4) and 0 or 6.1)
@@ -1555,12 +1563,12 @@ local function hudDraw(l,t,w,h)
 
     -- Draw bombs
     if session.save.hasBomb then
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      love.graphics.setColor(1, 1, 1, 1)
       local maxBombs = session.checkItemLim("mateBlastSeed")
       local bombs = string.format("%02d", (session.save.mateBlastSeed or 0))
       local bspr = im.sprites["Drops/blastSeed"]
       love.graphics.draw(bspr.img, bspr[0], 2, h-9,  0, bspr.res_x_scale, bspr.res_y_scale)
-      love.graphics.setColor(0, 0, 0, COLORCONST)
+      love.graphics.setColor(0, 0, 0, 1)
       local bombOffset = 12
       local bombYBase = h-6.8
       love.graphics.print(bombs, bombOffset + rno, bombYBase, 0, 0.255)
@@ -1568,21 +1576,21 @@ local function hudDraw(l,t,w,h)
       love.graphics.print(bombs, bombOffset, bombYBase + rno, 0, 0.255)
       love.graphics.print(bombs, bombOffset, bombYBase - rno, 0, 0.255)
       if maxBombs == session.save.mateBlastSeed then
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST * 0.2, COLORCONST)
+        love.graphics.setColor(1, 1, 0.2, 1)
       else
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+        love.graphics.setColor(1, 1, 1, 1)
       end
       love.graphics.print(bombs, bombOffset, bombYBase, 0, 0.255)
     end
 
     -- Draw magic dust
     if session.save.hasMystery then
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      love.graphics.setColor(1, 1, 1, 1)
       local maxDust = session.checkItemLim("mateMagicDust")
       local dust = string.format("%02d", (session.save.mateMagicDust or 0))
       local dupr = im.sprites["Drops/magicDust"]
       love.graphics.draw(dupr.img, dupr[0], 2, h-27,  0, dupr.res_x_scale, dupr.res_y_scale)
-      love.graphics.setColor(0, 0, 0, COLORCONST)
+      love.graphics.setColor(0, 0, 0, 1)
       local dustOffset = 12
       local dustYBase = h-20.4
       love.graphics.print(dust, dustOffset + rno, dustYBase, 0, 0.255)
@@ -1590,9 +1598,9 @@ local function hudDraw(l,t,w,h)
       love.graphics.print(dust, dustOffset, dustYBase + rno, 0, 0.255)
       love.graphics.print(dust, dustOffset, dustYBase - rno, 0, 0.255)
       if maxDust == session.save.mateMagicDust then
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST * 0.2, COLORCONST)
+        love.graphics.setColor(1, 1, 0.2, 1)
       else
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+        love.graphics.setColor(1, 1, 1, 1)
       end
       love.graphics.print(dust, dustOffset, dustYBase, 0, 0.255)
     end
@@ -1603,7 +1611,7 @@ local function hudDraw(l,t,w,h)
     -- Draw pause menu
     if game.paused and not transing and not game.cutscene then
       -- local pr, pg, pb, pa = love.graphics.getColor()
-      love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
+      love.graphics.setColor(0, 0, 0, 0.5)
       love.graphics.rectangle("fill", l, t, w, h)
       love.graphics.setColor(pr, pg, pb, pa)
       inv.draw(l,t,w,h)
@@ -1819,11 +1827,11 @@ end
 function love.mousereleased(x, y, button, isTouch)
   moub[button] = false
 
-  if button == 1 then
-    Pointer.left.clicked = false
-  elseif button == 2 then
-    Pointer.right.clicked = false
-  end
+  -- if button == 1 then
+  --   Pointer.left.clicked = false
+  -- elseif button == 2 then
+  --   Pointer.right.clicked = false
+  -- end
 end
 
 function love.keypressed(key, scancode)

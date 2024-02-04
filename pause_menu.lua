@@ -59,6 +59,7 @@ bbb[3].y = bbb.y
 local function checkIfInBBB(x, y)
   if y > bbb[1].y.u and y < bbb[1].y.d then
     for bindex, box in ipairs(bbb) do
+---@diagnostic disable-next-line: undefined-field
       if x > box.x.l and x < box.x.r then
         return bindex
       end
@@ -97,34 +98,34 @@ function pam.top_menu_draw(l,t,w,h)
   local menuBGTop = 0
   local scale = 0.2
   local menuBGBottom = bbb[3].y.u + love.graphics.getFont():getHeight() * scale + 4
-  love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
+  love.graphics.setColor(0, 0, 0, 0.5)
   love.graphics.rectangle("line", 0, menuBGTop, 400, menuBGBottom)
-  love.graphics.setColor(0, 0, 0, COLORCONST * 0.3)
+  love.graphics.setColor(0, 0, 0, 0.3)
   love.graphics.rectangle("fill", 0, menuBGTop, 400, menuBGBottom)
 
-  local alpha = COLORCONST
-  if not gs.musicOn then alpha = 0.5 * COLORCONST end
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, alpha)
+  local alpha = 1
+  if not gs.musicOn then alpha = 0.5 end
+  love.graphics.setColor(1, 1, 1, alpha)
   love.graphics.print("Music", bbb[1].x.l, bbb[1].y.u, 0, 0.2)
-  alpha = COLORCONST
-  if not gs.soundsOn then alpha = 0.5 * COLORCONST end
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, alpha)
+  alpha = 1
+  if not gs.soundsOn then alpha = 0.5 end
+  love.graphics.setColor(1, 1, 1, alpha)
   love.graphics.print("Sound", bbb[2].x.l, bbb[2].y.u, 0, 0.2)
-  alpha = COLORCONST
+  alpha = 1
 
   -- Volume control draw
   local vcMaxWidth = 25
   local vcGap = 3
   local textWidth = love.graphics.getFont():getWidth("Volume") * scale
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  love.graphics.setColor(1, 1, 1, 1)
   love.graphics.print("Volume", 200 - (textWidth + vcMaxWidth + vcGap) * 0.5, bbb[3].y.u, 0, scale)
-  love.graphics.setColor(0, 0, 0, COLORCONST * 0.5)
+  love.graphics.setColor(0, 0, 0, 0.5)
   local vcL, vcT, vcW, vcH = 200 + (textWidth - vcMaxWidth + vcGap) * 0.5, bbb[2].y.u, vcMaxWidth, love.graphics.getFont():getHeight() * scale
   love.graphics.rectangle('fill', vcL, vcT, vcW, vcH)
 
   local vcWidth = snd.getMasterVolume() * vcMaxWidth
 
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  love.graphics.setColor(1, 1, 1, 1)
   for i = 1, vcMaxWidth, 2 do
     if i > vcWidth then
       love.graphics.rectangle("fill", vcL + i - 1, vcT + 2, 1, 1)
@@ -161,17 +162,17 @@ function pam.top_menu_draw(l,t,w,h)
     pam.draggingVolume = false
   end
 
-  love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+  love.graphics.setColor(1, 1, 1, 1)
   love.graphics.print("Quit", bbb[3].x.l, bbb[3].y.u, 0, 0.2)
 
   -- love.graphics.rectangle("fill", 0, bbb[3].y.u + love.graphics.getFont():getHeight() * scale + 4, 400, 0.5)
 
   if pam.quitting then
-    love.graphics.setColor(0, 0, 0, COLORCONST * 0.6)
+    love.graphics.setColor(0, 0, 0, 0.6)
     love.graphics.rectangle("fill", l-1, t-1, w+2, h+2)
-    love.graphics.setColor(0, 0, 0, COLORCONST)
+    love.graphics.setColor(0, 0, 0, 1)
     love.graphics.rectangle("fill", l-1, 80, w+2, 44)
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    love.graphics.setColor(1, 1, 1, 1)
     love.graphics.print("Are you sure you want to quit?\n\zYes(Enter)   No(Escape)", 22, 88, 0, 0.5)
   end
   love.graphics.setColor(pr, pg, pb, pa)
@@ -191,7 +192,7 @@ local function isEquipped(itemid)
   return session.save.equippedRing == itemid or session.save.focus == itemid
 end
 local function setColorToEquipped()
-  love.graphics.setColor(COLORCONST*0.7, COLORCONST*0.4, COLORCONST, COLORCONST*0.2)
+  love.graphics.setColor(0.7, 0.4, 1, 0.2)
 end
 local function determineHotkeyDisplayPosition(i)
   local j = 0
@@ -238,16 +239,16 @@ pam.middle.draw = function(l, t, w, h)
       if equipped then
         setColorToEquipped()
       else
-        love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+        love.graphics.setColor(0, 0, 0, 0.3)
       end
       love.graphics.rectangle("fill", x + 1, y, boxWidth, boxHeight)
       if equipped then
         setColorToEquipped()
       else
-        love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+        love.graphics.setColor(0, 0, 0, 0.5)
       end
       love.graphics.rectangle("line", x + 1, y, boxWidth, boxHeight)
-      love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+      love.graphics.setColor(1, 1, 1, 1)
       love.graphics.print((i + 1) .. ".", x + 2, y + yPadding, 0, textScale)
 
       local xPadding = (boxWidth - love.graphics.getFont():getWidth(itemname) * textScale) * 0.5
@@ -282,9 +283,9 @@ pam.middle.draw = function(l, t, w, h)
   local upgrx, upgry = w * 0.5, h * 0.28
   -- draw upgrade box
   local pr, pg, pb, pa = love.graphics.getColor()
-  love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+  love.graphics.setColor(0, 0, 0, 0.3)
   love.graphics.rectangle("fill", upgrx - 40, upgry - 11, 80, 22)
-  love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+  love.graphics.setColor(0, 0, 0, 0.5)
   love.graphics.rectangle("line", upgrx - 40, upgry - 11, 80, 22)
   love.graphics.setColor(pr, pg, pb, pa)
 
@@ -485,7 +486,7 @@ local logicFuncs = {
 
 local function recolor(w, h, subsetting)
   local pr, pg, pb, pa = love.graphics.getColor()
-  love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
+  love.graphics.setColor(0.4, 0.7, 1, 0.2)
   love.graphics.rectangle("fill", 0, (pam.left.subsettingCursor - 1) * 10, w, 10)
   love.graphics.setColor(pr, pg, pb, pa)
   love.graphics.print("Enabled: " .. (session.save["custom" .. u.capitalise(subsetting) .. "Enabled"] and "Yes" or "No"), 5, 5, 0, 0.15)
@@ -605,9 +606,9 @@ local tooltipFuncs = {
 
 local function drawTransparentBox(w, h)
   local pr, pg, pb, pa = love.graphics.getColor()
-  love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+  love.graphics.setColor(0, 0, 0, 0.3)
   love.graphics.rectangle("fill", 0, 0, w, h)
-  love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+  love.graphics.setColor(0, 0, 0, 0.5)
   love.graphics.rectangle("line", 0, 0, w, h)
   love.graphics.setColor(pr, pg, pb, pa)
 end
@@ -620,9 +621,9 @@ local drawFuncs = {
 
     local x = 0
     for i = 1, pamleft.headerCursor - 1 do
-      love.graphics.setColor(0, COLORCONST*0.2, COLORCONST*0.5, COLORCONST)
+      love.graphics.setColor(0, 0.2, 0.5, 1)
       love.graphics.rectangle("fill", x, 0, hwidth, h)
-      love.graphics.setColor(COLORCONST*0.5, COLORCONST*0.5, COLORCONST*0.5, COLORCONST)
+      love.graphics.setColor(0.5, 0.5, 0.5, 1)
       love.graphics.rectangle("line", x, 0, hwidth, h)
       local header = pamleft.headers[i]
       local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
@@ -632,9 +633,9 @@ local drawFuncs = {
 
     local x = (#pamleft.headers - 1) * hdist
     for i = #pamleft.headers, pamleft.headerCursor + 1, -1 do
-      love.graphics.setColor(0, COLORCONST*0.2, COLORCONST*0.5, COLORCONST)
+      love.graphics.setColor(0, 0.2, 0.5, 1)
       love.graphics.rectangle("fill", x, 0, hwidth, h)
-      love.graphics.setColor(COLORCONST*0.5, COLORCONST*0.5, COLORCONST*0.5, COLORCONST)
+      love.graphics.setColor(0.5, 0.5, 0.5, 1)
       love.graphics.rectangle("line", x, 0, hwidth, h)
       local header = pamleft.headers[i]
       local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
@@ -644,12 +645,12 @@ local drawFuncs = {
 
     local x = (pamleft.headerCursor - 1) * hdist
     if pamleft.selectedHeader then
-      love.graphics.setColor(COLORCONST*0.6, COLORCONST*0.1, COLORCONST*0.5, COLORCONST)
+      love.graphics.setColor(0.6, 0.1, 0.5, 1)
     else
-      love.graphics.setColor(COLORCONST*0.1, COLORCONST*0.4, COLORCONST*0.7, COLORCONST)
+      love.graphics.setColor(0.1, 0.4, 0.7, 1)
     end
     love.graphics.rectangle("fill", x, 0, hwidth, h)
-    love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST)
+    love.graphics.setColor(1, 1, 1, 1)
     love.graphics.rectangle("line", x, 0, hwidth, h)
     local header = pamleft.headers[pamleft.headerCursor]
     local txtWd2 = love.graphics.getFont():getWidth(header) * 0.1
@@ -668,15 +669,15 @@ local drawFuncs = {
       local t, ih = pamleft.itemTop, love.graphics.getFont():getHeight() * textScale + 2 * padding
       for iindex, itemid in ipairs(session.save.items) do
         local pr, pg, pb, pa = love.graphics.getColor()
-        love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+        love.graphics.setColor(0, 0, 0, 0.5)
         if isEquipped(itemid) then
           setColorToEquipped()
           love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
         elseif pamleft.itemCursor == iindex then
-          love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
+          love.graphics.setColor(0.4, 0.7, 1, 0.2)
           love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
         elseif iindex % 2 == 0 then
-          love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST*0.05)
+          love.graphics.setColor(1, 1, 1, 0.05)
           love.graphics.rectangle("fill", 0, t, scrollBarX, ih)
         end
         love.graphics.setColor(pr, pg, pb, pa)
@@ -698,7 +699,7 @@ local drawFuncs = {
       local itemNumInv = 1 / #session.save.items
       local scrollBarPos = (pamleft.itemCursor - 1) * itemNumInv
       local pr, pg, pb, pa = love.graphics.getColor()
-      love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+      love.graphics.setColor(0, 0, 0, 0.3)
       love.graphics.line(scrollBarX, 0, scrollBarX, h)
       love.graphics.setColor(pr, pg, pb, pa)
       love.graphics.rectangle("fill", w-5, h*scrollBarPos, 5, h*itemNumInv)
@@ -717,12 +718,12 @@ local drawFuncs = {
       local t, qh = pamleft.questTop, love.graphics.getFont():getHeight() * textScale + 2 * padding
       for qindex, questid in ipairs(session.save.quests) do
         local pr, pg, pb, pa = love.graphics.getColor()
-        love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+        love.graphics.setColor(0, 0, 0, 0.5)
         if pamleft.questCursor == qindex then
-          love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
+          love.graphics.setColor(0.4, 0.7, 1, 0.2)
           love.graphics.rectangle("fill", 0, t, scrollBarX, qh)
         elseif qindex % 2 == 0 then
-          love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST*0.05)
+          love.graphics.setColor(1, 1, 1, 0.05)
           love.graphics.rectangle("fill", 0, t, scrollBarX, qh)
         end
         love.graphics.setColor(pr, pg, pb, pa)
@@ -740,7 +741,7 @@ local drawFuncs = {
       local questNumInv = 1 / #session.save.quests
       local scrollBarPos = (pamleft.questCursor - 1) * questNumInv
       local pr, pg, pb, pa = love.graphics.getColor()
-      love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+      love.graphics.setColor(0, 0, 0, 0.3)
       love.graphics.line(scrollBarX, 0, scrollBarX, h)
       love.graphics.setColor(pr, pg, pb, pa)
       love.graphics.rectangle("fill", w-5, h*scrollBarPos, 5, h*questNumInv)
@@ -759,14 +760,14 @@ local drawFuncs = {
       local pr, pg, pb, pa = love.graphics.getColor()
       if pamleft.customiseCursor == i then
         if pamleft.selectedSetting then
-          love.graphics.setColor(COLORCONST*0.7, COLORCONST*0.4, COLORCONST, COLORCONST*0.2)
+          love.graphics.setColor(0.7, 0.4, 1, 0.2)
           love.graphics.rectangle("fill", 0, t, w, sh)
         else
-          love.graphics.setColor(COLORCONST*0.4, COLORCONST*0.7, COLORCONST, COLORCONST*0.2)
+          love.graphics.setColor(0.4, 0.7, 1, 0.2)
           love.graphics.rectangle("fill", 0, t, w, sh)
         end
       elseif i % 2 == 0 then
-        love.graphics.setColor(COLORCONST, COLORCONST, COLORCONST, COLORCONST*0.05)
+        love.graphics.setColor(1, 1, 1, 0.05)
         love.graphics.rectangle("fill", 0, t, w, sh)
       end
       love.graphics.setColor(pr, pg, pb, pa)
@@ -807,9 +808,9 @@ local drawFuncs = {
 
   tooltip = function(w, h, pamleft)
     local pr, pg, pb, pa = love.graphics.getColor()
-    love.graphics.setColor(0, 0, 0, COLORCONST*0.3)
+    love.graphics.setColor(0, 0, 0, 0.3)
     love.graphics.rectangle("fill", 0, 0, w, h)
-    love.graphics.setColor(0, 0, 0, COLORCONST*0.5)
+    love.graphics.setColor(0, 0, 0, 0.5)
     love.graphics.rectangle("line", 0, 0, w, h)
     love.graphics.setColor(pr, pg, pb, pa)
     if type(pamleft.tooltip) == "function" then

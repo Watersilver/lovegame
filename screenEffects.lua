@@ -57,11 +57,11 @@ local resize = function( w, h )
 
   for _, effect in ipairs(effects) do
 ---@diagnostic disable-next-line: undefined-field
-    if effect.shader:getExternVariable('deadSpaceX') then
+    if effect.shader:hasUniform('deadSpaceX') then
       effect.shader:send('deadSpaceX', 0)
     end
 ---@diagnostic disable-next-line: undefined-field
-    if effect.shader:getExternVariable('deadSpaceY') then
+    if effect.shader:hasUniform('deadSpaceY') then
       effect.shader:send('deadSpaceY', 0)
     end
   end
