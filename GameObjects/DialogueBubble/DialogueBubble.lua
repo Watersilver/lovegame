@@ -90,21 +90,23 @@ local resize = {
     -- An Amp = 1 tote:
     -- k = ln(self.targetHeight) / dur =>
     -- h targetWidth
-    -- Ta gamhsa ola edw anti na pollaplasiasw me dt stis diaforikes...
-    -- TODO: fix the whole bouncyness thing because it changes behaviour depending on dt
-    local k = dt * logthdivdur
+    -- I think all of the above is wrong. whatever it works so..
+    -- (hey future me, sorry about the mess, you can't have your revenge, time only flows forward)
+    local k = logthdivdur * 100
 
     -- dampingRatio ζ = c / 2 * sqrt(k*m) if >= 1 it's overdamped
     -- so c = ζ * 2 * sqrt(k*m), for m = 1 =>
     -- c = ζ * 2 * sqrt(k)
     -- or dampingRatio = dumping / criticalDumping =>
     -- dumping = dampingRatio * criticalDumping
-    local c = self.dampingRatio * 2 * math.sqrt(k)
+    local c = self.dampingRatio * 2 * math.sqrt(k * self.mass)
+
     self.heightAcc = - k * (self.height - self.targetHeight)
     self.heightAcc = self.heightAcc - c * self.heightVel
+    self.heightAcc = self.heightAcc / self.mass
     -- self.heightVel = (self.heightVel + self.heightAcc) * (1 - self.damping)
-    self.heightVel = self.heightVel + self.heightAcc
-    self.height = self.height + self.heightVel
+    self.heightVel = self.heightVel + self.heightAcc * dt
+    self.height = self.height + self.heightVel * dt
 
     -- self.widthMoveState = self.widthMoveState or "wait"
     -- -- Diafora fashs 45 (nomizw. Mporei 90)
@@ -115,9 +117,11 @@ local resize = {
     if self.timeBeforeWidthVibrates <= 0 then
       self.widthAcc = - k * (self.width - self.targetWidth)
       self.widthAcc = self.widthAcc - c * self.widthVel
+      self.widthAcc = self.widthAcc / self.mass
       -- self.widthVel = (self.widthVel + self.widthAcc) * (1 - self.damping)
-      self.widthVel = self.widthVel + self.widthAcc
-      self.width = self.width + self.widthVel
+      self.widthVel = self.widthVel + self.widthAcc * dt
+      self.width = self.width + self.widthVel * dt
+      if self.width < 5 then self.width = 5 end
       -- if math.abs(self.widthVel) <= 0.1 and math.abs(self.widthAcc) <= 0.1 then
       --   self.stable = true
       -- end
@@ -143,11 +147,12 @@ function DialogueBubble.initialize(instance)
   instance.widthVel = 0
   instance.heightAcc = 0
   instance.heightVel = 0
-  instance.duration = 1
+  instance.duration = 0.7
+  instance.mass = 1 -- don't use, not sure I've added it correctly. Leave it at 1 for now
   instance.widthDelayMod = 1
   -- instance.widthDelayMod = 0.5
   -- dampingRatio ζ = c / 2 * sqrt(k*m)
-  instance.dampingRatio = 0.5 -- if > 1 it's overdamped
+  instance.dampingRatio = 0.4 -- if > 1 it's overdamped
   instance.anchor = defaultAnchor
   instance.color = "black"
   instance.string = "string"
