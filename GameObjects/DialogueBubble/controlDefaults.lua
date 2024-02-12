@@ -131,6 +131,9 @@ private.singleSimpleBubbleTemplate = function(settings)
       cd.facingChecker(dlgControl)
     end
 
+    if interactive then
+      cd.stateChecker(dlgControl)
+    end
   end
 end
 
@@ -237,6 +240,21 @@ cd.facingChecker = function (dlgControl)
     end
     dlgControl.hookReturn = "ssbLookedAway"
     dlgControl.updateHook = nil
+  end
+end
+
+cd.stateChecker = function (dlgControl)
+  if pl1 and pl1.exists then
+    if not dlgControl.allowAllStates and pl1.movement_state.state ~= 'normal' then
+      local instance = dlgControl.speechBubble
+      if instance then
+        dlgControl.textReturn = instance.string
+      else
+        dlgControl.textReturn = nil
+      end
+      dlgControl.hookReturn = "ssbInvalidState"
+      dlgControl.updateHook = nil
+    end
   end
 end
 

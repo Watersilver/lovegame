@@ -214,6 +214,8 @@ pam.middle.draw = function(l, t, w, h)
 
   if session.save.hotkeys then
     love.graphics.print("Day " .. session.save.days, w*0.05, h*0.2, 0, 0.5)
+    local mp = session.getMoonPhase()
+    love.graphics.print(mp == 'new' and '-' or mp == 'half' and '(' or 'o', w*0.05 - 15, h*0.2, 0, 0.5)
     local boxHeight = 7
     local boxWidth = 98
     local textScale = 0.13

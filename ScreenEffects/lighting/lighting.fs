@@ -79,11 +79,19 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
   // corresponding pixel of the lightMap texture
   vec4 light = Texel(lightMap, texture_coords);
 
-  // Each pixel can be as bright as the min value of its inherent
+  // Each pixel is the brightest of its max ambient
   // brightness and the intensity of the light hitting it
-  pixel.r = max(min(ambient.r, shadow.r * unlit.r), light.r * unlit.r);
-  pixel.g = max(min(ambient.g, shadow.g * unlit.g), light.g * unlit.g);
-  pixel.b = max(min(ambient.b, shadow.b * unlit.b), light.b * unlit.b);
+  pixel.r = max(shadow.r * ambient.r, light.r * unlit.r);
+  pixel.g = max(shadow.g * ambient.g, light.g * unlit.g);
+  pixel.b = max(shadow.b * ambient.b, light.b * unlit.b);
+
+  // was:
+  // // Each pixel can be as bright as the min value of its inherent
+  // // brightness and the intensity of the light hitting it
+  // pixel.r = max(min(ambient.r, shadow.r * unlit.r), light.r * unlit.r);
+  // pixel.g = max(min(ambient.g, shadow.g * unlit.g), light.g * unlit.g);
+  // pixel.b = max(min(ambient.b, shadow.b * unlit.b), light.b * unlit.b);
+
 
   // https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
   // float backlightLuminocity = 0.299*backRed + 0.587*backGreen + 0.114*backBlue;

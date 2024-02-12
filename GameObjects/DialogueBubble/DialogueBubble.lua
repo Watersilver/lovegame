@@ -43,6 +43,9 @@ local resize = {
   end,
 
   blobby = function (self, dt)
+    -- limit dt because model doesn't make sense with huge dt
+    if dt > 0.02 then dt = 0.02 end
+
     local logthdivdur = math.log(self.targetHeight) / self.duration
 
     if self.stable then
@@ -94,6 +97,8 @@ local resize = {
     -- (hey future me, sorry about the mess, you can't have your revenge, time only flows forward)
     local k = logthdivdur * 100
 
+    local w = math.sqrt(k / self.mass)
+
     -- dampingRatio ζ = c / 2 * sqrt(k*m) if >= 1 it's overdamped
     -- so c = ζ * 2 * sqrt(k*m), for m = 1 =>
     -- c = ζ * 2 * sqrt(k)
@@ -106,6 +111,12 @@ local resize = {
     self.heightAcc = self.heightAcc / self.mass
     -- self.heightVel = (self.heightVel + self.heightAcc) * (1 - self.damping)
     self.heightVel = self.heightVel + self.heightAcc * dt
+
+    -- clamp velocity
+    if math.abs(self.heightVel) > w * self.targetHeight then
+      self.heightVel = u.sign(self.heightVel) * w * self.targetHeight
+    end
+
     self.height = self.height + self.heightVel * dt
 
     -- self.widthMoveState = self.widthMoveState or "wait"
@@ -120,6 +131,12 @@ local resize = {
       self.widthAcc = self.widthAcc / self.mass
       -- self.widthVel = (self.widthVel + self.widthAcc) * (1 - self.damping)
       self.widthVel = self.widthVel + self.widthAcc * dt
+
+      -- clamp velocity
+      if math.abs(self.widthVel) > w * self.targetWidth then
+        self.widthVel = u.sign(self.widthVel) * w * self.targetWidth
+      end
+
       self.width = self.width + self.widthVel * dt
       if self.width < 5 then self.width = 5 end
       -- if math.abs(self.widthVel) <= 0.1 and math.abs(self.widthAcc) <= 0.1 then

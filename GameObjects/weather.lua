@@ -69,16 +69,6 @@ local transitions = require "transitions"
 --   -- love.graphics.pop()
 -- end
 
--- TODO
--- How to determine weather:
--- snowy = 90x93 to 93x95
--- grassland = 93-94x101 -> 92-94x102 -> 91x103 to 94x106
--- tropical isle = 102x105 to 104x106
--- * Split areas of worldmap to have their own weather patterns
--- * roll two values for each area. Current weather value and duration.
--- * Make sure to lerp between areas with different weather and also change weather gradually when it changes
-
-
 ---@class Cloud
 ---@field shape {x: number, y: number}[]
 ---@field density number
