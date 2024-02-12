@@ -181,7 +181,6 @@ private.proximityTriggerTemplate = function (interactive)
 
   return function(dlgControl, dt)
     local isStateAllowed = dlgControl.allowAllStates or pl1.movement_state.state == 'normal'
-    print(pl1.movement_state.state)
     dlgControl.indicatorCooldown = dlgControl.indicatorCooldown - dt
     if closeEnoughToPlayer(dlgControl) and plHasCorrectFacing(dlgControl) and isStateAllowed then
       if not interactive or input.enterPressed then

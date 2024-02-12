@@ -2,6 +2,7 @@ local screenEffects = require "screenEffects"
 local u = require 'utilities'
 local determineAmbient = require 'ScreenEffects.lighting.determineAmbient'
 local determinePalette = require 'ScreenEffects.lighting.determinePalette'
+local scaling_handler  = require 'scaling_handler'
 
 local sourceTypes = require 'ScreenEffects.lighting.sourceTypes'
 
@@ -43,15 +44,14 @@ end
 
 local initial_w = love.graphics.getWidth()
 local initial_h = love.graphics.getHeight()
-local canvScale = 2
 -- -- Min canvas width
 -- local canvW = 800 / 2
 -- -- Min canvas height
 -- local canvH = 450 / 2
 -- Min canvas width
-local canvW = 400 * canvScale
+local canvW = 800
 -- Min canvas height
-local canvH = 225 * canvScale
+local canvH = 450
 
 ---@param w number
 ---@param h number
@@ -243,14 +243,15 @@ local function drawSourceOnCanvas(sources, canvas)
     })
     local resetColor = u.storeColour()
     if type then
+      local scale = scaling_handler.get_game_scale()
       if type.type == "sprite" then
         if light.image_index then
           local s = type.sprite
           love.graphics.draw(
             s.img, s[light.image_index],
             x, y, light.rad or 0,
-            canvScale * s.res_x_scale * (light.x_scale or light.scale or 1),
-            canvScale * s.res_x_scale * (light.scale or 1),
+            scale * s.res_x_scale * (light.x_scale or light.scale or 1),
+            scale * s.res_y_scale * (light.scale or 1),
             s.cx, s.cy
           )
         end
@@ -258,8 +259,8 @@ local function drawSourceOnCanvas(sources, canvas)
         love.graphics.draw(
           type.img,
           x, y, light.rad or 0,
-          canvScale * (light.x_scale or light.scale or 1),
-          canvScale * (light.scale or 1),
+          scale * (light.x_scale or light.scale or 1),
+          scale * (light.scale or 1),
           type.centerOffset,
           type.centerOffset
         )
