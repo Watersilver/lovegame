@@ -212,9 +212,11 @@ end
 pam.middle.draw = function(l, t, w, h)
   local resetcol = u.storeColour()
 
+  -- Gets drawn in different locations depending on whether hotkeys are available
+  local mp = session.getMoonPhase()
+
   if session.save.hotkeys then
     love.graphics.print("Day " .. session.save.days, w*0.05, h*0.2, 0, 0.5)
-    local mp = session.getMoonPhase()
     love.graphics.print(mp == 'new' and '-' or mp == 'half' and '(' or 'o', w*0.05 - 15, h*0.2, 0, 0.5)
     local boxHeight = 7
     local boxWidth = 98
@@ -259,6 +261,7 @@ pam.middle.draw = function(l, t, w, h)
     resetcol()
   else
     love.graphics.print("Day " .. session.save.days, w*0.05, h*0.1, 0, 0.5)
+    love.graphics.print(mp == 'new' and '-' or mp == 'half' and '(' or 'o', w*0.05 - 15, h*0.1, 0, 0.5)
   end
 
   local trifx, trify = w * 0.5, h * 0.5 - 8
