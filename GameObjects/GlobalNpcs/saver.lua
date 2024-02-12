@@ -34,6 +34,9 @@ function NPC.initialize(instance)
   instance.ballbreaker = true
   instance.unpushable = false
   instance.physical_properties.masks = {PLAYERJUMPATTACKCAT}
+  instance.onHookReturnListeners.ssbChose = instance.ssbChose
+  instance.onHookReturnListeners.ptTriggered = instance.ptTriggered
+  instance.onHookReturnListeners.ssbWaiting = instance.ssbWaiting
 end
 
 NPC.functions = {
@@ -54,29 +57,26 @@ NPC.functions = {
     return "..."
   end,
 
-  handleHookReturn = function (self)
-    self.image_index = 0
-    if not self.hookReturn then
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ptTriggered" then
+  ptTriggered = function (self)
+    self.image_index = 1
+    self.dlgState = "asking"
+  end,
+
+  ssbWaiting = function (self)
+    self.image_index = 1
+    self.dlgState = "choosing"
+  end,
+
+  ssbChose = function (self)
+    if self.choiceReturn.a == self.choicesDict.yes then
       self.image_index = 1
-      self.dlgState = "asking"
-    elseif self.hookReturn == "ssbWaiting" then
-      self.image_index = 1
-      self.dlgState = "choosing"
-    elseif self.hookReturn == "ssbChose" then
-      if self.choiceReturn.a == self.choicesDict.yes then
-        self.image_index = 1
-        session.saveGame()
-      end
-      self.dlgState = "reacting"
-    elseif self.hookReturn == "ssbDone" then
-      -- Clean up
-      cd.cleanSsb(self)
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ssbFar" then
-      self.dlgState = "interrupted"
+      session.saveGame()
     end
+    self.dlgState = "reacting"
+  end,
+
+  onHandleHookReturnStart = function (self)
+    self.image_index = 0
   end,
 
   determineUpdateHook = function (self)

@@ -581,6 +581,7 @@ function Boss4.initialize(instance)
   instance.content = nil
   instance.content_index = 0
   instance.shieldJustBroke = false
+  instance.allowAllStates = true
 end
 
 local dialogue = {

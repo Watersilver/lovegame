@@ -33,6 +33,7 @@ function NPC.initialize(instance)
   instance.question = "Choose a skill to learn."
   instance.image_speed = 0.05
   instance.sprite_info = im.spriteSettings.npcTest2Sprites
+  instance.onHookReturnListeners.ssbChose = instance.ssbChose
 end
 
 NPC.functions = {
@@ -57,31 +58,17 @@ NPC.functions = {
     elseif self.choiceReturn.a:find("3") then return 3
     end
   end,
-  handleHookReturn = function (self)
-    if not self.hookReturn then
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ptTriggered" then
-      self.dlgState = "asking"
-    elseif self.hookReturn == "ssbWaiting" then
-      self.dlgState = "choosing"
-    elseif self.hookReturn == "ssbChose" then
-      if self.choiceReturn.a:find("Armor lvl") then
-        session.save.armorLvl = self:getChoiceLevel()
-      elseif self.choiceReturn.a:find("Magic lvl") then
-        session.save.magicLvl = self:getChoiceLevel()
-      elseif self.choiceReturn.a:find("Athletics lvl") then
-        session.save.athleticsLvl = self:getChoiceLevel()
-      elseif self.choiceReturn.a:find("Swordsmanship lvl") then
-        session.save.swordLvl = self:getChoiceLevel()
-      end
-      self.dlgState = "reacting"
-    elseif self.hookReturn == "ssbDone" then
-      -- Clean up
-      cd.cleanSsb(self)
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ssbFar" then
-      self.dlgState = "interrupted"
+  ssbChose = function (self)
+    if self.choiceReturn.a:find("Armor lvl") then
+      session.save.armorLvl = self:getChoiceLevel()
+    elseif self.choiceReturn.a:find("Magic lvl") then
+      session.save.magicLvl = self:getChoiceLevel()
+    elseif self.choiceReturn.a:find("Athletics lvl") then
+      session.save.athleticsLvl = self:getChoiceLevel()
+    elseif self.choiceReturn.a:find("Swordsmanship lvl") then
+      session.save.swordLvl = self:getChoiceLevel()
     end
+    self.dlgState = "reacting"
   end,
 
   determineUpdateHook = function (self)

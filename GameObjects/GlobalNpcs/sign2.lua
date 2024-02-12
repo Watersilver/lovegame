@@ -16,7 +16,6 @@ local function throw_collision(self)
   expl.commonExplosion(self, im.spriteSettings.woodDestruction)
   drops.normal(self.x, self.y)
 end
-
 local NPC = {}
 
 function NPC.initialize(instance)
@@ -38,6 +37,7 @@ function NPC.initialize(instance)
   instance.ballbreaker = true
   instance.unpushable = false
   instance.physical_properties.masks = {PLAYERJUMPATTACKCAT}
+  instance.onHookReturnListeners.ssbLookedAway = instance.ssbLookedAway
 end
 
 NPC.functions = {
@@ -49,18 +49,8 @@ NPC.functions = {
     return "..."
   end,
 
-  handleHookReturn = function (self)
-    if not self.hookReturn then
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ptTriggered" then
-      self.dlgState = "talking"
-    elseif self.hookReturn == "ssbDone" then
-      -- Clean up
-      cd.cleanSsb(self)
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ssbFar" or self.hookReturn == "ssbLookedAway" then
-      self.dlgState = "interrupted"
-    end
+  ssbLookedAway = function (self)
+    self.dlgState = "interrupted"
   end,
 
   determineUpdateHook = function (self)

@@ -25,6 +25,7 @@ function NPC.initialize(instance)
   instance.question = "Choose Special."
   instance.image_speed = 0.05
   instance.sprite_info = im.spriteSettings.npcTest3Sprites
+  instance.onHookReturnListeners.ssbChose = instance.ssbChose
 end
 
 NPC.functions = {
@@ -42,46 +43,32 @@ NPC.functions = {
     return "Whatever."
   end,
 
-  handleHookReturn = function (self)
-    if not self.hookReturn then
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ptTriggered" then
-      self.dlgState = "asking"
-    elseif self.hookReturn == "ssbWaiting" then
-      self.dlgState = "choosing"
-    elseif self.hookReturn == "ssbChose" then
-      if self.choiceReturn.a == "Power" then
-        session.save.dinsPower = not session.save.dinsPower
-      elseif self.choiceReturn.a == "Hotkeys" then
-        session.save.hotkeys = not session.save.hotkeys
-      elseif self.choiceReturn.a == "Wisdom" then
-        session.save.nayrusWisdom = not session.save.nayrusWisdom
-      elseif self.choiceReturn.a == "Courage" then
-        session.save.faroresCourage = not session.save.faroresCourage
-      elseif self.choiceReturn.a == "Customize" then
-        session.save.customMarkAvailable = not session.save.customMarkAvailable
-        session.save.customMissileAvailable = not session.save.customMissileAvailable
-        session.save.customSwordAvailable = not session.save.customSwordAvailable
-        session.save.customTunicAvailable = not session.save.customTunicAvailable
-      elseif self.choiceReturn.a == "Water Walk" then
-        session.save.walkOnWater = not session.save.walkOnWater
-      elseif self.choiceReturn.a == "Light" then
-        session.save.playerGlowAvailable = not session.save.playerGlowAvailable
-      elseif self.choiceReturn.a == "Piece of Heart" then
-        local itemInfo = (require "GameObjects.GlobalNpcs.fanfareGottenItems.pieceOfHeart").itemInfo
-        local o = require "GameObjects.objects"
-        local itemGetPoseAndDlg = require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"
-        local pieceOfHeart = itemGetPoseAndDlg:new(itemInfo)
-        o.addToWorld(pieceOfHeart)
-      end
-      self.dlgState = "reacting"
-    elseif self.hookReturn == "ssbDone" then
-      -- Clean up
-      cd.cleanSsb(self)
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ssbFar" then
-      self.dlgState = "interrupted"
+  ssbChose = function (self)
+    if self.choiceReturn.a == "Power" then
+      session.save.dinsPower = not session.save.dinsPower
+    elseif self.choiceReturn.a == "Hotkeys" then
+      session.save.hotkeys = not session.save.hotkeys
+    elseif self.choiceReturn.a == "Wisdom" then
+      session.save.nayrusWisdom = not session.save.nayrusWisdom
+    elseif self.choiceReturn.a == "Courage" then
+      session.save.faroresCourage = not session.save.faroresCourage
+    elseif self.choiceReturn.a == "Customize" then
+      session.save.customMarkAvailable = not session.save.customMarkAvailable
+      session.save.customMissileAvailable = not session.save.customMissileAvailable
+      session.save.customSwordAvailable = not session.save.customSwordAvailable
+      session.save.customTunicAvailable = not session.save.customTunicAvailable
+    elseif self.choiceReturn.a == "Water Walk" then
+      session.save.walkOnWater = not session.save.walkOnWater
+    elseif self.choiceReturn.a == "Light" then
+      session.save.playerGlowAvailable = not session.save.playerGlowAvailable
+    elseif self.choiceReturn.a == "Piece of Heart" then
+      local itemInfo = (require "GameObjects.GlobalNpcs.fanfareGottenItems.pieceOfHeart").itemInfo
+      local o = require "GameObjects.objects"
+      local itemGetPoseAndDlg = require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"
+      local pieceOfHeart = itemGetPoseAndDlg:new(itemInfo)
+      o.addToWorld(pieceOfHeart)
     end
+    self.dlgState = "reacting"
   end,
 
   determineUpdateHook = function (self)

@@ -174,6 +174,7 @@ NPC.functions = {
   end,
 
   update = function (self, dt)
+    self.allowAllStates = not session.save.startCutsceneDone
     dlgCtrl.functions.update(self, dt)
     self.image_index = (self.image_index + dt*60*self.image_speed)
     while self.image_index >= self.sprite.frames do

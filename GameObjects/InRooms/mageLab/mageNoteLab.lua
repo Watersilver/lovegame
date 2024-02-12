@@ -22,6 +22,8 @@ function NPC.initialize(instance)
   However one must have the power of the nine Mystical Spells to cast the Seal. \z
   Most are bound deep in the ancient dungeons of "..GCON.shidun..". One I have here. \z
   I will take the outworlder to the other spells. We must not fail."
+  instance.onHookReturnListeners.ssbDone = instance.ssbDone
+  instance.onHookReturnListeners.ssbLookedAway = instance.ssbLookedAway
 end
 
 NPC.functions = {
@@ -34,22 +36,18 @@ NPC.functions = {
     dlgCtrl.functions.update(self, dt)
   end,
 
-  handleHookReturn = function (self)
-    if not self.hookReturn then
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ptTriggered" then
-      self.dlgState = "talking"
-    elseif self.hookReturn == "ssbDone" then
-      -- Clean up
-      cd.cleanSsb(self)
-      self.dlgState = "waiting"
-      -- Make note and set save.
-      session.startQuest("mainQuest3");
-      session.startQuest("mysticalSpells1");
-      session.save.readMageJournal1 = true
-    elseif self.hookReturn == "ssbFar" or self.hookReturn == "ssbLookedAway" then
-      self.dlgState = "interrupted"
-    end
+  ssbDone = function (self)
+    -- Clean up
+    cd.cleanSsb(self)
+    self.dlgState = "waiting"
+    -- Make note and set save.
+    session.startQuest("mainQuest3");
+    session.startQuest("mysticalSpells1");
+    session.save.readMageJournal1 = true
+  end,
+
+  ssbLookedAway = function (self)
+    self.dlgState = "interrupted"
   end,
 }
 

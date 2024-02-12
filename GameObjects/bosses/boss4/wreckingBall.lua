@@ -256,6 +256,7 @@ function WreckingBall.initialize(instance)
   instance.state.state = "start"
   instance.spike_index = 0
   instance.spike_anim_speed = 0
+  instance.allowAllStates = true
 end
 
 WreckingBall.functions = {

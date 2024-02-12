@@ -39,6 +39,7 @@ function NPC.initialize(instance)
   instance.question = "Choose Extra hearts."
   instance.image_speed = 0.05
   instance.sprite_info = im.spriteSettings.npcTest3Sprites
+  instance.onHookReturnListeners.ssbChose = instance.ssbChose
 end
 
 NPC.functions = {
@@ -56,28 +57,14 @@ NPC.functions = {
     return "Whatever."
   end,
 
-  handleHookReturn = function (self)
-    if not self.hookReturn then
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ptTriggered" then
-      self.dlgState = "asking"
-    elseif self.hookReturn == "ssbWaiting" then
-      self.dlgState = "choosing"
-    elseif self.hookReturn == "ssbChose" then
-      -- Choice is self.choiceReturn.a
-      session.save.piecesOfHeart = math.min(tonumber(self.choiceReturn.a) * 4, GCON.maxPOHs)
-      if pl1 then
-        pl1:readSave()
-        pl1.health = pl1.maxHealth
-      end
-      self.dlgState = "reacting"
-    elseif self.hookReturn == "ssbDone" then
-      -- Clean up
-      cd.cleanSsb(self)
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ssbFar" then
-      self.dlgState = "interrupted"
+  ssbChose = function (self)
+    -- Choice is self.choiceReturn.a
+    session.save.piecesOfHeart = math.min(tonumber(self.choiceReturn.a) * 4, GCON.maxPOHs)
+    if pl1 then
+      pl1:readSave()
+      pl1.health = pl1.maxHealth
     end
+    self.dlgState = "reacting"
   end,
 
   determineUpdateHook = function (self)

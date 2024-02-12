@@ -1,9 +1,6 @@
 local im = require "image"
 local p = require "GameObjects.prototype"
-local inp = require "input"
-local inv = require "inventory"
 local asp = require "GameObjects.Helpers.add_spell"
-local u = require "utilities"
 local cd = require "GameObjects.DialogueBubble.controlDefaults"
 local npcP = require "GameObjects.npcPrototype"
 local dlgCtrl = require "GameObjects.DialogueBubble.DialogueControl"
@@ -19,6 +16,7 @@ function NPC.initialize(instance)
   instance.question = "Power up fully?"
   instance.image_speed = 0.05
   instance.sprite_info = im.spriteSettings.npcTest3Sprites
+  instance.onHookReturnListeners.ssbChose = instance.ssbChose
 end
 
 NPC.functions = {
@@ -36,50 +34,36 @@ NPC.functions = {
     return "Whatever."
   end,
 
-  handleHookReturn = function (self)
-    if not self.hookReturn then
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ptTriggered" then
-      self.dlgState = "asking"
-    elseif self.hookReturn == "ssbWaiting" then
-      self.dlgState = "choosing"
-    elseif self.hookReturn == "ssbChose" then
-      -- Choice is self.choiceReturn.a
-      if self.choiceReturn.a == "Yes" then
-        session.save.armorLvl = 3
-        session.save.magicLvl = 3
-        session.save.athleticsLvl = 3
-        session.save.swordLvl = 3
-        session.save.hasSword = "sword"
-        session.save.hasJump = "jump"
-        session.save.hasMissile = "missile"
-        session.save.hasMark = "mark"
-        session.save.hasRecall = "recall"
-        session.save.hasGrip = "grip"
-        session.save.hasBomb = "bomb"
-        session.save.hasSpeed = "speed"
-        session.save.hasMystery = "mystery"
-        session.save.dinsPower = true
-        session.save.nayrusWisdom = true
-        session.save.faroresCourage = true
-        session.save.customMarkAvailable = true
-        session.save.customMissileAvailable = true
-        session.save.customSwordAvailable = true
-        session.save.customTunicAvailable = true
-        session.save.walkOnWater = true
-        session.save.playerGlowAvailable = true
-        session.save.hotkeys = true
-        asp.emptySpellSlots()
-        if pl1 then pl1:readSave() end
-      end
-      self.dlgState = "reacting"
-    elseif self.hookReturn == "ssbDone" then
-      -- Clean up
-      cd.cleanSsb(self)
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ssbFar" then
-      self.dlgState = "interrupted"
+  ssbChose = function (self)
+    -- Choice is self.choiceReturn.a
+    if self.choiceReturn.a == "Yes" then
+      session.save.armorLvl = 3
+      session.save.magicLvl = 3
+      session.save.athleticsLvl = 3
+      session.save.swordLvl = 3
+      session.save.hasSword = "sword"
+      session.save.hasJump = "jump"
+      session.save.hasMissile = "missile"
+      session.save.hasMark = "mark"
+      session.save.hasRecall = "recall"
+      session.save.hasGrip = "grip"
+      session.save.hasBomb = "bomb"
+      session.save.hasSpeed = "speed"
+      session.save.hasMystery = "mystery"
+      session.save.dinsPower = true
+      session.save.nayrusWisdom = true
+      session.save.faroresCourage = true
+      session.save.customMarkAvailable = true
+      session.save.customMissileAvailable = true
+      session.save.customSwordAvailable = true
+      session.save.customTunicAvailable = true
+      session.save.walkOnWater = true
+      session.save.playerGlowAvailable = true
+      session.save.hotkeys = true
+      asp.emptySpellSlots()
+      if pl1 then pl1:readSave() end
     end
+    self.dlgState = "reacting"
   end,
 
   determineUpdateHook = function (self)

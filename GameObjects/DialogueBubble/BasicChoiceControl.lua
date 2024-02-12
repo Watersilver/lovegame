@@ -2,6 +2,18 @@ local p = require "GameObjects.prototype"
 local DlgControl = require "GameObjects.DialogueBubble.DialogueControl"
 local cd = require "GameObjects.DialogueBubble.controlDefaults"
 
+local onReturnListenersCoiceDefaults = {
+  ssbChose = function(self)
+    self.dlgState = "reacting"
+  end,
+  ptTriggered = function(self)
+    self.dlgState = "asking"
+  end,
+  ssbWaiting = function(self)
+    self.dlgState = "choosing"
+  end,
+}
+
 local NPC = {}
 
 function NPC.initialize(instance)
@@ -16,6 +28,9 @@ function NPC.initialize(instance)
     instance.choicesDict.c3
   }
   instance.question = "Pick one"
+  instance.onHookReturnListeners.ssbChose = onReturnListenersCoiceDefaults.ssbChose
+  instance.onHookReturnListeners.ptTriggered = onReturnListenersCoiceDefaults.ptTriggered
+  instance.onHookReturnListeners.ssbWaiting = onReturnListenersCoiceDefaults.ssbWaiting
 end
 -- nearInteractiveChoiceBubble
 NPC.functions = {
@@ -25,24 +40,6 @@ NPC.functions = {
       return self.question
     else
       return self.choiceReturn.a .. "? Good choice!"
-    end
-  end,
-
-  handleHookReturn = function (self)
-    if not self.hookReturn then
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ssbDone" then
-      -- Clean up
-      cd.cleanSsb(self)
-      self.dlgState = "waiting"
-    elseif self.hookReturn == "ssbChose" then
-      self.dlgState = "reacting"
-    elseif self.hookReturn == "ssbFar" then
-      self.dlgState = "interrupted"
-    elseif self.hookReturn == "ptTriggered" then
-      self.dlgState = "asking"
-    elseif self.hookReturn == "ssbWaiting" then
-      self.dlgState = "choosing"
     end
   end,
 
