@@ -214,10 +214,10 @@ pam.middle.draw = function(l, t, w, h)
 
   -- Gets drawn in different locations depending on whether hotkeys are available
   local mp = session.getMoonPhase()
+  local mpHeightMod = 0.2
 
   if session.save.hotkeys then
     love.graphics.print("Day " .. session.save.days, w*0.05, h*0.2, 0, 0.5)
-    love.graphics.print(mp == 'new' and '-' or mp == 'half' and '(' or 'o', w*0.05 - 15, h*0.2, 0, 0.5)
     local boxHeight = 7
     local boxWidth = 98
     local textScale = 0.13
@@ -261,8 +261,9 @@ pam.middle.draw = function(l, t, w, h)
     resetcol()
   else
     love.graphics.print("Day " .. session.save.days, w*0.05, h*0.1, 0, 0.5)
-    love.graphics.print(mp == 'new' and '-' or mp == 'half' and '(' or 'o', w*0.05 - 15, h*0.1, 0, 0.5)
+    mpHeightMod = 0.2
   end
+  love.graphics.print(mp == 'new' and '-' or mp == 'half' and '(' or 'o', w*0.05 - 15, h*mpHeightMod, 0, 0.5)
 
   local trifx, trify = w * 0.5, h * 0.5 - 8
   local triforceSprite = pam.middle.triforceSprite
