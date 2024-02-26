@@ -429,8 +429,15 @@ items.ringMage = {
   description = "Transform into Mage!",
   equip = function()
     session.usedItemComment = "Equipped Mage Ring!"
-    for i, plSprite in ipairs(im.spriteSettings.playerSprites) do
-      im.replace_sprite(plSprite[1], altSkins.origPlayerSprites[i])
+    for _, plSprite in ipairs(im.spriteSettings.playerSprites) do
+      local sname = plSprite[1]:gsub("Witch/", '')
+      local s
+      for _, altSpr in ipairs(altSkins.origPlayerSprites) do
+        if altSpr[1]:gsub("WitchOrig/", '') == sname then s = altSpr end
+      end
+      if s then
+        im.replace_sprite(plSprite[1], s)
+      end
     end
   end,
   unequip = function()

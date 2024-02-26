@@ -44,16 +44,13 @@ inv.sword = {
     end
   end,
   image_offset = function(object, dt, side)
-    local offset
-    -- if object.swingingSword and (object.swingTimer > object.swingDuration) then
-    --   offset = 0
-    -- else
-    --   offset = object.image_index * 3 * 0.5
-    -- end
-    if object.swingingSword and (object.item_use_duration - object.item_use_counter < 0.07) then
-      offset = 0
-    else
-      offset = object.image_index * 3 * 0.5
+    local offset = 0
+    local maxOffset = 2
+    offset = maxOffset * object.image_index / (object.sprite.frames - 1)
+    if (object.item_use_duration - object.item_use_counter < 0.07) then
+      -- local x = (object.item_use_duration - object.item_use_counter) / 0.07
+      -- offset = maxOffset * x
+      offset = maxOffset * 0.5
     end
     if side == "down" then
       object.ioy = (offset)

@@ -58,6 +58,7 @@ altSkins.origPlayerSprites = {
   {'WitchOrig/die', 7, padding = 2, width = 16, height = 16},
   {'WitchOrig/shadow', 1, padding = 2, width = 16, height = 16},
   {'WitchOrig/defaultGrass', 2, padding = 2, width = 16, height = 16},
+  {'WitchOrig/wake_down', 1, padding = 2, width = 16, height = 16},
   {'WitchOrig/defaultWaterRipples', 4, padding = 2, width = 16, height = 6}
 }
 
@@ -119,7 +120,8 @@ altSkins.zeldaPlayerSprites = {
   {'Zelda/die', 7, padding = 2, width = 18, height = 19},
   {'Zelda/shadow', 1, padding = 2, width = 16, height = 18},
   {'Zelda/defaultGrass', 2, padding = 2, width = 16, height = 18},
-  {'Zelda/defaultWaterRipples', 4, padding = 2, width = 16, height = 6}
+  {'Zelda/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
+  {'Zelda/wake_down', 1, padding = 0, width = 16, height = 16}
 }
 
 return altSkins

@@ -430,7 +430,7 @@ local animation_states = {
 
   downstill = {
   run_state = function(instance, dt)
-    td.image_speed(instance, dt)
+    hps.run_still(instance, dt, "down")
   end,
 
   check_state = function(instance, dt)
@@ -438,17 +438,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/still_down"]
+    hps.start_still(instance, dt, "down")
   end,
 
   end_state = function(instance, dt)
+    hps.end_still(instance, dt, "down")
   end
   },
 
 
   rightstill = {
   run_state = function(instance, dt)
-    td.image_speed(instance, dt)
+    hps.run_still(instance, dt, "right")
   end,
 
   check_state = function(instance, dt)
@@ -456,19 +457,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/still_left"]
-    instance.x_scale = -1
+    hps.start_still(instance, dt, "right")
   end,
 
   end_state = function(instance, dt)
-    instance.x_scale = 1
+    hps.end_still(instance, dt, "right")
   end
   },
 
 
   leftstill = {
   run_state = function(instance, dt)
-    td.image_speed(instance, dt)
+    hps.run_still(instance, dt, "left")
   end,
 
   check_state = function(instance, dt)
@@ -476,17 +476,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/still_left"]
+    hps.start_still(instance, dt, "left")
   end,
 
   end_state = function(instance, dt)
+    hps.end_still(instance, dt, "left")
   end
   },
 
 
   upstill = {
   run_state = function(instance, dt)
-    td.image_speed(instance, dt)
+    hps.run_still(instance, dt, "up")
   end,
 
   check_state = function(instance, dt)
@@ -494,10 +495,11 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/still_up"]
+    hps.start_still(instance, dt, "up")
   end,
 
   end_state = function(instance, dt)
+    hps.end_still(instance, dt, "up")
   end
   },
 
@@ -865,6 +867,7 @@ local animation_states = {
       spin = true,
       layer = instance.layer
     }
+    instance.spinattacking = true
     o.addToWorld(instance.sword)
   end,
 
@@ -875,6 +878,7 @@ local animation_states = {
     -- Delete sword
     o.removeFromWorld(instance.sword)
     instance.sword = nil
+    instance.spinattacking = nil
   end
   },
 

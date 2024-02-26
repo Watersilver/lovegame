@@ -230,7 +230,9 @@ Sword.functions = {
 
     -- Calculate sprite_index
     local phase
-    if not self.stab then
+    if cr.spinattacking then
+      self.image_index = 1
+    elseif not self.stab then
       phase = floor(cr.image_index * self.sprite.frames / cr.sprite.frames)
       self.image_index = phase
     else

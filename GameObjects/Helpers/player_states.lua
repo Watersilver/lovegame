@@ -63,6 +63,11 @@ player_states.check_halt = function(instance, dt, side)
   end
 end
 
+-- TODO: breath fast after running for long, take deep breath exhale
+-- and stay without air for a while and afterwards calm breathing
+player_states.run_still = function(instance, dt, side)
+end
+
 player_states.check_still = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if pddp(instance, trig, side, dt) then
@@ -74,6 +79,26 @@ player_states.check_still = function(instance, dt, side)
   elseif td.check_push_a(instance, trig, side, dt) then
   elseif td.check_walk_a(instance, trig, side, dt) then
   elseif td.check_halt_a(instance, trig, side, dt) then
+  end
+end
+
+-- TODO: breath fast after running for long, take deep breath exhale
+-- and stay without air for a while and afterwards calm breathing
+player_states.start_still = function(instance, dt, side)
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/still_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/still_left"]
+    instance.x_scale = -1
+  end
+  instance.image_speed = 0.07
+end
+
+-- TODO: breath fast after running for long, take deep breath exhale
+-- and stay without air for a while and afterwards calm breathing
+player_states.end_still = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = 1
   end
 end
 
@@ -94,7 +119,7 @@ player_states.run_swing = function(instance, dt, side)
   -- Manage position offset and image speed
   if trig.animation_end then
     instance.image_speed = 0
-    instance.image_index = 1.99
+    instance.image_index = instance.sprite.frames - 0.01
   else
     inv.sword.image_offset(instance, dt, side)
   end
@@ -126,7 +151,6 @@ player_states.start_swing = function(instance, dt, side)
     snd.play(instance.sounds.swordSlash3)
   end
   instance.image_index = 0
-  instance.image_speed = 0.20
   instance.triggers.animation_end = false
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/swing_" .. side]
@@ -134,6 +158,7 @@ player_states.start_swing = function(instance, dt, side)
     instance.sprite = im.sprites["Witch/swing_left"]
     instance.x_scale = -1
   end
+  instance.image_speed = instance.sprite.frames * 0.0667
   -- Create sword
   instance.sword = sw:new{
     creator = instance,
@@ -279,7 +304,10 @@ end
 
 player_states.run_fall = function(instance, dt, side)
   -- Witch fall
-  if instance.sprite.frames == 3 and session.save.equippedRing == "ringMage" then
+  if (
+    instance.sprite.frames == 3 and session.save.equippedRing == "ringMage"
+  )
+  then
     local vel = instance.zvel
 
     if instance.sideScroll then
@@ -295,7 +323,7 @@ player_states.run_fall = function(instance, dt, side)
       instance.image_index = 1
     end
 
-    -- Link fall
+  -- Link fall
   else
     if instance.triggers.animation_end then
       instance.image_speed = 0
@@ -661,6 +689,10 @@ player_states.run_damaged = function(instance, dt, side)
     instance.image_speed = 0
     instance.image_index = 5
   end
+  if instance.triggers.animation_end then
+    instance.image_speed = 0
+    instance.image_index = instance.sprite.frames - 1
+  end
 end
 
 player_states.check_damaged = function(instance, dt, side)
@@ -686,7 +718,7 @@ player_states.start_damaged = function(instance, dt, side)
   end
   instance.takingDamage = 3 -- Cannot take more damage for three frames
   instance.image_index = 0
-  instance.image_speed = 0
+  instance.image_speed = 0.2
   if instance.body:getType() ~= "static" and not (dlg.enable or dlg.enabled) then
     instance:addHealth(-(instance.triggers.damaged or 1))
   end
@@ -919,7 +951,9 @@ end
 
 
 player_states.run_climbing = function(instance, dt, side)
-  td.image_speed(instance, dt, 1)
+  local s = instance.speed / (instance.timeFlow or 1)
+  local f = instance.sprite.frames
+  instance.image_speed = 0.001 * s * f
 end
 
 player_states.check_climbing = function(instance, dt, side)

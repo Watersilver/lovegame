@@ -29,7 +29,7 @@ local states = {
   run_state = function(instance, dt)
     instance.stateTimer = instance.stateTimer - dt
     if instance.stateTimer < 0 then
-      instance.playa.image_index = 1
+      instance.playa.sprite = im.sprites["Witch/wake_down"]
       game.room.ambientLightType = instance.prevLightType
     end
   end,
@@ -39,7 +39,7 @@ local states = {
     pl.animation_state:change_state(pl, "noDt", "cutscene")
     pl.sprite = im.sprites["Witch/sleeping_down"]
     pl.image_index = 0
-    pl.image_speed = 0
+    pl.image_speed = 0.1
     instance.rescuer = o.identified.rescuer[1]
     instance.stateTimer = 4
   end,

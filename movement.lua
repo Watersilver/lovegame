@@ -316,7 +316,7 @@ local mo = {}
         image_speed = image_speed * 1/floorFriction
       end
       if image_speed > 0.3 then image_speed = 0.3 end
-      object.image_speed = image_speed
+      object.image_speed = image_speed * (speedMod or 1)
     end,
 
     sideZAxis = function(object)

@@ -23,6 +23,12 @@ draw = function (self)
   local shm = ca.shadowHeightMod or 0
   if ca.exists then
     self.x, self.y = ca.x, ca.y + shm
+    if ca.iox then
+      self.x = self.x + ca.iox
+    end
+    if ca.ioy then
+      self.y = self.y + ca.ioy
+    end
     love.graphics.draw(
     sprite.img, frame, self.x, self.y, 0,
     sprite.res_x_scale, sprite.res_y_scale,
@@ -67,34 +73,24 @@ function Shadow:new(init)
 end
 
 function Shadow.handleShadow(object, plshadow)
-  -- If above ground level
-  if object.zo < 0 then
-    -- Create shadow
-    if not object.shadow then
-      local shlayer = object.layer-1
-      if shlayer < 1 then shlayer = 1
-      elseif shlayer > 19 then shlayer = 19
-      end
-      local shm = object.shadowHeightMod or 0
-      local ytotal = object.y or object.ystart
-      if ytotal then ytotal = ytotal + shm end
-      object.shadow = Shadow:new{
-        caster = object, layer = shlayer,
-        xstart = object.x or object.xstart,
-        ystart = ytotal,
-        playershadow = plshadow
-      }
-      if object.shadowsprite then
-        object.shadow.sprite_info = object.shadowsprite
-      end
-      o.addToWorld(object.shadow)
+  if not object.shadow then
+    local shlayer = object.layer-1
+    if shlayer < 1 then shlayer = 1
+    elseif shlayer > 19 then shlayer = 19
     end
-  else
-    -- Destroy Shadow
-    if object.shadow then
-      o.removeFromWorld(object.shadow)
-      object.shadow = nil
+    local shm = object.shadowHeightMod or 0
+    local ytotal = object.y or object.ystart
+    if ytotal then ytotal = ytotal + shm end
+    object.shadow = Shadow:new{
+      caster = object, layer = shlayer,
+      xstart = object.x or object.xstart,
+      ystart = ytotal,
+      playershadow = plshadow
+    }
+    if object.shadowsprite then
+      object.shadow.sprite_info = object.shadowsprite
     end
+    o.addToWorld(object.shadow)
   end
 end
 
