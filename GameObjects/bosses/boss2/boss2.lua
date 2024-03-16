@@ -275,6 +275,7 @@ local states = {
 
   singleHand = {
     run_state = function(instance, dt)
+      instance.singleHandStateRunOnce = true
       instance.angleTimer = instance.angleTimer + dt * 30
       instance.angle = 0.05 * math.sin(instance.angleTimer)
 
@@ -330,6 +331,7 @@ local states = {
 
   cartoonPhysics = {
     run_state = function(instance, dt)
+      instance.cartoonPhysicsStateRunOnce = true
       instance.currentY = instance.currentY - dt * 55
       instance.y = instance.currentY
       if instance.y < instance.stateY then instance.y = instance.stateY end
@@ -576,6 +578,9 @@ Boss2.functions = {
 
       self.body:setPosition(x, defaultHeadHeight)
       self.y = self.lastY + (self.lastYOffset or 0)
+      self.lastSingleHandY = self.y
+    elseif self.singleHandStateRunOnce and not self.cartoonPhysicsStateRunOnce then
+      self.y = self.lastSingleHandY
     end
 
     -- Check if blind
