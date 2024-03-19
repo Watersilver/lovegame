@@ -93,17 +93,81 @@ local methods = {
     return self:getNextHeight() - 2 * self:getLineHeight() + 0.01 -- Last line is to fix occasional floating point error
   end,
 
+  -- updateLength = function (self, newLength)
+  --   local maxLength = self:getMaxLength()
+  --   if newLength >= maxLength then newLength = maxLength end
+  --   if self.length == newLength then return end
+  --   self.length = newLength
+  --   self.colouredString[1] = self.textRGBA
+  --   local visibleStr = string.sub(self.string, 0, self.length)
+  --   self.colouredString[2] = visibleStr
+  --   self.colouredString[3] = transparentColour
+  --   self.colouredString[4] = string.sub(self.string, self.length + 1)
+  --   self.text:setf(self.colouredString, self:getWraplimit(), self.alignmode)
+  --   return visibleStr:sub(#visibleStr, #visibleStr)
+  -- end,
+
+  parseCol = function(self, col)
+    if not col then return self.textRGBA end
+    if col.token:sub(5, 5) == '#' then
+      return {
+        tonumber(col.token:sub(6, 6), 16) / 15,
+        tonumber(col.token:sub(7, 7), 16) / 15,
+        tonumber(col.token:sub(8, 8), 16) / 15,
+        1
+      }
+    elseif col.token:sub(5) == 'default' then
+      return self.textRGBA
+    end
+  end,
+
   updateLength = function (self, newLength)
     local maxLength = self:getMaxLength()
     if newLength >= maxLength then newLength = maxLength end
     if self.length == newLength then return end
     self.length = newLength
-    self.colouredString[1] = self.textRGBA
-    local visibleStr = string.sub(self.string, 0, self.length)
-    self.colouredString[2] = visibleStr
-    self.colouredString[3] = transparentColour
-    self.colouredString[4] = string.sub(self.string, self.length + 1)
+
+    local markup = self.options.markup or {}
+
+    -- Determine colours
+    -- Sort color tokens by encounter order
+    local colToks = {}
+    for _, m in pairs(markup) do
+      if m.atLength <= self.length and m.token:sub(1,3) == 'col' then
+        table.insert(colToks, m)
+      end
+    end
+
+    local cols = {{
+      startPos = 1,
+      endPos = 1,
+      col = self.textRGBA
+    }}
+    for _, colTok in ipairs(colToks) do
+      local l = colTok.atLength - 1
+      cols[#cols].endPos = l
+      if l >= self.length then break end
+      table.insert(cols, {
+        startPos = colTok.atLength,
+        col = self:parseCol(colTok)
+      })
+    end
+    cols[#cols].endPos = self.length
+    table.insert(cols, {
+      startPos = self.length + 1,
+      col = transparentColour
+    })
+
+    local i = 1
+
+    for _, col in ipairs(cols) do
+      self.colouredString[i] = col.col
+      self.colouredString[i + 1] = self.string:sub(col.startPos, col.endPos)
+      i = i + 2
+    end
+
     self.text:setf(self.colouredString, self:getWraplimit(), self.alignmode)
+    local visibleStr = string.sub(self.string, 1, self.length)
     return visibleStr:sub(#visibleStr, #visibleStr)
   end,
 
@@ -135,6 +199,7 @@ function BubbleText.new(string, options)
     bubbleText[name] = method
   end
   options = options or {}
+  bubbleText.options = options
   local maxWidth, maxHeight, font, textRGBA =
     options.maxWidth, options.maxHeight,
     options.font, options.textRGBA

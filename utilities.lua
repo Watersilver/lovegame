@@ -771,4 +771,42 @@ function u.deep_copy(t)
   return deep_copy(t, {})
 end
 
+-- split functions found here: http://lua-users.org/wiki/SplitJoin
+
+---@param str string
+---@param tokens string[]
+---@param max? number
+---@return string[]
+function u.splitTokens(str, tokens, max)
+  for i,t in ipairs(tokens) do
+    tokens[i] = '^.-()' .. t
+  end
+
+  -- Now the actual loop to split the first string parameter
+  local t, n, p = {}, 1, 1
+  while n ~= max do
+    -- locate the nearest subpatterns that match a separator in str:sub(p);
+    -- if two subpatterns match at same nearest position, keep the longest one
+    local first, last = nil, nil
+    for _, token in ipairs(tokens) do
+      local q, r, s = str:find(token, p)
+      if q then
+        -- A possible token (not necessarily the neareast) was found in str:sub(s, r)
+        -- Here: q~=nil, r~=nil, s~=nil, q==p <= s <= r)
+        if not first or s < first then
+          first, last = s, r -- this also overrides any longer pattern, but located later
+        elseif r > last then
+          last = r -- prefer the longest pattern at the same position
+        end
+      end
+    end
+    if not first then break end
+    -- The nearest token (with the longest length) was found in str:sub(first, last).
+    -- Store the non-token part (possibly empty) at odd position, and the token at the next even position
+    t[n], t[n + 1], n, p = str:sub(p, first - 1), str:sub(first, last), n + 2, last + 1
+  end
+  t[n] = str:sub(p) -- Store the last non-token (possibly empty) at odd position
+  return t
+end
+
 return u

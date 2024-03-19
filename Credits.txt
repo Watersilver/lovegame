@@ -1,18 +1,3 @@
 Press Start Font Family : codeman38 | cody@zone38.net | http://www.zone38.net/ ]
 
-GRAPHICS
-Zelda overworld rip KOOLKID67890
-Additional overworld and clutter by Katsu
-Misc rips by Reptile, Bruce juice
-Effects, Oracle Enemies rips by Darth RPG
-Link Awakening Enemies rips by Bruce Juice
-Final Fantasy Adventure Enemies ripped by WaxPoetic
-Interior by Red Mage Moogle
-dungeons and bosses by Mister Mike
-Link rips by Sonikku and tailssbs/ shawn
-Intro rips by Sonikku
-Zelda rip by Guille Skye
-Npcs by Mister Mike, Darth RPG, Shawn
-
-SOUNDS
-Oracle games sfx from http://noproblo.dayjo.org/ZeldaSounds/Oracle/index.html
+kikito - require lib

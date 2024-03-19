@@ -85,6 +85,7 @@ gvar = {
   t = 0,
   -- Threshold before screen transitions are triggered
   screenEdgeThreshold = GCON.defaultScreenEdgeThreshold,
+  spritesTypeSelected = false
 }
 
 -- Load stuff from save directory
@@ -602,6 +603,11 @@ session = {
     end
 
   end,
+
+  ---@param id string
+  setInstanceId = function(instance, id)
+    instance.ids[#instance.ids+1] = id
+  end
 }
 local session = session
 

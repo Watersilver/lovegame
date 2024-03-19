@@ -546,6 +546,20 @@ function im.reloadPlSprites()
       -- reload sprites
       im.load_sprite(plSprite).times_loaded = timesLoaded
     end
+
+    if gvar.spritesTypeSelected == 'link' then
+      local altSkins = require "altSkins"
+      for _, plSprite in ipairs(im.spriteSettings.playerSprites) do
+        local sname = plSprite[1]:gsub("Witch/", '')
+        local s
+        for _, altSpr in ipairs(altSkins.linkSprites) do
+          if altSpr[1]:gsub("Witch.old/", '') == sname then s = altSpr end
+        end
+        if s then
+          im.replace_sprite(plSprite[1], s)
+        end
+      end
+    end
   end
 end
 

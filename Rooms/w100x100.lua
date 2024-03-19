@@ -1140,6 +1140,8 @@ room.manuallyPlacedObjects = {
   -- },
   {x = 344, y = 168, blueprint = "GlobalNpcs.debug.pohGiver"},
   {x = 392, y = 168, blueprint = "GlobalNpcs.debug.godModeGiver"},
+  {x = 244, y = 168, blueprint = "GlobalNpcs.debug.test1npc"},
+  {x = 224, y = 168, blueprint = "GlobalNpcs.debug.test2npc"},
   {x = 360, y = 248, blueprint = "GlobalNpcs.saver"},
   {x = 328, y = 104, blueprint = "GlobalNpcs.debug.spellGiver2"},
   {x = 104, y = 344, blueprint = "GlobalNpcs.debug.skillGiver2"},

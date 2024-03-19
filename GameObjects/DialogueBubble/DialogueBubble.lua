@@ -14,6 +14,7 @@ function DialogueBubble.addNew(string, anchor, options)
   init.position = init.position or "up"
   init.staysOnScreen = init.staysOnScreen
   init.noXOffset = init.noXOffset
+  init.markup = init.markup
   -- textRGBA
   local newBubble = DialogueBubble:new(init)
   o.addToWorld(newBubble)
@@ -73,14 +74,6 @@ local resize = {
         self.height = self.targetHeight
         self.width = self.targetWidth
       end
-    end
-
-    if math.abs(self.widthVel) < 1 and
-    math.abs(self.height - self.targetHeight) < 5 and
-    math.abs(self.width - self.targetWidth) < 5 then
-      self.writable = true
-    else
-      self.writable = false
     end
 
     -- Se duration 1 / k to amplitude tha einai self.targetHeight / e
@@ -143,6 +136,29 @@ local resize = {
       --   self.stable = true
       -- end
     end
+
+    -- Kinetic E: 1/2 * m * v ^ 2
+    -- Potentical E: 1/2 * k * x ^ 2
+    local xKE = (1/2) * self.mass * (self.widthVel) ^ 2
+    local xPE = (1/2) * k * (self.width - self.targetWidth) ^ 2
+    local yKE = (1/2) * self.mass * (self.heightVel) ^ 2
+    local yPE = (1/2) * k * (self.height - self.targetHeight) ^ 2
+    -- The Total Energy of Vibration can be calculated using the equation E = (1/2)kA^2, (1)
+    -- where E is the total energy, k is the spring constant, and A is the amplitude of vibration.
+    -- Using this we can find the amplitude. I'm sure there's a better way.
+    -- (1) => A = sqrt(E / ((1/2)*k))
+    local xE = xKE + xPE
+    local yE = yKE + yPE
+    local xA = math.sqrt(xE / ((1/2)*k))
+    local yA = math.sqrt(yE / ((1/2)*k))
+    if
+      xA < 5
+      and yA < 5
+    then
+      self.writable = true
+    else
+      self.writable = false
+    end
   end,
 }
 
@@ -158,7 +174,6 @@ function DialogueBubble.initialize(instance)
   instance.targetHeight = 0
   instance.padding = 4
   instance.bottomPadding = 1
-  instance.resizeFunc = "hThenW"
   instance.resizeFunc = "blobby"
   instance.widthAcc = 0
   instance.widthVel = 0
@@ -231,8 +246,10 @@ DialogueBubble.functions = {
       + self.padding
       + self.triangleHeight * math.abs(self.positionMod)
     )
-    if anchor.height then
-     self.y = self.y - anchor.height * 0.5 * self.positionMod
+
+    local aHeight = anchor.height or anchor.sprite.height
+    if aHeight then
+     self.y = self.y - aHeight * 0.5 * self.positionMod
     end
 
     -- Nilify triggers
@@ -276,14 +293,17 @@ DialogueBubble.functions = {
     -- Make sure to stay in camera if I must
     local totalWidth = self.width + 2 * self.padding * wdivtw
     local totalHeight = self.height + 2 * self.padding * hdivth
+    local isPushedToScreen = false
     if self.staysOnScreen then
       -- Check x axis
       if l + 3 > x - 0.5 * totalWidth then
         -- beyond left edge
         x = l + 3 + 0.5 * totalWidth
+        isPushedToScreen = true
       elseif l + w - 3 < x + 0.5 * totalWidth then
         -- beyond right edge
         x = l + w - 3 - 0.5 * totalWidth
+        isPushedToScreen = true
       end
       -- Check y axis
       local triangleOffset = self.positionMod * self.triangleHeight
@@ -297,14 +317,16 @@ DialogueBubble.functions = {
       if t + 3 > y - 0.5 * totalHeight + topTrigOffset then
         -- beyond top edge
         y = t + 3 + 0.5 * totalHeight - topTrigOffset
+        isPushedToScreen = true
       elseif t + h - 3 < y + 0.5 * totalHeight + bottomTrigOffset then
         -- beyond bottom edge
         y = t + h - 3 - 0.5 * totalHeight - bottomTrigOffset
+        isPushedToScreen = true
       end
     end
 
     -- Draw bubble
-    if anchor and anchor.exists and not self.noTriangle then
+    if anchor and anchor.exists and not self.noTriangle and not isPushedToScreen then
       local triangleX = anchor.x + (anchor.bubbleOffsetX or 0)
       triangleX = u.clamp(x - maxXOffset, triangleX, x + maxXOffset)
       -- Draw little triangle
@@ -353,7 +375,7 @@ DialogueBubble.functions = {
       local nby = y + 0.5 * self.height
       u.changeColour{"red"}
       local rad = baseRad - math.sin(self.buttonTimer) * 0.2
-      love.graphics.circle("fill", nbx, nby, 2 - math.sin(self.buttonTimer) * 0.2)
+      love.graphics.circle("fill", nbx, nby, rad)
       u.changeColour{"black"}
       local rad2 = baseRad * 0.9 + math.sin(self.buttonTimer) * 0.5
       love.graphics.circle("fill", nbx, nby, rad2)

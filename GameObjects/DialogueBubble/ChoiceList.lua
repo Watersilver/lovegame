@@ -27,6 +27,10 @@ function ChoiceList.initialize(instance)
   instance.choicesSpacing = 11
 end
 
+local function parseChoiceTxt(choice)
+  return type(choice) == 'string' and choice or choice.text
+end
+
 ChoiceList.functions = {
   remove = function (self)
     o.removeFromWorld(self)
@@ -96,7 +100,7 @@ ChoiceList.functions = {
     local caml, camt, camw, camh = cam:getVisible()
     local maxWidth = 0
     for _, choice in ipairs(self.choices) do
-      local cWidth = self.font:getWidth(choice)
+      local cWidth = self.font:getWidth(parseChoiceTxt(choice))
       if cWidth > maxWidth then maxWidth = cWidth end
     end
     maxWidth = maxWidth * self.scale + 2 * self.padding + 4
@@ -190,7 +194,7 @@ ChoiceList.functions = {
 
   drawCursor = function (self, x, y, a)
     a = a or 1
-    local w2 = self.font:getWidth(self.choices[self.cursor]) * self.scale * 0.5 + self.padding * 0.7
+    local w2 = self.font:getWidth(parseChoiceTxt(self.choices[self.cursor])) * self.scale * 0.5 + self.padding * 0.7
     u.changeColour{"red", a = a}
     love.graphics.polygon("fill",
       x - w2, y,
@@ -205,7 +209,7 @@ ChoiceList.functions = {
   end,
 
   drawChoice = function (self, x, y, index, scaleMod, alphaMod, sear)
-    local choice = self.choices[index]
+    local choice = parseChoiceTxt(self.choices[index])
     local s = self.scale * (scaleMod or 1)
     local alpha = (alphaMod or 1)
     -- local w = self.font:getWidth(choice) * s
@@ -220,6 +224,10 @@ ChoiceList.functions = {
     u.changeColour{"white", a = alpha}
     -- love.graphics.print(choice, x, y, 0, s, s, w * 0.5, h * 0.5, sear or 0)
     love.graphics.print(choice, l, t, 0, s, s, 0, 0, sear)
+  end,
+
+  getCurrentChoice = function (self)
+    return self.choices[self.cursor]
   end
 }
 
