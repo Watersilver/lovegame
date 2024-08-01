@@ -545,6 +545,7 @@ function Conversation:new(init)
   return instance
 end
 
+-- Creates new Conversation obect and adds it to world
 ---@param data ConversationData
 ---@param options? unknown
 function Conversation.addNew(data, parent, options)
