@@ -248,8 +248,8 @@ snd.bgmV2 = {
 }
 
 ---@class MusicInfo
----@field name string
----@field introName string
+---@field name? string
+---@field introName? string
 ---@field folder? string
 ---@field extension? string
 ---@field targetVolume? number
