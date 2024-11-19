@@ -227,17 +227,6 @@ items.keyLyre = {
 }
 
 -- Material
-items.mateBlastSeed = {
-  name = "Blast seed",
-  description = "Used to cast magic blast",
-  limit = 10
-}
-
-items.mateMagicDust = {
-  name = "Magic dust",
-  description = "Sprinkle for variety of effects.\n\n\n\n\n\n*Highly volatile and unpredictable",
-  limit = 20
-}
 
 -- Focuses
 items.focusDoll = {

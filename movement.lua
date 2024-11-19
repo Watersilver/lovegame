@@ -302,20 +302,18 @@ local mo = {}
 
     image_speed = function(object, dt, speedMod)
       local floorFriction = object.floorFriction or 1
-      local objSpeed = object.speed / (object.timeFlow or 1)
-      local image_speed = 0.13 * objSpeed/80--100 looks alright too.
-      -- take into account different number of frames (assume there are four frames)
-      -- if object.sprite.frames > 5 then
-      --   local framemod = speedMod or (object.sprite.frames)*0.25
-      --   image_speed = image_speed * framemod
-      -- end
-      if object.sprite.frames > 5 then
+      local objSpeed = object.speed / (80 * (object.timeFlow or 1))
+      local image_speed = 0.13 * objSpeed
+      if object.sprite.frames > 7 then
+        image_speed = image_speed * 2.3
+      elseif object.sprite.frames > 5 then
         image_speed = image_speed * 1.25
       end
       if floorFriction < 1 then
         image_speed = image_speed * 1/floorFriction
       end
-      if image_speed > 0.3 then image_speed = 0.3 end
+      -- if image_speed > 0.3 then image_speed = 0.3 end
+      if image_speed > 0.4 then image_speed = 0.4 end
       object.image_speed = image_speed * (speedMod or 1)
     end,
 

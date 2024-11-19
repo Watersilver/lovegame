@@ -237,23 +237,23 @@ function inv.isOpen()
   return open
 end
 
-function inv.check_use(instance, trig, side, dt)
+function inv.check_use(instance, trig, side, dt, jump_side)
   local returnValue = false
   if trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
     returnValue = true
   elseif trig.jump and instance:grounded() then
-    instance.animation_state:change_state(instance, dt, side .. "jump")
+    instance.animation_state:change_state(instance, dt, (jump_side or side) .. "jump")
     returnValue = true
   elseif trig.fire_missile then
     instance.animation_state:change_state(instance, dt, side .. "missile")
     returnValue = true
-  elseif trig.speed_start then
+  elseif trig.speed_start and instance.zvel <= 0 then
     instance.animation_state:change_state(instance, dt, side .. "sprintcharge")
     returnValue = true
   elseif trig.bomb then
-    local removeResult = session.removeItem("mateBlastSeed")
-    if removeResult < 0 then return end
+    if session.save.bombs <= 0 then return end
+    session.addBombs(-1)
     local blvl = inv.bomb.l1
     instance.liftedOb = (require "GameObjects.Items.lifted"):new{
       creator = instance,
@@ -264,6 +264,7 @@ function inv.check_use(instance, trig, side, dt)
       blevel = blvl.lvl,
       sprite_info = blvl.sprite_info,
       image_index = math.floor(blvl.image_index),
+      image_speed = 0.15,
       lifterSpeedMod = 0.9
     }
     o.addToWorld(instance.liftedOb)

@@ -7,6 +7,7 @@ local remove = table.remove
 local sqrt = math.sqrt
 local cos, sin = math.cos, math.sin
 local atan2 = math.atan2
+local abs = math.abs
 
 function u.emptyFunc()
 end
@@ -26,7 +27,7 @@ end
 
 -- linear interpolation
 function u.lerp(a, b, t)
-  return a + b * t
+  return a + (b - a) * t
 end
 
 -- Returns a value for undefined values
@@ -262,8 +263,11 @@ function u.chooseKeyFromTable(tbl, ...)
   return returnKey
 end
 
--- Will work correctly only if sum of chances is <= 1
--- By design. Might be a stupid design
+---@alias ChanceTable {chance: number, value: any}[]
+
+---Will work correctly only if sum of chances is <= 1
+---By design. Might be a stupid design
+---@param cTbl ChanceTable
 function u.chooseFromChanceTable(cTbl)
   local choiceNumber = random()
   for _, valChanceTbl in pairs(cTbl) do
@@ -273,6 +277,9 @@ function u.chooseFromChanceTable(cTbl)
   return nil
 end
 
+---@alias WeightTable {weight: number, value: any}[]
+
+---@param wTbl WeightTable
 function u.chooseFromWeightTable(wTbl)
   local totalWeight = 0
   for _, val in ipairs(wTbl) do
@@ -285,7 +292,21 @@ function u.chooseFromWeightTable(wTbl)
     if choiceNumber < chance then return val.value end
     choiceNumber = choiceNumber - chance
   end
-  return
+end
+
+---@param wTbl WeightTable
+function u.weightTableToChanceTable(wTbl)
+  local totalWeight = 0
+  for _, v in ipairs(wTbl) do
+    totalWeight = totalWeight + v.weight
+  end
+
+  ---@type ChanceTable
+  local cTbl = {}
+  for _, v in ipairs(wTbl) do
+    table.insert(cTbl, {value = v.value, chance = v.weight / totalWeight})
+  end
+  return cTbl
 end
 
 function u.shuffle(tbl)
@@ -433,16 +454,16 @@ function u.obliterateBody(body)
   for _, fixture in pairs(body:getFixtures()) do
     fixture:setUserData(nil)
     fixture:destroy()
-    fixture:release()
+    -- fixture:release()
   end
   for _, joint in pairs(body:getJoints()) do
     joint:setUserData(nil)
     joint:destroy()
-    joint:release()
+    -- joint:release()
   end
   body:setUserData(nil)
   body:destroy()
-  body:release()
+  -- body:release()
 end
 
 function u.rememberFloorTile(self, other)
@@ -486,6 +507,8 @@ local coloursEnum = {
   red = {r = 1, g = 0, b = 0},
   black = {r = 0, g = 0, b = 0}
 }
+
+---@param cTable {r: number, g: number, b: number, a: number}|{[1]: 'white'|'black'|'red'}|{colour: 'white'|'black'|'red'}
 function u.changeColour(cTable)
   local colour = cTable.colour or cTable[1]
   local rgb = colour and coloursEnum[colour] or cTable
@@ -622,7 +645,6 @@ function u.ternaryOp(condition, valIfTrue, valIfFalse)
   if condition then return valIfTrue else return valIfFalse end
 end
 
---- difference from simple lerp is this gives value between a and b even if b is smaller than a
 ---@param a number
 ---@param b number
 ---@param progress number
@@ -773,6 +795,7 @@ end
 
 -- split functions found here: http://lua-users.org/wiki/SplitJoin
 
+--- Patterns work as outlined here: https://www.lua.org/manual/5.2/manual.html 6.4.1 – Patterns
 ---@param str string
 ---@param tokens string[]
 ---@param max? number
@@ -807,6 +830,59 @@ function u.splitTokens(str, tokens, max)
   end
   t[n] = str:sub(p) -- Store the last non-token (possibly empty) at odd position
   return t
+end
+
+---@param image_index number
+---@param num_frames number
+---@param alpha_table {[number]: number, first?: number, last?: number, relative?: {[number]: number}}
+---@param onPreviousRoom boolean | nil
+---@param transitioning nil | {progress: number}
+---@return number
+function u.compute_alpha_from_table(image_index, num_frames, alpha_table, onPreviousRoom, transitioning)
+  local min = {val = alpha_table.first or 0, frame = -1}
+  local max = {val = alpha_table.last or 0, frame = num_frames}
+  for k, v in pairs(alpha_table) do
+    if type(k) == 'number' then
+      if k <= image_index and k >= min.frame then
+        min.val = v
+        min.frame = k
+      elseif k > image_index and k <= max.frame then
+        max.val = v
+        max.frame = k
+      end
+    end
+  end
+  if alpha_table.relative then
+    for k, v in pairs(alpha_table.relative) do
+      k = k * (num_frames - 1)
+      if k <= image_index and k >= min.frame then
+        min.val = v
+        min.frame = k
+      elseif k > image_index and k <= max.frame then
+        max.val = v
+        max.frame = k
+      end
+    end
+  end
+  local x = image_index - min.frame
+  local y = max.frame - min.frame
+  local a = u.lerp(min.val, max.val, x / y)
+
+  if transitioning then
+    if onPreviousRoom then
+      a = a * (1 - transitioning.progress)
+    else
+      a = a * transitioning.progress
+    end
+  end
+
+  return a
+end
+
+---@param n number
+---@return number
+u.getDecimal = function(n)
+  return abs(n)%1
 end
 
 return u

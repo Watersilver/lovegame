@@ -37,7 +37,7 @@ quests.mainQuest2 = {
   description = {
     stage1 =
     "There was no one but a\n\z
-    skelleton in "..GCON.npcNames.mage.."'s\n\z
+    skeleton in "..GCON.npcNames.mage.."'s\n\z
     lab..."
   }
 }

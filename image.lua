@@ -1,3 +1,4 @@
+local utilities = require "utilities"
 -- removes scaled sprite blurriness
 love.graphics.setDefaultFilter("nearest", "nearest")
 
@@ -5,7 +6,7 @@ local floor = math.floor
 
 -- Will try to avoid gaps for adjacent tiles by making them slightly bigger
 -- Set to nullify by setting to 0
-local dw = 0.1
+local dw = 0.0
 local dh = dw
 
 local im = {}
@@ -70,7 +71,9 @@ im.spriteSettings = {
   bushDestruction = {'BushDestruction', 8, padding = 2, width = 30, height = 34},
   grassDestruction = {'GrassDestruction', 8, padding = 2, width = 30, height = 34},
   swordHitWall = {'SwordHitWall', 2, padding = 2, width = 16, height = 16},
-  enemyExplosion = {'EnemyExplosion', 4, padding = 2, width = 30, height = 30},
+  enemyExplosion = {'EnemyExplosion', 4, 4, padding = 0, width = 64, height = 64},
+  teleportEffect = {'TeleportEffect', 4, 4, padding = 0, width = 64, height = 64},
+  smallExplosion1 = {'Effects/small-explosion-1', 7, padding = 0, width = 32, height = 32},
   mark = {'Inventory/UseMarkL1', 3, padding = 2, width = 16, height = 16},
   -- NPCS
   npcTestSprites = {
@@ -83,7 +86,8 @@ im.spriteSettings = {
     {'NPCs/NpcTest3/down', 2, padding = 2, width = 16, height = 16}
   },
   owlStatue = {
-    {'NPCs/owlStatue/down', 2, padding = 2, width = 24, height = 16}
+    {'NPCs/owlStatue/asleep', 3, padding = 2, width = 16, height = 16},
+    {'NPCs/owlStatue/awake', 12, padding = 2, width = 16, height = 22, oy = 3}
   },
   chest = {
     {'NPCs/Chest/down', 2, padding = 2, width = 16, height = 16}
@@ -94,38 +98,29 @@ im.spriteSettings = {
 
   -- drops
   dropHeart = {
-    {'Drops/heart', 1, padding = 0, width = 7, height = 7}
+    {'Drops/heart', 4, padding = 2, width = 10, height = 8}
   },
   dropRupee = {
-    {'Drops/rupee', 1, padding = 0, width = 5, height = 11}
+    {'Drops/rupee', 7, padding = 0, width = 8, height = 8}
   },
   dropRupee5 = {
-    {'Drops/rupee5', 1, padding = 0, width = 7, height = 14}
+    {'Drops/rupee5', 8, padding = 0, width = 9, height = 9}
   },
   dropRupee20 = {
-    {'Drops/rupee20', 1, padding = 0, width = 7, height = 14}
+    {'Drops/rupee20', 8, padding = 0, width = 11, height = 11}
   },
   dropRupee100 = {
-    {'Drops/rupee100', 1, padding = 0, width = 11, height = 16}
+    {'Drops/rupee100', 9, padding = 0, width = 12, height = 12}
   },
   dropRupee200 = {
-    {'Drops/rupee200', 1, padding = 0, width = 11, height = 16}
+    {'Drops/rupee200', 7, padding = 0, width = 16, height = 16}
   },
   dropFairy = {
-    {'Drops/fairy', 1, padding = 0, width = 8, height = 11}
-  },
-  dropBlast = {
-    {'Drops/blastSeed', 1, padding = 0, width = 8, height = 8},
-  },
-  dropMultiBlast = {
-    {'Drops/blastSeeds', 1, padding = 0, width = 12, height = 9},
-  },
-  dropDust = {
-    {'Drops/magicDust', 1, padding = 0, width = 8, height = 14}
+    {'Drops/fairy', 2, padding = 2, width = 16, height = 17}
   },
 
   pieceOfHeart = {
-    {'pieceOfHeart', 1, padding = 0, width = 16, height = 15}
+    {'pieceOfHeart', 4, padding = 2, width = 9, height = 15}
   },
 
   -- menu stuff
@@ -136,73 +131,96 @@ im.spriteSettings = {
   mobilitySkill = {'mobilitySkill', 4, padding = 1, width = 9, height = 13},
 
   playerSprites = {
-    {'Witch/walk_left', 6, padding = 0, width = 16, height = 16},
-    {'Witch/walk_up', 6, padding = 0, width = 16, height = 16},
-    {'Witch/walk_down', 6, padding = 0, width = 16, height = 16},
-    {'Witch/push_up', 4, padding = 0, width = 16, height = 16},
-    {'Witch/push_left', 4, padding = 0, width = 16, height = 16},
-    {'Witch/push_down', 2, padding = 0, width = 16, height = 16},
-    {'Witch/grip_up', 4, padding = 0, width = 16, height = 16},
-    {'Witch/grip_left', 4, padding = 0, width = 16, height = 16},
-    {'Witch/grip_down', 2, padding = 0, width = 16, height = 16},
-    {'Witch/lifting_up', 1, padding = 2, width = 16, height = 16},
-    {'Witch/lifting_left', 1, padding = 2, width = 16, height = 16},
-    {'Witch/lifting_down', 1, padding = 2, width = 16, height = 16},
-    {'Witch/lifted_up', 4, padding = 0, width = 16, height = 16},
-    {'Witch/lifted_left', 4, padding = 0, width = 16, height = 16},
-    {'Witch/lifted_down', 4, padding = 0, width = 16, height = 16},
-    {'Witch/halt_up', 3, padding = 0, width = 16, height = 16},
-    {'Witch/halt_left', 3, padding = 0, width = 16, height = 16},
-    {'Witch/halt_down', 3, padding = 0, width = 16, height = 16},
-    {'Witch/hurt_up', 3, padding = 0, width = 16, height = 16},
-    {'Witch/hurt_left', 3, padding = 0, width = 16, height = 16},
-    {'Witch/hurt_down', 3, padding = 0, width = 16, height = 16},
-    {'Witch/still_up', 5, padding = 0, width = 16, height = 16},
-    {'Witch/still_left', 5, padding = 0, width = 16, height = 16},
-    {'Witch/still_down', 5, padding = 0, width = 16, height = 16},
-    {'Witch/cape_up', 3, padding = 0, width = 16, height = 16},
-    {'Witch/cape_left', 3, padding = 0, width = 16, height = 16},
-    {'Witch/cape_down', 3, padding = 0, width = 16, height = 16},
-    {'Witch/swing_up', 4, padding = 0, width = 16, height = 16},
-    {'Witch/swing_left', 4, padding = 0, width = 16, height = 16},
-    {'Witch/swing_down', 4, padding = 0, width = 16, height = 16},
-    {'Witch/hold_up', 2, padding = 2, width = 16, height = 16},
-    {'Witch/hold_left', 2, padding = 2, width = 16, height = 16},
-    {'Witch/hold_down', 2, padding = 2, width = 16, height = 16},
-    {'Witch/shoot_up', 5, padding = 0, width = 16, height = 16},
-    {'Witch/shoot_left', 5, padding = 0, width = 16, height = 16},
-    {'Witch/shoot_down', 5, padding = 0, width = 16, height = 16},
-    {'Witch/jump_down', 4, padding = 0, width = 16, height = 16},
-    {'Witch/jump_left', 4, padding = 0, width = 16, height = 16},
-    {'Witch/jump_up', 4, padding = 0, width = 16, height = 16},
-    {'Witch/roll_down', 4, padding = 0, width = 16, height = 16},
-    {'Witch/roll_left', 4, padding = 0, width = 16, height = 16},
-    {'Witch/roll_up', 4, padding = 0, width = 16, height = 16},
-    {'Witch/mdust_down', 2, padding = 2, width = 16, height = 16},
-    {'Witch/mdust_left', 2, padding = 2, width = 16, height = 16},
-    {'Witch/mdust_up', 2, padding = 2, width = 16, height = 16},
-    {'Witch/mark_down', 1, padding = 2, width = 16, height = 16},
-    {'Witch/recall_down', 1, padding = 2, width = 16, height = 16},
-    {'Witch/display_down', 2, padding = 0, width = 16, height = 16},
-    {'Witch/eating_down', 2, padding = 0, width = 16, height = 16},
-    {'Witch/sleeping_down', 2, padding = 0, width = 16, height = 16},
-    {'Witch/wake_down', 1, padding = 0, width = 16, height = 16},
-    {'Witch/harp_down', 2, padding = 2, width = 20, height = 16},
-    {'Witch/drown_down', 2, padding = 0, width = 16, height = 16},
-    {'Witch/climb_up', 6, padding = 0, width = 16, height = 16},
-    {'Witch/plummet', 3, padding = 0, width = 16, height = 16},
-    {'Witch/die', 7, padding = 0, width = 16, height = 16},
+    {'Witch/walk_left', 10, padding = 0, width = 32, height = 32},
+    {'Witch/walk_up', 10, padding = 0, width = 32, height = 32},
+    {'Witch/walk_down', 10, padding = 0, width = 32, height = 32},
+    {'Witch/push_up', 8, padding = 0, width = 32, height = 32},
+    {'Witch/push_left', 8, padding = 0, width = 32, height = 32},
+    {'Witch/push_down', 8, padding = 0, width = 32, height = 32},
+    {'Witch/grip_up', 8, padding = 0, width = 32, height = 32},
+    {'Witch/grip_left', 8, padding = 0, width = 32, height = 32},
+    {'Witch/grip_down', 8, padding = 0, width = 32, height = 32},
+    {'Witch/lifting_up', 1, padding = 0, width = 32, height = 32},
+    {'Witch/lifting_left', 1, padding = 0, width = 32, height = 32},
+    {'Witch/lifting_down', 1, padding = 0, width = 32, height = 32},
+    {'Witch/carry_up', 10, padding = 0, width = 32, height = 32},
+    {'Witch/carry_left', 10, padding = 0, width = 32, height = 32},
+    {'Witch/carry_down', 10, padding = 0, width = 32, height = 32},
+    {'Witch/skid_up', 5, padding = 0, width = 32, height = 32},
+    {'Witch/skid_left', 5, padding = 0, width = 32, height = 32},
+    {'Witch/skid_down', 5, padding = 0, width = 32, height = 32},
+    {'Witch/hurt_up', 2, padding = 0, width = 32, height = 32},
+    {'Witch/hurt_left', 2, padding = 0, width = 32, height = 32},
+    {'Witch/hurt_down', 2, padding = 0, width = 32, height = 32},
+    {'Witch/idle_up', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_left', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_down', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_shoot_up', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_shoot_left', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_shoot_down', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_carry_up', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_carry_left', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_carry_down', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_hold_up', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_hold_left', 1, padding = 0, width = 32, height = 32},
+    {'Witch/idle_hold_down', 1, padding = 0, width = 32, height = 32},
+    {'Witch/riding_start_up', 3, padding = 0, width = 32, height = 32},
+    {'Witch/riding_start_left', 3, padding = 0, width = 32, height = 32},
+    {'Witch/riding_start_down', 3, padding = 0, width = 32, height = 32},
+    {'Witch/broom_left', 3, padding = 0, width = 32, height = 32},
+    {'Witch/broom_up', 3, padding = 0, width = 32, height = 32},
+    {'Witch/broom_down', 3, padding = 0, width = 32, height = 32},
+    {'Witch/swing_up', 2, padding = 0, width = 32, height = 32},
+    {'Witch/swing_left', 2, padding = 0, width = 32, height = 32},
+    {'Witch/swing_down', 2, padding = 0, width = 32, height = 32},
+    {'Witch/hold_up', 10, padding = 0, width = 32, height = 32},
+    {'Witch/hold_left', 10, padding = 0, width = 32, height = 32},
+    {'Witch/hold_down', 10, padding = 0, width = 32, height = 32},
+    {'Witch/shoot_up', 10, padding = 0, width = 32, height = 32},
+    {'Witch/shoot_left', 10, padding = 0, width = 32, height = 32},
+    {'Witch/shoot_down', 10, padding = 0, width = 32, height = 32},
+    {'Witch/jump_down', 3, padding = 0, width = 32, height = 32},
+    {'Witch/jump_left', 3, padding = 0, width = 32, height = 32},
+    {'Witch/jump_up', 3, padding = 0, width = 32, height = 32},
+    {'Witch/idle_landing_down', 4, padding = 0, width = 32, height = 32},
+    {'Witch/idle_landing_left', 4, padding = 0, width = 32, height = 32},
+    {'Witch/idle_landing_up', 4, padding = 0, width = 32, height = 32},
+    {'Witch/dash_down', 8, padding = 0, width = 32, height = 32},
+    {'Witch/dash_left', 8, padding = 0, width = 32, height = 32},
+    {'Witch/dash_up', 8, padding = 0, width = 32, height = 32},
+    {'Witch/mdust_down', 2, padding = 0, width = 32, height = 32},
+    {'Witch/mdust_left', 2, padding = 0, width = 32, height = 32},
+    {'Witch/mdust_up', 2, padding = 0, width = 32, height = 32},
+    {'Witch/mark_down', 1, padding = 0, width = 32, height = 32},
+    {'Witch/recall_down', 1, padding = 0, width = 32, height = 32},
+    {'Witch/fallen_down', 1, padding = 0, width = 32, height = 32},
+    {'Witch/display_down', 2, padding = 0, width = 32, height = 32},
+    {'Witch/eating_down', 17, padding = 0, width = 32, height = 32},
+    {'Witch/drinking_down', 10, padding = 0, width = 32, height = 32},
+    {'Witch/sleeping_down', 7, padding = 0, width = 32, height = 32},
+    {'Witch/flute_down', 6, padding = 0, width = 32, height = 32},
+    {'Witch/drown_down', 8, padding = 0, width = 32, height = 32},
+    {'Witch/climb_up', 6, padding = 0, width = 32, height = 32},
+    {'Witch/plummet', 11, padding = 0, width = 32, height = 32},
+    {'Witch/die', 2, padding = 0, width = 32, height = 32},
     {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
     {'Witch/defaultGrass', 2, padding = 2, width = 16, height = 16},
-    {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6}
+    {'Witch/wake_down', 3, padding = 0, width = 32, height = 32},
+    {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
+    {'Witch/hat_back', 2, padding = 0, width = 32, height = 32},
+    {'Witch/hat_front', 2, padding = 0, width = 32, height = 32}
   },
   note = {'note', 1, padding = 0, width = 7, height = 12},
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
-  playerMissile = {'Inventory/UseMissileL1', 5, padding = 2, width = 4, height = 4},
-  playerMissileOutline = {'Inventory/UseMissileOutlineL1', 1, padding = 2, width = 6, height = 6},
-  playerBomb = {'Inventory/UseBomb', 1, padding = 2, width = 8, height = 13},
+  playerMissile = {
+    {'Inventory/missile/creation', 2, padding = 0, width = 16, height = 16},
+    {'Inventory/missile/animation', 7, padding = 0, width = 16, height = 16},
+    {'Inventory/missile/destruction', 5, padding = 0, width = 16, height = 16},
+    {'Inventory/missile/outline', 3, padding = 0, width = 16, height = 16}
+  },
+  playerBomb = {'Inventory/UseBomb', 4, padding = 2, width = 12, height = 12},
   playerDust = {'Inventory/UseSpeedL1', 3, padding = 2, width = 10, height = 10},
-  playerBlast = {'Inventory/UseBombsplosionL1', 6, padding = 2, width = 32, height = 32},
+  playerBlast = {'Inventory/UseBombsplosionL1', 8, padding = 0, width = 64, height = 64, oy = 26},
   playerMdust = {'Inventory/UseSprinkle', 6, padding = 2, width = 24, height = 10},
   playerMbox = {'Inventory/UseMagicBox', 4, padding = 2, width = 16, height = 16},
   playerDissapearMbox = {'Inventory/DissapearEffect', 3, padding = 2, width = 16, height = 16},
@@ -225,10 +243,10 @@ im.spriteSettings = {
     {'Enemies/Wasp/wasp', 2, padding = 2, width = 16, height = 16}
   },
   ghost = {
-    {'Enemies/Ghost/ghost', 2, padding = 2, width = 16, height = 14}
+    {'Enemies/Ghost/ghost', 2, padding = 2, width = 16, height = 15}
   },
   raven = {
-    {'Enemies/Raven/raven', 2, padding = 2, width = 16, height = 16}
+    {'Enemies/Raven/raven', 2, padding = 2, width = 24, height = 16}
   },
   crow = {
     {'Enemies/Crow/crow', 2, padding = 2, width = 16, height = 16}
@@ -244,13 +262,15 @@ im.spriteSettings = {
     {'Enemies/BladeTrap/bladeTrap', 4, padding = 2, width = 16, height = 16}
   },
   beetle = {
-    {'Enemies/Beetle/beetle', 2, padding = 2, width = 16, height = 11}
+    {'Enemies/Beetle/beetle', 2, padding = 2, width = 16, height = 16}
   },
   mummy = {
     {'Enemies/Mummy/mummy', 2, padding = 2, width = 16, height = 16}
   },
   skeleton = {
-    {'Enemies/Skeleton/skeleton', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Skeleton/down', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Skeleton/up', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Skeleton/left', 2, padding = 2, width = 16, height = 16},
     {'Enemies/Skeleton/jump', 1, padding = 2, width = 16, height = 16}
   },
   bat = {
@@ -263,11 +283,13 @@ im.spriteSettings = {
     {'Enemies/Zora/zora', 4, padding = 2, width = 16, height = 16}
   },
   robe = {
-    {'Enemies/Robe/robe', 4, padding = 2, width = 16, height = 16}
+    {'Enemies/Robe/robe', 4, padding = 2, width = 15, height = 16}
   },
   leever = {
-    {'Enemies/Leever/leever', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Leever/down', 2, padding = 2, width = 16, height = 16},
     {'Enemies/Leever/digging', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Leever/up', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Leever/left', 2, padding = 2, width = 16, height = 16},
   },
   blueHand = {
     {'Enemies/BlueHand/hand', 2, padding = 2, width = 16, height = 16},
@@ -277,7 +299,7 @@ im.spriteSettings = {
     {'Enemies/RedHand/hand', 2, padding = 2, width = 16, height = 16},
   },
   jellyfish = {
-    {'Enemies/Jellyfish/float', 2, padding = 2, width = 16, height = 16},
+    {'Enemies/Jellyfish/float', 2, padding = 2, width = 15, height = 18},
     {'Enemies/Jellyfish/shock', 2, padding = 2, width = 16, height = 15},
   },
   jellysmall = {
@@ -299,7 +321,7 @@ im.spriteSettings = {
     {'Enemies/Robe/attack', 4, padding = 2, width = 12, height = 12}
   },
   enemySword = {
-    {'Enemies/Sword/sword', 1, padding = 2, width = 6, height = 15}
+    {'Enemies/Sword/sword', 1, padding = 2, width = 8, height = 15}
   },
   hoodedSkeleton = {
     {'Enemies/HoodedSkeleton/walk_left', 2, padding = 2, width = 16, height = 16},
@@ -429,6 +451,7 @@ im.spriteSettings = {
 
 im.sprites = {}
 
+---@param args string|[string]|{img_name: string, rows: number, columns: number, padding: number, width?: number, height?: number, oy?: number, cx?: number, cy?: number}
 function im.load_sprite(args)
 
   local img_name
@@ -446,12 +469,20 @@ function im.load_sprite(args)
     local padding = args.padding or args[4] or 1
 
     -- Prepare sprite
+    ---@class Sprite
     local sprite = {
       framesX = rows,
       framesY = columns
     }
 
     -- Load image
+    if not img_name then
+      print('ass')
+    else
+      if type(img_name) == 'table' then
+        utilities.printTable('img_name', img_name, 2)
+      end
+    end
     sprite.img = love.graphics.newImage("Sprites/" .. img_name .. ".png")
     local img = sprite.img
 
@@ -471,10 +502,11 @@ function im.load_sprite(args)
     end
 
     sprite.width, sprite.height = args.width, args.height
+    sprite.oy = args.oy
 
     -- Determine center
-    sprite.cx = width * 0.5 + dw -- sprite.cx = width * 0.5
-    sprite.cy = height * 0.5 + dh -- sprite.cy = height * 0.5
+    sprite.cx = (args.cx or width * 0.5) + dw*0.5
+    sprite.cy = (args.cy or height * 0.5) + dh*0.5
 
     -- Slice image WARNING: This table starts from ZERO!!!!
     local frames = 0
@@ -491,6 +523,7 @@ function im.load_sprite(args)
     sprite.frames = frames
     -- Initialize counter that stores how many times this image was loaded
     sprite.times_loaded = 0
+    sprite.name = img_name
     im.sprites[img_name] = sprite
   end
 
@@ -547,19 +580,20 @@ function im.reloadPlSprites()
       im.load_sprite(plSprite).times_loaded = timesLoaded
     end
 
-    if gvar.spritesTypeSelected == 'link' then
-      local altSkins = require "altSkins"
-      for _, plSprite in ipairs(im.spriteSettings.playerSprites) do
-        local sname = plSprite[1]:gsub("Witch/", '')
-        local s
-        for _, altSpr in ipairs(altSkins.linkSprites) do
-          if altSpr[1]:gsub("Witch.old/", '') == sname then s = altSpr end
-        end
-        if s then
-          im.replace_sprite(plSprite[1], s)
-        end
-      end
-    end
+    -- Player sprite replace code
+    -- if true then
+    --   local altSkins = require "altSkins"
+    --   for _, plSprite in ipairs(im.spriteSettings.playerSprites) do
+    --     local sname = plSprite[1]:gsub("Witch/", '')
+    --     local s
+    --     for _, altSpr in ipairs(altSkins.placeholder) do
+    --       if altSpr[1]:gsub("Witch/", '') == sname then s = altSpr end
+    --     end
+    --     if s then
+    --       im.replace_sprite(plSprite[1], s)
+    --     end
+    --   end
+    -- end
   end
 end
 
@@ -567,17 +601,16 @@ end
 for _, plSprite in ipairs(im.spriteSettings.playerSprites) do
   im.load_sprite(plSprite)
 end
-im.load_sprite{'health', 5, padding = 2, width = 7, height = 7}
 im.load_sprite{'rupees', 1, padding = 0, width = 7, height = 7}
-im.load_sprite{'Drops/blastSeed', 1, padding = 0, width = 8, height = 8}
-im.load_sprite{'Drops/magicDust', 1, padding = 0, width = 8, height = 14}
 im.load_sprite{'Test', 1, padding = 0}
 im.load_sprite(im.spriteSettings.note)
 im.load_sprite(im.spriteSettings.floorOutside)
 im.load_sprite(im.spriteSettings.solidsOutside)
 im.load_sprite(im.spriteSettings.basicFriendlyInterior)
 im.load_sprite(im.spriteSettings.playerSword)
-im.load_sprite(im.spriteSettings.playerMissile)
+for _, mslSprite in ipairs(im.spriteSettings.playerMissile) do
+  im.load_sprite(mslSprite)
+end
 im.load_sprite(im.spriteSettings.playerBomb)
 im.load_sprite(im.spriteSettings.playerDust)
 im.load_sprite(im.spriteSettings.clock)
@@ -594,6 +627,7 @@ im.load_sprite(im.spriteSettings.portals)
 im.load_sprite(im.spriteSettings.edges)
 im.load_sprite(im.spriteSettings.clutter)
 im.load_sprite(im.spriteSettings.fire)
+im.load_sprite(im.spriteSettings.smallExplosion1)
 im.load_sprite{'linkHorseback1', 5, padding = 0, width = 15 * 5, height = 31 * 5}
 im.load_sprite{'linkHorseback2', 4, padding = 0, width = 32 * 5, height = 50 * 5}
 im.load_sprite{'linkHorseback3', 4, padding = 0, width = 44 * 5, height = 70 * 5}
@@ -605,5 +639,9 @@ im.load_sprite{'horseAlone', 3, padding = 0, width = 68 * 4.2, height = 53 * 4.2
 im.load_sprite{'linkKidnapped', 1, padding = 0, width = 24 * 4.2, height = 16 * 4.2}
 im.load_sprite{'introBackground', 1, padding = 0, width = 160 * 5, height = 96 * 5}
 im.load_sprite{'introBackground2', 1, padding = 0, width = 192 * 4.2, height = 144 * 4.2}
+
+-- HUD
+im.load_sprite{'HUD/healthbar', 1, padding = 0, width = 51, height = 8}
+im.load_sprite{'HUD/healthbar_fill', 5, padding = 3, width = 1, height = 2}
 
 return im

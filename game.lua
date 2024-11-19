@@ -73,6 +73,8 @@ end
 function game.transition(trans)
   game.paused = true
   game.transitioning = trans
+  game.transitioning.xmod = game.transitioning.xmod or 0
+  game.transitioning.ymod = game.transitioning.ymod or 0
   game.lastSide = trans.side or "portal"
   game.prevRoom = game.room
 end
@@ -95,12 +97,13 @@ function game.change_room(roomTarget)
   return newRoom
 end
 
-game.transitioning = false --[[
+--[[
 {
   type = "scrolling" or "whiteScreen",
   progress = 0 to 1,
   side = "left" or "up" or "down" or "right" or nil
 }
 ]]
+game.transitioning = false
 
 return game

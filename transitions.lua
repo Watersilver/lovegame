@@ -37,6 +37,13 @@ function trans.remove_from_world_previous_room()
   game.transitioning.startedTransition = true
 end
 
+trans.xtransform = 0
+trans.ytransform = 0
+trans.xadjust = 0
+trans.yadjust = 0
+trans.xdisplacement = 0
+trans.ydisplacement = 0
+
 function trans.determine_coordinates_transformation()
   local side = game.transitioning.side
 
@@ -162,14 +169,14 @@ function trans.moving_objects_coords(instance)
   local zo = instance.zo or 0
 
   if instance.onPreviousRoom then
-    xtotal = instance.x + trans.xtransform
+    xtotal = (instance.x or instance.xstart) + trans.xtransform
       + game.transitioning.xmod
-    ytotal = instance.y + trans.ytransform
+    ytotal = (instance.y or instance.ystart) + trans.ytransform
       + zo + game.transitioning.ymod
   else
-    xtotal = instance.x + trans.xtransform
+    xtotal = (instance.x or instance.xstart) + trans.xtransform
       + trans.xdisplacement
-    ytotal = instance.y + trans.ytransform
+    ytotal = (instance.y or instance.ystart) + trans.ytransform
       + zo + trans.ydisplacement
   end
 

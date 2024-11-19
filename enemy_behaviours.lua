@@ -1,4 +1,3 @@
-local snd = require "sound"
 local im = require "image"
 local snd = require "sound"
 local u = require "utilities"
@@ -8,8 +7,7 @@ local ebh = {}
 
 local pi = math.pi
 
-local defaultDeathSound = {"Testplosion"}
-local defaultDeathSprite = {im.spriteSettings.testsplosion}
+local defaultDeathSprite = {im.spriteSettings.enemyExplosion}
 
 function ebh.die(object)
   if object.enemyId then
@@ -22,10 +20,15 @@ function ebh.die(object)
     layer = object.layer,
     explosionNumber = object.explosionNumber or 1,
     explosion_sprite = object.explosionSprite or defaultDeathSprite,
-    image_speed = object.explosionSpeed or 0.2,
+    image_speed = object.explosionSpeed or 0.3,
     sounds = snd.load_sounds({explode = object.deathSound}),
     enexploshaders = true,
     onlySoundOnce = true,
+    light = {
+      rgba = {r = 1, g = 0.5, b = 1, a = 1},
+      alpha_table = {first = 0, [0] = 0, [1] = 1},
+      type = 'massive'
+    },
     drop = object.drop or "normal",
     drops = object.drops -- Objects custom droptable
   }

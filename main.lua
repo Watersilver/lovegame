@@ -37,8 +37,8 @@ GCON = {
   You can also swap spell key bindings in the pause menu.",
 
   -- Names n stuff
-  money = "rupee",
-  moneys = "rupees",
+  money = "lek",
+  moneys = "lekë",
   heroWorld = "Tollaw",
   lakeVillage = "Kidwy",
   flowerVillage = "Anima",
@@ -77,15 +77,14 @@ GCON = {
   },
 
   MAX_DT = 0.03333333,
-  MAX_PHYSICS_DT = 0.03333333
+  MAX_PHYSICS_DT = 0.03333333,
 }
 
 -- global variables
 gvar = {
   t = 0,
   -- Threshold before screen transitions are triggered
-  screenEdgeThreshold = GCON.defaultScreenEdgeThreshold,
-  spritesTypeSelected = false
+  screenEdgeThreshold = GCON.defaultScreenEdgeThreshold
 }
 
 -- Load stuff from save directory
@@ -112,10 +111,11 @@ local rm = require("RoomBuilding.room_manager")
 
 local gamera = require "gamera.gamera"
 
-local globs = {
+local imports = {
   particles = require "GameObjects.misc.particles",
   screenEffects = require "screenEffects",
   lighting = require "ScreenEffects.lighting.lighting",
+  healthDisplay = require "HUD.health",
   shdrs = require 'Shaders.shaders'
 }
 
@@ -131,7 +131,13 @@ session = {
     swordShader = nil,
     missileShader = nil,
     markShader = nil,
-    swordSpeed = nil
+    swordSpeed = nil,
+    bombs = 0,
+    maxBombs = 1,
+    bombsCooldown = 0,
+    dust = 0,
+    maxDust = 1,
+    dustCooldown = 0
   },
   mslQueue = u.newQueue(),
   initialize = function()
@@ -147,6 +153,12 @@ session = {
       require("items")[session.save.equippedRing].equip()
     end
     -- save
+    session.save.bombs = session.save.bombs or 0
+    session.save.maxBombs = session.save.maxBombs or 1
+    session.save.bombsCooldown = session.save.bombsCooldown or 0
+    session.save.dust = session.save.dust or 0
+    session.save.maxDust = session.save.maxDust or 1
+    session.save.dustCooldown = session.save.dustCooldown or 0
     session.save.time = session.save.time or 6
     session.save.days = session.save.days or 1
     session.save.rupees = session.save.rupees or 0
@@ -179,7 +191,7 @@ session = {
     session.sleeping_danger = false
 
     -- add global objects
-    session.particles = globs.particles:new()
+    session.particles = imports.particles:new()
     o.addToWorld(session.particles)
 
   end,
@@ -418,28 +430,6 @@ session = {
       )
     end
   end,
-  -- Removes magic dust on usage taking into account cost modifiers
-  removeMDust = function(missile, lifted, bomb)
-    local amount = 1
-
-    if missile then
-      -- Check for rings that change missiles here too, to further affect amount maybe.
-      amount = 2
-      if session.hasFocusEquipped() then
-        amount = 4
-      end
-    end
-
-    if lifted then
-      amount = 2
-    end
-
-    if bomb then
-      amount = 3
-    end
-
-    return session.removeItems("mateMagicDust", amount)
-  end,
   -- Removes specified amount of items or fails if there are not enough items.
   -- If amount is decimal it gets floored.
   removeItems = function(itemid, amount)
@@ -500,6 +490,24 @@ session = {
   end,
   barrierBounce = function(plaObj, horDir, verDir)
     plaObj.body:setLinearVelocity(200 * horDir, 200 * verDir)
+  end,
+  ---@param n number
+  addBombs = function(n)
+    session.save.bombs = session.save.bombs + n
+    if session.save.bombs > session.save.maxBombs then
+      session.save.bombs = session.save.maxBombs
+    elseif session.save.bombs < 0 then
+      session.save.bombs = 0
+    end
+  end,
+  ---@param n number
+  addDust = function(n)
+    session.save.dust = session.save.dust + n
+    if session.save.dust > session.save.maxDust then
+      session.save.dust = session.save.maxDust
+    elseif session.save.dust < 0 then
+      session.save.dust = 0
+    end
   end,
   saveGame = function()
     local game_settings = require 'game_settings'
@@ -607,7 +615,7 @@ session = {
   ---@param id string
   setInstanceId = function(instance, id)
     instance.ids[#instance.ids+1] = id
-  end
+  end,
 }
 local session = session
 
@@ -676,91 +684,92 @@ Pointer = {
 }
 
 -- global sounds
-glsounds = snd.load_sounds{
-  jagoburonLaugh = {"Effects/jagoburonLaugh"},
-  wingFlap = {"Effects/Wing_flap"},
-  dragonWingFlap = {"Effects/OOS_OnoxDragon_Fly"},
-  dragonRoar = {"Effects/OOS_Dodongo_Roar"},
-  dragonWalk = {"Effects/OOS_Aquamentus_Walk"},
-  smallBoom = {"Effects/Oracle_Barrier"},
-  bigBoom = {"Effects/Oracle_Boss_BigBoom"},
-  pauseOpen = {"Effects/Oracle_PauseMenu_Open"},
-  pauseClose = {"Effects/Oracle_PauseMenu_Close"},
-  secret = {"Effects/Oracle_Secret"},
-  select = {"Effects/Oracle_Menu_Select"},
-  deselect = {"Effects/Oracle_Menu_Cursor_low_pitch"},
-  error = {"Effects/Oracle_Error"},
-  letter = {"Effects/Oracle_Text_Letter"},
-  textDone = {"Effects/Oracle_Text_Done"},
-  cursor = {"Effects/Oracle_Menu_Cursor"},
-  getHeart = {"Effects/Oracle_Get_Heart"},
-  getRupee = {"Effects/Oracle_Get_Rupee"},
-  getRupee5 = {"Effects/Oracle_Get_Rupee5"},
-  getRupee20 = {"Effects/Oracle_Get_Rupee20"},
-  fanfareItem = {"Effects/Oracle_Fanfare_Item"},
-  open = {"Effects/Oracle_Chest"},
-  heartContainer = {"Effects/Oracle_HeartContainer"},
-  stairs = {"Effects/Oracle_Stairs"},
-  useItem = {"Effects/Oracle_Get_Item"},
-  portal = {"Effects/Oracle_Dungeon_Teleport"},
-  bomb = {"Effects/Oracle_Bomb_Blow"},
-  bombDrop = {"Effects/Oracle_Bomb_Drop"},
-  magicDust = {"Effects/Oracle_MakuTree_Leaves"},
-  appearVanish = {"Effects/Oracle_AppearVanish"},
-  decoy = {"Effects/OOA_Veran_Shapeshift"},
-  fire = {"Effects/Oracle_EmberSeed"},
-  ice = {"Effects/Oracle_SwordShimmer"},
-  stone = {"Effects/Oracle_Rumble2b"},
-  boing = {"Effects/Oracle_ScentSeed"},
-  plant = {"Effects/Oracle_ScentSeed_Shot"},
-  wind = {"Effects/Oracle_GaleSeed"},
-  blockFall = {"Effects/Oracle_Block_Fall"},
-  enemyJump = {"Effects/Oracle_Enemy_Jump"},
-  shieldDeflect = {"Effects/Oracle_Shield_Deflect"},
-  swordShimmer = {"Effects/Oracle_SwordShimmer"},
-  supercharge = {"Effects/Oracle_BiggoronsSword"},
-  journalEntry = {"Effects/journalEntry"},
-  bell = {"Effects/bell"},
+glsounds = {
+  hard_step = snd.load_sound{"Effects/hard_step"},
+  jagoburonLaugh = snd.load_sound{"Effects/jagoburonLaugh"},
+  wingFlap = snd.load_sound{"Effects/Wing_flap"},
+  dragonWingFlap = snd.load_sound{"Effects/OOS_OnoxDragon_Fly"},
+  dragonRoar = snd.load_sound{"Effects/OOS_Dodongo_Roar"},
+  dragonWalk = snd.load_sound{"Effects/OOS_Aquamentus_Walk"},
+  smallBoom = snd.load_sound{"Effects/Oracle_Barrier"},
+  bigBoom = snd.load_sound{"Effects/Oracle_Boss_BigBoom"},
+  pauseOpen = snd.load_sound{"Effects/Oracle_PauseMenu_Open"},
+  pauseClose = snd.load_sound{"Effects/Oracle_PauseMenu_Close"},
+  secret = snd.load_sound{"Effects/Oracle_Secret"},
+  select = snd.load_sound{"Effects/Oracle_Menu_Select"},
+  deselect = snd.load_sound{"Effects/Oracle_Menu_Cursor_low_pitch"},
+  error = snd.load_sound{"Effects/Oracle_Error"},
+  letter = snd.load_sound{"Effects/Oracle_Text_Letter"},
+  textDone = snd.load_sound{"Effects/Oracle_Text_Done"},
+  cursor = snd.load_sound{"Effects/Oracle_Menu_Cursor"},
+  getHeart = snd.load_sound{"Effects/Oracle_Get_Heart"},
+  getRupee = snd.load_sound{"Effects/Oracle_Get_Rupee"},
+  getRupee5 = snd.load_sound{"Effects/Oracle_Get_Rupee5"},
+  getRupee20 = snd.load_sound{"Effects/Oracle_Get_Rupee20"},
+  fanfareItem = snd.load_sound{"Effects/Oracle_Fanfare_Item"},
+  open = snd.load_sound{"Effects/Oracle_Chest"},
+  heartContainer = snd.load_sound{"Effects/Oracle_HeartContainer"},
+  stairs = snd.load_sound{"Effects/Oracle_Stairs"},
+  useItem = snd.load_sound{"Effects/Oracle_Get_Item"},
+  portal = snd.load_sound{"Effects/Oracle_Dungeon_Teleport"},
+  bomb = snd.load_sound{"Effects/Oracle_Bomb_Blow"},
+  bombDrop = snd.load_sound{"Effects/Oracle_Bomb_Drop"},
+  magicDust = snd.load_sound{"Effects/Oracle_MakuTree_Leaves"},
+  appearVanish = snd.load_sound{"Effects/Oracle_AppearVanish"},
+  decoy = snd.load_sound{"Effects/OOA_Veran_Shapeshift"},
+  fire = snd.load_sound{"Effects/Oracle_EmberSeed"},
+  ice = snd.load_sound{"Effects/Oracle_SwordShimmer"},
+  stone = snd.load_sound{"Effects/Oracle_Rumble2b"},
+  boing = snd.load_sound{"Effects/Oracle_ScentSeed"},
+  plant = snd.load_sound{"Effects/Oracle_ScentSeed_Shot"},
+  wind = snd.load_sound{"Effects/Oracle_GaleSeed"},
+  blockFall = snd.load_sound{"Effects/Oracle_Block_Fall"},
+  enemyJump = snd.load_sound{"Effects/Oracle_Enemy_Jump"},
+  shieldDeflect = snd.load_sound{"Effects/Oracle_Shield_Deflect"},
+  swordShimmer = snd.load_sound{"Effects/Oracle_SwordShimmer"},
+  supercharge = snd.load_sound{"Effects/Oracle_BiggoronsSword"},
+  journalEntry = snd.load_sound{"Effects/journalEntry"},
+  bell = snd.load_sound{"Effects/bell"},
 
   -- Mundane
-  bushCut = {"Effects/Oracle_Bush_Cut"},
-  uproot = {"Effects/Bush_Uproot"},
-  dungeonDoor = {"Effects/Oracle_Dungeon_Door"},
+  bushCut = snd.load_sound{"Effects/Oracle_Bush_Cut"},
+  uproot = snd.load_sound{"Effects/Bush_Uproot"},
+  dungeonDoor = snd.load_sound{"Effects/Oracle_Dungeon_Door"},
 
   -- Feedback
-  runOut = {"Effects/run_out"},
-  runningLow = {"Effects/running_low"},
+  runOut = snd.load_sound{"Effects/run_out"},
+  runningLow = snd.load_sound{"Effects/running_low"},
 
   -- Harpsounds
-  harpad = {"Effects/harp/ad"},
-  harpadB = {"Effects/harp/adB"},
-  harpbd = {"Effects/harp/bd"},
-  harpbdB = {"Effects/harp/bdB"},
-  harpcd = {"Effects/harp/cd"},
-  harpdd = {"Effects/harp/dd"},
-  harpddB = {"Effects/harp/ddB"},
-  harped = {"Effects/harp/ed"},
-  harpedB = {"Effects/harp/edB"},
-  harpfd = {"Effects/harp/fd"},
-  harpfdS = {"Effects/harp/fdS"},
-  harpgd = {"Effects/harp/gd"},
+  harpad = snd.load_sound{"Effects/harp/ad"},
+  harpadB = snd.load_sound{"Effects/harp/adB"},
+  harpbd = snd.load_sound{"Effects/harp/bd"},
+  harpbdB = snd.load_sound{"Effects/harp/bdB"},
+  harpcd = snd.load_sound{"Effects/harp/cd"},
+  harpdd = snd.load_sound{"Effects/harp/dd"},
+  harpddB = snd.load_sound{"Effects/harp/ddB"},
+  harped = snd.load_sound{"Effects/harp/ed"},
+  harpedB = snd.load_sound{"Effects/harp/edB"},
+  harpfd = snd.load_sound{"Effects/harp/fd"},
+  harpfdS = snd.load_sound{"Effects/harp/fdS"},
+  harpgd = snd.load_sound{"Effects/harp/gd"},
 
-  harpam = {"Effects/harp/am"},
-  harpamB = {"Effects/harp/amB"},
-  harpbm = {"Effects/harp/bm"},
-  harpbmB = {"Effects/harp/bmB"},
-  harpcm = {"Effects/harp/cm"},
-  harpdm = {"Effects/harp/dm"},
-  harpdmB = {"Effects/harp/dmB"},
-  harpem = {"Effects/harp/em"},
-  harpemB = {"Effects/harp/emB"},
-  harpfm = {"Effects/harp/fm"},
-  harpfmS = {"Effects/harp/fmS"},
-  harpgm = {"Effects/harp/gm"},
+  harpam = snd.load_sound{"Effects/harp/am"},
+  harpamB = snd.load_sound{"Effects/harp/amB"},
+  harpbm = snd.load_sound{"Effects/harp/bm"},
+  harpbmB = snd.load_sound{"Effects/harp/bmB"},
+  harpcm = snd.load_sound{"Effects/harp/cm"},
+  harpdm = snd.load_sound{"Effects/harp/dm"},
+  harpdmB = snd.load_sound{"Effects/harp/dmB"},
+  harpem = snd.load_sound{"Effects/harp/em"},
+  harpemB = snd.load_sound{"Effects/harp/emB"},
+  harpfm = snd.load_sound{"Effects/harp/fm"},
+  harpfmS = snd.load_sound{"Effects/harp/fmS"},
+  harpgm = snd.load_sound{"Effects/harp/gm"},
 
-  harpcu = {"Effects/harp/cu"},
-  harpdu = {"Effects/harp/du"},
-  harpduB = {"Effects/harp/duB"},
+  harpcu = snd.load_sound{"Effects/harp/cu"},
+  harpdu = snd.load_sound{"Effects/harp/du"},
+  harpduB = snd.load_sound{"Effects/harp/duB"},
 }
 
 -- Set up cameras
@@ -1000,6 +1009,7 @@ function love.update(dt)
 
   inp.check_input()
 
+  game.finishedTransition = false
   -- manage transition
   if game.transitioning then
 
@@ -1033,7 +1043,11 @@ function love.update(dt)
     elseif game.transitioning.progress < 1 then
       -- local transSpeed = 1
       -- if game.transitioning.type ~= 'whiteScreen' then transSpeed = 0.1 end
-      game.transitioning.progress = game.transitioning.progress + (game.transitioning.speed or 1) * dt
+      if game.transitioning.type == 'scrolling' then
+        game.transitioning.progress = game.transitioning.progress + 6 * (1.02 - game.transitioning.progress) * (game.transitioning.speed or 1) * dt
+      else
+        game.transitioning.progress = game.transitioning.progress + (game.transitioning.speed or 1) * dt
+      end
       if game.transitioning.progress > 1 then game.transitioning.progress = 1 end
       trans.determine_coordinates_transformation()
     else
@@ -1089,6 +1103,10 @@ function love.update(dt)
           playa.body:setPosition(game.transitioning.desx, game.transitioning.desy)
           -- Also set spritebody to avoid funkyness
           playa.spritebody:setPosition(game.transitioning.desx, game.transitioning.desy)
+
+          session.save.lastWhitescreenScreenName = game.transitioning.roomTarget
+          session.save.lastWhitescreenScreenX = game.transitioning.desx
+          session.save.lastWhitescreenScreenY = game.transitioning.desy
         end
         -- reset player veolocity after transition if necessary
         -- playa.body:setLinearVelocity(u.sign(playa.vx), u.sign(playa.vy))
@@ -1108,6 +1126,7 @@ function love.update(dt)
 
       game.paused = false
       game.transitioning = false
+      game.finishedTransition = true
 
       -- snd.bgm:load(newRoom.music_info)
       snd.bgmV2.getMusicAndload()
@@ -1500,6 +1519,19 @@ local function afterScreenEffects(l,t,w,h)
   end
 end
 local function noEffectsDraw()
+  -- The lights must be drawn either here
+  -- or below. When drawn here there is
+  -- a delay because the camera moves after
+  -- they are drawn. However if they are
+  -- not drawn here at the moment that a
+  -- scrolling transition ends there's a blink!
+  -- This check determines where the lights will
+  -- be drawn.
+  -- It's a total hack but don't touch it or all will be lost!
+  if game.finishedTransition then
+    imports.lighting.draw()
+  end
+
   cam:setScale(sh.get_total_scale())
   -- local l, t, w, h = cam:getWindow()
   -- cam:setWindow(cam.noisel,cam.noiset,w,h)
@@ -1507,32 +1539,19 @@ local function noEffectsDraw()
   cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
   cam:setPosition(cam.xt, cam.yt)
   setCurrentCam(mainCamera)
+
+  if not game.finishedTransition then
+    imports.lighting.draw()
+  end
+
   cam:draw(mainCameraDraw)
 end
 local function hudDraw(l,t,w,h)
+
+  imports.healthDisplay.draw(l,t,w,h)
+
   local transing = game.transitioning
   if pl1 and not (transing and transing.type == "whiteScreen") then
-    local hpspr = im.sprites["health"]
-    -- Draw as many filled hearts as player has health
-    for i = 1, pl1.maxHealth do
-      local healthFrame
-
-      if pl1.health <= i - 1 then
-        healthFrame = hpspr[4]
-      elseif pl1.health <= i - 0.75 then
-        healthFrame = hpspr[3]
-      elseif pl1.health <= i - 0.5 then
-        healthFrame = hpspr[2]
-      elseif pl1.health <= i - 0.25 then
-        healthFrame = hpspr[1]
-      else
-        healthFrame = hpspr[0]
-      end
-
-      love.graphics.draw(hpspr.img, healthFrame, i*16-8, 5, 0, hpspr.res_x_scale, hpspr.res_y_scale, hpspr.cx, hpspr.cy)
-
-    end
-
     local pr, pg, pb, pa = love.graphics.getColor()
 
     -- Draw rupees
@@ -1567,50 +1586,6 @@ local function hudDraw(l,t,w,h)
     love.graphics.draw(cspr.img, cspr[0], clockX, h, session.clockAngle, cspr.res_x_scale, cspr.res_y_scale, cspr.cx, cspr.cy)
     local chspr = im.sprites["clockHand"]
     love.graphics.draw(chspr.img, chspr[session.clockAngleTarget == 0 and 0 or 1], clockX, h, -session.clockAngle + session.save.time * math.pi / 12, chspr.res_x_scale, chspr.res_y_scale, chspr.cx, chspr.cy)
-
-    -- Draw bombs
-    if session.save.hasBomb then
-      love.graphics.setColor(1, 1, 1, 1)
-      local maxBombs = session.checkItemLim("mateBlastSeed")
-      local bombs = string.format("%02d", (session.save.mateBlastSeed or 0))
-      local bspr = im.sprites["Drops/blastSeed"]
-      love.graphics.draw(bspr.img, bspr[0], 2, h-9,  0, bspr.res_x_scale, bspr.res_y_scale)
-      love.graphics.setColor(0, 0, 0, 1)
-      local bombOffset = 12
-      local bombYBase = h-6.8
-      love.graphics.print(bombs, bombOffset + rno, bombYBase, 0, 0.255)
-      love.graphics.print(bombs, bombOffset - rno, bombYBase, 0, 0.255)
-      love.graphics.print(bombs, bombOffset, bombYBase + rno, 0, 0.255)
-      love.graphics.print(bombs, bombOffset, bombYBase - rno, 0, 0.255)
-      if maxBombs == session.save.mateBlastSeed then
-        love.graphics.setColor(1, 1, 0.2, 1)
-      else
-        love.graphics.setColor(1, 1, 1, 1)
-      end
-      love.graphics.print(bombs, bombOffset, bombYBase, 0, 0.255)
-    end
-
-    -- Draw magic dust
-    if session.save.hasMystery then
-      love.graphics.setColor(1, 1, 1, 1)
-      local maxDust = session.checkItemLim("mateMagicDust")
-      local dust = string.format("%02d", (session.save.mateMagicDust or 0))
-      local dupr = im.sprites["Drops/magicDust"]
-      love.graphics.draw(dupr.img, dupr[0], 2, h-27,  0, dupr.res_x_scale, dupr.res_y_scale)
-      love.graphics.setColor(0, 0, 0, 1)
-      local dustOffset = 12
-      local dustYBase = h-20.4
-      love.graphics.print(dust, dustOffset + rno, dustYBase, 0, 0.255)
-      love.graphics.print(dust, dustOffset - rno, dustYBase, 0, 0.255)
-      love.graphics.print(dust, dustOffset, dustYBase + rno, 0, 0.255)
-      love.graphics.print(dust, dustOffset, dustYBase - rno, 0, 0.255)
-      if maxDust == session.save.mateMagicDust then
-        love.graphics.setColor(1, 1, 0.2, 1)
-      else
-        love.graphics.setColor(1, 1, 1, 1)
-      end
-      love.graphics.print(dust, dustOffset, dustYBase, 0, 0.255)
-    end
 
     love.graphics.setColor(pr, pg, pb, pa)
 
@@ -1647,20 +1622,19 @@ function love.draw()
   prevs.ring = session.ringShader
 
   if resetScreenEffects then
-    globs.screenEffects.clear()
-    globs.lighting.pushScreenEffect()
+    imports.screenEffects.clear()
+    imports.lighting.pushScreenEffect()
     if session.drug and session.drug.shader then
-      globs.screenEffects.push(session.drug.shader, function(s) s:send("invScale", 0.9 + 0.1*math.cos(session.drug.duration - session.drug.maxDuration)) end)
+      imports.screenEffects.push(session.drug.shader, function(s) s:send("invScale", 0.9 + 0.1*math.cos(session.drug.duration - session.drug.maxDuration)) end)
     end
     if session.ringShader then
-      globs.screenEffects.push(session.ringShader)
+      imports.screenEffects.push(session.ringShader)
     end
-    globs.screenEffects.push(globs.shdrs.vignette)
+    imports.screenEffects.push(imports.shdrs.vignette)
   end
 
-  globs.lighting.draw()
   noEffectsDraw()
-  globs.screenEffects.apply(gamera.getCanvas())
+  imports.screenEffects.apply(gamera.getCanvas())
 
   cam:draw(afterScreenEffects)
 
@@ -1716,8 +1690,8 @@ end
 -- Avoid enemies that crash if they don't have a creator
 local avoid = {
   ["shooterTemplate.lua"] = true,
-  ["blueHand.lua"] = true,
-  ["redHand.lua"] = true,
+  -- ["blueHand.lua"] = true,
+  -- ["redHand.lua"] = true,
   ["robe.lua"] = true,
   ["leever.lua"] = true,
   ["zora.lua"] = true,
@@ -1749,6 +1723,29 @@ for i, path in ipairs(enemyPaths) do
     startingCursor = i
   end
 end
+
+function love.wheelmoved(_, y)
+  local move = 0
+  if y > 0 then
+    -- Mouse wheel moved up
+    move = 1
+  elseif y < 0 then
+    -- Mouse wheel moved down
+    move = -1
+  end
+  if cursor then
+    cursor = cursor + move
+  else
+    cursor = startingCursor
+  end
+  if cursor > #enemyPaths then
+    cursor = 1
+  elseif cursor < 1 then
+    cursor = #enemyPaths
+  end
+  currentEnemyName = enemyPaths[cursor]
+end
+
 function love.mousepressed(x, y, button, isTouch)
   -- x, y = cam:toWorld(x, y)
 
@@ -1756,34 +1753,36 @@ function love.mousepressed(x, y, button, isTouch)
   -- local brick = DynBrick:new{x = x, y = y, xstart = x, ystart = y}
   -- o.addToWorld(brick)
 
-  -- if button == 2 then
-  --   if cursor then
-  --     cursor = cursor + 1
-  --   else
-  --     cursor = startingCursor
-  --   end
-  --   if cursor > #enemyPaths then
-  --     cursor = 1
-  --   end
-  --   currentEnemyName = enemyPaths[cursor]
-  -- else
-  --   if currentEnemyName then
-  --     local enemClass = assert(love.filesystem.load(currentEnemyName))()
-  --     local enem = enemClass:new()
-  --     local wx, wy = cam:toWorld(x, y)
-  --     enem.x, enem.y = wx, wy
-  --     enem.xstart, enem.ystart = enem.x, enem.y
-  --     o.addToWorld(enem)
-    -- else
-      -- -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
+  if button == 2 then
+    if cursor then
+      cursor = cursor + 1
+    else
+      cursor = startingCursor
+    end
+    if cursor > #enemyPaths then
+      cursor = 1
+    end
+    currentEnemyName = enemyPaths[cursor]
+  else
+    if currentEnemyName then
+      local enemClass = assert(love.filesystem.load(currentEnemyName))()
+      local enem = enemClass:new()
+      local wx, wy = cam:toWorld(x, y)
+      enem.x, enem.y = wx, wy
+      enem.xstart, enem.ystart = enem.x, enem.y
+      o.addToWorld(enem)
+    else
+      -- local enemClass = assert(love.filesystem.load("/GameObjects/DialogueBubble/DialogueControl.lua"))()
       -- local enemClass = assert(love.filesystem.load("/GameObjects/misc/chess/pawn.lua"))()
       -- local enem = enemClass:new()
       -- local wx, wy = cam:toWorld(x, y)
       -- enem.x, enem.y = wx, wy
       -- enem.xstart, enem.ystart = enem.x, enem.y
       -- o.addToWorld(enem)
-  --   end
-  -- end
+
+      -- u.printTable('graphics stats', love.graphics.getStats(), 1)
+    end
+  end
 
   -- -- Enemarea code
   -- if type(enemarea[1]) == "table" then enemarea = {} end
@@ -1915,12 +1914,12 @@ function love.resize( w, h )
   textCam:setWindow(sh.getCachedTextWindow())
   -- textCam:setWindow(sh.getCachedTextWindow())
 
-  globs.screenEffects.resize(w, h)
+  imports.screenEffects.resize(w, h)
 
   -- Determine camera scale due to window size
   sh.calculate_total_scale{resized=true}
 
-  globs.lighting.resize(w, h)
+  imports.lighting.resize(w, h)
 end
 
 

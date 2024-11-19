@@ -8,6 +8,7 @@ function sm.new_state_machine(states)
     self.states[self.state].end_state(instance, dt)
     -- self.prevPrevState = self.prevState
     -- self.prevState = self.state
+    self.prev_state = self.state
     self.state = new_state
     self.states[self.state].start_state(instance, dt)
   end

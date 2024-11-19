@@ -13,6 +13,7 @@ snd.bgm = {} -- Background Music
 ---@type love.Source[]
 local soundsToBePlayed = {}
 
+---@return love.Source
 function snd.load_sound(snd_info)
   local snd_name = snd_info.name or snd_info[1]
   local extension = snd_info.extension or ".ogg"
