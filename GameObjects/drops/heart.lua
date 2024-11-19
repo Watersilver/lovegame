@@ -15,6 +15,7 @@ end
 function Drop.initialize(instance)
   instance.sprite_info = im.spriteSettings.dropHeart
   instance.onPlayerTouch = onPlayerTouch
+  instance.image_speed = 0.2
 end
 
 Drop.functions = {}

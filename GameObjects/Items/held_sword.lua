@@ -15,23 +15,23 @@ local floor = math.floor
 local pi = math.pi
 
 --  Calculate HeldSword position and angle offset due to creator's side
-local function calculate_offset(side, phase)
+local function calculate_offset(side)
   local xoff, yoff, aoff = 0, 0, 0
   if side == "down" then
     xoff = 3
-    yoff = 12
+    yoff = 12.5
     aoff = pi
   elseif side == "right" then
-    xoff = 11
+    xoff = 10.5
     yoff = 4
     aoff = pi * 0.5
   elseif side == "left" then
-    xoff = - 11
+    xoff = - 10.5
     yoff = 4
     aoff = - pi * 0.5
   elseif side == "up" then
     xoff = - 4
-    yoff = - 11
+    yoff = - 10.5
     aoff = 0
   end
   return xoff, yoff, aoff
@@ -154,7 +154,14 @@ HeldSword.functions = {
   end,
 
   draw = function(self, td)
+    local cr = self.creator
+    -- Check if I have to be destroyed
+    if not cr then
+      return
+    end
+
     local x, y = self.body:getPosition()
+    y = y + (cr.fake_zo or 0)
 
     if self.spritejoint then
       self.spritejoint:destroy()

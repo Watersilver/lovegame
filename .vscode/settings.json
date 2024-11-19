@@ -7,5 +7,10 @@
   "Lua.workspace.checkThirdParty": false,
   "Lua.diagnostics.disable": [
     "cast-local-type"
-  ]
+  ],
+  "Lua.diagnostics.workspaceDelay": 30000,
+  "Lua.workspace.ignoreDir": [
+    ".vscode"
+  ],
+  "Lua.diagnostics.workspaceEvent": "None"
 }

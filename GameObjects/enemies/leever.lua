@@ -108,6 +108,23 @@ Leever.functions = {
       end
     end
 
+    self.x_scale = 1
+    if self.startedMoving and not self.sinking then
+      local vx, vy = self.body:getLinearVelocity()
+      if math.abs(vx) > math.abs(vy) then
+        self.sprite = im.sprites["Enemies/Leever/left"]
+        if vx > 0 then
+          self.x_scale = -1
+        end
+      else
+        if vy < 0 then
+          self.sprite = im.sprites["Enemies/Leever/up"]
+        else
+          self.sprite = im.sprites["Enemies/Leever/down"]
+        end
+      end
+    end
+
     -- Determine life state
     if self.timer > self.duration then
       self.sank = true
@@ -121,16 +138,17 @@ Leever.functions = {
         self.sprite = im.sprites["Enemies/Leever/digging"]
         self.image_speed = 0
         self.image_index = 1
+        self.body:setLinearVelocity(0, 0)
       end
-    elseif self.timer > 0.3 then
+    elseif self.timer > 0.4 then
       if not self.risen then
         belowGround(self, false)
         self.risen = true
-        self.sprite = im.sprites["Enemies/Leever/leever"]
-        self.image_speed = 0.2
+        self.sprite = im.sprites["Enemies/Leever/down"]
+        self.image_speed = 0.1
         self.image_index = 0
       end
-    elseif self.timer > 0.15 then
+    elseif self.timer > 0.2 then
       self.image_index = 1
     else
       self.image_index = 0

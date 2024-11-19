@@ -1,10 +1,6 @@
 local p = require "GameObjects.prototype"
 local Nothing = require "GameObjects.drops.nothing"
 local itemGetPoseAndDlg = require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"
-local im = require "image"
-local snd = require "sound"
-local ps = require "physics_settings"
-local o = require "GameObjects.objects"
 
 local itemInfo = (require "GameObjects.GlobalNpcs.fanfareGottenItems.pieceOfHeart").itemInfo
 
@@ -14,6 +10,7 @@ local Drop = {}
 
 local function onPlayerTouch()
   local pieceOfHeart = itemGetPoseAndDlg:new(itemInfo)
+  pieceOfHeart.image_speed = 0.15
   session.save.randomPiecesOfHeart = (session.save.randomPiecesOfHeart or 0) + 1
   o.addToWorld(pieceOfHeart)
 end
@@ -22,6 +19,7 @@ function Drop.initialize(instance)
   instance.sprite_info = itemInfo.itemSprite
   instance.onPlayerTouch = onPlayerTouch
   instance.shadowHeightMod = 0
+  instance.image_speed = 0.15
 end
 
 Drop.functions = {

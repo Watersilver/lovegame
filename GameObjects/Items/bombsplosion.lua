@@ -2,12 +2,12 @@ local p = require "GameObjects.prototype"
 local ps = require "physics_settings"
 local o = require "GameObjects.objects"
 local trans = require "transitions"
-local game = require "game"
 local u = require "utilities"
 local im = require "image"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
 local gsh = require "gamera_shake"
+local game= require "game"
 
 -- xplosion light
 local lighting = require 'ScreenEffects.lighting.lighting'
@@ -110,20 +110,11 @@ Bombsplosion.functions = {
 
     self.x, self.y = x, y
 
-    local progress = (1 - self.timer / self.startingTimer)
-
-    local a = 0
-    if progress < 0.2 then
-      a = progress / 0.2
-    elseif progress < 0.7 then
-      a = 1
-    else
-      a = 1 - (progress - 0.7) / 0.3
-    end
+    local a = u.compute_alpha_from_table(self.image_index, self.sprite.frames, {first = 0, [1] = 1}, self.onPreviousRoom, game.transitioning)
 
     -- bomb light
     lighting.applyLight{
-      type = 'owlStatue',
+      type = 'massive',
       x = x,
       y = y,
       rgba = self.red and {r = 1, g = 0.5, b = 0, a = a} or {r = 1, g = 0, b = 1, a = a}
@@ -137,7 +128,7 @@ Bombsplosion.functions = {
     love.graphics.draw(
     sprite.img, frame, x, y, 0,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
-    sprite.cx, sprite.cy)
+    sprite.cx, sprite.cy + (sprite.oy or 0))
 
     love.graphics.setShader(worldShader)
 
@@ -156,7 +147,7 @@ Bombsplosion.functions = {
 
   beginContact = function(self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom
-    local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
+    -- local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
   end,
 }

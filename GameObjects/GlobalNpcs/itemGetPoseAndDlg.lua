@@ -13,10 +13,8 @@ local npcTest = require "GameObjects.NpcTest"
 local typicalNpc = require "GameObjects.GlobalNpcs.typicalNpc"
 local autoActivatedDlg = require "GameObjects.GlobalNpcs.autoActivatedDlg"
 
-local itemSprite = im.spriteSettings.dropRupee
+local defaultItemSprite = im.spriteSettings.dropRupee
 local playerSprites = im.spriteSettings.playerSprites
-
-local floor = math.floor
 
 local NPC = {}
 
@@ -81,11 +79,14 @@ function NPC.initialize(instance)
   instance.onDialogueRealEnd = onDialogueRealEnd
   instance.layer = 21
   instance.sounds = {}
-  instance.itemSprite_info = instance.itemSprite or itemSprite
+  instance.itemSprite_info = instance.itemSprite or defaultItemSprite
   instance.itemSprite_info = instance.itemSprite_info[1]
   instance.sprite_info = playerSprites
   instance.playerFrame = instance.playerFrame or 0
   instance.noLetterSound = {[1] = true}
+  instance.image_index = 0
+  instance.image_speed = 0
+  instance.frame_speed_mods = {}
 end
 
 NPC.functions = {
@@ -93,7 +94,9 @@ NPC.functions = {
     if o.identified and o.identified.PlayaTest and o.identified.PlayaTest[1] then
       self.activator = o.identified.PlayaTest[1]
     end
+
     self.sprite = im.sprites["Witch/display_down"]
+
     self.activated = true
     if self.itemSprite_info then
       im.load_sprite(self.itemSprite_info)
@@ -104,6 +107,14 @@ NPC.functions = {
   delete = function (self)
     if self.itemSprite_info then
       im.unload_sprite(self.itemSprite_info[1] or self.itemSprite_info["img_name"])
+    end
+  end,
+
+  unpausable_update = function (self, dt)
+    npcTest.functions.unpausable_update(self, dt)
+    self.image_index = (self.image_index + dt*60*self.image_speed*(self.frame_speed_mods[math.floor(self.image_index)] or 1))
+    while self.image_index >= self.itemSprite.frames do
+      self.image_index = self.image_index - self.itemSprite.frames
     end
   end,
 
@@ -121,10 +132,13 @@ NPC.functions = {
       love.graphics.setShader(worldShader)
 
       local itemSprite = self.itemSprite
-      local frame = itemSprite[0]
+      while self.image_index >= itemSprite.frames do
+        self.image_index = self.image_index - itemSprite.frames
+      end
+      frame = itemSprite[math.floor(self.image_index)]
       love.graphics.draw(
       itemSprite.img, frame, xtotal, ytotal - ps.shapes.plshapeHeight, 0,
-      itemSprite.res_x_scale*pl1.x_scale, itemSprite.res_y_scale*pl1.y_scale,
+      itemSprite.res_x_scale, itemSprite.res_y_scale,
       itemSprite.cx, itemSprite.height)
     end
   end

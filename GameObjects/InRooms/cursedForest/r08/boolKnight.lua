@@ -13,8 +13,8 @@ local cd = require "GameObjects.DialogueBubble.controlDefaults"
 local o = require "GameObjects.objects"
 
 local s_info = {
-  {'NPCs/BoolKnight/down1', 2, padding = 2, width = 15, height = 16},
-  {'NPCs/BoolKnight/down2', 2, padding = 2, width = 15, height = 16},
+  {'NPCs/BoolKnight/down1', 2, padding = 2, width = 16, height = 16},
+  {'NPCs/BoolKnight/down2', 2, padding = 2, width = 16, height = 16},
 }
 
 local BoolKnight = {}
@@ -45,7 +45,7 @@ dlgMethods.getDlg = function (self)
       dlg = self.anchor.rightWay == 1 and goLeft or goRight
     end
   end
-  return dlg
+  return "The other one always lies! I'm always truthful! " .. dlg
 end
 
 dlgMethods.waitingHook = function (self, dt)

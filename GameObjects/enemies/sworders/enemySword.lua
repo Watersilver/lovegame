@@ -28,14 +28,14 @@ local function determinePositionDefault(x, y, facing, index)
       mody = mody - 2
     end
   elseif facing == "left" then
-    mody = 3
-    modx = -8
+    mody = 4
+    modx = -9
     if index >= 1 then
       modx = modx - 2
     end
   elseif facing == "right" then
-    mody = 3
-    modx = 8
+    mody = 4
+    modx = 9
     if index >= 1 then
       modx = modx + 2
     end
@@ -159,9 +159,9 @@ Sword.functions = {
 }
 
 function Sword:new(init)
-  local instance = p:new() -- add parent functions and fields
+  local instance = p:new(init) -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields
-  p.new(Sword, instance, init) -- add own functions and fields
+  p.new(Sword, instance) -- add own functions and fields
   return instance
 end
 

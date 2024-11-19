@@ -1063,22 +1063,6 @@ room.manuallyPlacedObjects = {
   { x = room.width * 0.5 - 8, y = 0, n = {side = "down"}, blueprint = "misc.DunDoor"},
   { x = room.width * 0.5 + 8, y = 0, n = {side = "up"}, blueprint = "misc.DunDoor"},
   { x = room.width * 0.5 - 8, y = 0, n = {side = "up"}, blueprint = "misc.DunDoor"},
-  {x = 88, y = 232, blueprint = "misc.regeneratingPlant", n ={
-    drops = "blastSeed",
-    cooldown = 60
-  }},
-  {x = 88, y = 280, blueprint = "misc.regeneratingPlant", n ={
-    drops = "blastSeeds",
-    cooldown = 120
-  }},
-  {x = 424, y = 232, blueprint = "misc.regeneratingPlant", n ={
-    drops = "blastSeeds",
-    cooldown = 120
-  }},
-  {x = 424, y = 280, blueprint = "misc.regeneratingPlant", n ={
-    drops = "blastSeed",
-    cooldown = 60
-  }}
 }
 
 return room

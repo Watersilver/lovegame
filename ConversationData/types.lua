@@ -2,7 +2,13 @@
 
 -- TODO: system to pause dialogue running until something happens at which point it can resume
 
----@class ConversationObject
+---@class GameObject
+---@field x? number
+---@field y? number
+---@field xstart? number
+---@field ystart? number
+
+---@class ConversationObject: GameObject
 ---@field currentNode DlgNode
 ---@field data ConversationData
 
@@ -25,7 +31,7 @@
 ---@field id ConversationId
 ---@field nodes DlgNode[]
 ---@field choices? DlgChoice[]
----@field participants DlgParticipantId[]
+---@field participants DlgParticipantId[] If empty parent instance will speak the dlg
 ---@field options? DlgOptions
 ---@field startNodeData DlgNextNodeDataGetter
 ---@field activators? DlgParticipantId[] | 'none'
@@ -36,7 +42,7 @@
 ---@field autoProgress? boolean
 ---@field onEndDelay? number | fun(convo: ConversationObject): number
 ---@field onEnd? DlgNextNodeDataGetter
----@field onEvent? fun(convo: ConversationObject, event: string): (DlgNextNodeDataGetter | nil)
+---@field onEvent? fun(convo: ConversationObject, event: string): DlgNextNodeDataGetter
 -- Default is first participant
 ---@field anchor? DlgParticipantId
 ---@field options? DlgOptions
@@ -50,7 +56,7 @@
 
 ---@alias ConversationId string
 ---@alias DlgNodeId string
----@alias DlgNextNodeData {id?: DlgNodeId, keepConversationAlive?: {keepTextBubbleAlive?: boolean}}
+---@alias DlgNextNodeData {id?: DlgNodeId, keepConversationAlive?: {keepTextBubbleAlive?: boolean}, events?: string[]}
 ---@alias DlgNextNodeDataGetter DlgNextNodeData | fun(convo: ConversationObject): DlgNextNodeData
 ---@alias DlgNodeInterruptIdGetter DlgNodeId | fun(convo: ConversationObject, reason: string): DlgNodeId
 ---@alias DlgChoiceId string

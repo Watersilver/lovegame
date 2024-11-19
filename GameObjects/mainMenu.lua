@@ -947,25 +947,6 @@ end,
 
 update = function (self, dt)
 
-  if not gvar.spritesTypeSelected then
-    if o.identified.introID then return end
-    local move = 0
-    if input.upPressed then move = move - 1 end
-    if input.downPressed then move = move + 1 end
-    if move ~= 0 then
-      self.sprCursor = not self.sprCursor
-    end
-    if input.enterPressed then
-      if not self.sprCursor then
-        gvar.spritesTypeSelected = 'link';
-      else
-        gvar.spritesTypeSelected = 'new';
-      end
-      input.enterPressed = false
-    else
-      return
-    end
-  end
 
   -- Determine menu we're working on
   local currMenu = self.menus[self.currentMenu]
@@ -1068,14 +1049,6 @@ update = function (self, dt)
 end,
 
 draw_overlay = function (self)
-  if not gvar.spritesTypeSelected then
-    local cursor = self.sprCursor or false
-    love.graphics.print('Use zelda sprites?', 10, 10)
-    love.graphics.print('YES', 30, 50)
-    love.graphics.print('NO', 30, 90)
-    love.graphics.circle('fill', 10, (not cursor and 50 or 90) + 10, 5)
-    return
-  end
 
   if self.menus_to_be_drawn_previous then
     for i, prev in ipairs(self.menus_to_be_drawn_previous) do

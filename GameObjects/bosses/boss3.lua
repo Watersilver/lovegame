@@ -23,11 +23,6 @@ local pi = math.pi
 
 local function onFireEnd(fuel)
   o.removeFromWorld(fuel)
-  if o.identified.blastSeedDrop and #o.identified.blastSeedDrop >= 2 then return end
-  local drops = require "GameObjects.drops.drops"
-  drops.custom(fuel.x, fuel.y, {
-    {chance = 0.05, value = "blastSeed"}
-  })
 end
 
 local animationTable = {

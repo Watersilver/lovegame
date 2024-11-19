@@ -1,56 +1,42 @@
----@type table<string, love.Shader>
-local shdrs = {}
-
-local function shaderPcall(fieldName, fileName)
-  if not fileName then fileName = fieldName end
-  local s, err = pcall(
+local function createShader(fileName)
+  ---@type love.Shader|nil
+  local shdr = nil
+  local _, err = pcall(
     function ()
-      shdrs[fieldName] = love.graphics.newShader("Shaders/" .. fileName .. ".fs")
+      shdr = love.graphics.newShader("Shaders/" .. fileName .. ".fs")
     end
   )
-  if err ~= nil then
-    print(err)
-    shdrs[fieldName] = nil
-  end
+  if err ~= nil then print(err) end
+  return shdr, err
 end
 
-shaderPcall("playerHitShader", "player_damage")
-shaderPcall("enemyHitShader", "enemy_damage")
-shaderPcall("bossDeathShader", "boss_death")
-shaderPcall("boss4angry", "boss4angry")
-shaderPcall("enemyExplodeShader1", "enemy_explode_shader_1")
-shaderPcall("enemyExplodeShader2", "enemy_explode_shader_2")
-shaderPcall("bombRedShader", "bomb_red_shader")
-shaderPcall("itemRedShader", "item_red_shader")
-shaderPcall("itemBlueShader", "item_blue_shader")
-shaderPcall("itemGreenShader", "item_green_shader")
-shaderPcall("swordCustomShader", "sword_custom_shader")
-shaderPcall("missileCustomShader", "missile_custom_shader")
-shaderPcall("markCustomShader", "mark_custom_shader")
-shaderPcall("swordChargeShader", "charge_sword_shader")
-shaderPcall("blueTunic", "blue_tunic")
-shaderPcall("redTunic", "red_tunic")
-shaderPcall("mauveTunic", "mauve_tunic")
-shaderPcall("customTunic", "custom_tunic")
+local shdrs = {
+  playerHitShader = createShader("player_damage"),
+  bossDeathShader = createShader("boss_death"),
+  enemyHitShader = createShader("enemy_damage"),
+  boss4angry = createShader("boss4angry"),
+  enemyExplodeShader1 = createShader("enemy_explode_shader_1"),
+  enemyExplodeShader2 = createShader("enemy_explode_shader_2"),
+  bombRedShader = createShader("bomb_red_shader"),
+  itemRedShader = createShader("item_red_shader"),
+  itemBlueShader = createShader("item_blue_shader"),
+  itemGreenShader = createShader("item_green_shader"),
+  swordCustomShader = createShader("sword_custom_shader"),
+  missileCustomShader = createShader("missile_custom_shader"),
+  markCustomShader = createShader("mark_custom_shader"),
+  swordChargeShader = createShader("charge_sword_shader"),
+  customTunic = createShader("custom_tunic"),
+  grayscale = createShader("grayscale"),
+  sepia = createShader("sepia/sepia"),
+  vignette = createShader("vignette/vignette"),
+  oldScreen = createShader("oldScreen"),
+  drugShader = createShader("drugShader"),
+  multiply = createShader("multiply"),
 
--- Freeze, stone and plant shaders
-shaderPcall("frozenShader", "frozen_shader")
-shaderPcall("stoneShader", "stone_shader")
-shaderPcall("plantShader", "plant_shader")
-
---
--- shdrs.grayscale = love.graphics.newShader("Shaders/grayscale.fs")
-shaderPcall("grayscale")
--- shdrs.sepia = love.graphics.newShader("Shaders/sepia/sepia.fs")
-shaderPcall("sepia", "sepia/sepia")
--- shdrs.vignette = love.graphics.newShader("Shaders/vignette/vignette.fs")
-shaderPcall("vignette", "vignette/vignette")
--- shdrs.oldScreen = love.graphics.newShader("Shaders/oldScreen.fs")
-shaderPcall("oldScreen")
--- shdrs.drugShader = love.graphics.newShader("Shaders/drugShader.fs")
-shaderPcall("drugShader")
---
--- shdrs.multiply = love.graphics.newShader("Shaders/multiply.fs")
-shaderPcall("multiply")
+  -- Freeze, stone and plant shaders
+  frozenShader = createShader("frozen_shader"),
+  stoneShader = createShader("stone_shader"),
+  plantShader = createShader("plant_shader"),
+}
 
 return shdrs

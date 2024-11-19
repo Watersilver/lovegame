@@ -34,6 +34,7 @@ Decoy.functions = {
     else
       self.side = "left"
     end
+
     if self.side ~= "right" then
       self.sprite = im.sprites["Witch/mdust_" .. self.side]
     else
@@ -63,6 +64,11 @@ Decoy.functions = {
     end
     if self.alpha > 1 then self.alpha = 1 end
     self.timer = self.timer + dt
+
+    -- TODO: Make it always have the same animation as player but opposite facing
+    -- if pl1 then
+    --   self.sprite = pl1.sprite
+    -- end
   end,
 
   draw = function(self, td)

@@ -7,6 +7,10 @@ local transparentColour = {0, 0, 0, 0}
 
 local BubbleText = {}
 
+---@class BubbleTextMethods
+---@field new fun(content: string, options: any): BubbleTextMethods
+
+---@class BubbleTextMethods
 local methods = {
 
   getLength = function (self)
@@ -93,20 +97,6 @@ local methods = {
     return self:getNextHeight() - 2 * self:getLineHeight() + 0.01 -- Last line is to fix occasional floating point error
   end,
 
-  -- updateLength = function (self, newLength)
-  --   local maxLength = self:getMaxLength()
-  --   if newLength >= maxLength then newLength = maxLength end
-  --   if self.length == newLength then return end
-  --   self.length = newLength
-  --   self.colouredString[1] = self.textRGBA
-  --   local visibleStr = string.sub(self.string, 0, self.length)
-  --   self.colouredString[2] = visibleStr
-  --   self.colouredString[3] = transparentColour
-  --   self.colouredString[4] = string.sub(self.string, self.length + 1)
-  --   self.text:setf(self.colouredString, self:getWraplimit(), self.alignmode)
-  --   return visibleStr:sub(#visibleStr, #visibleStr)
-  -- end,
-
   parseCol = function(self, col)
     if not col then return self.textRGBA end
     if col.token:sub(5, 5) == '#' then
@@ -119,6 +109,44 @@ local methods = {
     elseif col.token:sub(5) == 'default' then
       return self.textRGBA
     end
+  end,
+
+  ---@return string
+  getRevealedString = function (self)
+    return self.revealedString
+  end,
+
+  ---@return number
+  getLetterDelay = function (self)
+    local delay = {pos = 0, delay = -1}
+    for _, d in ipairs(self:getDelays()) do
+      if d.pos <= self.length then
+        if delay.pos <= d.pos then
+          delay = d
+        end
+      end
+    end
+    return delay.delay
+  end,
+
+  getNextNonZeroDelayPosition = function (self)
+    for _, d in ipairs(self:getDelays()) do
+      if d.pos >= self.length and d.delay ~= 0 then
+        return d.pos
+      end
+    end
+    return #self.string
+  end,
+
+  getDelays = function (self)
+    local delays = {}
+    for _, v in ipairs(self.options.markup or {}) do
+      if v.token:sub(1,5) == "delay" then
+        local split = u.split(v.token, ":")
+        table.insert(delays, {delay = tonumber(split[2]), pos = v.atLength - 1})
+      end
+    end
+    return delays
   end,
 
   updateLength = function (self, newLength)
@@ -167,8 +195,8 @@ local methods = {
     end
 
     self.text:setf(self.colouredString, self:getWraplimit(), self.alignmode)
-    local visibleStr = string.sub(self.string, 1, self.length)
-    return visibleStr:sub(#visibleStr, #visibleStr)
+    self.revealedString = string.sub(self.string, 1, self.length)
+    return self.revealedString:sub(#self.revealedString, #self.revealedString)
   end,
 
   draw = function (self, x, y, cam)
@@ -199,6 +227,7 @@ function BubbleText.new(string, options)
     bubbleText[name] = method
   end
   options = options or {}
+
   bubbleText.options = options
   local maxWidth, maxHeight, font, textRGBA =
     options.maxWidth, options.maxHeight,
@@ -206,6 +235,7 @@ function BubbleText.new(string, options)
   bubbleText.font = fonts[font] or fonts.prstart
   bubbleText.yOffset = 0
   bubbleText.string = string
+  bubbleText.revealedString = ""
   bubbleText.text = love.graphics.newText(bubbleText.font)
   bubbleText.heightText = love.graphics.newText(bubbleText.font)
   bubbleText.scale = options.scale or 0.2

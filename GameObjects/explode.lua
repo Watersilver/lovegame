@@ -34,6 +34,34 @@ function Explode.commonExplosion(instance, explosion_sprite, explosion_sound, xd
   o.addToWorld(explOb)
 end
 
+---@param useBodyPosition boolean
+---@param rgba [number,number,number,number]
+function Explode.teleportEffect(instance, useBodyPosition, rgba)
+  local x, y
+  if useBodyPosition then
+    x, y = instance.body:getPosition()
+  else
+    x = instance.x or instance.xstart
+    y = instance.y or instance.ystart
+  end
+  local explOb = Explode:new{
+    x = x, y = y,
+    layer = instance.layer + 5,
+    explosionNumber = 1,
+    explosion_sprite = im.spriteSettings.teleportEffect,
+    image_speed = 0.4,
+    nosound = true,
+    light = {
+      rgba = {r = rgba[1], g = rgba[2], b = rgba[3], a = rgba[4]},
+      alpha_table = {first = 0, [0] = 0, [1] = 1},
+      type = 'massive'
+    },
+    rgba = rgba,
+    transPersistent = true
+  }
+  o.addToWorld(explOb)
+end
+
 local sink_sprite = im.spriteSettings.rockSink
 local sink_sound = {"Effects/Oracle_Link_Wade"}
 function Explode.sink(instance)
@@ -134,6 +162,9 @@ Explode.functions = {
       if pmod > 1 then pmod = 1 end
       self.x = self.xstart + pmod * (self.xdest - self.xstart)
       self.y = self.ystart + pmod * (self.ydest - self.ystart)
+    elseif self.velocity then
+      self.x = self.x + self.velocity.x * dt
+      self.y = self.y + self.velocity.y * dt
     end
 
     --shaders

@@ -247,7 +247,7 @@ DialogueBubble.functions = {
       + self.triangleHeight * math.abs(self.positionMod)
     )
 
-    local aHeight = anchor.height or anchor.sprite.height
+    local aHeight = anchor.height or (anchor.sprite and anchor.sprite.height or nil)
     if aHeight then
      self.y = self.y - aHeight * 0.5 * self.positionMod
     end

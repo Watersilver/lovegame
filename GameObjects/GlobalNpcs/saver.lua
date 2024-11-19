@@ -1,25 +1,12 @@
 local im = require "image"
 local p = require "GameObjects.prototype"
-local cd = require "GameObjects.DialogueBubble.controlDefaults"
-local npcP = require "GameObjects.npcPrototype"
-local dlgCtrl = require "GameObjects.DialogueBubble.DialogueControl"
-local choiceCtrl = require "GameObjects.DialogueBubble.BasicChoiceControl"
+local conv = require 'GameObjects.Conversation.convoObject'
+local save = require 'ConversationData.data.save'
+local npcProt = require 'GameObjects.GlobalNpcs.debug.npcPrototype'
 
 local NPC = {}
 
 function NPC.initialize(instance)
-  instance.choicesDict = {
-    yes = "Yes",
-    no = "No"
-  }
-  instance.choices = {
-    instance.choicesDict.yes,
-    instance.choicesDict.no
-  }
-  instance.question = "Save game?"
-  instance.image_speed = 0
-  instance.sprite_info = im.spriteSettings.owlStatue
-
   ---@type Light[]
   instance.lights = {
     {
@@ -29,79 +16,66 @@ function NPC.initialize(instance)
       y = instance.ystart
     }
   }
+  instance.sprite_info = im.spriteSettings.owlStatue
+  instance.awake = false
+  instance.image_speed = 0
+  instance.image_index = 0
+  instance.image_index_prev = 0
+  instance.sleep_image_index_direction = 1
+  instance.sleep_frame_cooldown = 0.5
 
-  instance.pushback = true
-  instance.ballbreaker = true
-  instance.unpushable = false
-  instance.physical_properties.masks = {PLAYERJUMPATTACKCAT}
-  instance.onHookReturnListeners.ssbChose = instance.ssbChose
-  instance.onHookReturnListeners.ptTriggered = instance.ptTriggered
-  instance.onHookReturnListeners.ssbWaiting = instance.ssbWaiting
+  instance.conversation = conv.addNew(save, instance)
+  instance.conversation:setIdToObject('saver', instance)
+  instance.conversation:listen('wake', function()
+    instance.awake = true
+    instance.image_index = 0
+    instance.image_speed = 0.25
+    instance.sprite = im.sprites["NPCs/owlStatue/awake"]
+  end)
+  instance.conversation:listen('sleep', function()
+    instance.awake = false
+    instance.sleep_image_index_direction = 1
+    instance.sleep_frame_cooldown = 0.5
+  end)
+  instance.conversation:listen('save', function()
+    session.saveGame()
+  end)
 end
 
 NPC.functions = {
-  getDlg = function (self)
-    -- return self.dlgState ~= "reacting" and self.question or "Good choice"
-    if self.dlgState ~= "reacting" then
-      return self.question
-    else
-      if self.choiceReturn.a == self.choicesDict.yes then
-        return "Saved!"
+  update = function (self, dt)
+    self.image_index_prev = self.image_index
+    npcProt.functions.update(self, dt)
+
+    if not self.awake then
+      if self.sprite ~= im.sprites["NPCs/owlStatue/asleep"] then
+        if self.image_index_prev > self.image_index then
+          self.image_speed = 0
+          self.image_index = 0
+          self.sprite = im.sprites["NPCs/owlStatue/asleep"]
+        end
       else
-        return "..."
+        self.sleep_frame_cooldown = self.sleep_frame_cooldown - dt
+        if self.sleep_frame_cooldown <= 0 then
+          self.image_index = (self.image_index + self.sleep_image_index_direction) % 3
+
+          self.sleep_frame_cooldown = 0.5
+          if self.image_index == 0 then
+            self.sleep_image_index_direction = 1
+          elseif self.image_index == 2 then
+            self.sleep_image_index_direction = -1
+          else
+            self.sleep_frame_cooldown = 0.35
+          end
+        end
       end
     end
-  end,
-
-  getInterruptedDlg = function (self)
-    return "..."
-  end,
-
-  ptTriggered = function (self)
-    self.image_index = 1
-    self.dlgState = "asking"
-  end,
-
-  ssbWaiting = function (self)
-    self.image_index = 1
-    self.dlgState = "choosing"
-  end,
-
-  ssbChose = function (self)
-    if self.choiceReturn.a == self.choicesDict.yes then
-      self.image_index = 1
-      session.saveGame()
-    end
-    self.dlgState = "reacting"
-  end,
-
-  onHandleHookReturnStart = function (self)
-    self.image_index = 0
-  end,
-
-  determineUpdateHook = function (self)
-    if self.dlgState == "waiting" then
-      -- self.blockInput = false
-      self.indicatorCooldown = 0.5
-      self.updateHook = cd.interactiveProximityTrigger
-    elseif self.dlgState == "asking" then
-      -- self.blockInput = true
-      self.updateHook = cd.nearInteractiveChoiceBubble
-    elseif self.dlgState == "interrupted" then
-      cd.ssbInterrupted(self)
-    elseif self.dlgState == "choosing" then
-      self.updateHook = cd.choiceChecker
-    elseif self.dlgState == "reacting" then
-      self.updateHook = cd.ssbToSsspb
-    end
-  end,
+  end
 }
 
 function NPC:new(init)
   local instance = p:new() -- add parent functions and fields
-  p.new(npcP, instance) -- add parent functions and fields
-  p.new(dlgCtrl, instance) -- add parent functions and fields
-  p.new(choiceCtrl, instance) -- add parent functions and fields
+  p.new(npcProt, instance) -- add parent functions and fields
   p.new(NPC, instance, init) -- add own functions and fields
   return instance
 end

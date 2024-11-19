@@ -9,10 +9,19 @@ local itemInfo = (require "GameObjects.GlobalNpcs.fanfareGottenItems.rupee200").
 
 local o = require "GameObjects.objects"
 
+local lighting = require "ScreenEffects.lighting.lighting"
+local trans = require "transitions"
+local utilities = require "utilities"
+local game= require "game"
+
 local Drop = {}
 
 local function onPlayerTouch()
   local rupees200 = itemGetPoseAndDlg:new(itemInfo)
+  rupees200.image_speed = 0.2
+  rupees200.frame_speed_mods = {
+    [0] = 0.25
+  }
   o.addToWorld(rupees200)
 end
 
@@ -20,9 +29,38 @@ function Drop.initialize(instance)
   instance.sprite_info = itemInfo.itemSprite
   instance.onPlayerTouch = onPlayerTouch
   instance.shadowHeightMod = 0
+  instance.image_speed = 0.2
+  instance.frame_speed_mods = {
+    [0] = 0.25
+  }
 end
 
-Drop.functions = {}
+Drop.functions = {
+  unstoppable_update = function (self)
+    local x, y = self.xstart, self.ystart + (self.zo or 0)
+    local a = utilities.compute_alpha_from_table(self.image_index, self.sprite.frames, {
+      first = 0.8,
+      last = 0.8,
+      [0] = 0.8,
+      [2] = 1,
+      [5] = 1,
+    }, self.onPreviousRoom, game.transitioning)
+    if game.transitioning and game.transitioning.type == 'scrolling' then
+      x, y = trans.still_objects_coords(self)
+    end
+    lighting.applyLight{
+      type = 'rupee200',
+      x = x,
+      y = y,
+      rgba = {
+        g = 1,
+        r = 1,
+        b = 1,
+        a = a
+      }
+    }
+  end
+}
 
 function Drop:new(init)
   local instance = p:new() -- add parent functions and fields

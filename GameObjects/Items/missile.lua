@@ -25,37 +25,20 @@ local sqrt = math.sqrt
 
 local emptyFunc = function() end
 
---  Calculate sword position and angle offset due to creator's side
-local function calculate_offset(side, phase)
-  local xoff, yoff, aoff = 0, 0, 0
-  if side == "down" then
-    xoff = 0
-    yoff = 3
-  elseif side == "right" then
-    xoff = 9
-    yoff = 3
-  elseif side == "left" then
-    xoff = - 9
-    yoff = 3
-  elseif side == "up" then
-    xoff = 0
-    yoff = - 7
-  end
-  return xoff, yoff
-end
+local creation_alpha_table = {[7] = 1}
+local animation_alpha_table = {first = 1, last = 1, [0] = 1, [4] = 0.6, [7] = 1}
+local destruction_alpha_table = {[-1] = 1, [0] = 1}
 
 function Missile.initialize(instance)
   -- missile light
+  instance.angle = 0
   instance.iox = 0
   instance.ioy = 0
   instance.x_scale = 1
   instance.y_scale = 1
   instance.image_speed = 0
   instance.triggers = {}
-  instance.sprite_info = {
-    im.spriteSettings.playerMissile,
-    im.spriteSettings.playerMissileOutline
-  }
+  instance.sprite_info = im.spriteSettings.playerMissile
   -- instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",
@@ -70,6 +53,7 @@ function Missile.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.immamissile = true
+  instance.light_intensity = 0
 end
 
 
@@ -101,11 +85,49 @@ end
 
 
 Missile.functions = {
+  compute_offset = function (self)
+    local side = self.side
+    local cr = self.creator
+    if side == "down" then
+      self.sox = 0
+      self.soy = 3
+    elseif side == "right" then
+      self.sox = 7
+      self.soy = 3
+    elseif side == "left" then
+      self.sox = - 7
+      self.soy = 3
+    elseif side == "up" then
+      self.sox = 0
+      self.soy = -2
+    end
+
+    local ii = math.floor(cr.image_index)
+    if ii == 1 or ii == 2 or ii == 6 or ii == 7 then
+      self.soy = self.soy - 3
+    elseif ii == 3 or ii == 8 then
+      self.soy = self.soy - 2
+    elseif ii == 0 or ii == 5 then
+      self.soy = self.soy - 1
+    end
+
+    local horside = (side == 'right' and 1) or (side == 'left' and -1) or 0
+    if ii < 3 then
+      if horside ~= 0 then
+        self.sox = self.sox - horside * 1
+      end
+    elseif ii > 4 and ii < 8 then
+      if horside ~= 0 then
+        self.sox = self.sox - horside * 1
+      end
+    end
+  end,
+
   load = function (self)
-    self.sox, self.soy = calculate_offset(self.side)
+    self:compute_offset()
     self.x, self.y = 0, 0
     session.mslQueue:add(self)
-    self.outlineSprite = im.sprites["Inventory/UseMissileOutlineL1"]
+    self.outlineSprite = im.sprites["Inventory/missile/outline"]
 
     self.sparkCounter = counter.new(.2)
 
@@ -126,6 +148,8 @@ Missile.functions = {
   end,
 
   early_update = function(self, dt)
+    self.light_intensity = self.light_intensity + dt * 4
+    if self.light_intensity > 1 then self.light_intensity = 1 end
 
     local cr = self.creator
 
@@ -136,6 +160,10 @@ Missile.functions = {
       session.particles:addColouredSpark{x = self.x + dx, y = self.y + dy}
     end
 
+    if self.pastMslLim then
+      self.broken = true
+    end
+
     if not self.fired then
 
       if not cr or not cr.exists then
@@ -143,8 +171,8 @@ Missile.functions = {
         return
       end
 
-      if cr.missile_cooldown then
-        local stage = cr.missile_cooldown/session.getMagicCooldown()
+      if cr.missile_start_counter then
+        local stage = cr.missile_start_counter/cr.missile_start_duration
         self.image_index = stage * (self.sprite.frames - 1)
       end
 
@@ -163,7 +191,13 @@ Missile.functions = {
       self.weld = love.physics.newWeldJoint(cr.body, self.body, x, y, true)
 
       local layeradjust = 0
-      if self.side == "up" then layeradjust = -1 end
+      if self.side == "up" then
+        layeradjust = - 1
+      elseif self.side == "left" or self.side == "right" then
+        if cr.image_index < 3 then
+          layeradjust = - 1
+        end
+      end
       o.change_layer(self, cr.layer+layeradjust)
     -- else
     --   self.weld = nil
@@ -176,7 +210,23 @@ Missile.functions = {
 
     if not cr or not cr.exists then
       self.broken = true
-      return
+    end
+
+    if self.fired then
+      if not self.broken then
+        if self.sprite ~= im.sprites['Inventory/missile/animation'] then
+          self.sprite = im.sprites['Inventory/missile/animation']
+          self.image_index = love.math.random() * self.sprite.frames
+          self.angle = math.pi * (love.math.random(4) - 1) / 2
+          self.image_speed = 0.2
+        end
+      else
+        if self.sprite ~= im.sprites['Inventory/missile/destruction'] then
+          self.sprite = im.sprites['Inventory/missile/destruction']
+          self.image_index = 0
+          self.image_speed = 0.3
+        end
+      end
     end
 
     -- if self.spritejoint then self.spritejoint:destroy() end
@@ -186,24 +236,41 @@ Missile.functions = {
 
     self.x, self.y = x, y
 
+    self.animation_end = false
+    self.image_index = (self.image_index + dt*60*self.image_speed)
+    local frames = self.sprite.frames
+    while self.image_index >= frames do
+      self.image_index = self.image_index - frames
+      if frames > 1 then self.animation_end = true end
+    end
+    while self.image_index < 0 do
+      self.image_index = self.image_index + frames
+      if frames > 1 then self.animation_end = true end
+    end
+
     if self.broken then
-      if self.dust and not self.outOfBounds then
+      if self.dust and not self.outOfBounds and not self.pastMslLim then
         o.addToWorld(self.dust)
       end
       self.dust = nil
 
-      if self.fired and self.image_index ~= 0 then
-        self.body:setLinearVelocity(0, 0)
-        self.image_index = self.image_index - dt * 60
-        if self.image_index < 0 then
-          self.image_index = 0
-          self.trans_draw = emptyFunc
-          self.draw = emptyFunc
-          self.update = emptyFunc
-          self.early_update = emptyFunc
-          -- Stop colliding
-          self.fixture:setMask(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)
+      if self.fired then
+        if self.animation_end then
+          -- self.trans_draw = emptyFunc
+          -- self.draw = emptyFunc
+          -- self.update = emptyFunc
+          -- self.early_update = emptyFunc
+          self.image_index = self.sprite.frames - 1
+          self.image_speed = 0
+          o.removeFromWorld(self)
         end
+      end
+
+      self.body:setLinearVelocity(0, 0)
+      if not self.itsoverjoker then
+        self.itsoverjoker = true
+        -- Stop colliding
+        self.fixture:setMask(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16)
       end
     else
       if self.charged then
@@ -218,13 +285,6 @@ Missile.functions = {
         self.dust.y = self.y
         self.dust.xstart = self.x
         self.dust.ystart = self.y
-      end
-    end
-    if self.pastMslLim then
-      if not self.broken then self.image_index = self.image_index - dt * 60 end
-      if self.image_index < 0 then
-        self.image_index = 0
-        o.removeFromWorld(self)
       end
     end
     if not self.outOfBounds then
@@ -243,23 +303,44 @@ Missile.functions = {
     end
   end,
 
-  draw = function(self, td)
+  late_update = function(self, dt)
+    self:compute_offset()
+  end,
+
+  unstoppable_update = function(self)
+
     local x, y = self.x, self.y
 
-    if td then
+    if game.transitioning and game.transitioning.type == 'scrolling' then
+      self.x, self.y = self.body:getPosition()
       x, y = trans.moving_objects_coords(self)
+      self.x, self.y = x, y
     end
 
     -- missile light
+    local alpha_table = animation_alpha_table
+    if self.sprite == im.sprites["Inventory/missile/creation"] then
+      alpha_table = creation_alpha_table
+    elseif self.sprite == im.sprites["Inventory/missile/destruction"] then
+      alpha_table = destruction_alpha_table
+    end
+    local a = utilities.compute_alpha_from_table(self.image_index, self.sprite.frames, alpha_table, self.onPreviousRoom, game.transitioning)
+    if self.rgba then
+      self.rgba.a = a
+    end
+    a = self.light_intensity * a
     lighting.applyLight{
       type = 'missile',
       x = x,
       y = y,
-      rgba = self.rgba and self.rgba or (self.poweredUp and {r=0,g=0.5,b=1,a=1} or {r=0,g=1,b=0,a=1}),
-      scale = (self.image_index + 1) / self.sprite.frames
+      rgba = self.rgba and self.rgba or (self.poweredUp and {r=0,g=0.5,b=1,a=a} or {r=0,g=1,b=0,a=a}),
+      scale = 1
     }
+  end,
 
-    self.x, self.y = x, y
+  draw = function(self, td)
+    local x, y = self.x, self.y
+
     local sprite = self.sprite
     -- Check in case animation changed to something with fewer frames
     while self.image_index >= sprite.frames do
@@ -305,14 +386,14 @@ Missile.functions = {
 
     love.graphics.setShader(self.myShader)
     love.graphics.draw(
-    sprite.img, frame, x, y, 0,
+    sprite.img, frame, x, y, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
 
-    if self.deflected and self.image_index >= 4 then
+    if self.deflected and self.sprite == im.sprites['Inventory/missile/animation'] then
       local outlineSprite = self.outlineSprite
       love.graphics.draw(
-      outlineSprite.img, outlineSprite[0], x, y, 0,
+      outlineSprite.img, outlineSprite[math.floor(outlineSprite.frames * (self.image_index / (sprite.frames)))], x, y, 0,
       outlineSprite.res_x_scale*self.x_scale,
       outlineSprite.res_y_scale*self.y_scale,
       outlineSprite.cx, outlineSprite.cy)
@@ -329,7 +410,6 @@ Missile.functions = {
   end,
 
   trans_draw = function(self)
-    self.x, self.y = self.body:getPosition()
     self:draw(true)
   end,
 

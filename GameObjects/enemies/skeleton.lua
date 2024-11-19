@@ -18,7 +18,7 @@ local Skeleton = {}
 function Skeleton.initialize(instance)
   instance.sprite_info = im.spriteSettings.skeleton
   instance.hp = 4
-  instance.image_speed = 0.2
+  instance.image_speed = 0.1
   instance.maxspeed = 40
   instance.physical_properties.shape = ps.shapes.rectThreeFourths
   instance.jumpChance = 0.7
@@ -110,7 +110,21 @@ Skeleton.functions = {
     self.undamageable = false
     self.attackDodger = false
     self.jumping = false
-    self.sprite = im.sprites["Enemies/Skeleton/skeleton"]
+
+    local vx, vy = self.body:getLinearVelocity()
+    self.x_scale = 1
+    if math.abs(vx) > math.abs(vy) then
+      self.sprite = im.sprites["Enemies/Skeleton/left"]
+      if vx < 0 then
+        self.x_scale = -1
+      end
+    else
+      if vy < 0 then
+        self.sprite = im.sprites["Enemies/Skeleton/up"]
+      else
+        self.sprite = im.sprites["Enemies/Skeleton/down"]
+      end
+    end
   end,
 
   hitBySword = function (self, other, myF, otherF)

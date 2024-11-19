@@ -31,12 +31,14 @@ function MagicDust.initialize(instance)
     categories = {PLAYERATTACKCAT}
   }
   instance.seeThrough = true
-  instance.poweredUp = session.save.nayrusWisdom
+  if instance.creator == pl1 then
+    instance.poweredUp = session.save.nayrusWisdom
+    instance.lvl = session.save.magicLvl
+  end
   if instance.poweredUp then
     instance.myShader = shdrs["itemBlueShader"]
     instance.chargedShader = shdrs.swordChargeShader
   end
-  instance.lvl = session.save.magicLvl
   instance.chargedShaderFreq = 1 / 30
   instance.chargedShaderPhase = instance.chargedShaderFreq
 
@@ -312,8 +314,8 @@ MagicDust.functions = {
 }
 
 function MagicDust:new(init)
-  local instance = p:new() -- add parent functions and fields
-  p.new(MagicDust, instance, init) -- add own functions and fields
+  local instance = p:new(nil, init) -- add parent functions and fields
+  p.new(MagicDust, instance) -- add own functions and fields
   return instance
 end
 

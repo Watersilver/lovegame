@@ -17,9 +17,12 @@ end
 
 Shadow.functions = {
 draw = function (self)
+  local ca = self.caster
+  if ca.invisible then return end
+  if ca.fake_zo == 0 and ca.zo and ca.zo >= 0 then return end
+
   local sprite = self.sprite
   local frame = sprite[self.image_index]
-  local ca = self.caster
   local shm = ca.shadowHeightMod or 0
   if ca.exists then
     self.x, self.y = ca.x, ca.y + shm
@@ -39,6 +42,10 @@ draw = function (self)
 end,
 
 trans_draw = function (self)
+  local ca = self.caster
+  if ca.invisible then return end
+  if not ca.fake_zo and ca.zo and ca.zo >= 0 then return end
+
   local sprite = self.sprite
   local frame = sprite[self.image_index]
 
@@ -92,6 +99,12 @@ function Shadow.handleShadow(object, plshadow)
     end
     o.addToWorld(object.shadow)
   end
+
+  local shlayer = object.layer-1
+  if shlayer < 1 then shlayer = 1
+  elseif shlayer > 19 then shlayer = 19
+  end
+  o.change_layer(object.shadow, shlayer)
 end
 
 return Shadow

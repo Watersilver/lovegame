@@ -28,8 +28,6 @@ local itemGetFunc = function ()
   session.addItem("keyLyre")
   session.addItem("keyBedroll")
   for _ = 1, 22 do
-    session.addItem("mateMagicDust")
-    session.addItem("mateBlastSeed")
     session.addItem("focusDoll")
     session.addItem("foodFrittata")
   end

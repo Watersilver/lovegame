@@ -89,7 +89,7 @@ function Thrown.initialize(instance)
 
   instance.x_scale = 1
   instance.y_scale = 1
-  instance.image_speed = 0
+  instance.image_speed = instance.image_speed or 0
   instance.gravity = 350
   instance.zvel = 0
   instance.floorTiles = {role = "thrownFloorTilesIndex"} -- Tracks what kind of floortiles I'm over
@@ -213,6 +213,15 @@ Thrown.functions = {
 
     -- throw_update is a function fed by what I was before I was thrown
     if self.throw_update then self.throw_update(self, dt) end
+
+    if self.image_speed then
+      self.image_index = (self.image_index + delta_time*60*self.image_speed)
+      local frames = self.sprite.frames
+      while self.image_index >= frames do
+        self.image_index = self.image_index - frames
+        -- if frames > 1 then trig.animation_end = true end
+      end
+    end
   end,
 
   draw = function(self, td)
@@ -229,7 +238,7 @@ Thrown.functions = {
     while self.image_index >= sprite.frames do
       self.image_index = self.image_index - sprite.frames
     end
-    local frame = sprite[self.image_index]
+    local frame = sprite[math.floor(self.image_index)]
     local worldShader = love.graphics.getShader()
 
     love.graphics.setShader(self.inheritedShader or self.myShader)

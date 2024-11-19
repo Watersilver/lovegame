@@ -55,7 +55,9 @@ local states = {
     run_state = function(instance, dt)
       if pl1 and pl1.exists then
         if pl1.zo == 0 then
-          pl1.sprite = im.sprites["Witch/still_up"]
+
+          pl1.sprite = im.sprites["Witch/idle_up"]
+
           pl1.x_scale = 1
         end
       end
@@ -544,9 +546,8 @@ Boss2.functions = {
     else
       self.myShader = nil
     end
-  end,
 
-  late_update = function (self, dt)
+    
     if self.enabled and self.handsLoss == 0 and self.leftHand.exists and self.rightHand.exists then
       local x = (self.rightHand.x + self.leftHand.x) * 0.5
       local y = defaultHeadHeight - 0.5 * (self.leftHand.y + self.rightHand.y - 2 * handMinHeight)

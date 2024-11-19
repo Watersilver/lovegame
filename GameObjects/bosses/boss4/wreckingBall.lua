@@ -548,7 +548,7 @@ WreckingBall.functions = {
     end
   end,
 
-  draw = function (self)
+  unstoppable_update = function(self)
     if self.creator and self.creator.exists then
       local angry = self.creator.angry
       lighting.applyLight{
@@ -570,6 +570,20 @@ WreckingBall.functions = {
       image_index = self.image_index
     }
 
+    -- Draw spikes light
+    if self.spike_index and math.floor(self.spike_index) > 0 then
+      lighting.applyLight{
+        type = "boss4spikes",
+        x = self.x,
+        y = self.y + (self.zo or 0),
+        rgba=lightColor,
+        image_index = math.floor(self.spike_index) - 1
+      }
+    end
+  end,
+
+  draw = function (self)
+
     -- Draw enemy the default way
     et.functions.draw(self)
 
@@ -589,14 +603,6 @@ WreckingBall.functions = {
       self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
       sprite.cx, sprite.cy)
       love.graphics.setShader(worldShader)
-
-      lighting.applyLight{
-        type = "boss4spikes",
-        x = xtotal,
-        y = ytotal,
-        rgba=lightColor,
-        image_index = math.floor(self.spike_index) - 1
-      }
     end
 
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))

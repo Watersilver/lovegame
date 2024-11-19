@@ -18,30 +18,66 @@ local states = {
   end,
   check_state = function(instance, dt)
     if true then
-      instance.state_machine:change_state(instance, dt, "wakingup")
+      instance.state_machine:change_state(instance, dt, "sleeping")
     end
   end,
   end_state = function(instance, dt)
   end
   },
 
+  sleeping = {
+    run_state = function(instance, dt)
+      instance.stateTimer = instance.stateTimer - dt
+      if instance.stateTimer < 0 then
+
+        instance.playa.sprite = im.sprites["Witch/wake_down"]
+        instance.playa.image_index = 0
+        instance.playa.image_speed = 0
+        game.room.ambientLightType = instance.prevLightType
+      end
+    end,
+    start_state = function(instance, dt)
+      instance.playa = o.identified.PlayaTest[1]
+      local pl = instance.playa
+      pl.animation_state:change_state(pl, "noDt", "cutscene")
+
+      pl.sprite = im.sprites["Witch/sleeping_down"]
+      pl.image_speed = 0.1
+      pl.image_index = 0
+      instance.rescuer = o.identified.rescuer[1]
+      instance.stateTimer = 4
+    end,
+    check_state = function(instance, dt)
+      if instance.stateTimer < 0 then
+        instance.state_machine:change_state(instance, dt, "wakingup")
+      end
+    end,
+    end_state = function(instance, dt)
+    end
+    },
+
   wakingup = {
   run_state = function(instance, dt)
     instance.stateTimer = instance.stateTimer - dt
-    if instance.stateTimer < 0 then
-      instance.playa.sprite = im.sprites["Witch/wake_down"]
-      game.room.ambientLightType = instance.prevLightType
+    local pl = instance.playa
+    local finalFrame = pl.image_index == pl.sprite.frames - 1
+    if instance.stateTimer < 0 and not finalFrame then
+      pl.image_speed = 0.2
+    end
+
+    if pl.image_index_prev > pl.image_index then
+      pl.image_speed = 0
+      pl.image_index = pl.sprite.frames - 1
+    end
+
+    if not finalFrame and instance.stateTimer < 0 then
+      instance.stateTimer = instance.stateTimer + dt
     end
   end,
   start_state = function(instance, dt)
     instance.playa = o.identified.PlayaTest[1]
-    local pl = instance.playa
-    pl.animation_state:change_state(pl, "noDt", "cutscene")
-    pl.sprite = im.sprites["Witch/sleeping_down"]
-    pl.image_index = 0
-    pl.image_speed = 0.1
     instance.rescuer = o.identified.rescuer[1]
-    instance.stateTimer = 4
+    instance.stateTimer = 3
   end,
   check_state = function(instance, dt)
     if instance.stateTimer < 0 then
@@ -188,6 +224,7 @@ local states = {
     instance.playa.zvel = 60
     snd.play(instance.playa.sounds.jump)
     instance.playa.x_scale = -1
+
     instance.playa.sprite = im.sprites["Witch/walk_left"]
   end,
   check_state = function(instance, dt)

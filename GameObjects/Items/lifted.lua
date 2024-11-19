@@ -99,6 +99,10 @@ local ssoffsets = {
   }
 }
 
+local function getOffsets()
+  return game.room.sideScrolling and ssoffsets or tdoffsets
+end
+
 local Lifted = {}
 
 function Lifted.initialize(instance)
@@ -112,7 +116,7 @@ Lifted.functions = {
     local cr = self.creator
     -- Set initial position
     local creatorx, creatory = cr.body:getPosition()
-    local offsets = game.room.sideScrolling and ssoffsets or tdoffsets
+    local offsets = getOffsets()
     local offs = offsets[self.side][#offsets[self.side]-1]
     local xoff, yoff = offs.x, offs.y
     local fy = 0
@@ -145,7 +149,7 @@ Lifted.functions = {
     local xoff, yoff
 
     -- Determine offset due to lifting stage
-    local offsets = game.room.sideScrolling and ssoffsets or tdoffsets
+    local offsets = getOffsets()
     if not self.lifted then
       local stage = floor(cr.liftingStage or 1)
       local offs = offsets[self.side][stage]
@@ -158,32 +162,70 @@ Lifted.functions = {
       local offs = offsets[self.side][4]
       xoff, yoff = offs.x, offs.y
       -- Bobbing
-      if floor(cr.image_index) == 1 then
+      local cr_frame = floor(cr.image_index)
+      self.angle = 0
+
+      if (cr_frame + 1) % 5 == 0 then
         yoff = yoff + 1
-        if self.side == "up" or self.side == "down" then
-          self.angle = 0.1
-          xoff = xoff + 1
-          yoff = yoff + 0.5
-        else
-          self.angle = 0
-        end
-      elseif floor(cr.image_index) == 3 then
-        yoff = yoff + 1
-        if self.side == "up" or self.side == "down" then
-          self.angle = - 0.1
-          xoff = xoff - 1
-          yoff = yoff + 0.5
-        else
-          self.angle = 0
-        end
-      else
-        self.angle = 0
+      elseif (cr_frame + 2) % 5 == 0 then
+        yoff = yoff - 3
+      elseif (cr_frame + 3) % 5 == 0 then
+        yoff = yoff - 4
+      elseif (cr_frame + 4) % 5 == 0 then
+        yoff = yoff - 3
+      elseif (cr_frame) % 5 == 0 then
+        yoff = yoff
       end
+
+      -- For swaying
+      -- local vert = self.side == "up" or self.side == "down"
+      -- if cr_frame == 0 then
+      --   yoff = yoff - 1
+      --   if vert then
+      --     self.angle = 0.1
+      --     xoff = xoff + 1
+      --     yoff = yoff + 0.5
+      --   end
+      -- elseif cr_frame == 1 then
+      --   yoff = yoff - 3
+      --   if vert then
+      --     self.angle = 0.1
+      --     xoff = xoff + 1
+      --     yoff = yoff + 0.5
+      --   end
+      -- elseif cr_frame == 2 then
+      --   yoff = yoff - 3
+      -- elseif cr_frame == 3 then
+      --   yoff = yoff - 2
+      -- elseif cr_frame == 5 then
+      --   yoff = yoff - 1
+      --   if vert then
+      --     self.angle = - 0.1
+      --     xoff = xoff - 1
+      --     yoff = yoff + 0.5
+      --   end
+      -- elseif cr_frame == 6 then
+      --   yoff = yoff - 3
+      --   if vert then
+      --     self.angle = - 0.1
+      --     xoff = xoff - 1
+      --     yoff = yoff + 0.5
+      --   end
+      -- elseif cr_frame == 7 then
+      --   yoff = yoff - 3
+      -- elseif cr_frame == 8 then
+      --   yoff = yoff - 2
+      -- end
     end
+    local crheight = cr.height
+
+    -- Fix subpixel inaccuracies
+    yoff = math.floor(yoff) + 0.5
+    crheight = math.abs(crheight)
 
     -- Set position
     local creatorx, creatory = cr.body:getPosition()
-    local x, y = creatorx + xoff, creatory + yoff - cr.height + cr.zo + fy
+    local x, y = creatorx + xoff, creatory + yoff - crheight + cr.zo + fy
 
     self.x, self.y = x, y
 
@@ -202,6 +244,15 @@ Lifted.functions = {
 
     -- lift_update is a function fed by what I was before I was lifted
     if self.lift_update then self.lift_update(self, dt) end
+
+    if self.image_speed then
+      self.image_index = (self.image_index + delta_time*60*self.image_speed)
+      local frames = self.sprite.frames
+      while self.image_index >= frames do
+        self.image_index = self.image_index - frames
+        -- if frames > 1 then trig.animation_end = true end
+      end
+    end
   end,
 
   draw = function (self, td)
@@ -213,7 +264,12 @@ Lifted.functions = {
     end
 
     local sprite = self.sprite
-    local frame = sprite[self.image_index]
+    local frames = sprite.frames
+    while self.image_index >= frames do
+      self.image_index = self.image_index - frames
+      -- if frames > 1 then trig.animation_end = true end
+    end
+    local frame = sprite[math.floor(self.image_index)]
     local worldShader = love.graphics.getShader()
 
     if not self.persistentData.noshdr then
@@ -262,6 +318,7 @@ Lifted.functions = {
       vx = vx, vy = vy,
       sprite_info = self.sprite_info,
       image_index = floor(self.image_index),
+      image_speed = self.image_speed,
       layer = cr.layer + 1,
       throw_update = self.throw_update,
       throw_collision = self.throw_collision,

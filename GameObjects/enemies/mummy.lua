@@ -9,6 +9,7 @@ local td = require "movement"; td = td.top_down
 local sh = require "GameObjects.shadow"
 local gsh = require "gamera_shake"
 local o = require "GameObjects.objects"
+local magic_dust_effects = require "GameObjects.Helpers.magic_dust_effects"
 
 local skel = require "GameObjects.enemies.skeleton"
 
@@ -130,9 +131,18 @@ Mummy.functions = {
     self.unmovingAxis = self.movingAxis
   end,
 
-  hitByMdust = function (self, other, myF, otherF)
-    self.hitByMdust = u.emptyFunc
-    other.createFire(self)
+  [GCON.md.choose] = function (self, other)
+    local pUp = other.poweredUp and 0.5 or 0
+    return u.chooseFromChanceTable{
+      -- chance of burning
+      {value = GCON.md.reaction.fire, chance = 0.5 + pUp},
+      -- If none of the above happens, nothing happens
+      {value = GCON.md.reaction.nothing, chance = 1},
+    }
+  end,
+
+  [GCON.md.reaction.fire] = function (self)
+    magic_dust_effects.burn(self)
   end,
 
   onFireEnd = function (self)

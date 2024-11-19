@@ -59,8 +59,8 @@ WindSlice.functions = {
   load = function (self)
     local dist = u.distance2d(self.x0, self.y0, self.x1, self.y1)
     for i = 0,1,1 / dist do
-      local x = u.lerp(self.x0, self.x1 - self.x0, i)
-      local y = u.lerp(self.y0, self.y1 - self.y0, i)
+      local x = u.lerp(self.x0, self.x1, i)
+      local y = u.lerp(self.y0, self.y1, i)
       local dx, dy = u.randomPointFromEllipse(5)
       session.particles:addSpark{
         x = x + dx, y = y + dy,

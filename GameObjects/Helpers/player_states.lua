@@ -6,6 +6,7 @@ local snd = require "sound"
 local ps = require "physics_settings"
 local dlg = require "dialogue"
 local u = require "utilities"
+local explode = require "GameObjects.explode"
 
 local o = require "GameObjects.objects"
 local sw = require "GameObjects.Items.sword"
@@ -15,6 +16,10 @@ local lft = require "GameObjects.Items.lifted"
 local mdu = require "GameObjects.Items.mdust"
 local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDrownPlummet
 
+-- TODO: Fix step sound when pushing and other non 10 frame animations
+-- TODO: Fix carry and other animations when hitting wall
+-- TODO?: Idle animations for other actions like shooting, carrying, holding etc.
+
 local floor = math.floor
 local random = math.random
 
@@ -22,14 +27,93 @@ local emptyFunc = function() end
 
 local player_states = {}
 
+local play_footstep_sound = function (instance)
+  if instance.inShallowWater then
+    snd.play(instance.sounds.water)
+  else
+    snd.play(glsounds.hard_step)
+  end
+end
+
+local should_play_footstep_sound = function (instance)
+  local frames = instance.sprite.frames
+  if frames == 10 then
+    if
+      (
+        instance.image_speed > 0 and
+        (
+          (instance.image_index >= 4 and instance.image_index_prev < 4)
+          or (instance.image_index >= 9 and instance.image_index_prev < 9)
+        )
+      ) or (
+        instance.image_speed < 0 and
+        (
+          (instance.image_index <= 4 and instance.image_index_prev > 4)
+          or (instance.image_index <= 9 and instance.image_index_prev > 9)
+        )
+        and instance.animationFramesPassed > 1
+      )
+    then
+      return true
+    end
+  elseif frames == 8 then
+    if
+      (
+        instance.image_speed > 0 and
+        (
+          (instance.image_index >= 1 and instance.image_index_prev < 1)
+          or (instance.image_index >= 5 and instance.image_index_prev < 5)
+        )
+      ) or (
+        instance.image_speed < 0 and
+        (
+          (instance.image_index <= 1 and instance.image_index_prev > 1)
+          or (instance.image_index <= 5 and instance.image_index_prev > 5)
+        )
+        and instance.animationFramesPassed > 1
+      )
+    then
+      return true
+    end
+  end
+  return false
+end
+
 player_states.img_speed_and_footstep_sound = function(instance, dt)
   td.image_speed(instance, dt)
-  if instance.inShallowWater and instance.image_index % 2 >= 1 and instance.image_index_prev % 2 < 1 then
-    snd.play(instance.sounds.water)
+  local f = instance:getFacing()
+  local vx, vy = instance.body:getLinearVelocity()
+  if
+    (f == 'up' and vy > 0)
+    or (f == 'down' and vy < 0)
+    or (f == 'left' and vx > 0)
+    or (f == 'right' and vx < 0)
+  then
+    instance.image_speed = -instance.image_speed
+  end
+
+  if should_play_footstep_sound(instance) then
+    play_footstep_sound(instance)
   end
 end
 
 local img_speed_and_footstep_sound = player_states.img_speed_and_footstep_sound
+
+player_states.run_walk = function(instance, dt, side)
+  img_speed_and_footstep_sound(instance, dt)
+  if math.floor(instance.image_index + 1) % 5 ~= 0 then
+    local fii = math.floor(instance.image_index)
+    if fii % 5 == 0 then
+      instance.fake_zo = -1
+    elseif (fii + 2) % 5 == 0 then
+      instance.fake_zo = -2
+    elseif (fii + 3) % 5 == 0 or (fii + 4) % 5 == 0 then
+      instance.fake_zo = -3
+    end
+  else
+    instance.fake_zo = 0
+  end
+end
 
 player_states.check_walk = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
@@ -47,6 +131,28 @@ player_states.check_walk = function(instance, dt, side)
   end
 end
 
+player_states.start_walk = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = -1
+    side = 'left'
+  end
+
+  instance.sprite = im.sprites["Witch/walk_" .. side]
+end
+
+player_states.end_walk = function(instance, dt, side)
+  instance.fake_zo = 0
+  if side == "right" then
+    instance.x_scale = 1
+  end
+end
+
+player_states.run_halt = function(instance, dt, side)
+  if instance.triggers.animation_end then
+    instance.stillhalt = nil
+  end
+end
+
 player_states.check_halt = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
   if pddp(instance, trig, side, dt) then
@@ -57,49 +163,134 @@ player_states.check_halt = function(instance, dt, side)
     instance.animation_state:change_state(instance, dt, side .. "fall")
   elseif td.check_push_a(instance, trig, side, dt) then
   elseif td.check_walk_a(instance, trig, side, dt) then
-  elseif trig.restish then
+  elseif trig.restish and not instance.stillhalt then
     instance.animation_state:change_state(instance, dt, side .. "still")
   elseif td.check_halt_notme(instance, trig, side, dt) then
+  end
+end
+
+player_states.start_halt = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = -1
+    side = 'left'
+  end
+  instance.triggers.animation_end = false
+
+  instance.image_index = 0
+  instance.image_speed = 0.25
+
+  instance.sprite = im.sprites["Witch/skid_" .. side]
+  if instance.speed > 95 and instance.sprite.frames > 1 then
+    instance.stillhalt = true
+  else
+    instance.image_speed = 0
+  end
+end
+
+player_states.end_halt = function(instance, dt, side)
+  instance.stillhalt = nil
+  if side == "right" then
+    instance.x_scale = 1
   end
 end
 
 -- TODO: breath fast after running for long, take deep breath exhale
 -- and stay without air for a while and afterwards calm breathing
 player_states.run_still = function(instance, dt, side)
+  if string.gmatch(instance.sprite.name, "idle_landing_") then
+    if instance.state_start_frame < math.floor(instance.image_index) then
+      instance.short_landing = nil
+    end
+    if instance.triggers.animation_end then
+      instance.is_landing = nil
+      instance.short_landing = nil
+      if side ~= "right" then
+        instance.sprite = im.sprites["Witch/idle_" .. side]
+      else
+        instance.sprite = im.sprites["Witch/idle_left"]
+        instance.x_scale = -1
+      end
+    end
+  end
 end
 
 player_states.check_still = function(instance, dt, side)
   local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+
+  local jump_side = side
+
+  if instance.speed > 5 then
+    if math.abs(instance.vx) > math.abs(instance.vy) then
+      if instance.vx > 0 then
+        jump_side = "right"
+      else
+        jump_side = "left"
+      end
+    else
+      if instance.vy > 0 then
+        jump_side = "down"
+      else
+        jump_side = "up"
+      end
+    end
+  end
+
   if pddp(instance, trig, side, dt) then
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
-  elseif inv.check_use(instance, trig, side, dt) then
+  elseif inv.check_use(instance, trig, side, dt, jump_side) then
   elseif not instance:grounded() then
     instance.animation_state:change_state(instance, dt, side .. "fall")
-  elseif td.check_push_a(instance, trig, side, dt) then
-  elseif td.check_walk_a(instance, trig, side, dt) then
-  elseif td.check_halt_a(instance, trig, side, dt) then
+  elseif not instance.short_landing and td.check_push_a(instance, trig, side, dt) then
+  elseif not instance.short_landing and td.check_walk_a(instance, trig, side, dt) then
+  elseif not instance.no_halt and td.check_halt_a(instance, trig, side, dt) then
   end
+
 end
 
--- TODO: breath fast after running for long, take deep breath exhale
--- and stay without air for a while and afterwards calm breathing
 player_states.start_still = function(instance, dt, side)
-  if side ~= "right" then
-    instance.sprite = im.sprites["Witch/still_" .. side]
+  instance.image_index = 0
+  instance.state_start_frame = instance.image_index
+  if instance.just_landed then
+    instance.no_halt = true
+    instance.just_landed = nil
+    instance.is_landing = true
+    instance.short_landing = true
+    instance.image_speed = 0.3
+    if side ~= "right" then
+      instance.sprite = im.sprites["Witch/idle_landing_" .. side]
+    else
+      instance.sprite = im.sprites["Witch/idle_landing_left"]
+      instance.x_scale = -1
+    end
+    if instance.soft_landing then
+      instance.image_index = instance.sprite.frames - 2
+      instance.state_start_frame = instance.image_index
+    end
   else
-    instance.sprite = im.sprites["Witch/still_left"]
-    instance.x_scale = -1
+    instance.image_speed = 0.07
+    if side ~= "right" then
+      instance.sprite = im.sprites["Witch/idle_" .. side]
+    else
+      instance.sprite = im.sprites["Witch/idle_left"]
+      instance.x_scale = -1
+    end
   end
-  instance.image_speed = 0.07
 end
 
--- TODO: breath fast after running for long, take deep breath exhale
--- and stay without air for a while and afterwards calm breathing
 player_states.end_still = function(instance, dt, side)
+  instance.is_landing = nil
+  instance.short_landing = nil
+  instance.soft_landing = nil
   if side == "right" then
     instance.x_scale = 1
   end
+end
+
+
+player_states.run_push = function(instance, dt, side)
+  img_speed_and_footstep_sound(instance, dt)
+  instance.image_speed = math.max(0.05, instance.image_speed)
 end
 
 player_states.check_push = function(instance, dt, side)
@@ -112,6 +303,22 @@ player_states.check_push = function(instance, dt, side)
     instance.animation_state:change_state(instance, dt, side .. "still")
   end
 end
+
+player_states.start_push = function(instance, dt, side)
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/push_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/push_left"]
+    instance.x_scale = -1
+  end
+end
+
+player_states.end_push = function(instance, dt, side)
+  if side == "right" then
+    instance.x_scale = 1
+  end
+end
+
 
 player_states.run_swing = function(instance, dt, side)
   local trig = instance.triggers
@@ -152,12 +359,14 @@ player_states.start_swing = function(instance, dt, side)
   end
   instance.image_index = 0
   instance.triggers.animation_end = false
+
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/swing_" .. side]
   else
     instance.sprite = im.sprites["Witch/swing_left"]
     instance.x_scale = -1
   end
+
   instance.image_speed = instance.sprite.frames * 0.0667
   -- Create sword
   instance.sword = sw:new{
@@ -214,16 +423,18 @@ player_states.check_stab = function(instance, dt, side)
 end
 
 player_states.start_stab = function(instance, dt, side)
-  instance.image_index = 1
   instance.image_speed = 0
   instance.stab_offset_speed = 0.20
   instance.stab_offset = 0
+
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/swing_" .. side]
   else
     instance.sprite = im.sprites["Witch/swing_left"]
     instance.x_scale = -1
   end
+  instance.image_index = instance.sprite.frames - 1
+
   -- Create sword
   instance.sword = sw:new{
     creator = instance,
@@ -237,7 +448,6 @@ end
 player_states.end_stab = player_states.end_swing
 
 player_states.run_hold = function(instance, dt, side)
-  img_speed_and_footstep_sound(instance, dt)
   -- Update spin attack counter
   instance.spinAttackCounter = instance.spinAttackCounter + dt
   if session.save.faroresCourage and instance.spinCharged == false and instance.spinAttackCounter > session.getSwordSpeed() * 2.5 then
@@ -245,7 +455,38 @@ player_states.run_hold = function(instance, dt, side)
     snd.play(instance.sounds.swordCharge)
   end
 
-  if instance.speed < 5 then instance.image_index = 0 end
+  img_speed_and_footstep_sound(instance, dt)
+
+  local idleFrame = math.floor(instance.image_index + 1) % 5 == 0
+
+  if not idleFrame then
+    local fii = math.floor(instance.image_index)
+    if fii % 5 == 0 then
+      instance.fake_zo = -1
+    elseif (fii + 2) % 5 == 0 then
+      instance.fake_zo = -2
+    elseif (fii + 3) % 5 == 0 or (fii + 4) % 5 == 0 then
+      instance.fake_zo = -3
+    end
+  else
+    instance.fake_zo = 0
+  end
+
+  if instance.speed < 5 then
+    if side ~= "right" then
+      instance.sprite = im.sprites["Witch/idle_hold_" .. side]
+    else
+      instance.sprite = im.sprites["Witch/idle_hold_left"]
+      instance.x_scale = -1
+    end
+  else
+    if side ~= "right" then
+      instance.sprite = im.sprites["Witch/hold_" .. side]
+    else
+      instance.sprite = im.sprites["Witch/hold_left"]
+      instance.x_scale = -1
+    end
+  end
 end
 
 player_states.check_hold = function(instance, dt, side)
@@ -266,12 +507,14 @@ end
 
 player_states.start_hold = function(instance, dt, side)
   instance.image_index = 0
+
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/hold_" .. side]
   else
     instance.sprite = im.sprites["Witch/hold_left"]
     instance.x_scale = -1
   end
+
   -- Start spin attack counter
   instance.spinAttackCounter = 0
   instance.spinCharged = false
@@ -303,11 +546,12 @@ player_states.start_jump = function(instance, dt, side)
 end
 
 player_states.run_fall = function(instance, dt, side)
-  -- Witch fall
-  if (
-    instance.sprite.frames == 3 and session.save.equippedRing == "ringMage"
-  )
-  then
+  if instance.double_jumping then
+    if instance.triggers.animation_end then
+      instance.image_index = instance.sprite.frames - 1
+    end
+    instance.broom_image_index = instance.image_index
+  else
     local vel = instance.zvel
 
     if instance.sideScroll then
@@ -322,13 +566,6 @@ player_states.run_fall = function(instance, dt, side)
     else
       instance.image_index = 1
     end
-
-  -- Link fall
-  else
-    if instance.triggers.animation_end then
-      instance.image_speed = 0
-      instance.image_index = instance.sprite.frames - 1
-    end
   end
 end
 
@@ -340,8 +577,29 @@ player_states.check_fall = function(instance, dt, side)
   elseif trig.swing_sword then
     instance.animation_state:change_state(instance, dt, side .. "swing")
   elseif trig.hold_jump and instance:canDoubleJump() then
-    instance.animation_state:change_state(instance, dt, side .. "jump")
+    -- local vx, vy = instance.body:getLinearVelocity()
+    -- if math.abs(vx) > math.abs(vy) then
+    --   if vx > 0 then
+    --     instance.animation_state:change_state(instance, dt, "rightjump")
+    --   elseif vx < 0 then
+    --     instance.animation_state:change_state(instance, dt, "leftjump")
+    --   else
+    --     instance.animation_state:change_state(instance, dt, side .. "jump")
+    --   end
+    -- else
+    --   if vy > 0 then
+    --     instance.animation_state:change_state(instance, dt, "downjump")
+    --   elseif vy < 0 then
+    --     instance.animation_state:change_state(instance, dt, "upjump")
+    --   else
+        instance.animation_state:change_state(instance, dt, side .. "jump")
+    --   end
+    -- end
   elseif instance:grounded() then
+    instance.just_landed = true
+    if instance.double_jumping then
+      instance.soft_landing = true
+    end
     instance.animation_state:change_state(instance, dt, side .. "still")
   end
 end
@@ -349,15 +607,19 @@ end
 player_states.start_fall = function(instance, dt, side)
   instance.triggers.animation_end = false
   instance.image_index = 0
-  instance.image_speed = 0.11
   if instance.triggers.hold_jump and instance.double_jumping then
+    instance.broom_exists = true
+    instance.broom_image_index = 0
+    instance.image_speed = 0.4
+
     if side ~= "right" then
-      instance.sprite = im.sprites["Witch/cape_" .. side]
+      instance.sprite = im.sprites["Witch/riding_start_" .. side]
     else
-      instance.sprite = im.sprites["Witch/cape_left"]
+      instance.sprite = im.sprites["Witch/riding_start_left"]
       instance.x_scale = -1
     end
   else
+
     if side ~= "right" then
       instance.sprite = im.sprites["Witch/jump_" .. side]
     else
@@ -373,23 +635,80 @@ player_states.end_fall = function(instance, dt, side)
   end
   instance.gravity = instance.defaultGravity
   instance.double_jumping = nil
+  instance.broom_exists = nil
 end
 
 player_states.run_missile = function(instance, dt, side)
   instance.missile_cooldown = instance.missile_cooldown + dt
+  instance.missile_start_counter = instance.missile_start_counter + dt
   img_speed_and_footstep_sound(instance, dt)
 
+  local idleFrame = math.floor(instance.image_index + 1) % 5 == 0
+
+  if not idleFrame then
+    local fii = math.floor(instance.image_index)
+    if fii % 5 == 0 then
+      instance.fake_zo = -1
+    elseif (fii + 2) % 5 == 0 then
+      instance.fake_zo = -2
+    elseif (fii + 3) % 5 == 0 or (fii + 4) % 5 == 0 then
+      instance.fake_zo = -3
+    end
+  else
+    instance.fake_zo = 0
+  end
+
   if instance.missile and not instance.missile.charged and instance.triggers.mystery then
-    if session.removeMDust(true) then
+    if session.save.dust > 0 then
+      session.addDust(-1)
       snd.play(instance.sounds.magicMissileCharge)
       instance.missile.charged = true
     end
   end
 
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/shoot_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/shoot_left"]
+    instance.x_scale = -1
+  end
+
   if instance.speed < 5 then
-    if floor(instance.image_index) ~= 3 then
-      instance.image_index = 1
+    if side ~= "right" then
+      instance.sprite = im.sprites["Witch/idle_shoot_" .. side]
+    else
+      instance.sprite = im.sprites["Witch/idle_shoot_left"]
+      instance.x_scale = -1
     end
+  end
+
+  if instance.missile_start_counter >= instance.missile_start_duration then
+    if instance.missile and not instance.missile.fired then
+      instance.missile.fired = true
+
+      if not instance.missile.body:isDestroyed() then
+
+        instance.missile.image_index = instance.missile.sprite.frames - 1
+
+        local mslvx, mslvy = instance.missile.body:getLinearVelocity()
+        local firevelx, firevely = 0, 0
+
+        -- WARNING If I add spritebody to missile, the speed I add will get cut in half
+
+        -- missile velocity function of (base) maxspeed
+        if side == "up" then
+          firevely = - session.save.playerMaxSpeed
+        elseif side == "down" then
+          firevely = session.save.playerMaxSpeed
+        elseif side == "left" then
+          firevelx = - session.save.playerMaxSpeed
+        else
+          firevelx = session.save.playerMaxSpeed
+        end
+        instance.missile.body:setLinearVelocity(mslvx+firevelx, mslvy+firevely)
+      end
+
+    end -- instance.missile
   end
 end
 
@@ -409,22 +728,51 @@ end
 
 player_states.start_missile = function(instance, dt, side)
   instance.missile_cooldown = 0
-  if side ~= "right" then
-    instance.sprite = im.sprites["Witch/shoot_" .. side]
-  else
-    instance.sprite = im.sprites["Witch/shoot_left"]
-    instance.x_scale = -1
-  end
+  instance.missile_start_counter = 0
+  instance.missile_start_duration = math.min(0.1, session.getMagicCooldown())
+
   -- Create missile
-  local misslayer = instance.layer
-  if side == "up" then misslayer = misslayer - 1 end
   instance.missile = msl:new{
     creator = instance,
     side = side,
-    layer = misslayer
+    layer = instance.layer
   }
   o.addToWorld(instance.missile)
   snd.play(instance.sounds.magicMissile)
+
+  instance.missile:compute_offset()
+  local fy = 0
+  if instance.edgeFall and instance.edgeFall.step2 then
+    fy = - instance.edgeFall.height
+  end
+  local y_scale = 1
+  local angle = 0
+  local facing = instance:getFacing()
+  if facing == "down" then
+    y_scale = -1
+  elseif facing == "left" then
+    angle = -math.pi / 2
+  elseif facing == "right" then
+    angle = math.pi / 2
+  end
+  o.addToWorld(explode:new{
+    nosound = true,
+    explosion_sprite = im.spriteSettings.smallExplosion1,
+    xstart = instance.x + instance.missile.sox,
+    ystart = instance.y + instance.missile.soy + instance.zo + fy,
+    x = instance.x + instance.missile.sox,
+    y = instance.y + instance.missile.soy + instance.zo + fy,
+    layer = facing == "up" and instance.layer - 1 or instance.layer,
+    image_speed = 0.3,
+    velocity = {x = instance.vx, y = instance.vy},
+    light = {
+      type = 'playerGlow',
+      rgba = {r = 1, g = 0.9, b = 1, a = 0},
+      alpha_table = {[0] = 0, [1] = 1}
+    },
+    y_scale = y_scale,
+    angle = angle
+  })
 end
 
 player_states.end_missile = function(instance, dt, side)
@@ -441,39 +789,12 @@ player_states.end_missile = function(instance, dt, side)
   end
   instance.missile_cooldown = nil
 
-  if instance.missile then
-    instance.missile.fired = true
-
-    if not instance.missile.body:isDestroyed() then
-
-      instance.missile.image_index = instance.missile.sprite.frames - 1
-
-      local mslvx, mslvy = instance.missile.body:getLinearVelocity()
-      local firevelx, firevely = 0, 0
-
-      -- WARNING If I add spritebody to missile, the speed I add will get cut in half
-
-      -- missile velocity function of (base) maxspeed
-      if side == "up" then
-        firevely = - session.save.playerMaxSpeed
-      elseif side == "down" then
-        firevely = session.save.playerMaxSpeed
-      elseif side == "left" then
-        firevelx = - session.save.playerMaxSpeed
-      else
-        firevelx = session.save.playerMaxSpeed
-      end
-      instance.missile.body:setLinearVelocity(mslvx+firevelx, mslvy+firevely)
-    end
-
-  end -- instance.missile
-
 end
 
 player_states.run_gripping = function(instance, dt, side)
   img_speed_and_footstep_sound(instance, dt)
   if instance.speed < 5 then
-    instance.image_index = 0
+    instance.image_index = 0.5
   end
 
   -- Check if object cannot be gripped any longer
@@ -489,7 +810,7 @@ player_states.check_gripping = function(instance, dt, side)
   elseif instance.climbing then
     instance.animation_state:change_state(instance, dt, "upclimbing")
   elseif not trig.grip or not instance.grippedOb or not instance.grippedOb.exists then
-    instance.animation_state:change_state(instance, dt, side .. "walk")
+    instance.animation_state:change_state(instance, dt, side .. "push")
   end
 end
 
@@ -516,6 +837,7 @@ player_states.start_gripping = function(instance, dt, side)
         layer = side == "up" and instance.layer - 1 or instance.layer + 1,
         sprite_info = other.sprite_info or {im.spriteSettings.testlift},
         image_index = floor(other.image_index),
+        image_speed = other.image_speed,
         lift_info = other.lift_info,
         persistentData = other.persistentData,
         iAmBomb = other.iAmBomb,
@@ -545,8 +867,12 @@ player_states.start_gripping = function(instance, dt, side)
     end
   end
 
-  instance.image_index = 0
+  local p = instance.animation_state.prev_state
+  if not p:match("push") then
+    instance.image_index = 0
+  end
   instance.image_speed = 0
+
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/grip_" .. side]
   else
@@ -560,14 +886,19 @@ player_states.end_gripping = function(instance, dt, side)
     instance.x_scale = 1
   end
   instance.grippedOb = nil
-  if instance.grip and not instance.grip:isDestroyed() then instance.grip:destroy(); instance.grip = nil end
+  if instance.grip and not instance.grip:isDestroyed() then
+    instance.grip:destroy();
+    instance.grip = nil
+  end
 end
 
 
 local function chargeLifted(lifted, lifter)
   if not lifted.undustable and not lifted.persistentData.charged and lifter.triggers.mystery then
-    local success = lifted.iAmBomb and session.removeMDust(nil, nil, true) or session.removeMDust(nil, true)
-    if success then
+    if session.save.dust > 0 then
+      -- Check if lifted.iAmBomb if I want to change anything when interacting with bombs
+
+      session.addDust(-1)
       snd.play(lifter.sounds.magicMissileCharge)
       lifted.persistentData.charged = true
       lifted.persistentData.focus = session.save.focus
@@ -583,6 +914,10 @@ player_states.run_lifting = function(instance, dt, side)
   instance.liftingStage = 1 + 3 * instance.item_use_counter * instance.invGripTime
 
   if instance.liftingStage >= 4 then instance.liftingStage = 4 end
+
+  if instance.triggers.animation_end then
+    instance.image_index = instance.sprite.frames - 1
+  end
 end
 
 player_states.check_lifting = function(instance, dt, side)
@@ -606,13 +941,15 @@ player_states.start_lifting = function(instance, dt, side)
   end
   instance.invGripTime = 1 / gripTime
   instance.image_index = 0
-  instance.image_speed = 0
+  instance.image_speed = instance.invGripTime / 10
+
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/lifting_" .. side]
   else
     instance.sprite = im.sprites["Witch/lifting_left"]
     instance.x_scale = -1
   end
+
   instance.liftState = true
 end
 
@@ -632,12 +969,36 @@ end
 
 player_states.run_lifted = function(instance, dt, side)
   img_speed_and_footstep_sound(instance, dt)
+  if side ~= "right" then
+    instance.sprite = im.sprites["Witch/carry_" .. side]
+  else
+    instance.sprite = im.sprites["Witch/carry_left"]
+    instance.x_scale = -1
+  end
   if instance.speed < 5 then
-    instance.image_index = 0
+    if side ~= "right" then
+      instance.sprite = im.sprites["Witch/idle_carry_" .. side]
+    else
+      instance.sprite = im.sprites["Witch/idle_carry_left"]
+      instance.x_scale = -1
+    end
   end
   if instance.liftedOb then
     instance.liftedOb.side = side
     chargeLifted(instance.liftedOb, instance)
+  end
+
+  if math.floor(instance.image_index + 1) % 5 ~= 0 then
+    local fii = math.floor(instance.image_index)
+    if fii % 5 == 0 then
+      instance.fake_zo = -1
+    elseif (fii + 2) % 5 == 0 then
+      instance.fake_zo = -2
+    elseif (fii + 3) % 5 == 0 or (fii + 4) % 5 == 0 then
+      instance.fake_zo = -3
+    end
+  else
+    instance.fake_zo = 0
   end
 end
 
@@ -656,12 +1017,6 @@ player_states.check_lifted = function(instance, dt, side)
 end
 
 player_states.start_lifted = function(instance, dt, side)
-  if side ~= "right" then
-    instance.sprite = im.sprites["Witch/lifted_" .. side]
-  else
-    instance.sprite = im.sprites["Witch/lifted_left"]
-    instance.x_scale = -1
-  end
   instance.liftState = true
 end
 
@@ -685,13 +1040,13 @@ player_states.run_damaged = function(instance, dt, side)
   end
   instance.damCounter = instance.damCounter - dt
   if instance.triggers.land then
-    instance.sprite = im.sprites["Witch/die"]
+
+    instance.hurt_from_height = true
+
+    instance.sprite = im.sprites["Witch/fallen_down"]
+    instance.image_index = 0
+
     instance.image_speed = 0
-    instance.image_index = 5
-  end
-  if instance.triggers.animation_end then
-    instance.image_speed = 0
-    instance.image_index = instance.sprite.frames - 1
   end
 end
 
@@ -703,19 +1058,24 @@ player_states.check_damaged = function(instance, dt, side)
     instance.animation_state:change_state(instance, dt, "downdrown")
   elseif instance.damCounter < 0 then
     instance.animation_state:change_state(instance, dt,
-    (instance.sprite == im.sprites["Witch/die"] and "down" or side) .. "still")
+    (instance.hurt_from_height and "down" or side) .. "still")
   elseif not instance.takingDamage and trig.damaged then
     instance.animation_state:change_state(instance, dt, side .. "damaged")
   end
 end
 
 player_states.start_damaged = function(instance, dt, side)
+
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/hurt_" .. side]
+    if side == "down" then
+      instance.x_scale = - 2 * love.math.random(0, 1) + 1
+    end
   else
     instance.sprite = im.sprites["Witch/hurt_left"]
     instance.x_scale = -1
   end
+
   instance.takingDamage = 3 -- Cannot take more damage for three frames
   instance.image_index = 0
   instance.image_speed = 0.2
@@ -724,17 +1084,16 @@ player_states.start_damaged = function(instance, dt, side)
   end
   if instance.triggers.damaged == 0 then instance.noInvShader = true end
   inp.disable_controller(instance.player)
-  instance.invulnerable = pl1.triggers.noInvFrames and 0 or 1
   instance.damCounter = instance.triggers.damCounter or 0.5
+  instance.invulnerable = instance.damCounter + (pl1.triggers.noInvFrames and 0 or 1)
   instance.damKeepMoving = instance.triggers.damKeepMoving
   snd.play(instance.triggers.altHurtSound or instance.sounds.hurt)
 end
 
 player_states.end_damaged = function(instance, dt, side)
   instance.takingDamage = false
-  if side == "right" then
-    instance.x_scale = 1
-  end
+  instance.hurt_from_height = nil
+  instance.x_scale = 1
   inp.enable_controller(instance.player)
   if instance.floorFriction > 0.9 and not instance.damKeepMoving then
     instance.body:setLinearVelocity(0, 0)
@@ -745,8 +1104,8 @@ player_states.run_sprintcharge = function(instance, dt, side)
   instance.sprintCharge = instance.sprintCharge - dt
 
   -- make footstep sounds
-  if instance.image_index % 2 >= 1 and instance.image_index_prev % 2 < 1 then
-    snd.play(instance.sounds[instance.landedTileSound])
+  if should_play_footstep_sound(instance) then
+    play_footstep_sound(instance)
   end
 end
 
@@ -767,13 +1126,15 @@ player_states.check_sprintcharge = function(instance, dt, side)
 end
 
 player_states.start_sprintcharge = function(instance, dt, side)
+
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/walk_" .. side]
   else
     instance.sprite = im.sprites["Witch/walk_left"]
     instance.x_scale = -1
   end
-  instance.image_speed = 0.3
+  instance.image_speed = 0.5
+
   instance.sprintCharge = 0.5
 
   if instance.speed > 110 then
@@ -810,50 +1171,31 @@ player_states.run_sprint = function(instance, dt)
   elseif (instance.sprintDir >= 0 and instance.sprintDir > math.pi * 0.75) or (instance.sprintDir < 0 and instance.sprintDir < - math.pi * 0.75) then
     instance.sprintSide = "left"
   end
-  local moveType = session.save.faroresCourage and "roll" or "walk"
+
   if instance.sprintSide ~= "right" then
-    instance.sprite = im.sprites["Witch/".. moveType .."_" .. instance.sprintSide]
+    instance.sprite = im.sprites["Witch/dash_"  .. instance.sprintSide]
     instance.x_scale = 1
   else
-    instance.sprite = im.sprites["Witch/".. moveType .."_left"]
+    instance.sprite = im.sprites["Witch/dash_left"]
     instance.x_scale = -1
   end
 
   instance.rollSoundTimer = instance.rollSoundTimer + dt
   instance.rollFxTimer = instance.rollFxTimer + dt
   -- make footstep sounds
-  if session.save.faroresCourage then
-    if instance.rollSoundTimer > 0.23 then
-      instance.rollSoundTimer = 0
-      snd.play(instance.sounds.roll)
-    end
-    if instance.rollFxTimer > 0.0766 then
-      instance.rollFxTimer = 0
-      local explOb = (require "GameObjects.explode"):new{
-        x = instance.x, y = instance.y + 4,
-        -- layer = self.layer+1,
-        layer = instance.layer - 1,
-        -- explosionNumber = 1,
-        sprite_info = {im.spriteSettings.playerDust},
-        image_speed = 0.25,
-        nosound = true
-      }
-      o.addToWorld(explOb)
-    end
-  else
-    if instance.image_index % 2 >= 1 and instance.image_index_prev % 2 < 1 then
-      snd.play(instance.sounds[instance.landedTileSound])
-      local explOb = (require "GameObjects.explode"):new{
-        x = instance.x, y = instance.y + 4,
-        -- layer = self.layer+1,
-        layer = instance.layer - 1,
-        -- explosionNumber = 1,
-        sprite_info = {im.spriteSettings.playerDust},
-        image_speed = 0.25,
-        nosound = true
-      }
-      o.addToWorld(explOb)
-    end
+
+  if should_play_footstep_sound(instance) then
+    play_footstep_sound(instance)
+    local explOb = (require "GameObjects.explode"):new{
+      x = instance.x, y = instance.y + 4,
+      -- layer = self.layer+1,
+      layer = instance.layer - 1,
+      -- explosionNumber = 1,
+      sprite_info = {im.spriteSettings.playerDust},
+      image_speed = 0.25,
+      nosound = true
+    }
+    o.addToWorld(explOb)
   end
 end
 
@@ -872,13 +1214,7 @@ player_states.check_sprint = function(instance, dt)
 end
 
 player_states.start_sprint = function(instance, dt)
-  if instance.sprintSide ~= "right" then
-    instance.sprite = im.sprites["Witch/walk_" .. instance.sprintSide]
-  else
-    instance.sprite = im.sprites["Witch/walk_left"]
-    instance.x_scale = -1
-  end
-  instance.image_speed = 0.3
+  instance.image_speed = 0.4
   instance.sprintDir = instance.sprintDir or 0
   instance.immasprint = true
   instance.rollSoundTimer = 0.23
@@ -897,7 +1233,7 @@ end
 
 
 player_states.run_mdust = function(instance, dt, side)
-  if instance.image_index >= 1 and instance.image_index_prev < 1 then
+  if math.floor(instance.image_index) == instance.sprite.frames - 1 and math.floor(instance.image_index_prev) ~= instance.sprite.frames - 1 then
 
     local xmod, ymod
     local hormod, vermod = 12, 6
@@ -935,12 +1271,14 @@ player_states.start_mdust = function(instance, dt, side)
   instance.image_index = 0
   instance.image_speed = 0.1
   instance.triggers.animation_end = false
+
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/mdust_" .. side]
   else
     instance.sprite = im.sprites["Witch/mdust_left"]
     instance.x_scale = -1
   end
+
 end
 
 player_states.end_mdust = function(instance, dt, side)
@@ -953,6 +1291,11 @@ end
 player_states.run_climbing = function(instance, dt, side)
   local s = instance.speed / (instance.timeFlow or 1)
   local f = instance.sprite.frames
+
+  if instance.vy > 0 then
+    s = -s
+  end
+
   instance.image_speed = 0.001 * s * f
 end
 
@@ -968,7 +1311,9 @@ player_states.check_climbing = function(instance, dt, side)
 end
 
 player_states.start_climbing = function(instance, dt, side)
+
   instance.sprite = im.sprites["Witch/climb_up"]
+
 end
 
 player_states.end_climbing = function(instance, dt, side)

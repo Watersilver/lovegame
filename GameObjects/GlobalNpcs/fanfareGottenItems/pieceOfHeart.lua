@@ -19,9 +19,9 @@ end
 
 local function commentDeterminer()
   local poh = session.save.piecesOfHeart or 0
-  incomingHeartContainer = math.floor((poh + 1) / 4) == (poh + 1) / 4
+  local incomingHeartContainer = math.floor((poh + 1) / 4) == (poh + 1) / 4
   if poh >= GCON.maxPOHs then return "Wait, there shouldn't be any more of those... \nUnfortunately it has no effect..." end
-  if poh + 1 >= GCON.maxPOHs then return "You discovered the final piece of Heart! \nCongratulations!" end
+  if poh + 1 >= GCON.maxPOHs then return "You discovered the final Life Wisp! \nCongratulations!" end
   return incomingHeartContainer and "Health increased by one Heart!" or "Collect 4 to extend maximum health by one Heart!"
 end
 
@@ -32,7 +32,7 @@ end
 local altLetterSound = {[2] = soundDeterminer}
 gottenItem.itemInfo = {
   itemSprite = sprite,
-  information = "You got a piece of heart!",
+  information = "You got a Life Wisp!",
   comment = commentDeterminer,
   itemGetEffect = itemGetFunc,
   altLetterSound = altLetterSound

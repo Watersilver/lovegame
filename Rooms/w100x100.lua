@@ -2,6 +2,7 @@ local rm = require("RoomBuilding.room_manager")
 local sh = require "scaling_handler"
 local im = require "image"
 local snd = require "sound"
+local utilities = require "utilities"
 
 local room = {}
 room.newType = true
@@ -1149,7 +1150,13 @@ room.manuallyPlacedObjects = {
   {x = 248, y = 222, blueprint = "GlobalNpcs.debug.instrGiver"},
   {x = 232, y = 216, blueprint = "GlobalNpcs.test.debugItemContainer"},
   {x = 232, y = 248, blueprint = "misc.regeneratingPlant", n ={
-    drops = "sprinkleOfDust"
+    drops = utilities.weightTableToChanceTable{
+      {value = 'rupee', weight = 1},
+      {value = 'rupee5', weight = 1},
+      {value = 'rupee20', weight = 1},
+      {value = 'rupee100', weight = 1},
+      {value = 'rupee200', weight = 1}
+    }
   }}
 
   -- 312, 392 -- Boss

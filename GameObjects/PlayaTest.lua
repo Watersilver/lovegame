@@ -16,6 +16,7 @@ local dlg = require "dialogue"
 local gsh = require "gamera_shake"
 local items = require "items"
 local lighting = require "ScreenEffects.lighting.lighting"
+local explode  = require "GameObjects.explode"
 
 local hps = require "GameObjects.Helpers.player_states"
 local ors = require "GameObjects.Helpers.object_read_save"
@@ -120,7 +121,8 @@ local movement_states = {
             elseif trig.recall then
               instance.movement_state:change_state(instance, dt, "using_recall")
             elseif trig.mystery then
-              if not session.removeMDust() then return end
+              if session.save.dust <= 0 then return end
+              session.addDust(-1)
               -- Animation state gets checked after this
               -- so mark a new trigger here to also change animation
               -- because I can't removeItem again to check removeResult
@@ -278,7 +280,7 @@ local animation_states = {
 
   downwalk = {
   run_state = function(instance, dt)
-    hps.img_speed_and_footstep_sound(instance, dt)
+    hps.run_walk(instance, dt, "down")
   end,
 
   check_state = function(instance, dt)
@@ -286,17 +288,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/walk_down"]
+    hps.start_walk(instance, dt, "down")
   end,
 
   end_state = function(instance, dt)
+    hps.end_walk(instance, dt, "down")
   end
   },
 
 
   rightwalk = {
   run_state = function(instance, dt)
-    hps.img_speed_and_footstep_sound(instance, dt)
+    hps.run_walk(instance, dt, "right")
   end,
 
   check_state = function(instance, dt)
@@ -304,19 +307,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/walk_left"]
-    instance.x_scale = -1
+    hps.start_walk(instance, dt, "right")
   end,
 
   end_state = function(instance, dt)
-    instance.x_scale = 1
+    hps.end_walk(instance, dt, "right")
   end
   },
 
 
   leftwalk = {
   run_state = function(instance, dt)
-    hps.img_speed_and_footstep_sound(instance, dt)
+    hps.run_walk(instance, dt, "left")
   end,
 
   check_state = function(instance, dt)
@@ -324,17 +326,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/walk_left"]
+    hps.start_walk(instance, dt, "left")
   end,
 
   end_state = function(instance, dt)
+    hps.end_walk(instance, dt, "left")
   end
   },
 
 
   upwalk = {
   run_state = function(instance, dt)
-    hps.img_speed_and_footstep_sound(instance, dt)
+    hps.run_walk(instance, dt, "up")
   end,
 
   check_state = function(instance, dt)
@@ -342,17 +345,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/walk_up"]
+    hps.start_walk(instance, dt, "up")
   end,
 
   end_state = function(instance, dt)
+    hps.end_walk(instance, dt, "up")
   end
   },
 
 
   downhalt = {
   run_state = function(instance, dt)
-    td.image_speed(instance, dt)
+    hps.run_halt(instance, dt, "down")
   end,
 
   check_state = function(instance, dt)
@@ -360,18 +364,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    if instance.inShallowWater then snd.play(instance.sounds.water) end
-    instance.sprite = im.sprites["Witch/halt_down"]
+    hps.start_halt(instance, dt, "down")
   end,
 
   end_state = function(instance, dt)
+    hps.end_halt(instance, dt, "down")
   end
   },
 
 
   righthalt = {
   run_state = function(instance, dt)
-    td.image_speed(instance, dt)
+    hps.run_halt(instance, dt, "right")
   end,
 
   check_state = function(instance, dt)
@@ -379,20 +383,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    if instance.inShallowWater then snd.play(instance.sounds.water) end
-    instance.sprite = im.sprites["Witch/halt_left"]
-    instance.x_scale = -1
+    hps.start_halt(instance, dt, "right")
   end,
 
   end_state = function(instance, dt)
-    instance.x_scale = 1
+    hps.end_halt(instance, dt, "right")
   end
   },
 
 
   lefthalt = {
   run_state = function(instance, dt)
-    td.image_speed(instance, dt)
+    hps.run_halt(instance, dt, "left")
   end,
 
   check_state = function(instance, dt)
@@ -400,18 +402,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    if instance.inShallowWater then snd.play(instance.sounds.water) end
-    instance.sprite = im.sprites["Witch/halt_left"]
+    hps.start_halt(instance, dt, "left")
   end,
 
   end_state = function(instance, dt)
+    hps.end_halt(instance, dt, "left")
   end
   },
 
 
   uphalt = {
   run_state = function(instance, dt)
-    td.image_speed(instance, dt)
+    hps.run_halt(instance, dt, "up")
   end,
 
   check_state = function(instance, dt)
@@ -419,11 +421,11 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    if instance.inShallowWater then snd.play(instance.sounds.water) end
-    instance.sprite = im.sprites["Witch/halt_up"]
+    hps.start_halt(instance, dt, "up")
   end,
 
   end_state = function(instance, dt)
+    hps.end_halt(instance, dt, "up")
   end
   },
 
@@ -506,8 +508,7 @@ local animation_states = {
 
   downpush = {
   run_state = function(instance, dt)
-    hps.img_speed_and_footstep_sound(instance, dt)
-    instance.image_speed = max(0.02, instance.image_speed)
+    hps.run_push(instance, dt, "down")
   end,
 
   check_state = function(instance, dt)
@@ -515,18 +516,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/push_down"]
+    hps.start_push(instance, dt, 'down')
   end,
 
   end_state = function(instance, dt)
+    hps.end_push(instance, dt, 'down')
   end
   },
 
 
   rightpush = {
   run_state = function(instance, dt)
-    hps.img_speed_and_footstep_sound(instance, dt)
-    instance.image_speed = max(0.01, instance.image_speed)
+    hps.run_push(instance, dt, "right")
   end,
 
   check_state = function(instance, dt)
@@ -534,20 +535,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/push_left"]
-    instance.x_scale = -1
+    hps.start_push(instance, dt, 'right')
   end,
 
   end_state = function(instance, dt)
-    instance.x_scale = 1
+    hps.end_push(instance, dt, 'right')
   end
   },
 
 
   leftpush = {
   run_state = function(instance, dt)
-    hps.img_speed_and_footstep_sound(instance, dt)
-    instance.image_speed = max(0.01, instance.image_speed)
+    hps.run_push(instance, dt, "left")
   end,
 
   check_state = function(instance, dt)
@@ -555,18 +554,18 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/push_left"]
+    hps.start_push(instance, dt, 'left')
   end,
 
   end_state = function(instance, dt)
+    hps.end_push(instance, dt, 'left')
   end
   },
 
 
   uppush = {
   run_state = function(instance, dt)
-    hps.img_speed_and_footstep_sound(instance, dt)
-    instance.image_speed = max(0.01, instance.image_speed)
+    hps.run_push(instance, dt, "up")
   end,
 
   check_state = function(instance, dt)
@@ -574,10 +573,11 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
-    instance.sprite = im.sprites["Witch/push_up"]
+    hps.start_push(instance, dt, 'up')
   end,
 
   end_state = function(instance, dt)
+    hps.end_push(instance, dt, 'up')
   end
   },
 
@@ -834,6 +834,7 @@ local animation_states = {
       end
       table.insert(a, spindex)
       instance.spinSide = instance.sideTable[spindex]
+
       if instance.spinSide == "right" then
         instance.sprite = im.sprites["Witch/swing_left"]
         instance.x_scale = -1
@@ -841,6 +842,8 @@ local animation_states = {
         instance.sprite = im.sprites["Witch/swing_" .. instance.spinSide]
         instance.x_scale = 1
       end
+
+      instance.image_index = instance.sprite.frames - 1
     end
   end,
 
@@ -855,7 +858,6 @@ local animation_states = {
     snd.play(instance.sounds.swordSpin)
     instance.sounds.swordCharge:stop()
     instance.image_speed = 0
-    instance.image_index = 1
     instance.spinAttackCounter = 0
     instance.playerSpinFreq = 1 / 30
     instance.playerSpinPhase = instance.playerSpinFreq
@@ -1582,7 +1584,9 @@ local animation_states = {
   run_state = function(instance, dt)
     instance.sleep_time = instance.sleep_time - session.delta_hours
 
-    if instance.sprite ~= im.sprites["Witch/die"] then
+    local deathsprite = im.sprites["Witch/die"]
+
+    if instance.sprite ~= deathsprite then
       for k, v in pairs(instance.input) do
         if
           instance.sleep_time < 0
@@ -1601,7 +1605,7 @@ local animation_states = {
             and k ~= 10
           )
         then
-          instance.sprite = im.sprites["Witch/die"]
+          instance.sprite = deathsprite
           instance.image_speed = 0.1
           instance.image_index = 0
           session.sleeping_danger = false
@@ -1612,9 +1616,12 @@ local animation_states = {
 
   check_state = function(instance, dt)
     local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
+
+    local deathsprite = im.sprites["Witch/die"]
+
     if pddp(instance, trig, 'down', dt) then
       instance.movement_state:change_state(instance, dt, "normal")
-    elseif instance.sprite == im.sprites["Witch/die"] and trig.animation_end then
+    elseif instance.sprite == deathsprite and trig.animation_end then
       instance.animation_state:change_state(instance, dt, "downstill")
       instance.movement_state:change_state(instance, dt, "normal")
     end
@@ -1671,7 +1678,9 @@ local animation_states = {
     else
       instance.markanim = inv.mark.time * 2
     end
+
     instance.sprite = im.sprites["Witch/mark_down"]
+
     snd.play(instance.sounds.markStart)
   end,
 
@@ -1720,12 +1729,18 @@ local animation_states = {
     else
       instance.recallanim = inv.recall.time * 2
     end
+
     instance.sprite = im.sprites["Witch/recall_down"]
+
     snd.play(instance.sounds.recallStart)
   end,
 
   end_state = function(instance, dt)
     if instance.mark and instance.mark.exists and instance.recallanim <= 0 and instance:canMark() then
+
+      local purple = {0.4,0,0.4,1}
+      local green = {0.3,1,0.3,1}
+      local brightPurple = {0.9,0.3,0.9,1}
 
       if session.latestVisitedRooms:getLast() ~= instance.mark.roomName then
         if not game.transitioning and session.canRecallOtherRoom() then
@@ -1740,6 +1755,7 @@ local animation_states = {
             desx = instance.mark.xstart,
             desy = instance.mark.ystart
           }
+          explode.teleportEffect(instance.mark, false, session.save.faroresCourage and green or brightPurple)
           instance:newMark(true, session.latestVisitedRooms:getLast(), true)
         end
       else
@@ -1758,6 +1774,9 @@ local animation_states = {
         instance.stateTriggers.poof = true
         instance.body:setPosition(instance.mark.xstart, instance.mark.ystart)
         instance:newMark(true, nil, true)
+
+        explode.teleportEffect(instance, false, purple)
+        explode.teleportEffect(instance, true, session.save.faroresCourage and green or brightPurple)
       end
 
     end
@@ -1787,25 +1806,29 @@ local animation_states = {
   downdrown = {
   run_state = function(instance, dt)
     instance.body:setLinearVelocity(0, 0)
+    instance.respawnCounter = instance.respawnCounter + dt
   end,
 
   check_state = function(instance, dt)
     local trig, state, otherstate = instance.triggers, instance.animation_state.state, instance.movement_state.state
-    if trig.animation_end then
+    if instance.respawnCounter > 1 then
       instance.animation_state:change_state(instance, dt, "respawn")
     end
   end,
 
   start_state = function(instance, dt)
     instance.image_index = 0
-    instance.image_speed = 0.1
     instance.xUnsteppable = instance.x
     instance.yUnsteppable = instance.y
     -- Ensure you're not jumping while drowning
     instance.jo = 0
     instance.fo = 0
     instance.zvel = 0
+    instance.respawnCounter = 0
+
     instance.sprite = im.sprites["Witch/drown_down"]
+    instance.image_speed = 0.3
+
     inp.disable_controller(instance.player)
     snd.play(instance.sounds.water)
     instance:setGhost(true)
@@ -1846,7 +1869,7 @@ local animation_states = {
 
     start_state = function(instance, dt)
       instance.image_index = 0
-      instance.image_speed = 0.05
+      instance.image_speed = 0.2
       if not instance.item_recovery_animation then
         instance.sprite = im.sprites["Witch/eating_down"]
       else
@@ -1938,7 +1961,9 @@ local animation_states = {
     instance.harpTimer = 0
     instance.noteTimer = 0
     instance.prevHarpTimer = 0
-    instance.sprite = im.sprites["Witch/harp_down"]
+
+    instance.sprite = im.sprites["Witch/flute_down"]
+
     instance.movement_state:change_state(pl1, dt, "stand_still")
     instance.wasMusicOn = gs.musicOn
     gs.musicOn = false
@@ -2001,7 +2026,7 @@ local animation_states = {
 
   plummet = {
   run_state = function(instance, dt)
-    local pmod = instance.image_index
+    local pmod = instance.image_index * (1 / (10 * instance.image_speed))
     if pmod > 1 then pmod = 1 end
     instance.body:setPosition(
       instance.xPlummetStart + pmod * (instance.xClosestTile - instance.xPlummetStart),
@@ -2018,12 +2043,14 @@ local animation_states = {
 
   start_state = function(instance, dt)
     snd.play(instance.sounds.plummet)
+
     instance.sprite = im.sprites["Witch/plummet"]
+    instance.image_speed = 0.15
+
     instance.xPlummetStart = instance.x
     instance.yPlummetStart = instance.y
     instance.plummetFrames = instance.sprite.frames
     instance.image_index = 0
-    instance.image_speed = 0.1
     inp.disable_controller(instance.player)
     instance:setGhost(true)
   end,
@@ -2117,49 +2144,15 @@ local animation_states = {
 
   downdie = {
   run_state = function(instance, dt)
+    instance.deathStunCounter = instance.deathStunCounter + dt
+
     if instance.deathPhase == 1 then
-      if instance.image_index >= 3 then
-        instance.image_index = 2
-        instance.image_speed = - instance.image_speed
-        instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
-      elseif instance.image_index <= 0 then
+      if instance.deathStunCounter > 1 then
+        instance.deathPhase = 2
         instance.image_index = 1
-        instance.image_speed = - instance.image_speed
-        instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
-        instance.x_scale = - instance.x_scale
-        if instance.deathDizzinesCounter >= instance.deathDizzinesRepeats then
-          instance.deathPhase = 2
-          instance.image_speed = 0.1
-          instance.image_index = 1
-          instance.deathDizzinesCounter = 0
-        end
+        snd.play(instance.sounds.die)
       end
     elseif instance.deathPhase == 2 then
-      if instance.image_index >= 2 then
-        instance.image_index = 1
-        instance.image_speed = - instance.image_speed
-        instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
-      elseif instance.image_index <= 0 then
-        instance.image_index = 1
-        instance.image_speed = - instance.image_speed
-        instance.deathDizzinesCounter = instance.deathDizzinesCounter + 1
-        instance.x_scale = - instance.x_scale
-        if instance.deathDizzinesCounter >= instance.deathDizzinesFastRepeats then
-          instance.deathPhase = 3
-          instance.image_speed = 0
-          instance.image_index = 0
-          instance.x_scale = 1
-          snd.play(instance.sounds.die)
-        end
-      end
-    elseif instance.deathPhase == 3 then
-      instance.deathFallCounter = instance.deathFallCounter + dt
-      if instance.deathFallCounter > 0 then
-        instance.deathFallCounter = 0
-        instance.image_index = 6
-        instance.deathPhase = 4
-      end
-    elseif instance.deathPhase == 4 then
       instance.deathFallCounter = instance.deathFallCounter + dt
       if instance.deathFallCounter > 0.4 then
         instance.deathFallCounter = 0
@@ -2175,16 +2168,16 @@ local animation_states = {
   end,
 
   start_state = function(instance, dt)
+    instance.deathStunCounter = 0
     snd.bgm:setFadeState("fadeout")
+
     snd.play(instance.sounds.dying)
     instance.sprite = im.sprites["Witch/die"]
+    instance.image_speed = 0
+
     inp.disable_controller(instance.player)
     instance.deathPhase = 1
     instance.image_index = 0
-    instance.image_speed = 0.1
-    instance.deathDizzinesCounter = 0
-    instance.deathDizzinesRepeats = 6
-    instance.deathDizzinesFastRepeats = 4
     instance.deathFallCounter = 0
     instance.ioyDeathStart = instance.ioy
     instance:setGhost(true)
@@ -2292,6 +2285,7 @@ function Playa.initialize(instance)
   instance.zoPrev = instance.zo
   instance.fo = 0 -- drawing offsets due to falling
   instance.jo = 0 -- drawing offsets due to jumping
+  instance.fake_zo = 0 -- zo_due to animation
   instance.zvel = 0 -- z axis velocity
   instance.gravity = 350
   instance.defaultGravity = instance.gravity
@@ -2332,6 +2326,7 @@ function Playa.initialize(instance)
   instance.flickerPeriod = 1 / 30 -- in secs
   instance.flickerTick = 0
   instance.doesntForceDir = true
+  instance.animationFramesPassed = 0
   instance.sounds = snd.load_sounds({
     swordSlash1 = {"Effects/Oracle_Sword_Slash1"},
     swordSlash2 = {"Effects/Oracle_Sword_Slash2"},
@@ -2527,6 +2522,7 @@ Playa.functions = {
   end,
 
   update = function(self, dt)
+
     -- -- float
     -- self.fo = -2
     -- self.zvel = 0
@@ -2536,6 +2532,27 @@ Playa.functions = {
       self.timeFlow = 1
     end
     dt = dt * self.timeFlow
+
+    -- Handle cooldowns
+    if session.save.bombs < session.save.maxBombs then
+      session.save.bombsCooldown = session.save.bombsCooldown - dt * 1.5
+      while session.save.bombsCooldown < 0 do
+        session.save.bombsCooldown = session.save.bombsCooldown + 1
+        session.addBombs(1)
+      end
+    else
+      session.save.bombsCooldown = 1
+    end
+
+    if session.save.dust < session.save.maxDust then
+      session.save.dustCooldown = session.save.dustCooldown - dt * 1.5
+      while session.save.dustCooldown < 0 do
+        session.save.dustCooldown = session.save.dustCooldown + 1
+        session.addDust(1)
+      end
+    else
+      session.save.dustCooldown = 1
+    end
 
     -- Make see through if there's a decoy
     if session.decoy then
@@ -2758,6 +2775,10 @@ Playa.functions = {
       self.image_index = self.image_index - frames
       if frames > 1 then trig.animation_end = true end
     end
+    while self.image_index < 0 do
+      self.image_index = self.image_index + frames
+      if frames > 1 then trig.animation_end = true end
+    end
     if self.health <= 0 then
       trig.noHealth = true
     else
@@ -2779,6 +2800,19 @@ Playa.functions = {
     self.groundedPrev = self:grounded()
     td.determine_animation_triggers(self, dt)
     inv.determine_equipment_triggers(self, dt)
+
+    if trig.restish and not self.restishPrev then
+      self.animationFramesPassed = 0
+    else
+      if self.spriteNamePrev ~= self.sprite.name then
+        self.animationFramesPassed = 0
+      end
+
+      if math.floor(self.image_index_prev) ~= math.floor(self.image_index) then
+        self.animationFramesPassed = self.animationFramesPassed + 1
+      end
+    end
+    self.spriteNamePrev = self.sprite.name
 
     local prevCli = self.climbing
     self.climbing = nil
@@ -2864,22 +2898,27 @@ Playa.functions = {
     if trig.enableHitShader then
       self.playerShader = hitShader
     else
-      if shdrs.customTunic and session.save.customTunicAvailable and session.save.customTunicEnabled then
-        shdrs.customTunic:send("rgb",
-        session.save.tunicR,
-        session.save.tunicG,
-        session.save.tunicB,
+
+      if shdrs.customTunic then
+        local rgb = {r=0,g=0,b=0}
+        if session.save.customTunicAvailable and session.save.customTunicEnabled then
+          rgb.r = session.save.tunicR
+          rgb.g = session.save.tunicG
+          rgb.b = session.save.tunicB
+        elseif session.save.armorLvl == 1 then
+          rgb.r = 0.282; rgb.g = 0.659; rgb.b = 0.722
+        elseif session.save.armorLvl == 2 then
+          rgb.r = 0.733; rgb.g = 0.353; rgb.b = 0.380
+        elseif session.save.armorLvl == 3 then
+          rgb.r = 0.565; rgb.g = 0.439; rgb.b = 0.690
+        else
+          rgb.r = 0.282; rgb.g = 0.627; rgb.b = 0.471
+        end
+        shdrs.customTunic:send("rgb", rgb.r, rgb.g, rgb.b,
         1) -- send one extra value to offset bug
         self.playerShader = shdrs.customTunic
-      elseif session.save.armorLvl == 1 then
-        self.playerShader = shdrs.blueTunic
-      elseif session.save.armorLvl == 2 then
-        self.playerShader = shdrs.redTunic
-      elseif session.save.armorLvl == 3 then
-        self.playerShader = shdrs.mauveTunic
-      else
-        self.playerShader = nil
       end
+
     end
 
     -- Shake if scared, or cold, etc
@@ -2900,6 +2939,8 @@ Playa.functions = {
 
     local regen = dt * (self.regen or 0)
     self:addHealth(regen)
+
+    self.restishPrev = trig.restish
 
     -- Turn off triggers
     -- triggersdebug = {}
@@ -2935,10 +2976,28 @@ Playa.functions = {
     -- check during pause screen if session.save.playerGlowAvailable to enable and disable
     self:applyLights(xtotal, ytotal)
 
+    local f = self:getFacing()
+    local hori_facing = f == 'right' or f == 'left'
+
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.playerShader)
+
+    if self.broom_exists and hori_facing then
+      local sprite = im.sprites['Witch/broom_left']
+      local frame = sprite[math.floor(self.broom_image_index)]
+      love.graphics.draw(
+      sprite.img, frame, xtotal + self.shakex, ytotal + self.shakey, self.angle,
+      sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
+      sprite.cx, sprite.cy)
+    end
+
     local sprite = self.sprite
     -- Check again in case animation changed to something with fewer frames
     while self.image_index >= sprite.frames do
       self.image_index = self.image_index - sprite.frames
+    end
+    while self.image_index < 0 do
+      self.image_index = self.image_index + sprite.frames
     end
     local frame = sprite[floor(self.image_index)]
     local prevBm = love.graphics.getBlendMode()
@@ -2946,12 +3005,47 @@ Playa.functions = {
     if session.decoy then
       love.graphics.setBlendMode("subtract")
     end
-    local worldShader = love.graphics.getShader()
-    love.graphics.setShader(self.playerShader)
+
+    local xfinal = xtotal + self.shakex
+    local yfinal = ytotal + self.shakey
+
+    -- Hat back
+    local hb_spr = im.sprites['Witch/hat_back']
+    local y_hat_lowest = yfinal - 5
     love.graphics.draw(
-    sprite.img, frame, xtotal + self.shakex, ytotal + self.shakey, self.angle,
+      hb_spr.img, hb_spr[0],
+      xfinal,
+      y_hat_lowest,
+      self.angle,
+      hb_spr.res_x_scale*self.x_scale, hb_spr.res_y_scale*self.y_scale,
+      hb_spr.cx, hb_spr.cy
+    )
+
+    love.graphics.draw(
+    sprite.img, frame, xfinal, yfinal, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
+
+    -- Hat front
+    local hf_spr = im.sprites['Witch/hat_front']
+    love.graphics.draw(
+      hf_spr.img, hf_spr[0],
+      xfinal,
+      y_hat_lowest,
+      self.angle,
+      hf_spr.res_x_scale*self.x_scale, hf_spr.res_y_scale*self.y_scale,
+      hf_spr.cx, hf_spr.cy
+    )
+
+    if self.broom_exists and not hori_facing then
+      local s = im.sprites['Witch/broom_' .. f]
+      local fr = s[math.floor(self.broom_image_index)]
+      love.graphics.draw(
+      s.img, fr, xtotal + self.shakex, ytotal + self.shakey, self.angle,
+      s.res_x_scale*self.x_scale, s.res_y_scale*self.y_scale,
+      s.cx, s.cy)
+    end
+
     love.graphics.setShader(worldShader)
     love.graphics.setBlendMode(prevBm)
 

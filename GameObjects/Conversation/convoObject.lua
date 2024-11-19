@@ -11,7 +11,12 @@ local ChoiceList = require "GameObjects.DialogueBubble.ChoiceList"
 local Conversation = {}
 
 --- returns first object that contains given id
-local function getObjFromId(id)
+local function getObjFromId(self, id)
+  if self.idMaps[id] then
+    if self.idMaps[id].exists then
+      return self.idMaps[id]
+    end
+  end
   if o.identified[id] then
     return o.identified[id][1]
   end
@@ -38,7 +43,7 @@ local getClosest = function(self, listType)
   local possibles
   if type(list) == 'table' then
     for _,a in ipairs(list) do
-      local ided = getObjFromId(a)
+      local ided = getObjFromId(self, a)
       if ided then
         possibles = possibles or {}
         table.insert(possibles, ided)
@@ -97,6 +102,10 @@ function Conversation.initialize(instance)
   instance.choiceList = nil
   instance.currentChoices = nil
 
+  instance.idMaps = {}
+
+  instance.eventHandlers = {}
+
   instance.dlgOptions = {}
   setmetatable(instance.dlgOptions, {
     __index = function(_, k)
@@ -115,12 +124,40 @@ function Conversation.initialize(instance)
   })
 end
 
+---@class ConversationObject
 Conversation.functions = {
   start = function(self)
     ---@type ConversationData
     local data = self.data
 
     self.active = true
+  end,
+
+  ---@param event string
+  ---@param handler fun(payload?: string)
+  listen = function (self, event, handler)
+    if not self.eventHandlers[event] then
+      self.eventHandlers[event] = {}
+    end
+    table.insert(self.eventHandlers[event], handler)
+  end,
+
+  ---@param event string
+  ---@param payload? string
+  fire = function (self, event, payload)
+    local l = self.eventHandlers[event]
+    if l then
+      for _, h in ipairs(l) do
+        h(payload)
+      end
+    end
+  end,
+
+  --- Sets ID encountered in conversation to object provided
+  --- If this function is not used conversation id corresponds to normal object id
+  ---@param id string
+  setIdToObject = function(self, id, obj)
+    self.idMaps[id] = obj
   end,
 
   ---@param nodeId string
@@ -131,7 +168,7 @@ Conversation.functions = {
     local dlgOptions = self.dlgOptions
 
     -- The object that spoke the last dlg node
-    local prevAnchor = self.currentNode and getObjFromId(self.currentNode.anchor or data.participants[1])
+    local prevAnchor = self.currentNode and getObjFromId(self, self.currentNode.anchor or data.participants[1])
 
     for _, node in ipairs(data.nodes) do
       if node.id == nodeId then
@@ -142,7 +179,7 @@ Conversation.functions = {
     if not self.currentNode then return end
 
     -- The object that will speak the dlg node of the givent nodeId parameter of this function
-    local anchor = getObjFromId(self.currentNode.anchor or data.participants[1])
+    local anchor = getObjFromId(self, self.currentNode.anchor or data.participants[1])
 
     self.active = true
 
@@ -153,7 +190,6 @@ Conversation.functions = {
         -- noXOffset = true,
         -- duration = 0.2,
         timeBetweenLetters = dlgOptions.delay or 0.055,
-        timeTillNextLetter = dlgOptions.delay or 0.055,
         staysOnScreen = dlgOptions.staysOnScreen,
         noTriangle = dlgOptions.noSpeechBubbleTail,
         -- color = unknown,
@@ -348,6 +384,13 @@ Conversation.functions = {
         nodeData = startNodeData
       end
       if nodeData then
+        if nodeData.events then
+          for _, ev in ipairs(nodeData.events) do
+            local split = u.split(ev, ':')
+            self:fire(split[1], split[2])
+          end
+        end
+
         for _, node in ipairs(data.nodes) do
           if node.id == nodeData.id then
             self.currentNode = node
@@ -412,6 +455,14 @@ Conversation.functions = {
               else
                 next = onEnd
               end
+
+              if next and next.events then
+                for _, ev in ipairs(next.events) do
+                  local split = u.split(ev, ':')
+                  self:fire(split[1], split[2])
+                end
+              end
+
               if
                 not next
                 or not next.id
@@ -439,6 +490,7 @@ Conversation.functions = {
               end
 
               if input.enterPressed then
+                snd.play(glsounds.select)
                 handleNextGetter(self.choiceList:getCurrentChoice().onChoose)
               end
             else
@@ -480,18 +532,59 @@ Conversation.functions = {
             dlgBubble.scrollingUp = nil
           end
         else
+
+          local zeroDelay = false
+          if not dlgBubble.currentTimeBetweenLetters then
+            local ld = dlgBubble.content:getLetterDelay()
+            dlgBubble.currentTimeBetweenLetters = ld < 0 and dlgBubble.timeBetweenLetters or ld
+
+            if ld == 0 then
+              dlgBubble.currentTimeBetweenLetters = -1
+              zeroDelay = true
+            end
+          end
+
+          if not dlgBubble.timeTillNextLetter then
+            dlgBubble.timeTillNextLetter = dlgBubble.currentTimeBetweenLetters
+          end
+          dlgBubble.timeTillNextLetter = dlgBubble.timeTillNextLetter - dt
+
           if dlgBubble.timeTillNextLetter < 0 then
             local prevLength = dlgBubble.content:getLength()
 
             -- Determine number of letters to add
             local numberOfLettersToAdd = 1
+            if zeroDelay then
+              numberOfLettersToAdd = dlgBubble.content:getNextNonZeroDelayPosition() - prevLength
+            end
 
-            -- TODO: parse delay tokens and dispatch events
+            -- handle tokens (other than text colour and delay)
+            if dlgBubble.content.options.markup then
+              for _, v in ipairs(dlgBubble.content.options.markup) do
+                -- Check if token falls between newly added length
+                if v.atLength > prevLength and v.atLength <= prevLength + numberOfLettersToAdd then
+
+                  -- Quest tokens
+                  if v.token:sub(1,1) == 'q' then
+                    local questName = v.token:sub(3)
+                    session.startQuest(questName)
+                  end
+
+                  -- Event tokens
+                  if v.token:sub(1,2) == 'ev' then
+                    -- fire
+                    local split = u.split(v.token, ':')
+                    self:fire(split[2], split[3])
+                  end
+                end
+              end
+            end
 
             local added = dlgBubble.content:updateLength(prevLength + numberOfLettersToAdd)
 
             dlgBubble.content:updateHeightTextLength(prevLength + numberOfLettersToAdd + 1)
-            dlgBubble.timeTillNextLetter = dlgBubble.timeBetweenLetters
+            dlgBubble.timeTillNextLetter = nil
+            dlgBubble.currentTimeBetweenLetters = nil
             if dlgOptions.letterSound ~= 'none' and added ~= " " and prevLength < dlgBubble.content:getLength() then
               local src = dlgOptions.letterSound
               if type(src) == 'function' then
@@ -500,7 +593,7 @@ Conversation.functions = {
               snd.play(src or glsounds.letter)
             end
           end
-          dlgBubble.timeTillNextLetter = dlgBubble.timeTillNextLetter - dt
+
           if dlgBubble.content:getLength() >= dlgBubble.content:getMaxLength() then
             dlgBubble.reachedEnd = true
           else
@@ -539,6 +632,7 @@ Conversation.functions = {
   end,
 }
 
+---@return ConversationObject
 function Conversation:new(init)
   local instance = p:new() -- add parent functions and fields
   p.new(Conversation, instance, init) -- add own functions and fields

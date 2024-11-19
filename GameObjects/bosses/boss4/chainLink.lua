@@ -95,7 +95,7 @@ WreckingBall.functions = {
   hitSolidStatic = function (self, other, myF, otherF)
   end,
 
-  draw = function (self)
+  unstoppable_update = function(self)
     if self.creator and self.creator.exists and self.creator.creator and self.creator.creator.exists then
       local angry = self.creator.creator.angry
       lighting.applyLight{
@@ -115,11 +115,6 @@ WreckingBall.functions = {
       rgba=lightColor,
       image_index = self.image_index
     }
-
-    -- Draw enemy the default way
-    et.functions.draw(self)
-
-    -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,
 }
 

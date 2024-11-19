@@ -44,7 +44,7 @@ local test1convo = {
     },
     {
       id = 'talk',
-      text = 'So, conversations are now {ev:jump}{col:#0ff}easier{col:default} to{delay:0.5} {ev:twirl}{delay:0}write{delay:reset} and text can also change {col:#fac}colour{col:default}. They can also support multiple participants!',
+      text = '{delay:1}S{delay:-1}o, conversations are now much much {ev:jump:1}{col:#0ff}easier{col:default} to{delay:1} {ev:twirl}{delay:0}write{delay:-1} and text can also change {col:#fac}colour{col:default}. They can also support multiple participants!',
       onEnd = {id = 'talk2'},
     },
     {

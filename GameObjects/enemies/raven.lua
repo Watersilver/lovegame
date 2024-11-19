@@ -114,9 +114,16 @@ local states = {
       local divCos = cos(instance.divingPhase)
       local vertMoveMod = divCos * divCos
       instance.zo = instance.maxHeight * vertMoveMod
+      if instance.image_speed == 0 and instance.divingPhase > pi / 2 then
+        instance.image_speed = 0.15
+        instance.image_index = 0
+        snd.play(glsounds.wingFlap)
+      end
     end,
     start_state = function(instance, dt)
-      instance.image_speed = 0.2
+      instance.image_speed = 0
+      instance.image_index = 1
+      snd.play(glsounds.wingFlap)
       -- in seconds
       -- local halftime = 0.7 -- fastish
       local halftime = 0.9

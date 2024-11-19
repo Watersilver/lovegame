@@ -22,6 +22,7 @@ function Fairy.initialize(instance)
   instance.t = 0
   instance.attackDodger = true
   instance.inertiaDuration = 0
+  instance.image_speed = 0.1
 end
 
 Fairy.functions = {

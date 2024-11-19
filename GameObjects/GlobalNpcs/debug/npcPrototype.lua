@@ -28,6 +28,7 @@ function NPC.initialize(instance)
   instance.layer = 20
   instance.zo = 0
   instance.unpushable = true
+  instance.angle = 0
 end
 
 NPC.functions = {
@@ -74,9 +75,9 @@ NPC.functions = {
     end
     local frame = sprite[floor(self.image_index)]
     love.graphics.draw(
-    sprite.img, frame, xtotal, ytotal, self.angle,
+    sprite.img, frame, xtotal, ytotal + self.zo, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
-    sprite.cx, sprite.cy)
+    sprite.cx, sprite.cy + (sprite.oy or 0))
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --
@@ -106,9 +107,9 @@ NPC.functions = {
     end
     local frame = sprite[floor(self.image_index)]
     love.graphics.draw(
-    sprite.img, frame, xtotal, ytotal, self.angle,
+    sprite.img, frame, xtotal, ytotal + self.zo, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
-    sprite.cx, sprite.cy)
+    sprite.cx, sprite.cy + (sprite.oy or 0))
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
     --

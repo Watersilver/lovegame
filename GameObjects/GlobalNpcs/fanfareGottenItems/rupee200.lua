@@ -10,7 +10,7 @@ end
 
 gottenItem.itemInfo = {
   itemSprite = sprite,
-  information = "You got 200 rupees!",
+  information = "You got 200 " .. GCON.moneys .. "!",
   comment = "What a lucky fucker!",
   itemGetEffect = itemGetFunc
 }

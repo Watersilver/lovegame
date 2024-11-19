@@ -62,6 +62,7 @@ BlueHand.functions = {
   end,
 
   destroy = function (self)
+    if not self.creator then return end
     self.creator.pause = false
     if not self.sank then self.creator.blueHands = self.creator.blueHands - 1 end
     self.creator:resetTimer(self.duration - self.timer)
@@ -70,6 +71,7 @@ BlueHand.functions = {
   enemyUpdate = function (self, dt)
     if self.grabbedPlayer then
       self.body:setLinearVelocity(0, 0)
+      self.grabbedPlayer.body:setLinearVelocity(0, 0)
 
       if self.grabTimer > 5 then
         self.y_scale = 0
@@ -80,13 +82,14 @@ BlueHand.functions = {
         game.transition{
           type = "whiteScreen",
           progress = 0,
-          roomTarget = self.destination,
+          roomTarget = self.destination or session.save.lastWhitescreenScreenName,
           playa = self.grabbedPlayer,
-          desx = self.desx,
-          desy = self.desy
+          desx = self.desx or session.save.lastWhitescreenScreenX,
+          desy = self.desy or session.save.lastWhitescreenScreenY
         }
       elseif self.grabTimer > 2 then
         self.y_scale = 0
+        self.invisible = true
       elseif self.grabTimer > 1 then
         self.image_index = 0
       elseif self.grabTimer == 0 then

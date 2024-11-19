@@ -100,6 +100,7 @@ RedHand.functions = {
   end,
 
   destroy = function (self)
+    if not self.creator then return end
     self.creator.pause = false
     if not self.rose then self.creator.redHands = self.creator.redHands - 1 end
     self.creator:resetTimer(self.duration - self.timer)
@@ -108,6 +109,7 @@ RedHand.functions = {
   enemyUpdate = function (self, dt)
     if self.grabbedPlayer then
       self.body:setLinearVelocity(0, 0)
+      self.grabbedPlayer.body:setLinearVelocity(0, 0)
 
       if self.grabTimer > 5 then
         self.y_scale = 0
@@ -118,10 +120,10 @@ RedHand.functions = {
         game.transition{
           type = "whiteScreen",
           progress = 0,
-          roomTarget = self.destination,
+          roomTarget = self.destination or session.save.lastWhitescreenScreenName,
           playa = self.grabbedPlayer,
-          desx = self.desx,
-          desy = self.desy
+          desx = self.desx or session.save.lastWhitescreenScreenX,
+          desy = self.desy or session.save.lastWhitescreenScreenY
         }
       elseif self.grabTimer == 0 then
         self.image_speed = 0

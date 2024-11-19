@@ -44,6 +44,7 @@ function Drop.initialize(instance)
   instance.bounceOnce = true
   instance.thrownGoesThrough = true
   instance.attackDodger = true
+  instance.frame_speed_mods = {}
 end
 
 Drop.functions = {
@@ -90,6 +91,11 @@ Drop.functions = {
       self.onPlayerTouch = u.emptyFunc
       return
     end
+
+    self.image_index = (self.image_index + dt*60*self.image_speed*(self.frame_speed_mods[math.floor(self.image_index)] or 1))
+    while self.image_index >= self.sprite.frames do
+      self.image_index = self.image_index - self.sprite.frames
+    end
   end,
 
   beginContact = function(self, a, b, coll, aob, bob)
@@ -124,7 +130,10 @@ Drop.functions = {
 
   draw = function (self)
     local sprite = self.sprite
-    local frame = sprite[self.image_index]
+    while self.image_index >= sprite.frames do
+      self.image_index = self.image_index - sprite.frames
+    end
+    local frame = sprite[math.floor(self.image_index)]
     local zo = self.zo or 0
     local xtotal, ytotal = self.xstart, self.ystart + zo
     love.graphics.draw(
@@ -138,7 +147,10 @@ Drop.functions = {
 
   trans_draw = function (self)
     local sprite = self.sprite
-    local frame = sprite[self.image_index]
+    while self.image_index >= sprite.frames do
+      self.image_index = self.image_index - sprite.frames
+    end
+    local frame = sprite[math.floor(self.image_index)]
 
     local xtotal, ytotal = trans.still_objects_coords(self)
 

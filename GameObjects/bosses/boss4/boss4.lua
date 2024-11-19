@@ -465,7 +465,9 @@ local states = {
       elseif instance.step == 1 then
         if pl1 and pl1.exists then
           if pl1.zo == 0 then
-            pl1.sprite = im.sprites["Witch/still_up"]
+
+            pl1.sprite = im.sprites["Witch/idle_up"]
+
             pl1.x_scale = 1
             instance.step = instance.step + 1
             instance.timer = 1
@@ -940,7 +942,7 @@ Boss4.functions = {
     end
   end,
 
-  draw = function (self)
+  unstoppable_update = function (self)
     local angry = self.angry
     lighting.applyLight{
       type = "playerGlow",
@@ -959,6 +961,45 @@ Boss4.functions = {
       image_index = self.image_index
     }
 
+    -- Draw shield light
+    if not self:isShieldBroken() then
+      local zo = self.zo or 0
+      local xtotal, ytotal = self.x, self.y + zo + 2.5
+      local shield_index = 0
+      local shield_xscale = 1
+
+      -- calculate offset and mirroring
+      if math.floor(self.image_index) % 2 == 0 then
+        xtotal = xtotal + 4
+        if self.shieldDmg == 1 then
+          shield_index = 1
+        elseif self.shieldDmg > 1 then
+          shield_index = 3
+        end
+      else
+        xtotal = xtotal + 6.8
+        if self.shieldDmg == 1 then
+          shield_index = 2
+        elseif self.shieldDmg > 1 then
+          shield_index = 4
+        else
+          shield_xscale = -1
+        end
+      end
+
+      lighting.applyLight{
+        type = "boss4shield",
+        x = xtotal,
+        y = ytotal,
+        rgba=lightColor,
+        image_index = math.floor(shield_index),
+        x_scale = shield_xscale,
+        rad = self.angle
+      }
+    end
+  end,
+
+  draw = function (self)
     -- Draw enemy the default way
     et.functions.draw(self)
 
@@ -998,16 +1039,6 @@ Boss4.functions = {
       shield_xscale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
       sprite.cx, sprite.cy)
       love.graphics.setShader(worldShader)
-
-      lighting.applyLight{
-        type = "boss4shield",
-        x = xtotal,
-        y = ytotal,
-        rgba=lightColor,
-        image_index = math.floor(shield_index),
-        x_scale = shield_xscale,
-        rad = self.angle
-      }
     end
 
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
