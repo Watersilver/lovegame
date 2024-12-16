@@ -150,6 +150,8 @@ end
 player_states.run_halt = function(instance, dt, side)
   if instance.triggers.animation_end then
     instance.stillhalt = nil
+    instance.image_speed = 0
+    instance.image_index = instance.sprite.frames - 1
   end
 end
 
@@ -184,6 +186,7 @@ player_states.start_halt = function(instance, dt, side)
     instance.stillhalt = true
   else
     instance.image_speed = 0
+    instance.image_index = instance.sprite.frames - 1
   end
 end
 
@@ -197,7 +200,14 @@ end
 -- TODO: breath fast after running for long, take deep breath exhale
 -- and stay without air for a while and afterwards calm breathing
 player_states.run_still = function(instance, dt, side)
+  -- local wasLanding = instance.is_landing
+  -- if instance.is_landing then
+  --   print(instance.image_index)
+  -- end
   if string.gmatch(instance.sprite.name, "idle_landing_") then
+    -- if instance.is_landing then
+    --   print(instance.image_index)
+    -- end
     if instance.state_start_frame < math.floor(instance.image_index) then
       instance.short_landing = nil
     end
@@ -211,7 +221,17 @@ player_states.run_still = function(instance, dt, side)
         instance.x_scale = -1
       end
     end
+    -- if instance.is_landing then
+    --   print(instance.image_index)
+    -- end
   end
+  -- if instance.is_landing then
+  --   print('animation end', instance.triggers.animation_end)
+  --   print(instance.sprite.name)
+  -- end
+  -- if wasLanding and not instance.is_landing then
+  --   print('end =================')
+  -- end
 end
 
 player_states.check_still = function(instance, dt, side)
@@ -251,6 +271,7 @@ end
 player_states.start_still = function(instance, dt, side)
   instance.image_index = 0
   instance.state_start_frame = instance.image_index
+  instance.triggers.animation_end = nil
   if instance.just_landed then
     instance.no_halt = true
     instance.just_landed = nil
@@ -282,6 +303,7 @@ player_states.end_still = function(instance, dt, side)
   instance.is_landing = nil
   instance.short_landing = nil
   instance.soft_landing = nil
+  instance.no_halt = nil
   if side == "right" then
     instance.x_scale = 1
   end
@@ -500,7 +522,11 @@ player_states.check_hold = function(instance, dt, side)
     if instance.spinCharged then -- spin attack
       instance.animation_state:change_state(instance, dt, "spinattack")
     else
-      instance.animation_state:change_state(instance, dt, side .. "walk")
+      if trig.restish then
+        instance.animation_state:change_state(instance, dt, side .. "still")
+      else
+        instance.animation_state:change_state(instance, dt, side .. "walk")
+      end
     end
   end
 end
@@ -610,7 +636,7 @@ player_states.start_fall = function(instance, dt, side)
   if instance.triggers.hold_jump and instance.double_jumping then
     instance.broom_exists = true
     instance.broom_image_index = 0
-    instance.image_speed = 0.4
+    instance.image_speed = 0.2
 
     if side ~= "right" then
       instance.sprite = im.sprites["Witch/riding_start_" .. side]
@@ -721,7 +747,11 @@ player_states.check_missile = function(instance, dt, side)
     if trig.fire_missile then
       instance.animation_state:change_state(instance, dt, side .. "missile")
     else
-      instance.animation_state:change_state(instance, dt, side .. "walk")
+      if trig.restish then
+        instance.animation_state:change_state(instance, dt, side .. "still")
+      else
+        instance.animation_state:change_state(instance, dt, side .. "walk")
+      end
     end
   end
 end
@@ -1068,9 +1098,6 @@ player_states.start_damaged = function(instance, dt, side)
 
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/hurt_" .. side]
-    if side == "down" then
-      instance.x_scale = - 2 * love.math.random(0, 1) + 1
-    end
   else
     instance.sprite = im.sprites["Witch/hurt_left"]
     instance.x_scale = -1

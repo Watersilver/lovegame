@@ -146,9 +146,9 @@ im.spriteSettings = {
     {'Witch/carry_up', 10, padding = 0, width = 32, height = 32},
     {'Witch/carry_left', 10, padding = 0, width = 32, height = 32},
     {'Witch/carry_down', 10, padding = 0, width = 32, height = 32},
-    {'Witch/skid_up', 5, padding = 0, width = 32, height = 32},
-    {'Witch/skid_left', 5, padding = 0, width = 32, height = 32},
-    {'Witch/skid_down', 5, padding = 0, width = 32, height = 32},
+    {'Witch/skid_up', 6, padding = 0, width = 32, height = 32},
+    {'Witch/skid_left', 6, padding = 0, width = 32, height = 32},
+    {'Witch/skid_down', 6, padding = 0, width = 32, height = 32},
     {'Witch/hurt_up', 2, padding = 0, width = 32, height = 32},
     {'Witch/hurt_left', 2, padding = 0, width = 32, height = 32},
     {'Witch/hurt_down', 2, padding = 0, width = 32, height = 32},
@@ -206,9 +206,7 @@ im.spriteSettings = {
     {'Witch/shadow', 1, padding = 2, width = 16, height = 16},
     {'Witch/defaultGrass', 2, padding = 2, width = 16, height = 16},
     {'Witch/wake_down', 3, padding = 0, width = 32, height = 32},
-    {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6},
-    {'Witch/hat_back', 2, padding = 0, width = 32, height = 32},
-    {'Witch/hat_front', 2, padding = 0, width = 32, height = 32}
+    {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6}
   },
   note = {'note', 1, padding = 0, width = 7, height = 12},
   playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},

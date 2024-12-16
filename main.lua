@@ -87,6 +87,17 @@ gvar = {
   screenEdgeThreshold = GCON.defaultScreenEdgeThreshold
 }
 
+-- Global Parameters
+GPAR = {
+  walk_anim_speed_factor = 0.13,
+  walk_anim_max_speed = 0.29,
+}
+
+-- Debug
+Debug = {
+  parameter_and_enemy_spawn_cursor = 2
+}
+
 -- Load stuff from save directory
 local gs = require "game_settings"
 
@@ -1664,8 +1675,21 @@ function love.draw()
 
   -- debug
   love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
+
+  local restore_col = u.storeColour()
+  love.graphics.circle('fill', 10, love.graphics.getHeight()-100 + 10 - Debug.parameter_and_enemy_spawn_cursor * 30, 5)
+
+  if Debug.parameter_and_enemy_spawn_cursor == 0 then u.changeColour{r = 1, g = 1, b = 1} else u.changeColour{r = 0.5, g = 0.5, b = 0.5} end
+  love.graphics.print("Enemy: ", 20, love.graphics.getHeight()-100)
 ---@diagnostic disable-next-line: undefined-global
-  if currentEnemyName then love.graphics.print(currentEnemyName, 0, love.graphics.getHeight()-77) end
+  if currentEnemyName then
+    love.graphics.print(currentEnemyName, 150 + 20, love.graphics.getHeight()-100)
+  end
+  if Debug.parameter_and_enemy_spawn_cursor == 1 then u.changeColour{r = 1, g = 1, b = 1} else u.changeColour{r = 0.5, g = 0.5, b = 0.5} end
+  love.graphics.print("Walk Anim Max Speed: " .. tostring(GPAR.walk_anim_max_speed), 20, love.graphics.getHeight()-100 - 30)
+  if Debug.parameter_and_enemy_spawn_cursor == 2 then u.changeColour{r = 1, g = 1, b = 1} else u.changeColour{r = 0.5, g = 0.5, b = 0.5} end
+  love.graphics.print("Walk Anim Speed Factor: " .. tostring(GPAR.walk_anim_speed_factor), 20, love.graphics.getHeight()-100 - 60)
+  restore_col()
   if fuck then love.graphics.print(tostring(fuck), 0, 177+120) end
   local debiter = 0
 ---@diagnostic disable-next-line: undefined-global
@@ -1725,6 +1749,7 @@ for i, path in ipairs(enemyPaths) do
 end
 
 function love.wheelmoved(_, y)
+
   local move = 0
   if y > 0 then
     -- Mouse wheel moved up
@@ -1733,17 +1758,24 @@ function love.wheelmoved(_, y)
     -- Mouse wheel moved down
     move = -1
   end
-  if cursor then
-    cursor = cursor + move
-  else
-    cursor = startingCursor
+
+  if Debug.parameter_and_enemy_spawn_cursor == 0 then
+    if cursor then
+      cursor = cursor + move
+    else
+      cursor = startingCursor
+    end
+    if cursor > #enemyPaths then
+      cursor = 1
+    elseif cursor < 1 then
+      cursor = #enemyPaths
+    end
+    currentEnemyName = enemyPaths[cursor]
+  elseif Debug.parameter_and_enemy_spawn_cursor == 1 then
+    GPAR.walk_anim_max_speed = GPAR.walk_anim_max_speed + move * 0.01
+  elseif Debug.parameter_and_enemy_spawn_cursor == 2 then
+    GPAR.walk_anim_speed_factor = GPAR.walk_anim_speed_factor + move * 0.01
   end
-  if cursor > #enemyPaths then
-    cursor = 1
-  elseif cursor < 1 then
-    cursor = #enemyPaths
-  end
-  currentEnemyName = enemyPaths[cursor]
 end
 
 function love.mousepressed(x, y, button, isTouch)
@@ -1753,17 +1785,7 @@ function love.mousepressed(x, y, button, isTouch)
   -- local brick = DynBrick:new{x = x, y = y, xstart = x, ystart = y}
   -- o.addToWorld(brick)
 
-  if button == 2 then
-    if cursor then
-      cursor = cursor + 1
-    else
-      cursor = startingCursor
-    end
-    if cursor > #enemyPaths then
-      cursor = 1
-    end
-    currentEnemyName = enemyPaths[cursor]
-  else
+  if Debug.parameter_and_enemy_spawn_cursor == 0 then
     if currentEnemyName then
       local enemClass = assert(love.filesystem.load(currentEnemyName))()
       local enem = enemClass:new()
@@ -1846,6 +1868,15 @@ function love.keypressed(key, scancode)
   elseif key == "f11" then
     local isFull = love.window.getFullscreen()
     love.window.setFullscreen(not isFull, "desktop")
+  elseif key == ',' or key == '<' then
+    Debug.parameter_and_enemy_spawn_cursor = Debug.parameter_and_enemy_spawn_cursor + 1
+  elseif key == '.' or key == '>' then
+    Debug.parameter_and_enemy_spawn_cursor = Debug.parameter_and_enemy_spawn_cursor - 1
+  end
+  if Debug.parameter_and_enemy_spawn_cursor < 0 then
+    Debug.parameter_and_enemy_spawn_cursor = 2
+  elseif Debug.parameter_and_enemy_spawn_cursor > 2 then
+    Debug.parameter_and_enemy_spawn_cursor = 0
   end
 
   -- -- Enemarea code

@@ -3009,33 +3009,11 @@ Playa.functions = {
     local xfinal = xtotal + self.shakex
     local yfinal = ytotal + self.shakey
 
-    -- Hat back
-    local hb_spr = im.sprites['Witch/hat_back']
-    local y_hat_lowest = yfinal - 5
-    love.graphics.draw(
-      hb_spr.img, hb_spr[0],
-      xfinal,
-      y_hat_lowest,
-      self.angle,
-      hb_spr.res_x_scale*self.x_scale, hb_spr.res_y_scale*self.y_scale,
-      hb_spr.cx, hb_spr.cy
-    )
-
     love.graphics.draw(
     sprite.img, frame, xfinal, yfinal, self.angle,
     sprite.res_x_scale*self.x_scale, sprite.res_y_scale*self.y_scale,
     sprite.cx, sprite.cy)
 
-    -- Hat front
-    local hf_spr = im.sprites['Witch/hat_front']
-    love.graphics.draw(
-      hf_spr.img, hf_spr[0],
-      xfinal,
-      y_hat_lowest,
-      self.angle,
-      hf_spr.res_x_scale*self.x_scale, hf_spr.res_y_scale*self.y_scale,
-      hf_spr.cx, hf_spr.cy
-    )
 
     if self.broom_exists and not hori_facing then
       local s = im.sprites['Witch/broom_' .. f]
