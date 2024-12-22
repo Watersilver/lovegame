@@ -26,6 +26,7 @@ if not shdrExists then print(err) end
 ---@field rgba? {r: number; g: number; b: number; a: number;}
 ---@field image_index? number
 ---@field canvasImg? love.Image
+---@field dynamic_options? {radius: number, segments?: number}
 
 ---@type Light[]
 local lights = {}
@@ -45,17 +46,19 @@ end
 local initial_w = love.graphics.getWidth()
 local initial_h = love.graphics.getHeight()
 -- -- Min canvas width
--- local canvW = 800 / 2
+local minCanvW = 800
 -- -- Min canvas height
--- local canvH = 450 / 2
--- Min canvas width
+local minCanvH = 450
+-- canvas width
 local canvW = 800
--- Min canvas height
+-- canvas height
 local canvH = 450
 
 ---@param w number
 ---@param h number
-local function getCanvasDims(w, h)
+local function calcCanvasDims(w, h)
+  canvW = minCanvW / scaling_handler.get_game_scale()
+  canvH = minCanvH / scaling_handler.get_game_scale()
   return canvW, canvH
   -- local newW, newH
   -- local ratio = w / h
@@ -69,10 +72,12 @@ local function getCanvasDims(w, h)
   -- return newW, newH
 end
 
-local lightMap = love.graphics.newCanvas(getCanvasDims(initial_w, initial_h))
+
+local lightMap = love.graphics.newCanvas(calcCanvasDims(initial_w, initial_h))
 if shdrExists then lightingShdr:send("lightMap", lightMap) end
-local shadowMap = love.graphics.newCanvas(getCanvasDims(initial_w, initial_h))
+local shadowMap = love.graphics.newCanvas(calcCanvasDims(initial_w, initial_h))
 if shdrExists then lightingShdr:send("shadowMap", shadowMap) end
+
 
 ---@type { r: number[], g: number[], b: number[] }
 local palette
@@ -243,7 +248,8 @@ local function drawSourceOnCanvas(sources, canvas)
     })
     local resetColor = u.storeColour()
     if type then
-      local scale = scaling_handler.get_game_scale()
+      -- local scale = scaling_handler.get_game_scale()
+      local scale = 1
       if type.type == "sprite" then
         if light.image_index then
           local s = type.sprite
@@ -275,6 +281,14 @@ local function drawSourceOnCanvas(sources, canvas)
           sy
         )
       end
+    elseif light.type == 'dynamic' then
+      if light.dynamic_options then
+        love.graphics.circle(
+          "fill", x, y,
+          light.dynamic_options.radius,
+          light.dynamic_options.segments
+        )
+      end
     end
     resetColor()
     lights[index] = nil
@@ -303,7 +317,7 @@ end
 
 function lighting.resize(w, h)
   -- Canvas might be elongated on resize but fix that when feeding source positions
-  local newW, newH = getCanvasDims(w, h)
+  local newW, newH = calcCanvasDims(w, h)
   lightMap = love.graphics.newCanvas(newW, newH)
   shadowMap = love.graphics.newCanvas(newW, newH)
 
@@ -314,4 +328,46 @@ function lighting.resize(w, h)
   end
 end
 
+scaling_handler.on_total_scale_calculated(function(w, h)
+  -- Canvas might be elongated on resize but fix that when feeding source positions
+  local newW, newH = calcCanvasDims(w, h)
+  lightMap = love.graphics.newCanvas(newW, newH)
+  shadowMap = love.graphics.newCanvas(newW, newH)
+
+  -- Send resized canvases to shader
+  if shdrExists then
+    lightingShdr:send("lightMap", lightMap)
+    lightingShdr:send("shadowMap", shadowMap)
+  end
+end)
+
 return lighting
+
+
+
+-- local _ditheringPatternMatrix = {
+--   {
+--     0.659,0.157,0.533,0.031,0.627,0.125,0.502,0.000
+--   },
+--   {
+--     0.408,0.918,0.282,0.784,0.376,0.878,0.251,0.753
+--   },
+--   {
+--     0.596,0.102,0.722,0.220,0.565,0.071,0.690,0.188
+--   },
+--   {
+--     0.345,0.847,0.471,0.973,0.314,0.816,0.439,0.941
+--   },
+--   {
+--     0.643,0.141,0.518,0.031,0.675,0.173,0.549,0.031
+--   },
+--   {
+--     0.392,0.894,0.267,0.769,0.424,0.918,0.298,0.800
+--   },
+--   {
+--     0.580,0.071,0.706,0.204,0.612,0.102,0.741,0.235
+--   },
+--   {
+--     0.329,0.831,0.455,0.957,0.361,0.863,0.486,1.000
+--   },
+-- }
