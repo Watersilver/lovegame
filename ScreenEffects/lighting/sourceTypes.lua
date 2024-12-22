@@ -55,6 +55,35 @@ local function radGrad(layers)
   -- last pair
   table.insert(pairs, {rmin = last.r, rmax = last.r, rdiff = 0, avar = 0, astart = 0})
 
+  -- local _ditheringPatternMatrix = {
+  --   {
+  --     0.659,0.157,0.533,0.031,0.627,0.125,0.502,0.000
+  --   },
+  --   {
+  --     0.408,0.918,0.282,0.784,0.376,0.878,0.251,0.753
+  --   },
+  --   {
+  --     0.596,0.102,0.722,0.220,0.565,0.071,0.690,0.188
+  --   },
+  --   {
+  --     0.345,0.847,0.471,0.973,0.314,0.816,0.439,0.941
+  --   },
+  --   {
+  --     0.643,0.141,0.518,0.031,0.675,0.173,0.549,0.031
+  --   },
+  --   {
+  --     0.392,0.894,0.267,0.769,0.424,0.918,0.298,0.800
+  --   },
+  --   {
+  --     0.580,0.071,0.706,0.204,0.612,0.102,0.741,0.235
+  --   },
+  --   {
+  --     0.329,0.831,0.455,0.957,0.361,0.863,0.486,1.000
+  --   },
+  -- }
+
+  -- local grads = 3
+  -- local gradsDiv = 1 / grads
   data:mapPixel(
     function(x, y)
       local dist = u.distance2d(totalRadius, totalRadius, x, y)
@@ -64,6 +93,22 @@ local function radGrad(layers)
         local pair = pairs[i]
         if dist > pair.rmin then
           local alpha = pair.astart - pair.avar * (dist - pair.rmin) / (pair.rdiff)
+
+          -- local endAlpha = pair.astart - pair.avar
+
+          -- alpha = alpha / first.a
+          -- alpha = math.floor(alpha * grads) * gradsDiv
+          -- alpha = alpha * first.a
+
+          -- local tween = (alpha - endAlpha) / pair.astart
+
+          -- local dith = _ditheringPatternMatrix[math.floor(x) % 8 + 1][math.floor(y) % 8 + 1]
+          -- if tween - dith > -0.01 then
+          --   alpha = pair.astart
+          -- else
+          --   alpha = endAlpha
+          -- end
+
           return alpha, alpha, alpha, alpha
         end
       end
@@ -80,12 +125,12 @@ local function shallowcopy(orig)
   local orig_type = type(orig)
   local copy
   if orig_type == 'table' then
-      copy = {}
-      for orig_key, orig_value in pairs(orig) do
-          copy[orig_key] = orig_value
-      end
+    copy = {}
+    for orig_key, orig_value in pairs(orig) do
+      copy[orig_key] = orig_value
+    end
   else -- number, string, boolean, etc
-      copy = orig
+    copy = orig
   end
   return copy
 end
@@ -96,7 +141,7 @@ local function getLightsprite(spriteSettings)
   return copy
 end
 
----@alias SourceType "owlStatue" | "canvas" | "cloudCurve" | "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel' | 'rupee' | 'rupee5' | 'rupee20' | 'rupee100' | 'rupee200'
+---@alias SourceType "dynamic" | "owlStatue" | "canvas" | "cloudCurve" | "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel' | 'rupee' | 'rupee5' | 'rupee20' | 'rupee100' | 'rupee200'
 
 ---@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown} | {type: "canvas"}}
 local sourceTypes = {
@@ -107,7 +152,7 @@ local sourceTypes = {
   playerGlow = radGrad{
     {r = 8, a = 0.5},
     {r = 16, a = 0.2},
-    {r = 48, a = 0}
+    {r = 48, a = 0},
   },
   massive = radGrad{
     {r = 24, a = 1},
