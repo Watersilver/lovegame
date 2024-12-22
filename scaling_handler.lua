@@ -65,6 +65,12 @@ function sh.__set_total_scale(tsc)
   total_scale = tsc
 end
 
+local _on_scale_change_listeners = {}
+
+function sh.on_total_scale_calculated(func)
+  table.insert(_on_scale_change_listeners, func)
+end
+
 -- Used when zooming in out due to in game reasons or window resize
 -- Never set total_scale. Calculate through this
 function sh.calculate_total_scale(params)
@@ -74,6 +80,10 @@ function sh.calculate_total_scale(params)
   end
   game_scale = params.game_scale or game_scale
   total_scale = window_scale * game_scale
+
+  for _, handler in ipairs(_on_scale_change_listeners) do
+    handler(current_w, current_h)
+  end
 
 end
 
