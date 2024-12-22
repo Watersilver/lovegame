@@ -2360,6 +2360,25 @@ function Playa.initialize(instance)
   instance.regen = 0
   instance.movement_state = sm.new_state_machine(movement_states)
   instance.animation_state = sm.new_state_machine(animation_states)
+
+  ---@class PlayerLightSettings
+  instance.light = {
+    r1 = 8,
+    r1Base = 11,
+    r1Amp = 3,
+    r1AngVel = 3 * 2,
+    r1Angle = 0,
+    r2 = 16,
+    r2Base = 17,
+    r2Amp = 2,
+    r2AngVel = 3 * math.pi / 2,
+    r2Angle = 0,
+    r3 = 48,
+    r3Base = 48,
+    r3Amp = 1,
+    r3AngVel = 3,
+    r3Angle = 0,
+  }
 end
 
 Playa.functions = {
@@ -2437,8 +2456,23 @@ Playa.functions = {
     if session.save.playerGlowAvailable then
       lighting.sendNightVision(not session.save.playerGlow or session.save.playerGlow == "No Glow")
       if not session.save.playerGlow or session.save.playerGlow == "No Night Vision" then
+        -- lighting.applyLight({
+        --   type = "playerGlow",
+        --   -- type = "torch", image_index = 0,
+        --   x = x,
+        --   y = y,
+        --   rgba = {
+        --     r = 1,
+        --     g = 0.3,
+        --     b = 0,
+        --     a = 1
+        --   },
+        --   image_index = self.flickerIndex
+        -- });
+        ---@type PlayerLightSettings
+        local l = self.light
         lighting.applyLight({
-          type = "playerGlow",
+          type = "dynamic",
           -- type = "torch", image_index = 0,
           x = x,
           y = y,
@@ -2446,9 +2480,41 @@ Playa.functions = {
             r = 1,
             g = 0.3,
             b = 0,
-            a = 1
+            a = 0.5
           },
-          image_index = self.flickerIndex
+          dynamic_options = {
+            radius = l.r1
+          }
+        });
+        lighting.applyLight({
+          type = "dynamic",
+          -- type = "torch", image_index = 0,
+          x = x,
+          y = y,
+          rgba = {
+            r = 1,
+            g = 0.3,
+            b = 0,
+            a = 0.3
+          },
+          dynamic_options = {
+            radius = l.r2
+          }
+        });
+        lighting.applyLight({
+          type = "dynamic",
+          -- type = "torch", image_index = 0,
+          x = x,
+          y = y,
+          rgba = {
+            r = 1,
+            g = 0.3,
+            b = 0,
+            a = 0.1
+          },
+          dynamic_options = {
+            radius = l.r3
+          }
         });
       end
     end
@@ -2950,6 +3016,35 @@ Playa.functions = {
       self.triggers[trigger] = nil
     end
 
+    ---@type PlayerLightSettings
+    local l = self.light
+
+    l.r1Angle = l.r1Angle + dt * l.r1AngVel
+    while l.r1Angle > 2 * math.pi do
+      l.r1Angle = l.r1Angle - 2 * math.pi
+    end
+    l.r1 = l.r1Base + math.sin(l.r1Angle) * l.r1Amp * 0.5
+
+    l.r2Angle = l.r2Angle + dt * l.r2AngVel
+    while l.r2Angle > 2 * math.pi do
+      l.r2Angle = l.r2Angle - 2 * math.pi
+    end
+    l.r2 = l.r2Base + math.sin(l.r2Angle) * l.r2Amp * 0.5
+
+    l.r3Angle = l.r3Angle + dt * l.r3AngVel
+    while l.r3Angle > 2 * math.pi do
+      l.r3Angle = l.r3Angle - 3 * math.pi
+    end
+    l.r3 = l.r3Base + math.sin(l.r3Angle) * l.r3Amp * 0.5
+  end,
+
+  unstoppable_update = function(self)
+    if self.animation_state.state == "dontdraw" then return end
+    if self.invisible then return end
+    if game.transitioning then return end
+    local x, y = self.x, self.y
+    local xtotal, ytotal = x + self.iox, y + self.ioy + self.zo
+    self:applyLights(xtotal, ytotal)
   end,
 
   customDraw = function(self, transitioning)
@@ -2972,9 +3067,7 @@ Playa.functions = {
       self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
     end
 
-    -- After done with coords draw light source (gets drawn later, this just sets it up)
-    -- check during pause screen if session.save.playerGlowAvailable to enable and disable
-    self:applyLights(xtotal, ytotal)
+    if transitioning then self:applyLights(xtotal, ytotal) end
 
     local f = self:getFacing()
     local hori_facing = f == 'right' or f == 'left'
