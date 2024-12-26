@@ -7,11 +7,7 @@ local room = {}
 room.newType = true
 
 room.music_info = snd.silence
-room.ambientLightType = {
-  r = {1, 0.3, 0, 1},
-  g = {0, 1.3, 0, 1},
-  b = {0, 0, 1, 1}
-}
+room.ambientLightType = "forestMagic"
 
 room.width = 512
 room.height = 512

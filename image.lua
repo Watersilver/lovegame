@@ -209,7 +209,12 @@ im.spriteSettings = {
     {'Witch/defaultWaterRipples', 4, padding = 2, width = 16, height = 6}
   },
   note = {'note', 1, padding = 0, width = 7, height = 12},
-  playerSword = {'Inventory/UseSwordL1', 3, padding = 2, width = 16, height = 15},
+  playerSword = {
+    {'Inventory/sword/draw', 4, padding = 0, width = 40, height = 38},
+    {'Inventory/sword/held', 30, padding = 0, width = 40, height = 38},
+    {'Inventory/sword/held_start', 8, padding = 0, width = 40, height = 38},
+    {'Inventory/sword/stab', 5, padding = 0, width = 40, height = 38},
+  },
   playerMissile = {
     {'Inventory/missile/creation', 2, padding = 0, width = 16, height = 16},
     {'Inventory/missile/animation', 7, padding = 0, width = 16, height = 16},
@@ -605,7 +610,9 @@ im.load_sprite(im.spriteSettings.note)
 im.load_sprite(im.spriteSettings.floorOutside)
 im.load_sprite(im.spriteSettings.solidsOutside)
 im.load_sprite(im.spriteSettings.basicFriendlyInterior)
-im.load_sprite(im.spriteSettings.playerSword)
+for _, swdSprite in ipairs(im.spriteSettings.playerSword) do
+  im.load_sprite(swdSprite)
+end
 for _, mslSprite in ipairs(im.spriteSettings.playerMissile) do
   im.load_sprite(mslSprite)
 end

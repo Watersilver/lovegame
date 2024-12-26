@@ -32,6 +32,7 @@ local shdrs = {
   oldScreen = createShader("oldScreen"),
   drugShader = createShader("drugShader"),
   multiply = createShader("multiply"),
+  colorize = createShader("colorize"),
 
   -- Freeze, stone and plant shaders
   frozenShader = createShader("frozen_shader"),

@@ -3,6 +3,7 @@ local u = require 'utilities'
 local determineAmbient = require 'ScreenEffects.lighting.determineAmbient'
 local determinePalette = require 'ScreenEffects.lighting.determinePalette'
 local scaling_handler  = require 'scaling_handler'
+local shaders          = require 'Shaders.shaders'
 
 local sourceTypes = require 'ScreenEffects.lighting.sourceTypes'
 
@@ -27,6 +28,7 @@ if not shdrExists then print(err) end
 ---@field image_index? number
 ---@field canvasImg? love.Image
 ---@field dynamic_options? {radius: number, segments?: number}
+---@field sprite_options? table
 
 ---@type Light[]
 local lights = {}
@@ -288,6 +290,27 @@ local function drawSourceOnCanvas(sources, canvas)
           light.dynamic_options.radius,
           light.dynamic_options.segments
         )
+      end
+    elseif light.type == 'sprite' then
+      local so = light.sprite_options
+      if so then
+        local s = so.sprite
+        local prevS
+        if so.sprite_light_color then
+          shaders.colorize:send('rgb', so.sprite_light_color[1], so.sprite_light_color[2], so.sprite_light_color[3], 1)
+          prevS = love.graphics.getShader()
+          love.graphics.setShader(shaders.colorize)
+        end
+        love.graphics.draw(
+          s.img, s[math.floor(so.image_index)],
+          x, y, so.angle or 0,
+          s.res_x_scale*so.x_scale,
+          s.res_y_scale*so.y_scale,
+          s.cx, s.cy
+        )
+        if so.sprite_light_color then
+          love.graphics.setShader(prevS)
+        end
       end
     end
     resetColor()

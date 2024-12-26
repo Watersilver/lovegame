@@ -470,6 +470,8 @@ end
 player_states.end_stab = player_states.end_swing
 
 player_states.run_hold = function(instance, dt, side)
+  local idling = false
+
   -- Update spin attack counter
   instance.spinAttackCounter = instance.spinAttackCounter + dt
   if session.save.faroresCourage and instance.spinCharged == false and instance.spinAttackCounter > session.getSwordSpeed() * 2.5 then
@@ -481,20 +483,8 @@ player_states.run_hold = function(instance, dt, side)
 
   local idleFrame = math.floor(instance.image_index + 1) % 5 == 0
 
-  if not idleFrame then
-    local fii = math.floor(instance.image_index)
-    if fii % 5 == 0 then
-      instance.fake_zo = -1
-    elseif (fii + 2) % 5 == 0 then
-      instance.fake_zo = -2
-    elseif (fii + 3) % 5 == 0 or (fii + 4) % 5 == 0 then
-      instance.fake_zo = -3
-    end
-  else
-    instance.fake_zo = 0
-  end
-
   if instance.speed < 5 then
+    idling = true
     if side ~= "right" then
       instance.sprite = im.sprites["Witch/idle_hold_" .. side]
     else
@@ -508,6 +498,19 @@ player_states.run_hold = function(instance, dt, side)
       instance.sprite = im.sprites["Witch/hold_left"]
       instance.x_scale = -1
     end
+  end
+
+  if not idleFrame and not idling then
+    local fii = math.floor(instance.image_index)
+    if fii % 5 == 0 then
+      instance.fake_zo = -1
+    elseif (fii + 2) % 5 == 0 then
+      instance.fake_zo = -2
+    elseif (fii + 3) % 5 == 0 or (fii + 4) % 5 == 0 then
+      instance.fake_zo = -3
+    end
+  else
+    instance.fake_zo = 0
   end
 end
 
@@ -665,24 +668,11 @@ player_states.end_fall = function(instance, dt, side)
 end
 
 player_states.run_missile = function(instance, dt, side)
+  local idling = false
+
   instance.missile_cooldown = instance.missile_cooldown + dt
   instance.missile_start_counter = instance.missile_start_counter + dt
   img_speed_and_footstep_sound(instance, dt)
-
-  local idleFrame = math.floor(instance.image_index + 1) % 5 == 0
-
-  if not idleFrame then
-    local fii = math.floor(instance.image_index)
-    if fii % 5 == 0 then
-      instance.fake_zo = -1
-    elseif (fii + 2) % 5 == 0 then
-      instance.fake_zo = -2
-    elseif (fii + 3) % 5 == 0 or (fii + 4) % 5 == 0 then
-      instance.fake_zo = -3
-    end
-  else
-    instance.fake_zo = 0
-  end
 
   if instance.missile and not instance.missile.charged and instance.triggers.mystery then
     if session.save.dust > 0 then
@@ -700,12 +690,28 @@ player_states.run_missile = function(instance, dt, side)
   end
 
   if instance.speed < 5 then
+    idling = true
     if side ~= "right" then
       instance.sprite = im.sprites["Witch/idle_shoot_" .. side]
     else
       instance.sprite = im.sprites["Witch/idle_shoot_left"]
       instance.x_scale = -1
     end
+  end
+
+  local idleFrame = math.floor(instance.image_index + 1) % 5 == 0
+
+  if not idleFrame and not idling then
+    local fii = math.floor(instance.image_index)
+    if fii % 5 == 0 then
+      instance.fake_zo = -1
+    elseif (fii + 2) % 5 == 0 then
+      instance.fake_zo = -2
+    elseif (fii + 3) % 5 == 0 or (fii + 4) % 5 == 0 then
+      instance.fake_zo = -3
+    end
+  else
+    instance.fake_zo = 0
   end
 
   if instance.missile_start_counter >= instance.missile_start_duration then
@@ -795,11 +801,21 @@ player_states.start_missile = function(instance, dt, side)
     layer = facing == "up" and instance.layer - 1 or instance.layer,
     image_speed = 0.3,
     velocity = {x = instance.vx, y = instance.vy},
-    light = {
-      type = 'playerGlow',
-      rgba = {r = 1, g = 0.9, b = 1, a = 0},
-      alpha_table = {[0] = 0, [1] = 1}
+    lights = {
+      {
+        type = 'dynamic',
+        rgba = {r = 1, g = 1, b = 1, a = 1},
+        radius_table = {[0] = 0, [1] = 1},
+        dynamic_options = {radius = 8}
+      },
+      {
+        type = 'dynamic',
+        rgba = {r = 1, g = 1, b = 1, a = 0.5},
+        radius_table = {[0] = 0, [1] = 1},
+        dynamic_options = {radius = 16}
+      }
     },
+    spritelight = true,
     y_scale = y_scale,
     angle = angle
   })
@@ -998,6 +1014,7 @@ player_states.end_lifting = function(instance, dt, side)
 end
 
 player_states.run_lifted = function(instance, dt, side)
+  local idling = false
   img_speed_and_footstep_sound(instance, dt)
   if side ~= "right" then
     instance.sprite = im.sprites["Witch/carry_" .. side]
@@ -1006,6 +1023,7 @@ player_states.run_lifted = function(instance, dt, side)
     instance.x_scale = -1
   end
   if instance.speed < 5 then
+    idling = true
     if side ~= "right" then
       instance.sprite = im.sprites["Witch/idle_carry_" .. side]
     else
@@ -1018,7 +1036,7 @@ player_states.run_lifted = function(instance, dt, side)
     chargeLifted(instance.liftedOb, instance)
   end
 
-  if math.floor(instance.image_index + 1) % 5 ~= 0 then
+  if not idling and math.floor(instance.image_index + 1) % 5 ~= 0 then
     local fii = math.floor(instance.image_index)
     if fii % 5 == 0 then
       instance.fake_zo = -1

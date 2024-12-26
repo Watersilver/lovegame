@@ -61,6 +61,9 @@ inv.sword = {
     elseif side == "up" then
       object.ioy = - (offset)
     end
+    if object.sword then
+      object.sword.offset = offset
+    end
   end
 }
 

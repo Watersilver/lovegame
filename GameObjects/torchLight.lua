@@ -3,6 +3,8 @@ local trans = require "transitions"
 local lighting = require 'ScreenEffects.lighting.lighting'
 local game = require 'game'
 
+local sin = math.sin
+
 local TorchLight = {}
 
 function TorchLight.initialize(instance)
@@ -17,9 +19,14 @@ TorchLight.functions = {
     self.y = self.ystart
     self.xlast = self.x
     self.ylast = self.y
+
+    self.aCounter = math.random() * 2 * math.pi
+    self.a = 0.5
   end,
 
   update = function (self, dt)
+    self.aCounter = (self.aCounter + dt * 10) % (2 * math.pi)
+    self.a = 0.5 + sin(self.aCounter) * 0.01
 
     -- Determine coordinates for transition
     self.xlast = self.x
@@ -53,9 +60,9 @@ TorchLight.functions = {
       type = 'massive',
       rgba = {
         r = 0.8,
-        g = 0.3,
-        b = 0,
-        a = 0.5
+        g = 0.5,
+        b = 0.3,
+        a = self.a
       },
       x = x,
       y = y
@@ -83,9 +90,9 @@ TorchLight.functions = {
       type = 'massive',
       rgba = {
         r = 0.8,
-        g = 0.3,
-        b = 0,
-        a = session.transitionValue(self, 0.5)
+        g = 0.5,
+        b = 0.3,
+        a = session.transitionValue(self, self.a)
       },
       x = x,
       y = y

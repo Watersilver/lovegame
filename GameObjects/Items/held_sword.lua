@@ -5,6 +5,7 @@ local trans = require "transitions"
 local game = require "game"
 local im = require "image"
 local shdrs = require "Shaders.shaders"
+local lighting = require "ScreenEffects.lighting.lighting"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -19,19 +20,19 @@ local function calculate_offset(side)
   local xoff, yoff, aoff = 0, 0, 0
   if side == "down" then
     xoff = 3
-    yoff = 12.5
+    yoff = 13
     aoff = pi
   elseif side == "right" then
-    xoff = 10.5
+    xoff = 11
     yoff = 4
     aoff = pi * 0.5
   elseif side == "left" then
-    xoff = - 10.5
+    xoff = - 11
     yoff = 4
     aoff = - pi * 0.5
   elseif side == "up" then
     xoff = - 4
-    yoff = - 10.5
+    yoff = - 11
     aoff = 0
   end
   return xoff, yoff, aoff
@@ -47,7 +48,7 @@ function HeldSword.initialize(instance)
   instance.image_speed = 0
   instance.image_index = 2
   instance.triggers = {}
-  instance.sprite_info = {im.spriteSettings.playerSword}
+  instance.sprite_info = im.spriteSettings.playerSword
   instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",
@@ -79,9 +80,28 @@ function HeldSword.initialize(instance)
   instance.chargedShader = shdrs.swordChargeShader
   instance.chargedShaderFreq = 1 / 15
   instance.chargedShaderPhase = instance.chargedShaderFreq
+
+  instance.sprite_light_color = {1, 1, 1}
 end
 
 HeldSword.functions = {
+  load = function(self)
+    self.image_speed = 0.5
+    self.sprite = im.sprites['Inventory/sword/held_start']
+  end,
+
+  -- unstoppable_update = function(self)
+  --   local cr = self.creator
+  --   if not cr then return end
+  --   local x, y = self.body:getPosition()
+  --   y = y + (cr.fake_zo or 0)
+  --   lighting.applyLight{
+  --     x = x, y = y,
+  --     type = 'sprite',
+  --     sprite_options = self
+  --   }
+  -- end,
+
   -- This could also be a func called swing to be used in *swing animstate like so:
   -- -- Swing HeldSword
   -- if instance.HeldSword.exists then instance.HeldSword:swing(dt) end
@@ -151,6 +171,28 @@ HeldSword.functions = {
     end
 
     o.change_layer(self, cr.layer)
+
+    self.x_scale = 1
+    if self.side == "right" then
+      self.x_scale = -1
+    end
+
+    self.animation_end = false
+    self.image_index = (self.image_index + dt*60*self.image_speed)
+    local frames = self.sprite.frames
+    while self.image_index >= frames do
+      self.image_index = self.image_index - frames
+      if frames > 1 then self.animation_end = true end
+    end
+    while self.image_index < 0 do
+      self.image_index = self.image_index + frames
+      if frames > 1 then self.animation_end = true end
+    end
+
+    if self.animation_end and not self.isLooping then
+      self.sprite = im.sprites['Inventory/sword/held']
+      self.image_speed = 0.8
+    end
   end,
 
   draw = function(self, td)
@@ -183,7 +225,7 @@ HeldSword.functions = {
     while self.image_index >= sprite.frames do
       self.image_index = self.image_index - sprite.frames
     end
-    local frame = sprite[self.image_index]
+    local frame = sprite[math.floor(self.image_index)]
     local worldShader = love.graphics.getShader()
     local pr, pg, pb, pa = love.graphics.getColor()
     love.graphics.setShader(self.currentShader)

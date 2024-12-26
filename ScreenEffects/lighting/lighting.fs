@@ -5,8 +5,9 @@ extern vec4 redAmbient = vec4(1, 0, 0, 1); // helps map redness of a pixel to an
 extern vec4 greenAmbient = vec4(0, 1, 0, 1); // helps map greenness of a pixel to another colour
 extern vec4 blueAmbient = vec4(0, 0, 1, 1); // helps map blueness of a pixel to another colour
 extern bool nightVision = false;
-extern Image lightMap; // Image that holds info about light sources
-extern Image shadowMap; // Image that holds info about shadows
+extern Image lightMap; // holds info about light sources
+extern Image shadowMap; // holds info about shadows
+extern Image ditherPattern; // Dithering pattern for the lighting
 
 // WARNING: Do not use max for vectors, it behaves weirdly
 
@@ -14,6 +15,15 @@ extern Image shadowMap; // Image that holds info about shadows
 
 float max3(vec4 v) {
   return max(max(v.r, v.g), v.b);
+}
+
+float cLvl = 5;
+float cLvlDiv = 1 / cLvl;
+vec4 colLimiter(vec4 col) {
+  col.r = floor(col.r * cLvl + 0.500) * cLvlDiv;
+  col.g = floor(col.g * cLvl + 0.500) * cLvlDiv;
+  col.b = floor(col.b * cLvl + 0.500) * cLvlDiv;
+  return col;
 }
 
 // color is from love.graphics.setColor
@@ -44,6 +54,10 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 
   vec4 unlit = pixel;
 
+  if (unlit.r == 1 || unlit.g == 1 || unlit.b == 1) {
+    return color * unlit;
+  }
+
   // -----------------
   // Determine ambient
   // -----------------
@@ -68,9 +82,11 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 
   // corresponding pixel of the shadowMap texture
   vec4 shadow = Texel(shadowMap, texture_coords);
+  // Reverse shadow pixel so itworks like a light pixel
   shadow.r = 1.0 - shadow.r;
   shadow.g = 1.0 - shadow.g;
   shadow.b = 1.0 - shadow.b;
+
 
   // -----------------
   // Get light sources
@@ -79,13 +95,14 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
   // corresponding pixel of the lightMap texture
   vec4 light = Texel(lightMap, texture_coords);
 
+  // looks like day for night
   // Each pixel is the brightest of its max ambient
   // brightness and the intensity of the light hitting it
   pixel.r = max(shadow.r * ambient.r, light.r * unlit.r);
   pixel.g = max(shadow.g * ambient.g, light.g * unlit.g);
   pixel.b = max(shadow.b * ambient.b, light.b * unlit.b);
 
-  // was:
+  // // Doesn't work for ambient sometimes
   // // Each pixel can be as bright as the min value of its inherent
   // // brightness and the intensity of the light hitting it
   // pixel.r = max(min(ambient.r, shadow.r * unlit.r), light.r * unlit.r);
@@ -96,8 +113,9 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
   // https://stackoverflow.com/questions/596216/formula-to-determine-perceived-brightness-of-rgb-color
   // float backlightLuminocity = 0.299*backRed + 0.587*backGreen + 0.114*backBlue;
   float brightestLight = max(max(max3(redAmbient), max(max3(greenAmbient), max3(blueAmbient))), max3(light));
+  brightestLight = floor(brightestLight * cLvl + 0.500) * cLvlDiv;
 
-  const float nightVisionThreshold = .1;
+  const float nightVisionThreshold = .2;
 
   bool inherentlyDark = unlit.r < .5 && unlit.g < .5 && unlit.b < .5;
 
@@ -107,8 +125,8 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
     && brightestLight <= nightVisionThreshold
   ) {
     float l = (nightVisionThreshold - brightestLight);
-    return max(color * pixel, vec4(l,l,l,pixel.a));
+    return colLimiter(max(color * pixel, vec4(l,l,l,pixel.a)));
   }
 
-  return color * pixel;
+  return colLimiter(color * pixel);
 }

@@ -35,7 +35,34 @@ NoBody.functions = {
         type = self.light.type,
         x = xtotal,
         y = ytotal,
-        rgba = self.light.rgba
+        rgba = self.light.rgba,
+        dynamic_options = self.light.dynamic_options
+      })
+    elseif self.lights then
+      for _, light in ipairs(self.lights) do
+        if light.alpha_table then
+          light.rgba.a = u.compute_alpha_from_table(self.image_indexfloat or self.image_index, self.sprite.frames, light.alpha_table, self.onPreviousRoom, game.transitioning)
+        end
+        local r = light.dynamic_options and light.dynamic_options.radius or nil
+        if r and light.radius_table then
+          r = r * u.compute_alpha_from_table(self.image_indexfloat or self.image_index, self.sprite.frames, light.radius_table, self.onPreviousRoom, game.transitioning)
+        end
+        lighting.applyLight({
+          type = light.type,
+          x = xtotal,
+          y = ytotal,
+          rgba = light.rgba,
+          dynamic_options = r and {radius = r} or nil
+        })
+      end
+    end
+
+    if self.spritelight then
+      lighting.applyLight({
+        type = 'sprite',
+        x = xtotal,
+        y = ytotal,
+        sprite_options = self
       })
     end
   end,
@@ -48,10 +75,11 @@ NoBody.functions = {
       r,g,b,a = love.graphics.getColor()
       love.graphics.setColor(self.rgba)
     end
+    local x, y = self.x or self.xstart, self.y or self.ystart
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.myShader)
     love.graphics.draw(
-    sprite.img, frame, self.x or self.xstart, self.y or self.ystart, self.angle,
+    sprite.img, frame, x, y, self.angle,
     sprite.res_x_scale * self.x_scale, sprite.res_y_scale * self.y_scale,
     sprite.cx, sprite.cy)
     love.graphics.setShader(worldShader)

@@ -3,7 +3,6 @@ local game = require "game"
 local o = require "GameObjects.objects"
 local u = require "utilities"
 local im = require "image"
-local lighting = require "ScreenEffects.lighting.lighting"
 local transitions = require "transitions"
 
 -- -- Played with noise
@@ -69,125 +68,140 @@ local transitions = require "transitions"
 --   -- love.graphics.pop()
 -- end
 
----@class Cloud
----@field shape {x: number, y: number}[]
----@field density number
----@field angle number
----@field x number
----@field y number
----@field w number
----@field h number
+-- -@class Cloud
+-- -@field shape {x: number, y: number}[]
+-- -@field density number
+-- -@field angle number
+-- -@field x number
+-- -@field y number
+-- -@field w number
+-- -@field h number
 
----@class CreateCloudOptions
----@field side "left" | "right" | "up" | "down"
+-- -@class CreateCloudOptions
+-- -@field side "left" | "right" | "up" | "down"
 
 -- TODOMAYBE: create better algorithm for cloud creation that creates non overlapping clouds efficiently
 -- Lots of magic numbers in here... Hope I remember why they're here...
----@param number number
----@param w number
----@param h number
----@param options? CreateCloudOptions
----@param clouds? Cloud[][]
----@return Cloud[]
-local function createClouds(number, w, h, options, clouds)
-  ---@type Cloud[]
-  local c = {}
+-- -@param number number
+-- -@param w number
+-- -@param h number
+-- -@param options? CreateCloudOptions
+-- -@param clouds? Cloud[][]
+-- -@return Cloud[]
+-- local function createClouds(number, w, h, options, clouds)
+--   ---@type Cloud[]
+--   local c = {}
 
-  local x0, y0, dx, dy = 0, 0, 0, 0
-  local xbound, ybound = 100, 35
-  local cloudW, cloudH = 100 + xbound, 100 + ybound
+--   local x0, y0, dx, dy = 0, 0, 0, 0
+--   local xbound, ybound = 100, 35
+--   local cloudW, cloudH = 100 + xbound, 100 + ybound
 
-  if options then
-    if options.side == "left" then
-      x0 = x0 - 100
-      dx = cloudW * 0.5
-    elseif options.side == "right" then
-      x0 = cloudW * 0.5 + 100
-      dx = x0
-    elseif options.side == "up" then
-      y0 = y0 - 100
-      dy = cloudH * 0.5
-    elseif options.side == "down" then
-      y0 = cloudH * 0.5 + 100
-      dy = y0
-    end
-  end
+--   if options then
+--     if options.side == "left" then
+--       x0 = x0 - 100
+--       dx = cloudW * 0.5
+--     elseif options.side == "right" then
+--       x0 = cloudW * 0.5 + 100
+--       dx = x0
+--     elseif options.side == "up" then
+--       y0 = y0 - 100
+--       dy = cloudH * 0.5
+--     elseif options.side == "down" then
+--       y0 = cloudH * 0.5 + 100
+--       dy = y0
+--     end
+--   end
 
-  -- local minDist = ybound ^ 2
-  local minDist = 100 ^ 2
+--   -- local minDist = ybound ^ 2
+--   local minDist = 100 ^ 2
 
-  for _ = 1, number do
-    local attempts = 0
-    local overlaps = true
+--   for _ = 1, number do
+--     local attempts = 0
+--     local overlaps = true
 
-    ---@type Cloud
-    local cloud = {
-      density = 1,
-      angle = love.math.random() * 2 * math.pi,
-      x = 0,
-      y = 0,
-      shape = {},
-      w = cloudW,
-      h = cloudH
-    }
+--     ---@type Cloud
+--     local cloud = {
+--       density = 1,
+--       angle = love.math.random() * 2 * math.pi,
+--       x = 0,
+--       y = 0,
+--       shape = {},
+--       w = cloudW,
+--       h = cloudH
+--     }
 
-    while overlaps and attempts < 10 do
-      cloud.x = x0 - 100 + love.math.random(w - dx + 200)
-      cloud.y = y0 - 100 + love.math.random(h - dy + 200)
+--     while overlaps and attempts < 10 do
+--       cloud.x = x0 - 100 + love.math.random(w - dx + 200)
+--       cloud.y = y0 - 100 + love.math.random(h - dy + 200)
 
-      overlaps = false
+--       overlaps = false
 
-      for _, cl in ipairs(c) do
-        if u.distanceSqared2d(cl.x, cl.y, cloud.x, cloud.y) < minDist then
-          overlaps = true
-          break
-        end
-      end
+--       for _, cl in ipairs(c) do
+--         if u.distanceSqared2d(cl.x, cl.y, cloud.x, cloud.y) < minDist then
+--           overlaps = true
+--           break
+--         end
+--       end
 
-      if clouds then
-        for _, cloudsOfLayer in ipairs(clouds) do
-          if overlaps then break end
+--       if clouds then
+--         for _, cloudsOfLayer in ipairs(clouds) do
+--           if overlaps then break end
 
-          for _, cl in ipairs(cloudsOfLayer) do
-            if u.distanceSqared2d(cl.x, cl.y, cloud.x, cloud.y) < minDist then
-              overlaps = true
-              break
-            end
-          end
+--           for _, cl in ipairs(cloudsOfLayer) do
+--             if u.distanceSqared2d(cl.x, cl.y, cloud.x, cloud.y) < minDist then
+--               overlaps = true
+--               break
+--             end
+--           end
 
-        end
-      end
+--         end
+--       end
 
-      attempts = attempts + 1
-    end
+--       attempts = attempts + 1
+--     end
 
-    for _ = 1, 3 + love.math.random(3) do
-      local x, y = u.randomPointFromEllipse(xbound, ybound)
-      table.insert(cloud.shape, {x=x, y=y})
-    end
+--     for _ = 1, 3 + love.math.random(3) do
+--       local x, y = u.randomPointFromEllipse(xbound, ybound)
+--       table.insert(cloud.shape, {x=x, y=y})
+--     end
 
-    table.insert(c, cloud)
-  end
+--     table.insert(c, cloud)
+--   end
 
-  return c
-end
+--   return c
+-- end
 
-local function drawCloud(layer, cloud, x, y)
-  local w2, h2 = cloud.w * 0.5, cloud.h * 0.5
-  if not (x + w2 < caml or x - w2 > caml + camw or y + h2 < camt or y - h2 > camt + camh) then
-    lighting.applyShadow{
-      type = "cloudCurve",
-      x = x,
-      y = y,
-      rgba = {
-        r = 1,
-        g = 1,
-        b = 1,
-        a = cloud.density * layer.opacity --* game.transitioning.progress
-      },
-    }
-  end
-end
+-- local function drawCloud(layer, cloud, x, y)
+--   local w2, h2 = cloud.w * 0.5, cloud.h * 0.5
+--   if not (x + w2 < caml or x - w2 > caml + camw or y + h2 < camt or y - h2 > camt + camh) then
+--     -- lighting.applyShadow{
+--     --   type = "cloudCurve",
+--     --   x = x,
+--     --   y = y,
+--     --   rgba = {
+--     --     r = 1,
+--     --     g = 1,
+--     --     b = 1,
+--     --     a = cloud.density * layer.opacity --* game.transitioning.progress
+--     --   },
+--     -- }
+--     local a = cloud.density * layer.opacity --* game.transitioning.progress
+--     lighting.applyShadow{
+--       type = "dynamic",
+--       x = x,
+--       y = y,
+--       dynamic_options = {radius = 30},
+--       rgba = { r = 1, g = 0.8, b = 0.5, a = a },
+--     }
+--     lighting.applyShadow{
+--       type = "dynamic",
+--       x = x,
+--       y = y,
+--       dynamic_options = {radius = 50},
+--       rgba = { r = 1, g = 0.8, b = 0.5, a = a * 0.5 },
+--     }
+--   end
+-- end
 
 local raindropHeight = 10
 local raindropYSpeed = 200
@@ -274,45 +288,45 @@ end
 
 ---@class WeatherMethods
 Weather.functions = {
-  ---@param self WeatherType
-  ---@return table<string, CloudLayer>
-  getCloudLayers = function(self)
-    return self.clouds
-  end,
+  -- ---@param self WeatherType
+  -- ---@return table<string, CloudLayer>
+  -- getCloudLayers = function(self)
+  --   return self.clouds
+  -- end,
 
-  ---@param self WeatherType
-  ---@return table<string, CloudLayer>
-  getOutgoingCloudLayers = function(self)
-    return self.outgoingClouds
-  end,
+  -- ---@param self WeatherType
+  -- ---@return table<string, CloudLayer>
+  -- getOutgoingCloudLayers = function(self)
+  --   return self.outgoingClouds
+  -- end,
 
-  ---@param self WeatherType
-  ---@param name string
-  ---@return CloudLayer | nil
-  getCloudLayer = function(self, name)
-    return self.clouds[name]
-  end,
+  -- ---@param self WeatherType
+  -- ---@param name string
+  -- ---@return CloudLayer | nil
+  -- getCloudLayer = function(self, name)
+  --   return self.clouds[name]
+  -- end,
 
-  ---@param self WeatherType
-  ---@param name string
-  ---@param cl CloudLayer
-  setCloudLayer = function(self, name, cl)
-    self.clouds[name] = cl
-  end,
+  -- ---@param self WeatherType
+  -- ---@param name string
+  -- ---@param cl CloudLayer
+  -- setCloudLayer = function(self, name, cl)
+  --   self.clouds[name] = cl
+  -- end,
 
-  ---@param self WeatherType
-  ---@param options? CreateCloudOptions
-  createClouds = function(self, options)
-    if self.weatherAnims.init then
-      self:updateWeather()
-      self.weatherAnims.init = false
-    end
-    self.clouds = {}
-    self:setCloudLayer('l1', {opacity = self.cloudsOpacityTarget.l1, clouds = createClouds(25, game.room.width, game.room.height, options)})
-    self:setCloudLayer('l2', {opacity = self.cloudsOpacityTarget.l2, clouds = createClouds(25, game.room.width, game.room.height, options)})
-    self:setCloudLayer('l3', {opacity = self.cloudsOpacityTarget.l3, clouds = createClouds(25, game.room.width, game.room.height, options)})
-    self:setCloudLayer('l4', {opacity = self.cloudsOpacityTarget.l4, clouds = createClouds(25, game.room.width, game.room.height, options)})
-  end,
+  -- ---@param self WeatherType
+  -- ---@param options? CreateCloudOptions
+  -- createClouds = function(self, options)
+  --   if self.weatherAnims.init then
+  --     self:updateWeather()
+  --     self.weatherAnims.init = false
+  --   end
+  --   self.clouds = {}
+  --   -- self:setCloudLayer('l1', {opacity = self.cloudsOpacityTarget.l1, clouds = createClouds(25, game.room.width, game.room.height, options), heightFactor = 1})
+  --   -- self:setCloudLayer('l2', {opacity = self.cloudsOpacityTarget.l2, clouds = createClouds(25, game.room.width, game.room.height, options), heightFactor = 2})
+  --   -- self:setCloudLayer('l3', {opacity = self.cloudsOpacityTarget.l3, clouds = createClouds(25, game.room.width, game.room.height, options), heightFactor = 3})
+  --   -- self:setCloudLayer('l4', {opacity = self.cloudsOpacityTarget.l4, clouds = createClouds(25, game.room.width, game.room.height, options), heightFactor = 4})
+  -- end,
 
   -- ---@param self WeatherType
   -- getBiomeArea = function(self)
@@ -519,53 +533,53 @@ Weather.functions = {
       if game.transitioning.firstFrame then
         -- Create weather effects
         if game.transitioning.type == "whiteScreen" then
-          if game.isWorldScreen() then
-            self:createClouds()
-          end
+          -- if game.isWorldScreen() then
+          --   self:createClouds()
+          -- end
         elseif game.transitioning.type == "scrolling" then
-          self.outgoingClouds = self.clouds
+          -- self.outgoingClouds = self.clouds
 
           local side = game.transitioning.side
 
-          if game.isWorldScreen() then
-            self:createClouds({side = side})
-          end
+          -- if game.isWorldScreen() then
+          --   self:createClouds({side = side})
+          -- end
 
           -- Check if outgoing clouds are in bounds of the new
           -- screen and if yes add them to new cloud layers
 
-          local dx, dy = 0, 0
-          if side == "left" then
-            dx = game.room.width
-          elseif side == "right" then
-            dx = -game.prevRoom.width
-          elseif side == "up" then
-            dy = game.room.height
-          elseif side == "down" then
-            dy = -game.prevRoom.height
-          end
+          -- local dx, dy = 0, 0
+          -- if side == "left" then
+          --   dx = game.room.width
+          -- elseif side == "right" then
+          --   dx = -game.prevRoom.width
+          -- elseif side == "up" then
+          --   dy = game.room.height
+          -- elseif side == "down" then
+          --   dy = -game.prevRoom.height
+          -- end
 
-          local ls = self:getOutgoingCloudLayers()
-          for layerName, l in pairs(ls) do
-            for i, cloud in ipairs(l.clouds) do
-              local newX, newY = cloud.x + dx, cloud.y + dy
-              local outOfBounds = newX + cloud.w * 0.5 < 0 or
-                newY + cloud.h * 0.5 < 0 or
-                newX - cloud.w * 0.5 > game.room.width or
-                newY - cloud.h * 0.5 > game.room.height
-              if not outOfBounds then
-                if not self.clouds[layerName] then self.clouds[layerName] = {clouds = {}, opacity = l.opacity} end
-                if not self.clouds[layerName].clouds then self.clouds[layerName].clouds = {} end
-                local newCloud = u.deep_copy(cloud)
-                newCloud.x, newCloud.y = newX, newY
-                if not self.clouds[layerName].clouds[i] then
-                  table.insert(self.clouds[layerName].clouds, newCloud)
-                else
-                  self.clouds[layerName].clouds[i] = newCloud
-                end
-              end
-            end
-          end
+          -- local ls = self:getOutgoingCloudLayers()
+          -- for layerName, l in pairs(ls) do
+          --   for i, cloud in ipairs(l.clouds) do
+          --     local newX, newY = cloud.x + dx, cloud.y + dy
+          --     local outOfBounds = newX + cloud.w * 0.5 < 0 or
+          --       newY + cloud.h * 0.5 < 0 or
+          --       newX - cloud.w * 0.5 > game.room.width or
+          --       newY - cloud.h * 0.5 > game.room.height
+          --     if not outOfBounds then
+          --       if not self.clouds[layerName] then self.clouds[layerName] = {clouds = {}, opacity = l.opacity, heightFactor = l.heightFactor} end
+          --       if not self.clouds[layerName].clouds then self.clouds[layerName].clouds = {} end
+          --       local newCloud = u.deep_copy(cloud)
+          --       newCloud.x, newCloud.y = newX, newY
+          --       if not self.clouds[layerName].clouds[i] then
+          --         table.insert(self.clouds[layerName].clouds, newCloud)
+          --       else
+          --         self.clouds[layerName].clouds[i] = newCloud
+          --       end
+          --     end
+          --   end
+          -- end
 
           local newCaml, newCamt = prevCaml, prevCamt
           if side == "left" then
@@ -604,23 +618,23 @@ Weather.functions = {
 
     self:updateWeather()
 
-    -- Gradually move to new cloud opacity
-    for l, c in pairs(self.clouds) do
-      local target = self.cloudsOpacityTarget[l]
-      if type(target) == 'number' then
-        if c.opacity > target then
-          c.opacity = c.opacity - session.delta_hours
-          if c.opacity < target then
-            c.opacity = target
-          end
-        elseif c.opacity < target then
-          c.opacity = c.opacity + session.delta_hours
-          if c.opacity > target then
-            c.opacity = target
-          end
-        end
-      end
-    end
+    -- -- Gradually move to new cloud opacity
+    -- for l, c in pairs(self.clouds) do
+    --   local target = self.cloudsOpacityTarget[l]
+    --   if type(target) == 'number' then
+    --     if c.opacity > target then
+    --       c.opacity = c.opacity - session.delta_hours
+    --       if c.opacity < target then
+    --         c.opacity = target
+    --       end
+    --     elseif c.opacity < target then
+    --       c.opacity = c.opacity + session.delta_hours
+    --       if c.opacity > target then
+    --         c.opacity = target
+    --       end
+    --     end
+    --   end
+    -- end
 
     -- Gradually move to rain/snow intensity
     local biome = self:getBiome()
@@ -649,29 +663,30 @@ Weather.functions = {
       end
     end
 
-    -- Clouds
-    local vx, vy = self:getWindVelocity()
-    for _, l in pairs(self:getCloudLayers()) do
-      for _, cloud in ipairs(l.clouds) do
-        -- Move clouds
-        cloud.x = cloud.x + vx * dt
-        cloud.y = cloud.y + vy * dt
+    local vx = self:getWindVelocity()
 
-        -- Loop out of bounds clouds
-        if cloud.x + cloud.w * 0.5 < 0 then
-          cloud.x = game.room.width + cloud.w * 0.5
-        end
-        if cloud.y + cloud.h * 0.5 < 0 then
-          cloud.y = game.room.height + cloud.h * 0.5
-        end
-        if cloud.x - cloud.w * 0.5 > game.room.width then
-          cloud.x = -cloud.w * 0.5
-        end
-        if cloud.y - cloud.h * 0.5 > game.room.height then
-          cloud.y = -cloud.h * 0.5
-        end
-      end
-    end
+    -- -- Clouds
+    -- for _, l in pairs(self:getCloudLayers()) do
+    --   for _, cloud in ipairs(l.clouds) do
+    --     -- Move clouds
+    --     cloud.x = cloud.x + vx * dt / l.heightFactor
+    --     cloud.y = cloud.y + vy * dt / l.heightFactor
+
+    --     -- Loop out of bounds clouds
+    --     if cloud.x + cloud.w * 0.5 < 0 then
+    --       cloud.x = game.room.width + cloud.w * 0.5
+    --     end
+    --     if cloud.y + cloud.h * 0.5 < 0 then
+    --       cloud.y = game.room.height + cloud.h * 0.5
+    --     end
+    --     if cloud.x - cloud.w * 0.5 > game.room.width then
+    --       cloud.x = -cloud.w * 0.5
+    --     end
+    --     if cloud.y - cloud.h * 0.5 > game.room.height then
+    --       cloud.y = -cloud.h * 0.5
+    --     end
+    --   end
+    -- end
 
     --Rain
 
@@ -722,14 +737,14 @@ Weather.functions = {
 
     -- drawNoise()
 
-    local ls = self:getCloudLayers()
-    for _, l in pairs(ls) do
-      for _, cloud in ipairs(l.clouds) do
-        for _, part in ipairs(cloud.shape) do
-          drawCloud(l, cloud, cloud.x + part.x, cloud.y + part.y)
-        end
-      end
-    end
+    -- local ls = self:getCloudLayers()
+    -- for _, l in pairs(ls) do
+    --   for _, cloud in ipairs(l.clouds) do
+    --     for _, part in ipairs(cloud.shape) do
+    --       drawCloud(l, cloud, cloud.x + part.x, cloud.y + part.y)
+    --     end
+    --   end
+    -- end
 
     local vx = self:getWindVelocity()
 
@@ -796,16 +811,16 @@ Weather.functions = {
     -- end
 
     if game.wasWorldScreen() then
-      local ls = self:getOutgoingCloudLayers()
-      for _, l in pairs(ls) do
-        for _, cloud in ipairs(l.clouds) do
-          for _, part in ipairs(cloud.shape) do
-            local x, y = cloud.x + part.x, cloud.y + part.y
-            x, y = transitions.transform(x, y)
-            drawCloud(l, cloud, x, y)
-          end
-        end
-      end
+      -- local ls = self:getOutgoingCloudLayers()
+      -- for _, l in pairs(ls) do
+      --   for _, cloud in ipairs(l.clouds) do
+      --     for _, part in ipairs(cloud.shape) do
+      --       local x, y = cloud.x + part.x, cloud.y + part.y
+      --       x, y = transitions.transform(x, y)
+      --       drawCloud(l, cloud, x, y)
+      --     end
+      --   end
+      -- end
 
       -- Rain
       for _, drop in ipairs(self.outgoingRaindrops) do
@@ -827,16 +842,16 @@ Weather.functions = {
 
     if not game.isWorldScreen() then return end
 
-    local ls = self:getCloudLayers()
-    for _, l in pairs(ls) do
-      for _, cloud in ipairs(l.clouds) do
-        for _, part in ipairs(cloud.shape) do
-          local x, y = cloud.x + part.x, cloud.y + part.y
-          x, y = transitions.transform(x, y, true)
-          drawCloud(l, cloud, x, y)
-        end
-      end
-    end
+    -- local ls = self:getCloudLayers()
+    -- for _, l in pairs(ls) do
+    --   for _, cloud in ipairs(l.clouds) do
+    --     for _, part in ipairs(cloud.shape) do
+    --       local x, y = cloud.x + part.x, cloud.y + part.y
+    --       x, y = transitions.transform(x, y, true)
+    --       drawCloud(l, cloud, x, y)
+    --     end
+    --   end
+    -- end
 
     -- Rain
     for _, drop in ipairs(self.raindrops) do
@@ -858,9 +873,9 @@ Weather.functions = {
 }
 
 ---@class WeatherType : WeatherMethods
----@field clouds table<string, CloudLayer>
+-- -@field clouds table<string, CloudLayer>
 ---@field cloudsOpacityTarget CloudsOpacityTarget
----@field outgoingClouds table<string, CloudLayer> | nil
+-- -@field outgoingClouds table<string, CloudLayer> | nil
 ---@field windDir number | nil
 ---@field windSpeed number | nil
 ---@field rTimer number | nil
@@ -891,9 +906,10 @@ Weather.functions = {
 ---@field areas Areas
 ---@field init? boolean if true area values will be initialized by current clouds opacity
 
----@class CloudLayer
----@field clouds Cloud[]
----@field opacity number
+-- -@class CloudLayer
+-- -@field clouds Cloud[]
+-- -@field opacity number
+-- -@field heightFactor number
 
 ---@class Raindrop
 ---@field x number

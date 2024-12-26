@@ -2363,12 +2363,12 @@ function Playa.initialize(instance)
 
   ---@class PlayerLightSettings
   instance.light = {
-    r1 = 8,
+    r1 = 16,
     r1Base = 11,
     r1Amp = 3,
     r1AngVel = 3 * 2,
     r1Angle = 0,
-    r2 = 16,
+    r2 = 32,
     r2Base = 17,
     r2Amp = 2,
     r2AngVel = 3 * math.pi / 2,
@@ -2478,8 +2478,8 @@ Playa.functions = {
           y = y,
           rgba = {
             r = 1,
-            g = 0.3,
-            b = 0,
+            g = 0.8,
+            b = 0.6,
             a = 0.5
           },
           dynamic_options = {
@@ -2493,29 +2493,29 @@ Playa.functions = {
           y = y,
           rgba = {
             r = 1,
-            g = 0.3,
-            b = 0,
+            g = 0.8,
+            b = 0.6,
             a = 0.3
           },
           dynamic_options = {
             radius = l.r2
           }
         });
-        lighting.applyLight({
-          type = "dynamic",
-          -- type = "torch", image_index = 0,
-          x = x,
-          y = y,
-          rgba = {
-            r = 1,
-            g = 0.3,
-            b = 0,
-            a = 0.1
-          },
-          dynamic_options = {
-            radius = l.r3
-          }
-        });
+        -- lighting.applyLight({
+        --   type = "dynamic",
+        --   -- type = "torch", image_index = 0,
+        --   x = x,
+        --   y = y,
+        --   rgba = {
+        --     r = 1,
+        --     g = 0.3,
+        --     b = 0,
+        --     a = 0.1
+        --   },
+        --   dynamic_options = {
+        --     radius = l.r3
+        --   }
+        -- });
       end
     end
   end,

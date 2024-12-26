@@ -8,6 +8,7 @@ local im = require "image"
 local shdrs = require "Shaders.shaders"
 local snd = require "sound"
 local expl = require "GameObjects.explode"
+local lighting = require "ScreenEffects.lighting.lighting"
 
 local ec = require "GameObjects.Helpers.edge_collisions"
 local dc = require "GameObjects.Helpers.determine_colliders"
@@ -45,7 +46,7 @@ local function calculate_offset(side, phase)
       yoff = - 10
       aoff = 0
     elseif phase == 2 then
-      xoff = 14
+      xoff = 15
       yoff = 4
       aoff = pi * 0.5
     end
@@ -59,7 +60,7 @@ local function calculate_offset(side, phase)
       yoff = - 11
       aoff = pi * 1.5
     elseif phase == 2 then
-      xoff = - 14
+      xoff = - 15
       yoff = 4
       aoff = - pi * 0.5
     end
@@ -164,7 +165,7 @@ function Sword.initialize(instance)
   instance.y_scale = 1
   instance.image_speed = 0
   instance.triggers = {}
-  instance.sprite_info = {im.spriteSettings.playerSword}
+  instance.sprite_info = im.spriteSettings.playerSword
   instance.spritefixture_properties = {shape = ps.shapes.swordSprite}
   instance.physical_properties = {
     bodyType = "dynamic",
@@ -190,6 +191,8 @@ function Sword.initialize(instance)
   elseif session.save.dinsPower then
     instance.myShader = shdrs["itemRedShader"]
   end
+
+  instance.sprite_light_color = {1, 1, 1}
 end
 
 Sword.functions = {
@@ -202,7 +205,29 @@ Sword.functions = {
       self.spinPhase = self.spinFreq
       self.spanPositionKeys = {} -- table to avoid same position
     end
+
+    if self.stab then
+      self.image_speed = 0.2
+      self.sprite = im.sprites['Inventory/sword/stab']
+    end
   end,
+
+  -- unstoppable_update = function(self)
+  --   local x, y = self.body:getPosition()
+
+  --   -- Move y a bit up to make it appear higher
+  --   -- It's really a bit lower because it would
+  --   -- push you back if you swing it next to wall
+  --   if self.side == "up" and self.phase == 0 then
+  --     y = y - 4
+  --   end
+
+  --   lighting.applyLight{
+  --     x = x, y = y,
+  --     type = 'sprite',
+  --     sprite_options = self
+  --   }
+  -- end,
 
   -- This could also be a func called swing to be used in *swing animstate like so:
   -- -- Swing sword
@@ -233,14 +258,18 @@ Sword.functions = {
     if cr.spinattacking then
       self.image_index = 1
     elseif not self.stab then
-      phase = floor(cr.image_index * self.sprite.frames / cr.sprite.frames)
+      phase = floor(cr.image_index * 3 / cr.sprite.frames)
       self.image_index = phase
+
+      if cr.image_index > 1.985 and self.offset == 1 then
+        self.image_index = 3
+      end
+
     else
-      self.image_index = 2
-      phase = self.image_index
+      phase = 2
     end
     self.phase = phase
-    local prevphase = self.previous_image_index
+    local prevphase = self.previous_image_index and math.min(2, self.previous_image_index)
 
     -- -- Calculate offset due to sword swinging
     -- local sox, soy, angle = calculate_offset(self.side, phase)
@@ -315,7 +344,7 @@ Sword.functions = {
           self.fixture = love.physics.newFixture(self.body, ps.shapes.swordIgniting, 0)
         elseif phase == 1 then
           self.fixture = love.physics.newFixture(self.body, ps.shapes.swordSwingWide, 0)
-        elseif phase == 2 then
+        else
           self.fixture = love.physics.newFixture(self.body, ps.shapes.swordStill, 0)
         end
 ---@diagnostic disable-next-line: missing-parameter
@@ -367,9 +396,31 @@ Sword.functions = {
 
     o.change_layer(self, cr.layer)
     self.previous_image_index = phase
+
+    self.x_scale = 1
+    if self.side == "right" and self.phase ~= 1 then
+      self.x_scale = -1
+    end
+
+    self.animation_end = false
+    self.image_index = (self.image_index + dt*60*self.image_speed)
+    local frames = self.sprite.frames
+    while self.image_index >= frames do
+      self.image_index = self.image_index - frames
+      if frames > 1 then self.animation_end = true end
+    end
+    while self.image_index < 0 do
+      self.image_index = self.image_index + frames
+      if frames > 1 then self.animation_end = true end
+    end
+
+    if self.animation_end and not self.isLooping then
+      self.sprite = im.sprites['Inventory/sword/held']
+    end
   end,
 
   draw = function(self, td)
+
     local x, y = self.body:getPosition()
 
     -- Move y a bit up to make it appear higher
@@ -390,7 +441,7 @@ Sword.functions = {
     while self.image_index >= sprite.frames do
       self.image_index = self.image_index - sprite.frames
     end
-    local frame = sprite[self.image_index]
+    local frame = sprite[math.floor(self.image_index)]
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.myShader)
     if self.creator and not self.creator.invisible then

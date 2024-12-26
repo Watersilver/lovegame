@@ -141,7 +141,7 @@ local function getLightsprite(spriteSettings)
   return copy
 end
 
----@alias SourceType "dynamic" | "owlStatue" | "canvas" | "cloudCurve" | "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel' | 'rupee' | 'rupee5' | 'rupee20' | 'rupee100' | 'rupee200'
+---@alias SourceType "dynamic" | "sprite" | "owlStatue" | "canvas" | "cloudCurve" | "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel' | 'rupee' | 'rupee5' | 'rupee20' | 'rupee100' | 'rupee200'
 
 ---@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown} | {type: "canvas"}}
 local sourceTypes = {
@@ -162,8 +162,8 @@ local sourceTypes = {
   },
 
   missile = radGrad{
-    {r = 2, a = 1},
-    {r = 6, a = 0}
+    {r = 4, a = 0.5},
+    {r = 8, a = 0}
   },
 
   rupee = radGrad{

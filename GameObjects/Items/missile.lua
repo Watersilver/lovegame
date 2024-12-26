@@ -54,6 +54,8 @@ function Missile.initialize(instance)
   instance.seeThrough = true
   instance.immamissile = true
   instance.light_intensity = 0
+
+  instance.sprite_light_color = {1, 1, 1}
 end
 
 
@@ -329,13 +331,23 @@ Missile.functions = {
       self.rgba.a = a
     end
     a = self.light_intensity * a
+    local rgba = self.rgba and self.rgba or (self.poweredUp and {r=0,g=0.5,b=1,a=a} or {r=0,g=1,b=0,a=a})
     lighting.applyLight{
       type = 'missile',
       x = x,
       y = y,
-      rgba = self.rgba and self.rgba or (self.poweredUp and {r=0,g=0.5,b=1,a=a} or {r=0,g=1,b=0,a=a}),
+      -- dynamic_options = {radius = a * 3.5},
+      rgba = rgba,
       scale = 1
     }
+
+    -- -- self.sprite_light_color = {rgba.r, rgba.g, rgba.b}
+    -- lighting.applyLight{
+    --   type = 'sprite',
+    --   x = x,
+    --   y = y,
+    --   sprite_options = self
+    -- }
   end,
 
   draw = function(self, td)

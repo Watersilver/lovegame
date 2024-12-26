@@ -9,9 +9,9 @@ room.newType = true
 room.music_info = snd.ovrwrld1
 room.ambientLightType = 'daynight1'
 room.palette = {
-  r = {1.25,0,0,1},
-  g = {0,1.5,0.2,1},
-  b = {0,0,1,1}
+  r = {1,0.4,0,1},
+  g = {0,1,0.4,1},
+  b = {0.4,0,1,1}
 }
 
 room.width = 512
