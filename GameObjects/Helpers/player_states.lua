@@ -815,7 +815,6 @@ player_states.start_missile = function(instance, dt, side)
         dynamic_options = {radius = 16}
       }
     },
-    spritelight = true,
     y_scale = y_scale,
     angle = angle
   })

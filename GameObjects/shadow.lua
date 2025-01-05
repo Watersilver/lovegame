@@ -80,6 +80,9 @@ function Shadow:new(init)
 end
 
 function Shadow.handleShadow(object, plshadow)
+  if object.noLandShadow and (not object.zo or object.zo >= 0) then
+    return
+  end
   if not object.shadow then
     local shlayer = object.layer-1
     if shlayer < 1 then shlayer = 1

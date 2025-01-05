@@ -117,9 +117,10 @@ Explode.functions = {
 
   update = function (self, dt)
     self.explosionTimer = self.explosionTimer + dt
+    local prif = self.image_indexfloat
     self.image_indexfloat = (self.image_indexfloat + dt*60*self.image_speed)
     local frames = self.sprite.frames
-    while self.image_indexfloat >= frames do
+    if self.image_indexfloat >= frames then
       o.removeFromWorld(self)
       if self.explosionNumber and self.explosionNumber > 1 then
         self.explosionNumber = self.explosionNumber - 1
@@ -153,7 +154,7 @@ Explode.functions = {
           drops[self.drop](self.xexplode or self.xstart, self.yexplode or self.ystart)
         end
       end
-      self.image_indexfloat = frames - 1
+      self.image_indexfloat = prif
       self.image_speed = 0
     end
     self.image_index = floor(self.image_indexfloat)

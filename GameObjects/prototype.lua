@@ -31,6 +31,7 @@ p.functions = {
     else
       if not self.body then self.body = lp.newBody(ps.pw, self.xstart or 0, self.ystart or 0) end
       local body = self.body
+      if pp.initAngle then body:setAngle(pp.initAngle) end
       if pp.bodyType then body:setType(pp.bodyType) end
       if pp.gravityScaleFactor then body:setGravityScale(pp.gravityScaleFactor) end
       if pp.fixedRotation then body:setFixedRotation(pp.fixedRotation) end

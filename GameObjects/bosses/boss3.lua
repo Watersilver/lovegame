@@ -19,9 +19,30 @@ local deathShader = shdrs.bossDeathShader
 
 local proj = require "GameObjects.enemies.projectile"
 
-local pi = math.pi
+local Swarm = require "GameObjects.enemies.swarm"
+
+local shockwaveShape = love.physics.newRectangleShape(10, 40)
 
 local function onFireEnd(fuel)
+  -- local ided = o.identified['swarm']
+  -- if ided then
+  --   fuck = #ided
+  -- end
+  local ch = fuel.swarmChance and (fuel.swarmChance * 0.01) or 0.1
+  if love.math.random() < ch then
+    local s = Swarm:new{
+      xstart = fuel.x,
+      ystart = fuel.y,
+      x = fuel.x,
+      y = fuel.y,
+      hp = 4,
+      goThroughStatic = true,
+      canBeBullrushed = false,
+      canBeRolledThrough = false
+    }
+    o.addToWorld(s)
+  end
+
   o.removeFromWorld(fuel)
 end
 
@@ -211,6 +232,7 @@ local states = {
       instance.stateProg = 0
       instance.cutscene = true
       -- dragonWingFlap
+      instance.hpLostInThisState = 0
     end,
     check_state = function(instance, dt)
       if instance.stateProg == 5 then
@@ -220,6 +242,7 @@ local states = {
     end_state = function(instance, dt)
       instance.cutscene = false
       instance.offscreenTime = 0
+      instance.hpLostInThisState = 0
     end
   },
 
@@ -230,6 +253,7 @@ local states = {
       if instance.offscreenTime < 0 then instance.offscreenTime = 0 end
     end,
     start_state = function(instance, dt)
+      instance.hpLostInThisState = 0
       instance.body:setPosition(-299, -299)
       instance.x, instance.y = -299, -299
       instance.zo = -299
@@ -242,7 +266,7 @@ local states = {
         {weight = 1, value = "charge"}
       }
       if not instance.offscreenTime then
-        instance.offscreenTime = love.math.random() * 2 + 0.5
+        instance.offscreenTime = love.math.random() + 0.5
       end
     end,
     check_state = function(instance, dt)
@@ -251,6 +275,7 @@ local states = {
       end
     end,
     end_state = function(instance, dt)
+      instance.hpLostInThisState = 0
       instance.offscreenTime = nil
     end
   },
@@ -362,6 +387,7 @@ local states = {
           end
 
           instance.walkAccel = instance.stomp and 200 or 300
+          instance.walkAccel = instance.walkAccel * 1.5
           instance.ax, instance.ay = u.polarToCartesian(instance.walkAccel, dir)
           instance.walkDuration = 0.33 + (instance.stomp and 0.22 or 0)
         end
@@ -391,12 +417,16 @@ local states = {
           end
 
           -- Check if in proper position to charge
-          instance.chargeAligned = false
-          local ___, ltop, ____, _____, ______, lbottom = instance.fixture:getShape():getPoints()
-          local _, top, __, bottom = instance.body:getWorldPoints(___, ltop, ______, lbottom)
-          if love.math.random() < 0.5 and instance.target.y > top and instance.target.y < bottom and math.abs(instance.target.x - instance.x) < 100 then
-            instance.chargeAligned = true
-            instance:lookAtTarget()
+          if instance.canCharge then
+            instance.willCharge = false
+            local ___, ltop, ____, _____, ______, lbottom = instance.fixture:getShape():getPoints()
+            local l, t, r, b = instance.body:getWorldPoints(___, ltop, ______, lbottom)
+            local cx, cy = l + 0.5 * (r - l), t + 0.5 * (b - t)
+            local dist = u.distance2d(cx, cy, instance.target.x, instance.target.y)
+            if dist < 100 and (dist < 84 and love.math.random() < 0.5 or love.math.random() < 0.3) then
+              instance.willCharge = true
+              instance:lookAtTarget()
+            end
           end
         end
 
@@ -512,7 +542,9 @@ local states = {
       instance.substateChanged = prevSubstate ~= instance.substate
     end,
     start_state = function(instance, dt)
-      instance.chargeAligned = false
+      instance.hpLostInThisState = 0
+      instance.canCharge = love.math.random() < 0.3
+      instance.willCharge = false
       instance.image_index_override = nil
 
       instance.fireAnimDur = 1
@@ -544,11 +576,14 @@ local states = {
         end
         local choice = u.chooseFromWeightTable(weightTable)
         instance.state:change_state(instance, dt, choice)
-      elseif instance.chargeAligned then
+      elseif instance.willCharge then
         instance.state:change_state(instance, dt, "charge")
+      elseif instance.hpLostInThisState > 7 then
+        instance.state:change_state(instance, dt, "flyoff")
       end
     end,
     end_state = function(instance, dt)
+      instance.hpLostInThisState = 0
     end
   },
 
@@ -630,6 +665,7 @@ local states = {
       end
     end,
     start_state = function(instance, dt)
+      instance.hpLostInThisState = 0
       instance.zo = instance.zoMinBomb + 1
       instance.wingTimer = 0
       instance.wingDuration = 0.67
@@ -639,7 +675,7 @@ local states = {
       instance.animationState.legs = "inTheAir"
       instance.animationState.mouth = "mouthClosed"
       local sweepChoice = love.math.random()
-      local sweepSpeed = 50
+      local sweepSpeed = 50 + love.math.random() * 50
       instance.sweepDir = sweepChoice > 0.75 and "down" or (sweepChoice > 0.50 and "left" or (sweepChoice > 0.25 and "right" or "up"))
       if instance.sweepDir == "down" or instance.sweepDir == "up" then
         instance.x = instance.sprite.width + love.math.random() * (game.room.width - 2 * instance.sprite.width)
@@ -675,6 +711,7 @@ local states = {
     end,
     end_state = function(instance, dt)
       instance.sweepOuttaBounds = nil
+      instance.hpLostInThisState = 0
     end
   },
 
@@ -700,6 +737,8 @@ local states = {
           then
             snd.play(glsounds.dragonWingFlap)
           end
+
+          instance.instacharge = true
           if instance.stateTimer == 0 then instance.substate = 1 end
         end
       elseif instance.substate == 1 then
@@ -729,6 +768,7 @@ local states = {
             end
           end
           instance.body:setPosition(instance.x, instance.y)
+          instance:determineChargeDir()
           instance:lookAtTarget()
         end
 
@@ -741,12 +781,17 @@ local states = {
           if pl1 and pl1.exists and pl1.zo == 0 then
             pl1.zvel = 120
           end
+          instance:determineChargeDir()
+          instance:lookAtTarget()
         end
       elseif instance.substate == 2 then
         if instance.substateChanged then
           instance.image_index_override = 18
           snd.play(glsounds.swordShimmer)
           instance.stateTimer = 0.5
+          if instance.instacharge then
+            instance.stateTimer = 0.1
+          end
         end
 
         if instance.stateTimer == 0 then
@@ -755,10 +800,23 @@ local states = {
       elseif instance.substate == 3 then
         if instance.substateChanged then
           snd.play(glsounds.supercharge)
-          instance.body:setLinearVelocity(200 * (instance.lookingRight and 1 or -1), 0)
+          local cx, cy = u.polarToCartesian(200, instance.chargeDir)
+          instance.body:setLinearVelocity(cx, cy)
         end
 
-        if (instance.x > game.room.width - 40 and instance.lookingRight) or (instance.x < 40 and not instance.lookingRight) then
+        local vx, vy = instance.body:getLinearVelocity()
+        local hitRight = vx >= 0 and instance.x > game.room.width - 40
+        local hitLeft = vx <= 0 and instance.x < 40
+        local x, y = instance.body:getPosition()
+        local shape = instance.fixture:getShape()
+        local _, t, _, b = shape:computeAABB(x,y,0)
+        local hitUp = vy >= 0 and b > game.room.height - 16
+        local hitDown = vy <= 0 and t < 16
+        if hitRight or hitLeft or hitUp or hitDown then
+          instance.wallHitSide = {
+            x = hitRight and -1 or (hitLeft and 1 or 0),
+            y = hitUp and -1 or (hitDown and 1 or 0),
+          }
           instance.body:setLinearVelocity(0, 0)
           snd.play(glsounds.smallBoom)
           gsh.newShake(mainCamera, "displacement")
@@ -782,7 +840,12 @@ local states = {
           instance.stateTimer = 0.5
           snd.play(glsounds.smallBoom)
           -- snd.play(glsounds.swordShimmer)
-          instance.body:setLinearVelocity(40 * (instance.lookingRight and -1 or 1), 0)
+          if instance.wallHitSide then
+            -- instance.body:setLinearVelocity(-instance.wallHitV.x, -instance.wallHitV.y)
+            instance.body:setLinearVelocity(40 * instance.wallHitSide.x, 40 * instance.wallHitSide.y)
+          else
+            instance.body:setLinearVelocity(40 * (instance.lookingRight and -1 or 1), 0)
+          end
         end
 
         if instance.stateTimer == 0 then
@@ -806,6 +869,9 @@ local states = {
       instance.substate = 0
       instance.stateTimer = 1
       instance.substateChanged = false
+      instance.hpLostInThisState = 0
+      instance.instacharge = false
+      instance:determineChargeDir()
     end,
     check_state = function(instance, dt)
       if instance.substate == 7 then
@@ -822,12 +888,13 @@ local states = {
       end
     end,
     end_state = function(instance, dt)
+      instance.hpLostInThisState = 0
     end
   },
 
   manyjump = {
     run_state = function(instance, dt)
-      instance.t = instance.t + dt
+      instance.t = instance.t + dt * 2
       if instance.t > instance.tmax then instance.t = instance.tmax end
 
       local prevSubstate = instance.substate
@@ -912,13 +979,19 @@ local states = {
           instance.timesJumped = instance.timesJumped + 1
           instance.zo = 0
 
+          instance.spawnShockwaves()
+
           -- Check if in proper position to charge
-          instance.chargeAligned = false
-          local ___, ltop, ____, _____, ______, lbottom = instance.fixture:getShape():getPoints()
-          local _, top, __, bottom = instance.body:getWorldPoints(___, ltop, ______, lbottom)
-          if love.math.random() < 0.5 and instance.target.y > top and instance.target.y < bottom and math.abs(instance.target.x - instance.x) < 100 then
-            instance.chargeAligned = true
-            instance:lookAtTarget()
+          if instance.canCharge then
+            instance.willCharge = false
+            local ___, ltop, ____, _____, ______, lbottom = instance.fixture:getShape():getPoints()
+            local l, t, r, b = instance.body:getWorldPoints(___, ltop, ______, lbottom)
+            local cx, cy = l + 0.5 * (r - l), t + 0.5 * (b - t)
+            local dist = u.distance2d(cx, cy, instance.target.x, instance.target.y)
+            if dist < 100 and (dist < 84 and love.math.random() < 0.5 or love.math.random() < 0.3) then
+              instance.willCharge = true
+              instance:lookAtTarget()
+            end
           end
         end
 
@@ -951,12 +1024,20 @@ local states = {
           instance.animationState.legs = "inTheAir"
         end
 
+        if instance.spawnFire and instance.zo < -200 then
+          instance.spawnFire()
+          if instance.hp <= 10 then instance.spawnFire() end
+          if love.math.random() <= 0.1 then instance.spawnFire() end
+          instance.spawnFire = nil
+        end
+
         instance.zo = instance.zo - dt * 200
       end
 
       instance.substateChanged = instance.substate ~= prevSubstate
     end,
     start_state = function(instance, dt)
+      instance.hpLostInThisState = 0
       instance.t = 0
       instance.substate = 0
       instance.zmax = -500
@@ -984,20 +1065,81 @@ local states = {
       instance.jumps = love.math.random(2, 5)
       instance.timesJumped = 0
       instance.image_index_override = nil
-      instance.chargeAligned = false
+      instance.canCharge = love.math.random() < 0.3
+      instance.willCharge = false
       instance.substateChanged = false
+      if not instance.shockwaveAxis then instance.shockwaveAxis = 0 end
+      instance.spawnFire = function()
+        local fireball = proj:new{
+          layer = instance.layer + 1,
+          xstart = instance.mouth.x, ystart = instance.mouth.y - instance.zo,
+          notBreakableByMissile = true,
+          dpDeflectable = false,
+          dragonFire = true,
+          attackDmg = 2,
+          sprite_info = im.spriteSettings.dragonFire,
+          creator = instance,
+          onFireEnd = onFireEnd,
+          direction = love.math.random() * math.pi * 2,
+          maxspeed = 10 * love.math.random(),
+          targetIsGround = true,
+          zo = instance.zo,
+          zvel = 150,
+          swarmChance = 100
+        }
+        o.addToWorld(fireball)
+      end
+      instance.spawnShockwave = function(direction, speedMod)
+        local shockwave = proj:new{
+          layer = instance.layer - 1,
+          xstart = instance.x,
+          ystart = instance.y + instance.shadowHeightMod,
+          notBreakableByMissile = true,
+          dpDeflectable = false,
+          attackDmg = 2,
+          sprite_info = im.spriteSettings.dragonShockwave,
+          image_speed = 0.15,
+          creator = instance,
+          direction = direction,
+          maxspeed = 200 * (speedMod or 1),
+          swarmChance = 0,
+          angle = direction,
+          impact = 15,
+          explosive = true,
+          blowUpForce = 75,
+          ballbreaker = false,
+          drawIntPos = true
+        }
+        shockwave.physical_properties.shape = shockwaveShape
+        shockwave.physical_properties.initAngle = direction
+        o.addToWorld(shockwave)
+      end
+      instance.spawnShockwaves = function()
+        if instance.shockwaveAxis == 0 then
+          instance.spawnShockwave(0)
+          instance.spawnShockwave(0, 0.5)
+          instance.spawnShockwave(math.pi)
+          instance.spawnShockwave(math.pi, 0.5)
+        else
+          instance.spawnShockwave(math.pi * 0.5)
+          instance.spawnShockwave(math.pi * 0.5, 0.5)
+          instance.spawnShockwave(math.pi * 1.5)
+          instance.spawnShockwave(math.pi * 1.5, 0.5)
+        end
+        instance.shockwaveAxis = 1 - instance.shockwaveAxis
+      end
     end,
     check_state = function(instance, dt)
       if instance.zo < -400 and instance.substate == 5 then
         instance.state:change_state(instance, dt, "offscreen")
-      elseif instance.chargeAligned then
+      elseif instance.willCharge then
         instance.state:change_state(instance, dt, "charge")
       elseif instance.substate == 6 then
         instance.state:change_state(instance, dt, "chase")
       end
     end,
     end_state = function(instance, dt)
-      instance.chargeAligned = false
+      instance.hpLostInThisState = 0
     end
   },
 
@@ -1013,16 +1155,52 @@ local states = {
         snd.play(glsounds.dragonWingFlap)
       end
 
+      local t = instance.stateDuration * 0.1
+      if instance.prevStateTimer <= t and instance.stateTimer > t then
+        instance.spawnFire()
+      end
+      t = instance.stateDuration * 0.25
+      if love.math.random() < 0.1 and instance.prevStateTimer <= t and instance.stateTimer > t then
+        instance.spawnFire()
+      end
+      t = instance.stateDuration * 0.5
+      if instance.hp <= 10 and instance.prevStateTimer <= t and instance.stateTimer > t then
+        instance.spawnFire()
+      end
+      instance.prevStateTimer = instance.stateTimer
+
       instance.zo = instance.zo + instance.zvel * dt
     end,
     start_state = function(instance, dt)
+      instance.hpLostInThisState = 0
       instance.image_index_override = nil
       instance.animationState.legs = "inTheAir"
       instance.animationState.mouth = "mouthClosed"
       instance.animationState.wings = "wingsOpen"
       instance.zvel = -150
       instance.stateTimer = 0
+      instance.prevStateTimer = 0
       instance.stateDuration = 3
+      instance.spawnFire = function()
+        local fireball = proj:new{
+          layer = instance.layer + 1,
+          xstart = instance.mouth.x, ystart = instance.mouth.y - instance.zo,
+          notBreakableByMissile = true,
+          dpDeflectable = false,
+          dragonFire = true,
+          attackDmg = 2,
+          sprite_info = im.spriteSettings.dragonFire,
+          creator = instance,
+          onFireEnd = onFireEnd,
+          direction = love.math.random() * math.pi * 2,
+          maxspeed = 10 * love.math.random(),
+          targetIsGround = true,
+          zo = instance.zo,
+          zvel = 150,
+          swarmChance = 100
+        }
+        o.addToWorld(fireball)
+      end
     end,
     check_state = function(instance, dt)
       if instance.stateTimer > instance.stateDuration then
@@ -1030,6 +1208,7 @@ local states = {
       end
     end,
     end_state = function(instance, dt)
+      instance.hpLostInThisState = 0
     end
   }
 }
@@ -1089,11 +1268,16 @@ Boss3.functions = {
 
   determineMouthPos = function (self)
     self.x_scale = self.lookingRight and -1 or 1
-    self.mouth.x = self.x - 20 * self.x_scale
+    -- self.mouth.x = self.x - 20 * self.x_scale
+    self.mouth.x = self.x - 14 * self.x_scale
     if self.animationState.legs == "inTheAir" then
-      self.mouth.y = self.y + self.zo - 12
+      -- self.mouth.y = self.y + self.zo - 12
+      self.mouth.y = self.y + self.zo + 8
+      -- 18 katw 6 deksia
     else
-      self.mouth.y = self.y + self.zo + 4
+      -- self.mouth.y = self.y + self.zo + 4
+      self.mouth.y = self.y + self.zo + 19
+      self.mouth.x = self.mouth.x - 2 * self.x_scale
     end
   end,
 
@@ -1115,6 +1299,7 @@ Boss3.functions = {
       attackDmg = 2,
       sprite_info = im.spriteSettings.dragonFire,
       target = target,
+      creator = self,
       onFireEnd = onFireEnd
     }
     o.addToWorld(fireball)
@@ -1136,14 +1321,31 @@ Boss3.functions = {
     end
   end,
 
+  determineChargeDir = function (self)
+    self.chargeDir = 0
+    if self.target then
+      local x, y = self.body:getPosition()
+      y = y + self.shadowHeightMod
+      local cx = self.target.x - x
+      local cy = self.target.y - y
+
+      local _, th = u.cartesianToPolar(cx, cy)
+      self.chargeDir = th
+    end
+  end,
+
   touchedByBombsplosion = function (self, other, myF, otherF)
     if self.cutscene then return end
     if self.zo < self.zoMinBomb then return end
+
+    local prevHp = self.hp
 
     self.lastHit = "bombsplosion"
     self.shieldDown = true
     ebh.damagedByHit(self, other, myF, otherF)
     self.shieldDown = false
+
+    self.hpLostInThisState = self.hpLostInThisState + prevHp - self.hp
 
     if self.hp <= 0 and not self.dying then
       self.dying = true
@@ -1170,6 +1372,7 @@ Boss3.functions = {
   end,
 
   enemyUpdate = function (self, dt)
+
     self.animStatePrev.wings = self.animationState.wings
     self.animStatePrev.mouth = self.animationState.mouth
     self.animStatePrev.legs = self.animationState.legs
@@ -1261,13 +1464,40 @@ Boss3.functions = {
   end,
 
   -- draw = function (self)
-  --
+
   --   -- Draw enemy the default way
   --   et.functions.draw(self)
-  --
+  --   -- love.graphics.circle("fill", self.x, self.y + 15, 2)
+
+  --   -- local x, y = self.body:getPosition()
+  --   -- love.graphics.circle("line", x, y, 2)
+  --   -- local shape = self.fixture:getShape()
+  --   -- local l, t, r, b = shape:computeAABB(x,y,0)
+  --   -- x, y = l + (r - l) * 0.5, t + (b - t) * 0.5
+  --   -- love.graphics.circle("fill", x, y, 2)
+  --   -- love.graphics.line(l, t, r, b)
+  --   -- y = y + (b - t) * 0.5
+  --   -- local cx = self.target.x - x
+  --   -- local cy = self.target.y - y
+  --   -- love.graphics.line(x, y, x + cx, y + cy)
+
+  --   local _, vy = self.body:getLinearVelocity()
+  --   local x, y = self.body:getPosition()
+  --   local shape = self.fixture:getShape()
+  --   local _, t, _, b = shape:computeAABB(x,y,0)
+  --   -- local hitUp = vy >= 0 and b > game.room.height - 40
+  --   -- local hitDown = vy <= 0 and t < 40
+
+  --   love.graphics.line(x - 10, t, x + 10, t)
+  --   love.graphics.line(x - 10, b, x + 10, b)
+
+  --   love.graphics.line(0, game.room.height - 16, game.room.width, game.room.height - 16)
+  --   love.graphics.line(0, 16, game.room.width, 16)
+
   --   -- love.graphics.circle("fill", self.mouth.x, self.mouth.y, 2)
-  --
-  --   love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+  --   -- love.graphics.rectangle("fill", self.mouth.x, self.mouth.y, 1, 1)
+
+  --   -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   --   -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
   -- end,
 }

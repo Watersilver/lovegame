@@ -22,6 +22,7 @@ local shdrs = {
   itemBlueShader = createShader("item_blue_shader"),
   itemGreenShader = createShader("item_green_shader"),
   swordCustomShader = createShader("sword_custom_shader"),
+  swordHeldShader = createShader("sword_held_shader"),
   missileCustomShader = createShader("missile_custom_shader"),
   markCustomShader = createShader("mark_custom_shader"),
   swordChargeShader = createShader("charge_sword_shader"),

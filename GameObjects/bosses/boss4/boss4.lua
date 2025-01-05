@@ -171,7 +171,7 @@ local states = {
           instance.hand_index = 0
         elseif instance.timer > 1 then
           instance.hand_index = 1
-        elseif instance.timer > 0.75 then
+        elseif instance.timer >= 0.75 then
           instance.hand_index = 0
           instance.ball:emote("crazy")
         elseif instance.timer > 0.5 then
@@ -246,7 +246,8 @@ local states = {
     end,
     start_state = function(instance, dt)
       instance.ball:contract()
-      instance.timer = 3.25
+      -- instance.timer = 3.25
+      instance.timer = 0.75
       instance.step = 0
       instance.walk_anim_speed = 0
       instance.ball:emote("ready")
@@ -942,62 +943,62 @@ Boss4.functions = {
     end
   end,
 
-  unstoppable_update = function (self)
-    local angry = self.angry
-    lighting.applyLight{
-      type = "playerGlow",
-      x = self.x,
-      y = self.y + (self.zo or 0),
-      rgba={r = angry and 1 or 0, b = 1, g = 0, a = 1},
-      image_index = self.image_index
-    }
+  -- unstoppable_update = function (self)
+  --   local angry = self.angry
+  --   lighting.applyLight{
+  --     type = "playerGlow",
+  --     x = self.x,
+  --     y = self.y + (self.zo or 0),
+  --     rgba={r = angry and 1 or 0, b = 1, g = 0, a = 1},
+  --     image_index = self.image_index
+  --   }
 
-    local lightColor = {r = 1, b = 1, g = 1, a = 0.2}
-    lighting.applyLight{
-      type = "boss4",
-      x = self.x,
-      y = self.y + (self.zo or 0),
-      rgba=lightColor,
-      image_index = self.image_index
-    }
+  --   local lightColor = {r = 1, b = 1, g = 1, a = 0.2}
+  --   lighting.applyLight{
+  --     type = "boss4",
+  --     x = self.x,
+  --     y = self.y + (self.zo or 0),
+  --     rgba=lightColor,
+  --     image_index = self.image_index
+  --   }
 
-    -- Draw shield light
-    if not self:isShieldBroken() then
-      local zo = self.zo or 0
-      local xtotal, ytotal = self.x, self.y + zo + 2.5
-      local shield_index = 0
-      local shield_xscale = 1
+  --   -- Draw shield light
+  --   if not self:isShieldBroken() then
+  --     local zo = self.zo or 0
+  --     local xtotal, ytotal = self.x, self.y + zo + 2.5
+  --     local shield_index = 0
+  --     local shield_xscale = 1
 
-      -- calculate offset and mirroring
-      if math.floor(self.image_index) % 2 == 0 then
-        xtotal = xtotal + 4
-        if self.shieldDmg == 1 then
-          shield_index = 1
-        elseif self.shieldDmg > 1 then
-          shield_index = 3
-        end
-      else
-        xtotal = xtotal + 6.8
-        if self.shieldDmg == 1 then
-          shield_index = 2
-        elseif self.shieldDmg > 1 then
-          shield_index = 4
-        else
-          shield_xscale = -1
-        end
-      end
+  --     -- calculate offset and mirroring
+  --     if math.floor(self.image_index) % 2 == 0 then
+  --       xtotal = xtotal + 4
+  --       if self.shieldDmg == 1 then
+  --         shield_index = 1
+  --       elseif self.shieldDmg > 1 then
+  --         shield_index = 3
+  --       end
+  --     else
+  --       xtotal = xtotal + 6.8
+  --       if self.shieldDmg == 1 then
+  --         shield_index = 2
+  --       elseif self.shieldDmg > 1 then
+  --         shield_index = 4
+  --       else
+  --         shield_xscale = -1
+  --       end
+  --     end
 
-      lighting.applyLight{
-        type = "boss4shield",
-        x = xtotal,
-        y = ytotal,
-        rgba=lightColor,
-        image_index = math.floor(shield_index),
-        x_scale = shield_xscale,
-        rad = self.angle
-      }
-    end
-  end,
+  --     lighting.applyLight{
+  --       type = "boss4shield",
+  --       x = xtotal,
+  --       y = ytotal,
+  --       rgba=lightColor,
+  --       image_index = math.floor(shield_index),
+  --       x_scale = shield_xscale,
+  --       rad = self.angle
+  --     }
+  --   end
+  -- end,
 
   draw = function (self)
     -- Draw enemy the default way

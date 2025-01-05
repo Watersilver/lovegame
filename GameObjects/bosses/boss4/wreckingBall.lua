@@ -548,39 +548,39 @@ WreckingBall.functions = {
     end
   end,
 
-  unstoppable_update = function(self)
-    if self.creator and self.creator.exists then
-      local angry = self.creator.angry
-      lighting.applyLight{
-        type = "playerGlow",
-        x = self.x,
-        y = self.y + (self.zo or 0),
-        rgba={r = angry and 1 or 0, b = 1, g = 0, a = 1},
-        image_index = self.image_index
-      }
-    end
+  -- unstoppable_update = function(self)
+  --   if self.creator and self.creator.exists then
+  --     local angry = self.creator.angry
+  --     lighting.applyLight{
+  --       type = "playerGlow",
+  --       x = self.x,
+  --       y = self.y + (self.zo or 0),
+  --       rgba={r = angry and 1 or 0, b = 1, g = 0, a = 1},
+  --       image_index = self.image_index
+  --     }
+  --   end
 
-    local lightColor = {r = 1, b = 1, g = 1, a = 0.2}
+  --   local lightColor = {r = 1, b = 1, g = 1, a = 0.2}
 
-    lighting.applyLight{
-      type = "boss4ball",
-      x = self.x,
-      y = self.y + (self.zo or 0),
-      rgba=lightColor,
-      image_index = self.image_index
-    }
+  --   lighting.applyLight{
+  --     type = "boss4ball",
+  --     x = self.x,
+  --     y = self.y + (self.zo or 0),
+  --     rgba=lightColor,
+  --     image_index = self.image_index
+  --   }
 
-    -- Draw spikes light
-    if self.spike_index and math.floor(self.spike_index) > 0 then
-      lighting.applyLight{
-        type = "boss4spikes",
-        x = self.x,
-        y = self.y + (self.zo or 0),
-        rgba=lightColor,
-        image_index = math.floor(self.spike_index) - 1
-      }
-    end
-  end,
+  --   -- Draw spikes light
+  --   if self.spike_index and math.floor(self.spike_index) > 0 then
+  --     lighting.applyLight{
+  --       type = "boss4spikes",
+  --       x = self.x,
+  --       y = self.y + (self.zo or 0),
+  --       rgba=lightColor,
+  --       image_index = math.floor(self.spike_index) - 1
+  --     }
+  --   end
+  -- end,
 
   draw = function (self)
 

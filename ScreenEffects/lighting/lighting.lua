@@ -27,7 +27,7 @@ if not shdrExists then print(err) end
 ---@field rgba? {r: number; g: number; b: number; a: number;}
 ---@field image_index? number
 ---@field canvasImg? love.Image
----@field dynamic_options? {radius: number, segments?: number}
+---@field dynamic_options? {radius?: number, segments?: number, vertices?: number[]}
 ---@field sprite_options? table
 
 ---@type Light[]
@@ -285,11 +285,27 @@ local function drawSourceOnCanvas(sources, canvas)
       end
     elseif light.type == 'dynamic' then
       if light.dynamic_options then
-        love.graphics.circle(
-          "fill", x, y,
-          light.dynamic_options.radius,
-          light.dynamic_options.segments
-        )
+        if light.dynamic_options.radius then
+          love.graphics.circle(
+            "fill", x, y,
+            light.dynamic_options.radius,
+            light.dynamic_options.segments
+          )
+        else
+          local v = {}
+          for i, c in ipairs(light.dynamic_options.vertices) do
+            local coord = (i % 2 == 1) and x or y
+            table.insert(v, c + coord)
+          end
+          if not love.math.isConvex(v) then
+            local triangles = love.math.triangulate( v )
+            for _, triangle in ipairs(triangles) do
+              love.graphics.polygon("fill", triangle)
+            end
+          else
+            love.graphics.polygon("fill", v)
+          end
+        end
       end
     elseif light.type == 'sprite' then
       local so = light.sprite_options

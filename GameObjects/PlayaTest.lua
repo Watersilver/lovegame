@@ -3099,6 +3099,10 @@ Playa.functions = {
       love.graphics.setBlendMode("subtract")
     end
 
+    -- TODOOOOOO make this into an optional setting until I get more opinions
+    -- xtotal = u.round(xtotal)
+    -- ytotal = u.round(ytotal)
+
     local xfinal = xtotal + self.shakex
     local yfinal = ytotal + self.shakey
 
@@ -3209,6 +3213,12 @@ Playa.functions = {
       end
 
     else
+
+      if (other.zoSafeZone and (other.zoSafeZone > other.zo)) then
+        coll:setEnabled(false)
+        return
+      end
+
       -- Remember if I'm on an edge
       if other.edge then self.onEdge = true end
 
@@ -3286,6 +3296,11 @@ Playa.functions = {
       -- jump over stuff on ground
       if other.grounded then
         if self.zo < 0 then coll:setEnabled(false); return end
+      end
+      -- go under stuff on the air
+      if (other.zoSafeZone and (other.zoSafeZone > other.zo)) then
+        coll:setEnabled(false)
+        return
       end
       self:takeDamage(other)
       if other.fairy then

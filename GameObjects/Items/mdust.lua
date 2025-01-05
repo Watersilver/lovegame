@@ -275,13 +275,6 @@ MagicDust.functions = {
       ymod = 0
     end
 
-    lighting.applyLight{
-      type = "sprinkle",
-      x = self.x,
-      y = self.y + 4 + ymod,
-      image_index = ii
-    }
-
     love.graphics.setShader(self.currentShader)
     love.graphics.draw(
     sprite.img, frame, x, y + 4 + ymod, 0,

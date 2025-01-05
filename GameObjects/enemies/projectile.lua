@@ -35,6 +35,11 @@ function Projectile.initialize(instance)
   instance.getDestroyed = o.removeFromWorld
   instance.seeThrough = true
   instance.thrownGoesThrough = true
+  instance.noLandShadow = true
+  instance.zo = 0
+  instance.zvel = 0
+  instance.targetIsGround = false
+  instance.zoSafeZone = -10
 end
 
 local function fireUpdate(self, dt)
@@ -146,6 +151,7 @@ Projectile.functions = {
   end,
 
   enemyUpdate = function (self, dt)
+    self.zo = self.zo + dt * self.zvel
     -- Remove if out of bounds
     if self.x + 5 < 0 or self.x - 5 > game.room.width then
       o.removeFromWorld(self)
@@ -156,20 +162,30 @@ Projectile.functions = {
     if self.targetStart then
       -- fire
       local newTarDis = u.magnitude2d(self.targetStart.x - self.x, self.targetStart.y - self.y)
-      if not self.reachedTarget and newTarDis > self.tarDis then
+      if not self.reachedTarget and newTarDis > self.tarDis and self.zo >= 0 then
         self.reachedTarget = true
         if self.onReachTarget then self:onReachTarget() end
       end
       self.tarDis = newTarDis
     end
+    if not self.reachedTarget and self.targetIsGround and self.zo >= 0 then
+      self.reachedTarget = true
+      if self.onReachTarget then self:onReachTarget() end
+    end
     if self.forceStill then
       self.body:setLinearVelocity(0, 0)
     end
+    sh.handleShadow(self)
   end,
 
   -- draw = function (self)
   --   et.functions.draw(self)
-  --   -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+  --   local sha = self.fixture:getShape()
+  --   if sha:getType() == 'circle' then
+  --     love.graphics.circle("line", self.x, self.y, self.fixture:getShape():getRadius())
+  --   else
+  --     love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+  --   end
   -- end,
 
   hitSolidStatic = function (self, other, myF, otherF, coll)

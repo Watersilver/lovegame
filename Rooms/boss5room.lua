@@ -409,11 +409,11 @@ room.gameObjects = {
 }
 
 room.manuallyPlacedObjects = {
-  {x = 264, y = 56, blueprint = "misc.regeneratingPlant", n ={ drops = "sprinkleOfDust", cooldown = 10 }},
-  {x = 264, y = 88, blueprint = "misc.regeneratingPlant", n ={ drops = "sprinkleOfDust", cooldown = 10 }},
-  {x = 296, y = 88, blueprint = "misc.regeneratingPlant", n ={ drops = "sprinkleOfDust", cooldown = 10 }},
-  {x = 296, y = 56, blueprint = "misc.regeneratingPlant", n ={ drops = "sprinkleOfDust", cooldown = 10 }},
-  {x = 280, y = 72, blueprint = "misc.regeneratingPlant", n ={ drops = "sprinkleOfDust", cooldown = 10 }},
+  {x = 264, y = 56, blueprint = "misc.regeneratingPlant", n ={cooldown = 10 }},
+  {x = 264, y = 88, blueprint = "misc.regeneratingPlant", n ={cooldown = 10 }},
+  {x = 296, y = 88, blueprint = "misc.regeneratingPlant", n ={cooldown = 10 }},
+  {x = 296, y = 56, blueprint = "misc.regeneratingPlant", n ={cooldown = 10 }},
+  {x = 280, y = 72, blueprint = "misc.regeneratingPlant", n ={cooldown = 10 }},
   {x = 200, y = 248, blueprint = "InRooms.boss5room.seal"},
 
   { x = 332, y = 85, blueprint = "bosses.boss5.boss5"}

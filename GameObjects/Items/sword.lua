@@ -146,10 +146,24 @@ local function hitEffect(self)
   local explOb = expl:new{
     x = cr.x + exoff, y = cr.y + cr.zo + eyoff,
     layer = self.layer,
-    explosionNumber = self.explosionNumber or 1,
+    explosionNumber = 1,
     explosion_sprite = self.hitWallSprite or im.spriteSettings.swordHitWall,
-    image_speed = self.hitWallImageSpeed or 0.5,
-    nosound = true
+    image_speed = 0.2,
+    nosound = true,
+    lights = {
+      {
+        type = 'dynamic',
+        rgba = {r = 1, g = 1, b = 1, a = 1},
+        radius_table = {[0] = 0, [1] = 1, [2] = 0},
+        dynamic_options = {radius = 8}
+      },
+      {
+        type = 'dynamic',
+        rgba = {r = 1, g = 1, b = 1, a = 0.5},
+        radius_table = {[0] = 0, [1] = 1, [2] = 0},
+        dynamic_options = {radius = 16}
+      }
+    },
   }
   o.addToWorld(explOb)
 end
@@ -191,8 +205,6 @@ function Sword.initialize(instance)
   elseif session.save.dinsPower then
     instance.myShader = shdrs["itemRedShader"]
   end
-
-  instance.sprite_light_color = {1, 1, 1}
 end
 
 Sword.functions = {
@@ -222,10 +234,23 @@ Sword.functions = {
   --     y = y - 4
   --   end
 
+  --   local a = (self.image_index + 1) / (self.sprite.frames)
+
   --   lighting.applyLight{
   --     x = x, y = y,
-  --     type = 'sprite',
-  --     sprite_options = self
+  --     type = 'dynamic',
+  --     rgba = {r=1,g=1,b=1,a=1},
+  --     dynamic_options = {
+  --       radius = 8 * a
+  --     }
+  --   }
+  --   lighting.applyLight{
+  --     x = x, y = y,
+  --     type = 'dynamic',
+  --     rgba = {r=1,g=1,b=1,a=0.5},
+  --     dynamic_options = {
+  --       radius = 16 * a
+  --     }
   --   }
   -- end,
 

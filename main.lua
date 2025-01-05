@@ -105,7 +105,7 @@ require "async"
 
 local ps = require "physics_settings"
 local o = require "GameObjects.objects"
-local p = require "GameObjects.BoxTest"
+-- local p = require "GameObjects.BoxTest"
 local u = require "utilities"
 local sh = require "scaling_handler"
 local pam = require "pause_menu"
@@ -627,6 +627,14 @@ session = {
   setInstanceId = function(instance, id)
     instance.ids[#instance.ids+1] = id
   end,
+
+  togleIntPos = function()
+    if DEFDRAW then
+      DEFDRAW = nil
+    else
+      DEFDRAW = love.graphics.draw
+    end
+  end
 }
 local session = session
 
@@ -1548,7 +1556,14 @@ local function noEffectsDraw()
   -- cam:setWindow(cam.noisel,cam.noiset,w,h)
   local l, t, w, h = sh.get_current_window()
   cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
-  cam:setPosition(cam.xt, cam.yt)
+
+  -- TODOOOOOO make this into an optional setting until I get more opinions
+  -- local camxt = u.round(cam.xt)
+  -- local camyt = u.round(cam.yt)
+  local camxt = (cam.xt)
+  local camyt = (cam.yt)
+
+  cam:setPosition(camxt, camyt)
   setCurrentCam(mainCamera)
 
   if not game.finishedTransition then

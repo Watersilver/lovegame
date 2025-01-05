@@ -15,12 +15,34 @@ local states = {
 
   positionSelf = {
     run_state = function(instance, dt)
-      instance.image_speed = instance.speed * 0.01
+      instance.maxspeed = instance.movementspeed
+
+      instance.stunnedFromAttack = instance.stunnedFromAttack - dt
+      if instance.stunnedFromAttack < 0 then instance.stunnedFromAttack = 0 end
+      if instance.stunnedFromAttack > 0 then instance.maxspeed = 0 end
+
+      instance.image_speed = 0.2
+
       local _, dir = u.cartesianToPolar(
         instance.target.x - instance.x,
         instance.target.y - instance.y
       )
-      instance.direction = dir
+      local s = u.sign(dir - instance.direction) -- s > 0 == ccw
+      if s == 0 then
+        instance.direction = dir
+      else
+        local b = dir - instance.direction - math.pi
+        if b == 0 then
+          s = love.math.random() > 0.5 and -s or s
+        elseif b > 0 then
+          s = -s
+        end
+      end
+      instance.direction = (instance.direction + s * 0.1 * math.pi * dt) % (math.pi * 2)
+      if s ~= dir - instance.direction then
+        instance.direction = dir
+      end
+      -- instance.direction = dir
 
       td.analogueWalk(instance, dt)
     end,
@@ -39,40 +61,34 @@ local states = {
 
 }
 
-local SworderTemplate = {}
+local Swarm = {}
 
-function SworderTemplate.initialize(instance)
-  instance.sprite_info = im.spriteSettings.bat
+function Swarm.initialize(instance)
+  instance.direction = math.pi * 2
+  instance.sprite_info = im.spriteSettings.swarmFire
   instance.zo = 0
   instance.ballbreakerEvenIfHigh = true
   instance.grounded = true
   instance.unpushable = true
   instance.hp = 10
-  instance.maxspeed = 60
+  instance.movementspeed = 60
+  instance.maxspeed = instance.movementspeed
   instance.layer = 20
   instance.physical_properties.shape = ps.shapes.circleHalf
   instance.state = sm.new_state_machine(states)
   instance.state.state = "positionSelf"
-  instance.sawPlayer = 0
+  instance.stunnedFromAttack = 0
+  session.setInstanceId(instance, 'swarm')
 end
 
-SworderTemplate.functions = {
+Swarm.functions = {
   enemyUpdate = function (self, dt)
+    if self.attacked then
+      self.stunnedFromAttack = 1
+    end
 
     -- Get tricked by decoy
     self.target = session.decoy or pl1
-
-    -- Determine target
-    if self.facing then
-      if self:lookFor(self.target) then
-        self.sawPlayer = self.sawPlayer + dt
-      else
-        self.sawPlayer = self.sawPlayer - dt
-      end
-    else
-      self.sawPlayer = self.sawPlayer - dt
-    end
-    if self.sawPlayer < 0 then self.sawPlayer = 0 end
 
     -- do stuff depending on state
     local state = self.state
@@ -85,11 +101,11 @@ SworderTemplate.functions = {
   end,
 }
 
-function SworderTemplate:new(init)
+function Swarm:new(init)
   local instance = p:new() -- add parent functions and fields
   p.new(et, instance) -- add parent functions and fields
-  p.new(SworderTemplate, instance, init) -- add own functions and fields
+  p.new(Swarm, instance, init) -- add own functions and fields
   return instance
 end
 
-return SworderTemplate
+return Swarm

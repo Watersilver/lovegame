@@ -134,7 +134,8 @@ end
 -- Table to hold objects pending to be added to the world
 o.to_be_added = {}
 -- Function to add them
-function o.to_be_added:add_all()
+---@param self table
+function o.to_be_added.add_all(self)
   for _, object in ipairs(self) do
     -- Add to persistents if persistent and if not already there
     if object.persistent and not type(object.persistent) == "number" then

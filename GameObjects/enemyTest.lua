@@ -54,6 +54,7 @@ function Enemy.initialize(instance)
   instance.controlledFlight = false -- Floor doesn't affect me at all, but I still have breaks on air
   instance.lowFlight = false -- can be affected by attacks that only target grounded targets
   instance.canSeeThroughWalls = false -- what it says on the tin
+  instance.goThroughStatic = false -- can go through static colliders but colides with others
   instance.shielded = false -- can be damaged
   instance.shieldDown = false -- shield temporarily disabled
   instance.shieldWall = false -- can be propelled by force
@@ -219,6 +220,10 @@ Enemy.functions = {
     end
     local frame = sprite[floor(self.image_index)]
 
+    if self.drawIntPos then
+      xtotal, ytotal = u.round(xtotal), u.round(ytotal)
+    end
+
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.myShader)
     love.graphics.draw(
@@ -247,6 +252,10 @@ Enemy.functions = {
     local xtotal, ytotal = trans.moving_objects_coords(self)
     ytotal = ytotal + zo
 
+    if self.drawIntPos then
+      xtotal, ytotal = u.round(xtotal), u.round(ytotal)
+    end
+
     love.graphics.draw(
     sprite.img, frame,
     xtotal, ytotal, self.angle,
@@ -265,6 +274,12 @@ Enemy.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    local isOtherStatic = otherF:getBody():getType() == "static"
+
+    if self.goThroughStatic and isOtherStatic then
+      return
+    end
+
     -- Determine if I'm at the room edge. If not and I'm flying, skip.
     if other.roomEdge then
       -- return if I don't collide with room edge
@@ -277,7 +292,7 @@ Enemy.functions = {
     end
 
     -- Check if hit static (before I check for floor, because some floors are static)
-    if otherF:getBody():getType() == "static" and not otherF:isSensor() then
+    if isOtherStatic and not otherF:isSensor() then
       self:hitStatic(other, myF, otherF, coll)
     end
 
@@ -289,12 +304,12 @@ Enemy.functions = {
     end
 
     -- Check if touched player
-    if other.player then
+    if other.player and (not self.zoSafeZone or (self.zoSafeZone < self.zo)) then
       self:hitPlayer(other, myF, otherF)
     end
 
     -- Check if hit solid static
-    if otherF:getBody():getType() == "static" and not otherF:isSensor() and not other.notSolidStatic then
+    if isOtherStatic and not otherF:isSensor() and not other.notSolidStatic then
       self:hitSolidStatic(other, myF, otherF, coll)
     end
 
@@ -410,6 +425,13 @@ Enemy.functions = {
     -- Find which fixture belongs to whom
     local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
+    local isOtherStatic = otherF:getBody():getType() == "static"
+
+    if self.goThroughStatic and isOtherStatic then
+      coll:setEnabled(false)
+      return
+    end
+
     if other.roomEdge then
       if self.canLeaveRoom then
         coll:setEnabled(false)
@@ -420,7 +442,7 @@ Enemy.functions = {
     if self.disableCollisions or self.flying or (self.goThroughEnemies and other.enemy) then
       coll:setEnabled(false)
     elseif self.jumping then
-      if other.body:getType() ~= "static" then coll:setEnabled(false) end
+      if not isOtherStatic then coll:setEnabled(false) end
     else
       if other.floor then
         if self.levitating then

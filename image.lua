@@ -320,6 +320,9 @@ im.spriteSettings = {
   dragonFire = {
     {'Bosses/boss3/dragonFire', 4, padding = 2, width = 8, height = 12}
   },
+  dragonShockwave = {
+    {'Bosses/boss3/shockwave', 4, padding = 2, width = 12, height = 44}
+  },
   robeMissile = {
     {'Enemies/Robe/attack', 4, padding = 2, width = 12, height = 12}
   },
@@ -345,6 +348,9 @@ im.spriteSettings = {
     {'Enemies/Blob/walk', 4, padding = 2, width = 14, height = 16},
     {'Enemies/Blob/transwalk', 4, padding = 2, width = 14, height = 16},
     {'Enemies/Blob/shock', 4, padding = 2, width = 13, height = 16},
+  },
+  swarmFire = {
+    {'Enemies/swarm/Fire', 4, padding = 2, width = 14, height = 16}
   },
 
   -- Bosses
