@@ -16,9 +16,8 @@ local lft = require "GameObjects.Items.lifted"
 local mdu = require "GameObjects.Items.mdust"
 local pddp = require "GameObjects.Helpers.triggerCheck"; pddp = pddp.playerDieDrownPlummet
 
--- TODO: Fix step sound when pushing and other non 10 frame animations
 -- TODO: Fix carry and other animations when hitting wall
--- TODO?: Idle animations for other actions like shooting, carrying, holding etc.
+-- TODO?: Idle animations
 
 local floor = math.floor
 local random = math.random
@@ -57,23 +56,44 @@ local should_play_footstep_sound = function (instance)
       return true
     end
   elseif frames == 8 then
-    if
-      (
-        instance.image_speed > 0 and
+    if instance.immasprint then
+      if
         (
-          (instance.image_index >= 1 and instance.image_index_prev < 1)
-          or (instance.image_index >= 5 and instance.image_index_prev < 5)
+          instance.image_speed > 0 and
+          (
+            (instance.image_index >= 1 and instance.image_index_prev < 1)
+            or (instance.image_index >= 5 and instance.image_index_prev < 5)
+          )
+        ) or (
+          instance.image_speed < 0 and
+          (
+            (instance.image_index <= 1 and instance.image_index_prev > 1)
+            or (instance.image_index <= 5 and instance.image_index_prev > 5)
+          )
+          and instance.animationFramesPassed > 1
         )
-      ) or (
-        instance.image_speed < 0 and
+      then
+        return true
+      end
+    else
+      if
         (
-          (instance.image_index <= 1 and instance.image_index_prev > 1)
-          or (instance.image_index <= 5 and instance.image_index_prev > 5)
+          instance.image_speed > 0 and
+          (
+            (instance.image_index >= 2 and instance.image_index_prev < 2)
+            or (instance.image_index >= 6 and instance.image_index_prev < 6)
+          )
+        ) or (
+          instance.image_speed < 0 and
+          (
+            (instance.image_index <= 2 and instance.image_index_prev > 2)
+            or (instance.image_index <= 6 and instance.image_index_prev > 6)
+          )
+          and instance.animationFramesPassed > 1
         )
-        and instance.animationFramesPassed > 1
-      )
-    then
-      return true
+      then
+        return true
+      end
     end
   end
   return false
@@ -83,14 +103,26 @@ player_states.img_speed_and_footstep_sound = function(instance, dt)
   td.image_speed(instance, dt)
   local f = instance:getFacing()
   local vx, vy = instance.body:getLinearVelocity()
+
+  -- if
+  --   (f == 'up' and vy > 0)
+  --   or (f == 'down' and vy < 0)
+  --   or (f == 'left' and vx > 0)
+  --   or (f == 'right' and vx < 0)
+  -- then
+  --   instance.image_speed = -instance.image_speed
+  -- end
+
   if
-    (f == 'up' and vy > 0)
-    or (f == 'down' and vy < 0)
-    or (f == 'left' and vx > 0)
-    or (f == 'right' and vx < 0)
+    (f == 'up' and vy > -0.01)
+    or (f == 'down' and vy < 0.01)
+    or (f == 'left' and vx > -0.01)
+    or (f == 'right' and vx < 0.01)
   then
     instance.image_speed = -instance.image_speed
   end
+
+  -- print(vy < 0, math.abs(vy) < 0.01)
 
   if should_play_footstep_sound(instance) then
     play_footstep_sound(instance)
@@ -239,7 +271,7 @@ player_states.check_still = function(instance, dt, side)
 
   local jump_side = side
 
-  if instance.speed > 5 then
+  if instance.speed > 5 and instance:holdingDirectionalKey() then
     if math.abs(instance.vx) > math.abs(instance.vy) then
       if instance.vx > 0 then
         jump_side = "right"
@@ -1129,7 +1161,7 @@ player_states.start_damaged = function(instance, dt, side)
   if instance.triggers.damaged == 0 then instance.noInvShader = true end
   inp.disable_controller(instance.player)
   instance.damCounter = instance.triggers.damCounter or 0.5
-  instance.invulnerable = instance.damCounter + (pl1.triggers.noInvFrames and 0 or 1)
+  instance.invulnerable = (pl1.triggers.noInvFrames and 0 or (instance.damCounter + 1))
   instance.damKeepMoving = instance.triggers.damKeepMoving
   snd.play(instance.triggers.altHurtSound or instance.sounds.hurt)
 end
@@ -1150,6 +1182,19 @@ player_states.run_sprintcharge = function(instance, dt, side)
   -- make footstep sounds
   if should_play_footstep_sound(instance) then
     play_footstep_sound(instance)
+  end
+
+  if math.floor(instance.image_index + 1) % 5 ~= 0 then
+    local fii = math.floor(instance.image_index)
+    if fii % 5 == 0 then
+      instance.fake_zo = -1
+    elseif (fii + 2) % 5 == 0 then
+      instance.fake_zo = -2
+    elseif (fii + 3) % 5 == 0 or (fii + 4) % 5 == 0 then
+      instance.fake_zo = -3
+    end
+  else
+    instance.fake_zo = 0
   end
 end
 

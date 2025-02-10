@@ -87,10 +87,23 @@ end
 function ebh.bounceOffScreenEdge(object)
   if object.direction then
     if object.edgeSide then
-      if object.edgeSide == "up" or object.edgeSide == "down" then
-        object.direction = - object.direction
+      local x, y = u.polarToCartesian(1, object.direction)
+      if object.edgeSide == "up" then
+        if y < 0 then
+          object.direction = - object.direction
+        end
+      elseif object.edgeSide == "down" then
+        if y > 0 then
+          object.direction = - object.direction
+        end
+      elseif object.edgeSide == "left" then
+        if x < 0 then
+          object.direction = - object.direction + math.pi
+        end
       else
-        object.direction = - object.direction + math.pi
+        if x > 0 then
+          object.direction = - object.direction + math.pi
+        end
       end
       object.edgeSide = nil
       object.behaviourTimer = object.behaviourTimer + 1
@@ -121,6 +134,10 @@ function ebh.damagedByHit(object, other, myF, otherF)
 
   -- Determine if shield was pierced
   local piercedShield = checkIfShieldPierced(object)
+
+  if object.hpPrev then
+    object.hpPrev = object.hp
+  end
 
   if (not object.shielded) or object.shieldDown or piercedShield then
     -- Calculate damage received

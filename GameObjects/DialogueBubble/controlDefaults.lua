@@ -53,7 +53,7 @@ private.singleSimpleBubbleTemplate = function(settings)
       if dlgControl.ssbRGBA then options.textRGBA = dlgControl.ssbRGBA end
       dlgControl.speechBubble = bubble.addNew(dlgControl:getDlg(), dlgControl, options)
       local inst = dlgControl.speechBubble
-      inst.timeBetweenLetters = 0.055
+      inst.timeBetweenLetters = GPAR.default_dlg_letter_delay
       inst.timer = inst.timeBetweenLetters
       inst.persistence = dlgControl.persistence or 1.5
     else
@@ -101,7 +101,7 @@ private.singleSimpleBubbleTemplate = function(settings)
             if interactive then snd.play(glsounds.textDone) end
           end
         elseif instance.scrollingUp then
-          instance.content:setYOffset(instance.content.yOffset + 25 * dt)
+          instance.content:setYOffset(instance.content.yOffset + GPAR.dlg_scroll_speed_factor * dt)
           if instance.content:getNextVisibleHeight() <= instance.content:getHeight() then
             instance.content:setYOffset(instance.content:getOffsetAfterScrollingOneLine())
             instance.scrollingUp = nil

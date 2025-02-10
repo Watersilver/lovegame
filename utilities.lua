@@ -200,6 +200,8 @@ function u.polarToCartesian(r, th)
   return r * cos( th ), r * sin( th ) -- x, y
 end
 
+---@return number r
+---@return number th
 function u.cartesianToPolar(x, y)
   return sqrt(x*x + y*y), atan2(y, x) -- r, th
 end
@@ -599,6 +601,14 @@ local function printPropsRecursive(obj, path, maxDepth, printed, tab)
   end
 
   for key, value in pairs(obj) do
+
+    local tk = type(key)
+    if tk ~= 'number' and tk ~= "string" then
+      key = "type:" .. tk .. ":" .. tostring(key)
+    elseif tk == "string" then
+      key = '"' .. key .. '"'
+    end
+
     local tv = type(value)
     if tv == "function" or tv == "thread" or tv == "userdata" then
       print(tab .. key .. ": unprintable type '" .. tv .. "'")

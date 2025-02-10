@@ -11,8 +11,6 @@ local o = require "GameObjects.objects"
 local npcTest = require "GameObjects.NpcTest"
 
 
-local floor = math.floor
-
 local NPC = {}
 
 local function onDialogueRealEnd(instance)
@@ -32,7 +30,6 @@ function NPC.initialize(instance)
     edgetable = ps.shapes.edgeRect1x1
   }
   instance.chestId = "teschest"
-  -- instance.chestContentsInit = (require "GameObjects.GlobalNpcs.fanfareGottenItems.pieceOfHeart").itemInfo
 end
 
 NPC.functions = {
@@ -98,8 +95,7 @@ NPC.functions = {
       end
       if self.opened then -- Chest open end
         self.unactivatable = true
-        local chestContents = itemGetPoseAndDlg:new(self.chestContentsInit)
-        o.addToWorld(chestContents)
+        itemGetPoseAndDlg:fromData(self.data)
         session.save["chest_" .. self.chestId] = true
       elseif self.sideDialogue then -- cant open from that side
         snd.play(glsounds.textDone)

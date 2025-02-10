@@ -14,7 +14,7 @@ NPC.functions = {
     session.startQuest("mainQuest2");
   end,
 
-  -- Make note and set save.
+  -- TODO: Make note and set save.
   -- session.startQuest("mainQuest3");
   -- session.startQuest("mysticalSpells1");
   -- session.save.readMageJournal1 = true

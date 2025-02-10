@@ -62,11 +62,7 @@ NPC.functions = {
     elseif self.choiceReturn.a == "Light" then
       session.save.playerGlowAvailable = not session.save.playerGlowAvailable
     elseif self.choiceReturn.a == "Piece of Heart" then
-      local itemInfo = (require "GameObjects.GlobalNpcs.fanfareGottenItems.pieceOfHeart").itemInfo
-      local o = require "GameObjects.objects"
-      local itemGetPoseAndDlg = require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"
-      local pieceOfHeart = itemGetPoseAndDlg:new(itemInfo)
-      o.addToWorld(pieceOfHeart)
+      (require "GameObjects.GlobalNpcs.itemGetPoseAndDlg"):fromData((require "collectables").data.piece_of_heart)
     end
     self.dlgState = "reacting"
   end,

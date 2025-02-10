@@ -10,15 +10,38 @@ local im = require "image"
 local ebh = require "enemy_behaviours"
 
 local proj = require "GameObjects.enemies.projectile"
-local function createProjectile(eye, dir)
+
+---@param pattern 'snipe' | 'shotgun' | 'spray' | 'random'
+local function createProjectile(eye, dir, pattern)
+  local startSpriteName = 'Enemies/Missiles/spinmissile'
+  local angleIsDirection = false
+  local imgsp = 0.25
+  if pattern == 'snipe' then
+    snd.play(glsounds.ice)
+    startSpriteName = "Enemies/Missiles/directionalmissile"
+    angleIsDirection = true
+  elseif pattern == "shotgun" then
+    snd.play(glsounds.dragonWingFlap)
+    startSpriteName = "Enemies/Missiles/multimissile"
+  elseif pattern == "spray" then
+    snd.play(glsounds.supercharge)
+    startSpriteName = "Enemies/Missiles/spinmissile"
+  elseif pattern == "random" then
+    snd.play(glsounds.wingFlap)
+    startSpriteName = "Enemies/Missiles/spinmissile2"
+    imgsp = 0.5
+  end
   o.addToWorld(proj:new{
     xstart = eye.x, ystart = eye.y,
     attackDmg = 2, layer = 15,
     direction = dir,
-    enemFire = true,
     doesntGoThroughSolids = true,
     notBreakableByMissile = true,
-    ballbreaker = false
+    ballbreaker = false,
+    sprite_info = im.spriteSettings.missiles,
+    image_speed = imgsp,
+    startSpriteName = startSpriteName,
+    angleIsDirection = angleIsDirection
   })
 end
 
@@ -44,7 +67,7 @@ local function newAttackPattern(startingTimer)
             self.times = self.times - 1
 
             local _, dir = u.cartesianToPolar(eye.head.target.x - eye.x, eye.head.target.y - eye.y)
-            createProjectile(eye, dir)
+            createProjectile(eye, dir, 'snipe')
 
             if self.times <= 0 then
               attackPattern.attack = nil
@@ -79,7 +102,7 @@ local function newAttackPattern(startingTimer)
               dir = dir + step * 0.5
             end
             while dir < maxDir do
-              createProjectile(eye, dir)
+              createProjectile(eye, dir, 'shotgun')
               dir = dir + step
             end
 
@@ -110,7 +133,7 @@ local function newAttackPattern(startingTimer)
 
           if prevMod < self.timer % self.frequency then
             local dir = math.abs(math.sin(self.timer * self.rate + self.startingPhase)) * math.pi
-            createProjectile(eye, dir)
+            createProjectile(eye, dir, 'spray')
           end
 
 
@@ -137,7 +160,7 @@ local function newAttackPattern(startingTimer)
 
           if prevMod < self.timer % self.frequency then
             local dir = (math.pi / 7) * (1 + 5 * love.math.random())
-            createProjectile(eye, dir)
+            createProjectile(eye, dir, 'random')
           end
 
 
@@ -153,7 +176,7 @@ local function newAttackPattern(startingTimer)
         self.idleTimer = self.idleTimer - dt
         if self.idleTimer <= 0 then self.idleTimer = nil end
       else
-        if (eye.image_index == 0 or eye.eyeChanged) and not eye.head.invulnerable then
+        if (eye.eyelid_index == 0 or eye.eyeChanged) and not eye.head.invulnerable then
           if self.attack then
             self.attack:update(self, eye, dt)
           else
@@ -192,7 +215,6 @@ function Boss2Eye.initialize(instance)
   instance.sprite_info = im.spriteSettings.boss2
   instance.hp = 50
   instance.missileDamageMod = 2.5
-  -- instance.hp = 1
   instance.canBeBullrushed = false
   instance.canBeRolledThrough = false
   instance.side = 1
@@ -201,20 +223,58 @@ function Boss2Eye.initialize(instance)
   instance.physical_properties.shape = ps.shapes.bosses.boss2.eye
   instance.spritefixture_properties = nil
   instance.image_index = 0
-  instance.eyelidState = 2
+  instance.eyelidState = 4
   instance.drop = "noDrop"
   instance.shieldTimer = 0
   instance.fullyOpenTimer = 0
   instance.attackPattern = newAttackPattern()
+
+  instance.hpPrev = instance.hp
 end
 
 Boss2Eye.functions = {
+  lookTowards = function (self, angle)
+    local angleChunk = 2 * math.pi / 8
+    if not angle then
+      self.image_index = 0
+    elseif angle <= angleChunk * 0.5 and angle > -angleChunk * 0.5 then
+      -- right
+      self.image_index = 3
+    elseif angle <= -angleChunk * 0.5 and angle > -angleChunk * 1.5 then
+      -- right up
+      self.image_index = 4
+    elseif angle <= -angleChunk * 1.5 and angle > -angleChunk * 2.5 then
+      -- up
+      self.image_index = 5
+    elseif angle <= -angleChunk * 2.5 and angle > -angleChunk * 3.5 then
+      -- left up
+      self.image_index = 6
+    elseif angle <= -angleChunk * 3.5 or angle > angleChunk * 3.5 then
+      -- left
+      self.image_index = 7
+    elseif angle <= angleChunk * 3.5 and angle > angleChunk * 2.5 then
+      -- left down
+      self.image_index = 8
+    elseif angle <= angleChunk * 2.5 and angle > angleChunk * 1.5 then
+      -- down
+      self.image_index = 1
+    elseif angle <= angleChunk * 1.5 and angle > angleChunk * 0.5 then
+      -- right down
+      self.image_index = 2
+    end
+  end,
+
+  getRorL = function(self)
+    return (self.side > 0) and 'l' or 'r'
+  end,
+
   load = function (self)
-    self.sprite = (self.side > 0) and im.sprites["Bosses/boss2/LeftEye"] or im.sprites["Bosses/boss2/RightEye"]
+    self.sprite = im.sprites["Bosses/boss2/eye_" .. self:getRorL()]
+    self.eyelidSprite = im.sprites["Bosses/boss2/eyelid_" .. self:getRorL()]
   end,
 
   enemyUpdate = function (self, dt)
-    self.image_index = u.clamp(0, self.shielded and 2 or (self.pain and self.pain or self.eyelidState), 2)
+    self.eyelid_index = u.clamp(0, self.shielded and 4 or (self.pain and 2 or self.eyelidState), 4)
 
     if not self.head.enabled then return end
 
@@ -223,7 +283,15 @@ Boss2Eye.functions = {
       if not self.otherEye.exists then
         self.eyeChanged = true
         self.bulgingCounter = 0
-        self.sprite = (self.side > 0) and im.sprites["Bosses/boss2/LeftEyeMad"] or im.sprites["Bosses/boss2/RightEyeMad"]
+        self.sprite = im.sprites["Bosses/boss2/swoleneye_" .. self:getRorL()]
+      else
+        if pl1 then
+          local r, th = u.cartesianToPolar(pl1.x - self.x, pl1.y - self.y)
+          self:lookTowards(th)
+          if self.image_index == 1 and r < 20 then
+            self.image_index = 0
+          end
+        end
       end
     else
       self.bulgingCounter = (self.bulgingCounter + dt * 5) % 6
@@ -258,16 +326,8 @@ Boss2Eye.functions = {
 
     -- offset from middle of head
     local xoffset, yoffset
-    xoffset = self.side * 33
+    xoffset = self.side * 23
     yoffset = 4
-    -- Head eye position changes when image index changes
-    -- Take care of that here
-    local intii = math.floor(head.image_index)
-    if intii == 1 then
-      yoffset = yoffset - 8
-    elseif intii == 2 then
-      yoffset = yoffset - 16
-    end
     xoffset, yoffset = u.rotate2d(xoffset, yoffset, head.angle)
 
     local x, y = xoffset + head.x, yoffset + head.y
@@ -306,20 +366,54 @@ Boss2Eye.functions = {
     -- What happens when I get destroyed.
     self.head:takeDamage()
     self.head.sightLoss = self.head.sightLoss + 1
-    if self.otherEye.exists then
+    if self.otherEye.exists and self.otherEye.hp > self.hpPrev then
       self.otherEye.hp = 75 - math.floor(self.otherEye.hp / 2)
     end
   end,
 
-  -- draw = function (self)
-  --
-  --   -- Draw enemy the default way
-  --   et.functions.draw(self)
-  --
-  --   -- Draw extra stuff like eyes and hands.
-  --
-  --   love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-  -- end,
+  draw = function (self)
+
+    if self.invisible then return end
+    if not self.head then return end
+
+    local xtotal, ytotal = self.head.x, self.head.y
+
+    if self.spritebody then
+      if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
+      self.spritebody:setPosition(xtotal, ytotal)
+      self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    end
+
+    local sprite = self.sprite
+    local frames = self.sprite.frames
+    while self.image_index >= frames do
+      self.image_index = self.image_index - frames
+    end
+    local frame = sprite[math.floor(self.image_index)]
+
+    if self.drawIntPos then
+      xtotal, ytotal = u.round(xtotal), u.round(ytotal)
+    end
+
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
+
+    -- Draw the eyes
+    love.graphics.draw(
+    sprite.img, frame, xtotal, ytotal, self.angle,
+    self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
+    sprite.cx, sprite.cy)
+
+    -- Draw the eyelids
+    --  - (self.head or {mouth_gape_state = 0}).mouth_gape_state * 8
+    local eyelidFrame = self.eyelidSprite[self.eyelid_index]
+    love.graphics.draw(
+    self.eyelidSprite.img, eyelidFrame, xtotal, ytotal, self.angle,
+    self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
+    sprite.cx, sprite.cy)
+
+    love.graphics.setShader(worldShader)
+  end,
 
   gotHurt = function (self)
     if not self.otherEye.exists then return end

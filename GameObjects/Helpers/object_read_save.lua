@@ -3,7 +3,8 @@ local ors = {}
 ors.player = function (instance)
   instance.maxHealth =
     (session.save.playerMaxHealth or 3) +
-    math.floor((session.save.piecesOfHeart or 0) / 4)
+    -- math.floor((session.save.piecesOfHeart or 0) / 4)
+    ((session.save.piecesOfHeart or 0) / 4)
   instance.health = instance.health or session.save.playerHealth or instance.maxHealth or 3
   instance:insertToSpellSlot(session.save.hasSword, session.save.swordKey)
   instance:insertToSpellSlot(session.save.hasJump, session.save.jumpKey)

@@ -235,6 +235,7 @@ local function drawSourceOnCanvas(sources, canvas)
   local canvasW, canvasH = canvas:getDimensions()
   local ratioW = canvasW / canvW
   local ratioH = canvasH / canvH
+  -- local scale = scaling_handler.get_game_scale()
   for index, light in ipairs(sources) do
     local x, y = mainCamera:toScreen(light.x, light.y)
     local l, t, w, h = mainCamera:getWindow()
@@ -250,16 +251,14 @@ local function drawSourceOnCanvas(sources, canvas)
     })
     local resetColor = u.storeColour()
     if type then
-      -- local scale = scaling_handler.get_game_scale()
-      local scale = 1
       if type.type == "sprite" then
         if light.image_index then
           local s = type.sprite
           love.graphics.draw(
             s.img, s[light.image_index],
             x, y, light.rad or 0,
-            scale * s.res_x_scale * (light.x_scale or light.scale or 1),
-            scale * s.res_y_scale * (light.scale or 1),
+            s.res_x_scale * (light.x_scale or light.scale or 1),
+            s.res_y_scale * (light.scale or 1),
             s.cx, s.cy
           )
         end
@@ -267,8 +266,8 @@ local function drawSourceOnCanvas(sources, canvas)
         love.graphics.draw(
           type.img,
           x, y, light.rad or 0,
-          scale * (light.x_scale or light.scale or 1),
-          scale * (light.scale or 1),
+          (light.x_scale or light.scale or 1),
+          (light.scale or 1),
           type.centerOffset,
           type.centerOffset
         )

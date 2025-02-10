@@ -915,37 +915,38 @@ room.gameObjects = {
 
 { x = 312, y = 392, n = {
   l = 10,
-  destination = "Rooms/TestRoomBoss.lua",
-  desx = 72,
-  desy = 120,
+  -- destination = "Rooms/TestRoomBoss.lua",
+  -- destination = "Rooms/boss1room.lua",
+  -- desx = 72,
+  -- desy = 120,
 }, t = 3, i = 8},
 
 { x = 72, y = 136, n = {
   l = 10,
-  destination = "Rooms/boss2room.lua",
-  desx = 200,
-  desy = 200,
+  -- destination = "Rooms/boss2room.lua",
+  -- desx = 200,
+  -- desy = 200,
 }, t = 3, i = 8},
 
 { x = 312, y = 88, n = {
   l = 10,
-  destination = "Rooms/boss3room.lua",
-  desx = 263,
-  desy = 480,
+  -- destination = "Rooms/boss3room.lua",
+  -- desx = 263,
+  -- desy = 480,
 }, t = 3, i = 8},
 
 { x = 440, y = 232, n = {
   l = 10,
-  destination = "Rooms/testtesttest.lua",
-  desx = 158,
-  desy = 24,
+  -- destination = "Rooms/testtesttest.lua",
+  -- desx = 158,
+  -- desy = 24,
 }, t = 3, i = 8},
 
 { x = 72, y = 328, n = {
   l = 10,
-  destination = "Rooms/boss5room.lua",
-  desx = 200,
-  desy = 232,
+  -- destination = "Rooms/boss5room.lua",
+  -- desx = 200,
+  -- desy = 232,
 }, t = 3, i = 8},
 
 { x = 56, y = 136, n = {l = 10}, t = 2, i = 204},
@@ -1139,15 +1140,16 @@ room.manuallyPlacedObjects = {
   --   n = {destination = "Rooms/w100x100.lua", desx = 257, desy = 257},
   --   -- giveChase = true
   -- },
-  {x = 344, y = 168, blueprint = "GlobalNpcs.debug.pohGiver"},
-  {x = 392, y = 168, blueprint = "GlobalNpcs.debug.godModeGiver"},
+  {x = 360, y = 248, blueprint = "GlobalNpcs.saver"},
+  -- {x = 344, y = 168, blueprint = "GlobalNpcs.debug.pohGiver"},
+  -- {x = 392, y = 168, blueprint = "GlobalNpcs.debug.godModeGiver"},
+  -- {x = 328, y = 104, blueprint = "GlobalNpcs.debug.spellGiver2"},
+  -- {x = 56, y = 152, blueprint = "GlobalNpcs.debug.specialGiver2"},
+  -- {x = 104, y = 344, blueprint = "GlobalNpcs.debug.skillGiver2"},
+  {x = 200, y = 222, blueprint = "GlobalNpcs.debug.debug"},
+  {x = 104, y = 344, blueprint = "GlobalNpcs.debug.debug_info"},
   {x = 244, y = 168, blueprint = "GlobalNpcs.debug.test1npc"},
   {x = 224, y = 168, blueprint = "GlobalNpcs.debug.test2npc"},
-  {x = 360, y = 248, blueprint = "GlobalNpcs.saver"},
-  {x = 328, y = 104, blueprint = "GlobalNpcs.debug.spellGiver2"},
-  {x = 104, y = 344, blueprint = "GlobalNpcs.debug.skillGiver2"},
-  {x = 56, y = 152, blueprint = "GlobalNpcs.debug.specialGiver2"},
-  {x = 248, y = 222, blueprint = "GlobalNpcs.debug.instrGiver"},
   {x = 232, y = 216, blueprint = "GlobalNpcs.test.debugItemContainer"},
   {x = 232, y = 248, blueprint = "misc.regeneratingPlant", n ={
     drops = utilities.weightTableToChanceTable{

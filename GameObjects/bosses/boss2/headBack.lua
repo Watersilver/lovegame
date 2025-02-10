@@ -13,7 +13,7 @@ function Boss2HandBack.initialize(instance)
   instance.layer = 6
   instance.deathTimer = 1
   instance.vy = 0
-  instance.image_index = 3
+  instance.image_index = 0
   instance.sounds = snd.load_sounds({
     handTouchGround = {"Effects/Oracle_Boss_BigBoom"},
   })
@@ -21,14 +21,18 @@ end
 
 Boss2HandBack.functions = {
   load = function (self)
-    self.sprite = im.sprites["Bosses/boss2/Head"]
+    self.sprite = im.sprites["Bosses/boss2/skullsection"]
+    if self.isJaw then
+      self.sprite = im.sprites["Bosses/boss2/jaw"]
+      self.deathTimer = 0
+    end
   end,
 
   late_update = function (self, dt)
     local parent = self.parent
     if parent and parent.exists then
       self.x = parent.x
-      self.y = parent.y + 13
+      self.y = parent.y
     else
       self.deathTimer = self.deathTimer - dt
       if self.deathTimer < 0 then
@@ -36,8 +40,10 @@ Boss2HandBack.functions = {
         self.y = self.y + self.vy
         if self.deathTimer < -1.5 then
           o.removeFromWorld(self)
-          snd.play(self.sounds.handTouchGround)
-          gsh.newShake(mainCamera, "displacement", 3)
+          if not self.isJaw then
+            snd.play(self.sounds.handTouchGround)
+            gsh.newShake(mainCamera, "displacement", 3)
+          end
         end
       end
     end

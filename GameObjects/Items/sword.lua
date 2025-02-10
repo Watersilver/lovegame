@@ -191,6 +191,7 @@ function Sword.initialize(instance)
   instance.side = nil -- down, right, left, up
   instance.seeThrough = true
   instance.minZo = - ps.shapes.plshapeHeight * 0.9
+  instance.imgInd2timer = 0
   if shdrs.swordCustomShader and session.save.customSwordAvailable and session.save.customSwordEnabled then
     local secondaryR = 0.65 + session.save.swordR * 0.35
     local secondaryG = 0.65 + session.save.swordG * 0.35
@@ -278,6 +279,10 @@ Sword.functions = {
 
     if self.weld and (not self.weld:isDestroyed()) then self.weld:destroy() end
 
+    if self.image_index == 2 then
+      self.imgInd2timer = self.imgInd2timer + dt
+    end
+
     -- Calculate sprite_index
     local phase
     if cr.spinattacking then
@@ -286,7 +291,7 @@ Sword.functions = {
       phase = floor(cr.image_index * 3 / cr.sprite.frames)
       self.image_index = phase
 
-      if cr.image_index > 1.985 and self.offset == 1 then
+      if (cr.image_index > 1.985 and self.offset == 1) or (self.imgInd2timer > 0.1) then
         self.image_index = 3
       end
 
@@ -445,6 +450,10 @@ Sword.functions = {
   end,
 
   draw = function(self, td)
+
+    if o.identified['itemGetPoseAndDlg'] then
+      return
+    end
 
     local x, y = self.body:getPosition()
 

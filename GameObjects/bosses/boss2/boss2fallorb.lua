@@ -20,7 +20,7 @@ local function throw_collision(self)
   expl.commonExplosion(self)
 end
 
-local sprite_info = {im.spriteSettings.boss1Orb}
+local sprite_info = {im.spriteSettings.liftableRock}
 local shadowsprite = {im.spriteSettings.boss1OrbShadow}
 
 local Orb = {}

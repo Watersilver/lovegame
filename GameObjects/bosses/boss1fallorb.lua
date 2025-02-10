@@ -4,7 +4,6 @@ local p = require "GameObjects.prototype"
 local et = require "GameObjects.enemyTest"
 local ebh = require "enemy_behaviours"
 local td = require "movement"; td = td.top_down
-local sh = require "GameObjects.shadow"
 local o = require "GameObjects.objects"
 local u = require "utilities"
 local expl = require "GameObjects.explode"
@@ -30,7 +29,7 @@ function Orb.initialize(instance)
   instance.shadowsprite = shadowsprite
   instance.physical_properties.bodyType = "static"
   -- instance.physical_properties.shape = ps.shapes.rect1x1
-  instance.physical_properties.shape = ps.shapes.circle1
+  instance.physical_properties.shape = ps.shapes.bosses.boss1.orb
   instance.physical_properties.masks = {PLAYERJUMPATTACKCAT}
   instance.image_speed = 0
   instance.hp = 4 --love.math.random(3)
@@ -52,6 +51,8 @@ function Orb.initialize(instance)
   })
 
   instance.floorTiles = {role = "thrownFloorTilesIndex"}
+  instance.zoOverride = 0
+  instance.x_scale = love.math.random() < 0.5 and 1 or -1
 end
 
 Orb.functions = {
@@ -73,9 +74,9 @@ Orb.functions = {
   end,
 
   enemyUpdate = function (self, dt)
+    if not self.zoStart then self.zoStart = self.zo end
 
     td.zAxis(self, dt)
-    sh.handleShadow(self)
     if self.zo < 0 and self.zo > -15 then
       self.harmless = false
     else
@@ -91,6 +92,9 @@ Orb.functions = {
         end
       end
     end
+
+    self.image_index = (1 - (self.zo / self.zoStart)) * (self.sprite.frames - 1)
+    if self.image_index < 0 then self.image_index = 0 end
 
     if self.floorTiles[1] then
       local x, y = self.body:getPosition()

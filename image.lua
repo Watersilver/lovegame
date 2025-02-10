@@ -86,7 +86,7 @@ im.spriteSettings = {
     {'NPCs/NpcTest3/down', 2, padding = 2, width = 16, height = 16}
   },
   owlStatue = {
-    {'NPCs/owlStatue/asleep', 3, padding = 2, width = 16, height = 16},
+    {'NPCs/owlStatue/asleep', 3, padding = 2, width = 16, height = 22, oy = 3},
     {'NPCs/owlStatue/awake', 12, padding = 2, width = 16, height = 22, oy = 3}
   },
   chest = {
@@ -121,6 +121,11 @@ im.spriteSettings = {
 
   pieceOfHeart = {
     {'pieceOfHeart', 4, padding = 2, width = 9, height = 15}
+  },
+
+  -- Spells
+  magic_missile_on_menu = {
+    {'Inventory/InvMissileL1', 1, padding = 3, width = 10, height = 10}
   },
 
   -- menu stuff
@@ -311,6 +316,12 @@ im.spriteSettings = {
   fireMissile = {
     {'Enemies/FireMissile/fireMissile', 2, padding = 2, width = 10, height = 10}
   },
+  missiles = {
+    {'Enemies/Missiles/directionalmissile', 6, padding = 0, width = 11, height = 11},
+    {'Enemies/Missiles/multimissile', 4, padding = 0, width = 10, height = 10},
+    {'Enemies/Missiles/spinmissile', 4, padding = 0, width = 10, height = 10},
+    {'Enemies/Missiles/spinmissile2', 8, padding = 0, width = 10, height = 10}
+  },
   bone = {
     {'Enemies/Bone/bone', 1, padding = 2, width = 10, height = 10}
   },
@@ -357,26 +368,58 @@ im.spriteSettings = {
   -- Boss 1
   boss1TestSprites = {
     -- {'boss1/arevcyeq', padding = 0, width = 18, height = 30},
-    {'boss1/arevcyeq', 4, padding = 2, width = 24, height = 28},
+    {'boss1/arevcyeq', 4, padding = 2, width = 36, height = 58},
     -- {'boss1/arevcyeqLH', 2, padding = 2, width = 8, height = 9},
     {'boss1/arevcyeqLH', 2, padding = 2, width = 15, height = 10},
     {'boss1/arevcyeqRH', padding = 0, width = 12, height = 12},
     {'boss1/arevcyeqLaser1', 2, padding = 0, width = 26, height = 107}
   },
-  boss1Orb = {'boss1/arevcyeqOrb', padding = 0, width = 16, height = 16},
-  boss1LiftableOrb = {'boss1/arevcyeqLiftableOrb', padding = 0, width = 16, height = 16},
+  boss1Orb = {'boss1/arevcyeqOrb', 7, padding = 0, width = 32, height = 32},
+  boss1LiftableOrb = {'boss1/arevcyeqLiftableOrb', 5, padding = 0, width = 32, height = 32},
   boss1OrbShadow = {'boss1/arevcyeqOrbShadow', 1, padding = 2, width = 16, height = 16},
 
   -- Boss 2
   boss2 = {
-    {'Bosses/boss2/Head', 4, padding = 2, width = 94, height = 89},
-    {'Bosses/boss2/HeadFront', 2, padding = 2, width = 94, height = 63},
-    {'Bosses/boss2/LeftEye', 3, padding = 2, width = 18, height = 19},
-    {'Bosses/boss2/RightEye', 3, padding = 2, width = 18, height = 19},
-    {'Bosses/boss2/LeftEyeMad', 3, padding = 2, width = 18, height = 19},
-    {'Bosses/boss2/RightEyeMad', 3, padding = 2, width = 18, height = 19},
-    {'Bosses/boss2/HandFront', 1, padding = 2, width = 36, height = 24},
-    {'Bosses/boss2/HandBack', 2, padding = 2, width = 53, height = 60}
+    {'Bosses/boss2/skull', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/skullnaileddown', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/skullsection', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/jaw', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/swoleneye_l', 3, padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/swoleneye_r', 3, padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/eye_l', 9, padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/eye_r', 9, padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/eyelid_l', 8, padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/eyelid_r', 8, padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/hand_front', padding = 0, width = 57, height = 64},
+    {'Bosses/boss2/hand_back', padding = 0, width = 57, height = 64},
+    {'Bosses/boss2/handwhole', padding = 0, width = 57, height = 64},
+
+    -- Decorations
+    {'Bosses/boss2/beads', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/crown', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/earingl', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/earingr', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/eyegemsl', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/eyegemsr', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/facering', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/faceringholders', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/faceringholders2', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/gems', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/goldtoothl', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/goldtoothr', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/hornl', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/hornll', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/hornm', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/hornr', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/hornrr', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/nosechainl', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/nosechainr', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/noseringl', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/noseringr', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/shinytiara', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/symbol', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/thintiara', padding = 0, width = 96, height = 94},
+    {'Bosses/boss2/warriorcrown', padding = 0, width = 96, height = 94},
   },
 
   boss3 = {
@@ -384,11 +427,19 @@ im.spriteSettings = {
   },
 
   boss4 = {
-    {'Bosses/boss4/boss4', 4, padding = 2, width = 28, height = 29},
-    {'Bosses/boss4/shield', 5, padding = 2, width = 16, height = 24},
+    {'Bosses/boss4/boss4-dmg0', 4, padding = 2, width = 28, height = 29},
+    {'Bosses/boss4/boss4-dmg1', 4, padding = 2, width = 28, height = 29},
+    {'Bosses/boss4/boss4-dmg2', 4, padding = 2, width = 28, height = 29},
+    {'Bosses/boss4/boss4-broken', 4, padding = 2, width = 28, height = 29},
     {'Bosses/boss4/wreckingBall', 8, padding = 2, width = 16, height = 16},
     {'Bosses/boss4/spikes', 2, padding = 2, width = 22, height = 20},
     {'Bosses/boss4/chainLink', 1, padding = 0, width = 8, height = 8},
+  },
+  boss4ShockStraight = {
+    {'Bosses/boss4/shockwave-straight', 3, padding = 1, width = 16, height = 16},
+  },
+  boss4ShockDiagonal = {
+    {'Bosses/boss4/shockwave-diagonal', 3, padding = 1, width = 16, height = 16},
   },
 
   boss5 = {

@@ -8,8 +8,7 @@ local Chest = {}
 
 function Chest.initialize(instance)
   instance.chestId = "magicMissileChest"
-  instance.chestContentsInit =
-    (require "GameObjects.GlobalNpcs.fanfareGottenItems.magicMissile").itemInfo
+  instance.data = (require "collectables").data.magic_missile
 end
 
 Chest.functions = {}

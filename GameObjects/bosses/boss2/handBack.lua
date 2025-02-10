@@ -15,7 +15,7 @@ end
 
 Boss2HandBack.functions = {
   load = function (self)
-    self.sprite = im.sprites["Bosses/boss2/HandBack"]
+    self.sprite = im.sprites["Bosses/boss2/hand_back"]
   end,
 
   late_update = function (self, dt)

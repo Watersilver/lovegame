@@ -92,6 +92,30 @@ local function handleInterrupt(reason, dlgOptions, self)
   end
 end
 
+---@param dlgOptions DlgOptions
+local function computeDlgOptions(instance, dlgOptions)
+  local bubbleOpts = {
+    -- widthDelayMod = 0.125,
+    -- noXOffset = true,
+    -- duration = 0.2,
+    timeBetweenLetters = dlgOptions.delay or GPAR.default_dlg_letter_delay,
+    staysOnScreen = dlgOptions.staysOnScreen,
+    noTriangle = dlgOptions.noSpeechBubbleTail,
+    -- color = unknown,
+    -- textRGBA = unknown
+  }
+  if dlgOptions.forceBubblePosition then
+    bubbleOpts.position = dlgOptions.forceBubblePosition
+  end
+
+  local parsed = instance:getCurrentNodeParsedText()
+  bubbleOpts.markup = parsed.markup
+  return {
+    bubbleOpts = bubbleOpts,
+    parsed = parsed
+  }
+end
+
 function Conversation.initialize(instance)
   instance.active = false
   instance.hasStartedOnce = false
@@ -101,6 +125,9 @@ function Conversation.initialize(instance)
   instance.speechBubble = nil
   instance.choiceList = nil
   instance.currentChoices = nil
+
+  instance.nodeIdHistory = {}
+  instance.choiceHistory = {}
 
   instance.idMaps = {}
 
@@ -131,6 +158,9 @@ Conversation.functions = {
     local data = self.data
 
     self.active = true
+
+    self.nodeIdHistory = {}
+    self.choiceHistory = {}
   end,
 
   ---@param event string
@@ -162,6 +192,7 @@ Conversation.functions = {
 
   ---@param nodeId string
   setNext = function(self, nodeId)
+
     ---@type ConversationData
     local data = self.data
     ---@type DlgOptions
@@ -185,24 +216,13 @@ Conversation.functions = {
 
     -- Create dialogue bubble if it doesn't exist
     if not self.speechBubble then
-      local bubbleOpts = {
-        -- widthDelayMod = 0.125,
-        -- noXOffset = true,
-        -- duration = 0.2,
-        timeBetweenLetters = dlgOptions.delay or 0.055,
-        staysOnScreen = dlgOptions.staysOnScreen,
-        noTriangle = dlgOptions.noSpeechBubbleTail,
-        -- color = unknown,
-        -- textRGBA = unknown
-      }
-      local startingPos = determinePosFromPlayer(anchor)
-      if startingPos then bubbleOpts.position = startingPos end
-      if dlgOptions.forceBubblePosition then
-        bubbleOpts.position = dlgOptions.forceBubblePosition
+      local opts = computeDlgOptions(self, dlgOptions)
+      local bubbleOpts = opts.bubbleOpts
+      local parsed = opts.parsed
+      if not dlgOptions.forceBubblePosition then
+        local startingPos = determinePosFromPlayer(anchor)
+        if startingPos then bubbleOpts.position = startingPos end
       end
-
-      local parsed = self:getCurrentNodeParsedText()
-      bubbleOpts.markup = parsed.markup
       self.speechBubble = DialogueBubble.addNew(
         parsed.text,
         anchor,
@@ -217,10 +237,12 @@ Conversation.functions = {
         self:setNext(self.currentNode.id)
         return
       else
-        local parsed = self:getCurrentNodeParsedText()
+        local opts = computeDlgOptions(self, dlgOptions)
+        local bubbleOpts = opts.bubbleOpts
+        local parsed = opts.parsed
+
         local speechBubble = self.speechBubble
         speechBubble:setContent{string = parsed.text}
-        speechBubble.markup = parsed.markup
         speechBubble.reachedVisibleEnd = nil
         speechBubble.reachedEnd = nil
         speechBubble.nextExists = nil
@@ -230,10 +252,17 @@ Conversation.functions = {
         speechBubble.stable = true
         -- Flat delay to next text rendering
         -- speechBubble.nextTextDelay = 0.5
+
+        for option, value in pairs(bubbleOpts) do
+          speechBubble[option] = value
+        end
       end
     end
 
     if self.prevNodeId ~= self.currentNode.id then
+
+      table.insert(self.nodeIdHistory, nodeId)
+
       -- Determine choices
       if self.choiceList then
         self.choiceList:remove()
@@ -264,7 +293,8 @@ Conversation.functions = {
             table.insert(self.currentChoices, {
               id = choice.id,
               onChoose = choice.onChoose,
-              text = text
+              text = text,
+              events = choice.events
             })
           end
         end
@@ -272,6 +302,14 @@ Conversation.functions = {
     end
 
     self.prevNodeId = self.currentNode.id
+  end,
+
+  getNodeIdHistory = function(self)
+    return self.nodeIdHistory
+  end,
+
+  getChoiceHistory = function(self)
+    return self.choiceHistory
   end,
 
   getCurrentNodeRawText = function(self)
@@ -489,9 +527,18 @@ Conversation.functions = {
                 handleInterrupt('cancel-choice', dlgOptions, self)
               end
 
-              if input.enterPressed then
+              -- Check if cc exists because if user mashes enter it might not exist yet resulting in crash
+              local cc = self.choiceList and self.choiceList:getCurrentChoice()
+              if input.enterPressed and cc then
                 snd.play(glsounds.select)
-                handleNextGetter(self.choiceList:getCurrentChoice().onChoose)
+                table.insert(self.choiceHistory, cc.id)
+                if cc.events then
+                  for _, ev in ipairs(cc.events) do
+                    local split = u.split(ev, ':')
+                    self:fire(split[1], split[2])
+                  end
+                end
+                handleNextGetter(cc.onChoose)
               end
             else
               -- Show end button when bubble is nonAuto and there are no choices
@@ -526,7 +573,7 @@ Conversation.functions = {
             end
           end
         elseif dlgBubble.scrollingUp then
-          dlgBubble.content:setYOffset(dlgBubble.content.yOffset + 25 * dt)
+          dlgBubble.content:setYOffset(dlgBubble.content.yOffset + GPAR.dlg_scroll_speed_factor * dt)
           if dlgBubble.content:getNextVisibleHeight() <= dlgBubble.content:getHeight() then
             dlgBubble.content:setYOffset(dlgBubble.content:getOffsetAfterScrollingOneLine())
             dlgBubble.scrollingUp = nil

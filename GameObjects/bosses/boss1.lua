@@ -62,6 +62,7 @@ local states = {
     instance.patrolDir = -instance.patrolDir
     if instance.resting then
       instance.changeDirNextState = "patrol"
+      instance.image_index = 0
     else
       if instance.hasCorneredPlayer then
         instance.changeDirNextState = "orbsAttack"
@@ -112,6 +113,13 @@ local states = {
   start_state = function(instance, dt)
     instance.plphase = 1 -- preparing laser phase
     instance.prepareLaserCounter = 1
+    if instance.image_index ~= 2 then
+      instance.targetAngle = math.pi * 2
+      if love.math.random() < 0.5 then
+        instance.targetAngle = -instance.targetAngle
+      end
+    end
+    instance.image_index = 2
   end,
   check_state = function(instance, dt)
     if instance.prepareLaserCounter < 0 and instance.plphase == 3 then
@@ -119,6 +127,7 @@ local states = {
     end
   end,
   end_state = function(instance, dt)
+    instance.targetAngle = nil
   end
   },
 
@@ -142,6 +151,7 @@ local states = {
     instance.hasCorneredPlayer = true
     instance.laserDuration = 9.1 * 25 / instance.patrolSpeed
     instance.angleAfterAttack = love.math.random(0,10) * 360
+    instance.image_index = 2
   end,
   check_state = function(instance, dt)
     if instance.haveHitWall then
@@ -226,12 +236,14 @@ local states = {
           liftable = true
         }
         liftableOrb.sprite_info = {im.spriteSettings.boss1LiftableOrb}
+        liftableOrb.physical_properties.shape = ps.shapes.circleHalf
         o.addToWorld(liftableOrb)
       end
       isOrbRow = 1 - isOrbRow
     end
     snd.play(instance.sounds.crumble)
     snd.play(instance.sounds.spell)
+    instance.image_index = 2
   end,
   check_state = function(instance, dt)
     if instance.orbsAttackCounter < 0 then
@@ -290,7 +302,7 @@ function Boss1.initialize(instance)
   instance.shielded = true
   instance.shieldWall = true
   instance.facing = "down"
-  instance.patrolDir = 1
+  instance.patrolDir = love.math.random() < 0.5 and 1 or -1
   instance.physical_properties.shape = ps.shapes.bosses.boss1.body
   instance.spritefixture_properties.shape = ps.shapes.bosses.boss1.sprite
   instance.handFrame = 0
@@ -304,6 +316,8 @@ function Boss1.initialize(instance)
 
   instance.state = sm.new_state_machine(states)
   instance.state.state = "start"
+  instance.t = 0
+  instance.t2 = 0
 end
 
 Boss1.functions = {
@@ -330,6 +344,7 @@ Boss1.functions = {
   end,
 
   enemyUpdate = function (self, dt)
+
     if self.invulnerableEnd then
       self.shieldDown = false
       self.shieldWall = true
@@ -369,6 +384,25 @@ Boss1.functions = {
     end
 
     self.gotHit = false
+
+    if self.laser then
+      if not self.targetAngle then self.angle = 0 end
+      local r = love.math.random()
+      local th = math.pi * love.math.random() * 2
+      local x, y = u.polarToCartesian(r, th)
+      self.x = self.x + x
+      self.y = self.y + y
+    else
+      if not self.targetAngle then self.angle = math.sin(self.t) * math.pi * 0.025 end
+      self.t = (self.t + dt) % (2 * math.pi)
+      self.t2 = (self.t2 + dt * math.pi * 0.5) % (2 * math.pi)
+
+      self.y = self.y + math.sin(self.t2) * 2
+    end
+
+    if self.targetAngle then
+      self.angle = u.gradualAdjust(dt, self.angle, self.targetAngle, 6)
+    end
   end,
 
   hitBySword = function (self, other, myF, otherF)
@@ -411,16 +445,16 @@ Boss1.functions = {
 
     et.functions.draw(self)
 
-    local sprite = self.staffSpr
-    love.graphics.draw(
-    sprite.img, sprite[0], self.staffx, self.staffy, math.rad(self.staffAngle),
-    self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
-    sprite.cx, sprite.cy)
-    local sprite = self.handSpr
-    love.graphics.draw(
-    sprite.img, sprite[self.handFrame], self.handx, self.handy, 0,
-    self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
-    sprite.cx, sprite.cy)
+    -- local sprite = self.staffSpr
+    -- love.graphics.draw(
+    -- sprite.img, sprite[0], self.staffx, self.staffy, math.rad(self.staffAngle),
+    -- self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
+    -- sprite.cx, sprite.cy)
+    -- local sprite = self.handSpr
+    -- love.graphics.draw(
+    -- sprite.img, sprite[self.handFrame], self.handx, self.handy, 0,
+    -- self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
+    -- sprite.cx, sprite.cy)
 
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
   end,

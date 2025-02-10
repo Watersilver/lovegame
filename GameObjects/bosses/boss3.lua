@@ -30,17 +30,24 @@ local function onFireEnd(fuel)
   -- end
   local ch = fuel.swarmChance and (fuel.swarmChance * 0.01) or 0.1
   if love.math.random() < ch then
-    local s = Swarm:new{
-      xstart = fuel.x,
-      ystart = fuel.y,
-      x = fuel.x,
-      y = fuel.y,
-      hp = 4,
-      goThroughStatic = true,
-      canBeBullrushed = false,
-      canBeRolledThrough = false
-    }
-    o.addToWorld(s)
+    local ifThisDiesIDie = o.identified['DragonThatWillObliterateYourAss']
+    if ifThisDiesIDie then
+      ifThisDiesIDie = ifThisDiesIDie[1]
+    end
+    if ifThisDiesIDie then
+      local s = Swarm:new{
+        xstart = fuel.x,
+        ystart = fuel.y,
+        x = fuel.x,
+        y = fuel.y,
+        hp = 4,
+        goThroughStatic = true,
+        canBeBullrushed = false,
+        canBeRolledThrough = false,
+        ifThisDiesIDie = ifThisDiesIDie
+      }
+      o.addToWorld(s)
+    end
   end
 
   o.removeFromWorld(fuel)
@@ -1259,6 +1266,7 @@ function Boss3.initialize(instance)
   instance.attackDmg = instance.touchDmg
   instance.blowUpForce = 130
   instance.chargeImpact = 25
+  session.setInstanceId(instance, 'DragonThatWillObliterateYourAss')
 end
 
 Boss3.functions = {

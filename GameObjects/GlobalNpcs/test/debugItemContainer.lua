@@ -8,8 +8,7 @@ local Chest = {}
 
 function Chest.initialize(instance)
   instance.chestId = "debugTest"
-  instance.chestContentsInit =
-    (require "GameObjects.GlobalNpcs.fanfareGottenItems.debug").itemInfo
+  instance.data = (require "collectables").data.testitems
 end
 
 Chest.functions = {}

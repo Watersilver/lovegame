@@ -1,8 +1,10 @@
 local im = require "image"
 local p = require "GameObjects.prototype"
 local conv = require 'GameObjects.Conversation.convoObject'
-local save = require 'ConversationData.data.save'
+local save = require 'ConversationData.data.save_convo'
 local npcProt = require 'GameObjects.GlobalNpcs.debug.npcPrototype'
+local TF = require "GameObjects.TextFloating"
+local u = require "utilities"
 
 local NPC = {}
 
@@ -38,7 +40,30 @@ function NPC.initialize(instance)
     instance.sleep_frame_cooldown = 0.5
   end)
   instance.conversation:listen('save', function()
+    if pl1 then
+      pl1:addHealth(100000)
+    end
     session.saveGame()
+    local vx = 0
+    local vy = -10
+    if pl1 then
+      local _, dir = u.cartesianToPolar(pl1.x - instance.x, pl1.y - instance.y)
+      vx, vy = u.polarToCartesian(-vy, dir)
+    end
+    TF:addNew{
+      x = instance.x,
+      y = instance.y - 10,
+      content = 'saved',
+      movement = {vx = vx, vy = vy},
+      onUnstoppableUpdate = function(self)
+        local t = self:getLifetime()
+        self.opacity = 1 - t * 0.5
+        if self.opacity < 0 then
+          self:removeFromWorld()
+          self.opacity = 0
+        end
+      end
+    }
   end)
 end
 

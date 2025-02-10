@@ -44,6 +44,15 @@ GCON = {
   flowerVillage = "Anima",
   refugeeVillage = "Ancora",
   shidun = "Shidun",
+  ---@param options? {capitalize?: boolean;}
+  lostWoods = function(options)
+    if options then
+      if options.capitalize then
+        return "The red forest"
+      end
+    end
+    return "the red forest"
+  end,
   npcNames = {
     rescuer = "Tutela",
     mage = "Lethe",
@@ -84,18 +93,21 @@ GCON = {
 gvar = {
   t = 0,
   -- Threshold before screen transitions are triggered
-  screenEdgeThreshold = GCON.defaultScreenEdgeThreshold
+  screenEdgeThreshold = GCON.defaultScreenEdgeThreshold,
 }
 
 -- Global Parameters
 GPAR = {
   walk_anim_speed_factor = 0.13,
   walk_anim_max_speed = 0.29,
+  default_dlg_letter_delay = 0.01,
+  dlg_scroll_speed_factor = 50
 }
 
 -- Debug
 Debug = {
-  parameter_and_enemy_spawn_cursor = 2
+  cursor = 2,
+  bodiesRenderMode = 0
 }
 
 -- Load stuff from save directory
@@ -200,6 +212,7 @@ session = {
     session.deadEnemies = u.newFastAccessQueue(20)
     session.delta_hours = 0
     session.sleeping_danger = false
+    session.prevRupees = session.save.rupees
 
     -- add global objects
     session.particles = imports.particles:new()
@@ -279,6 +292,7 @@ session = {
   end,
   addMoney = function(addedMoney)
     local maxRupees = session.maxMoney()
+    session.prevRupees = session.save.rupees
     session.save.rupees = u.clamp(0, session.save.rupees + addedMoney, maxRupees)
   end,
   getClockAngleTarget = function()
@@ -628,13 +642,6 @@ session = {
     instance.ids[#instance.ids+1] = id
   end,
 
-  togleIntPos = function()
-    if DEFDRAW then
-      DEFDRAW = nil
-    else
-      DEFDRAW = love.graphics.draw
-    end
-  end
 }
 local session = session
 
@@ -996,9 +1003,9 @@ function love.update(dt)
   -- fuck = session.save.time
 
   -- -- display mouse position
-  -- local wmx, wmy = cam:toWorld(moup.x, moup.y)
-  -- wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
-  -- fuck = tostring(wmx) .. "/" .. tostring(wmy)
+  local wmx, wmy = cam:toWorld(moup.x, moup.y)
+  wmx, wmy = math.floor(wmx / 16) * 16 + 8, math.floor(wmy / 16) * 16 + 8
+  fuck = tostring(wmx) .. "/" .. tostring(wmy)
 
   -- -- display room
   -- fuck = fuck .. "\n" .. (session.latestVisitedRooms and session.latestVisitedRooms:getLast() or "")
@@ -1517,6 +1524,42 @@ local function mainCameraDraw(l,t,w,h)
   --   resetColour()
   -- end
 
+  love.graphics.setColor(1, 0, 1, 1)
+  if Debug.bodiesRenderMode == 1 then
+    local bs = ps.pw:getBodies()
+    ---@param b love.Body
+    for _, b in ipairs(bs) do
+      local fis = b:getFixtures()
+      for _, fi in ipairs(fis) do
+        local sha = fi:getShape()
+        if sha:getType() == 'circle' then
+          local x, y = b:getPosition()
+          love.graphics.circle("line", x, y, sha:getRadius())
+        elseif sha:getType() == 'polygon' then
+          love.graphics.polygon("line", b:getWorldPoints(sha:getPoints()))
+        end
+      end
+    end
+  elseif Debug.bodiesRenderMode == 2 then
+    local bs = ps.pw:getBodies()
+    ---@param b love.Body
+    for _, b in ipairs(bs) do
+      if b:getType() ~= 'static' then
+        local fis = b:getFixtures()
+        for _, fi in ipairs(fis) do
+          local sha = fi:getShape()
+          if sha:getType() == 'circle' then
+            local x, y = b:getPosition()
+            love.graphics.circle("line", x, y, sha:getRadius())
+          elseif sha:getType() == 'polygon' then
+            love.graphics.polygon("line", b:getWorldPoints(sha:getPoints()))
+          end
+        end
+      end
+    end
+  end
+  love.graphics.setColor(1, 1, 1, 1)
+
 end
 local function afterScreenEffects(l,t,w,h)
   if not game.transitioning or
@@ -1557,11 +1600,8 @@ local function noEffectsDraw()
   local l, t, w, h = sh.get_current_window()
   cam:setWindow(cam.noisel + l,cam.noiset + t,w,h)
 
-  -- TODOOOOOO make this into an optional setting until I get more opinions
-  -- local camxt = u.round(cam.xt)
-  -- local camyt = u.round(cam.yt)
-  local camxt = (cam.xt)
-  local camyt = (cam.yt)
+  local camxt = cam.xt
+  local camyt = cam.yt
 
   cam:setPosition(camxt, camyt)
   setCurrentCam(mainCamera)
@@ -1692,18 +1732,18 @@ function love.draw()
   love.graphics.print("FPS: " .. love.timer.getFPS(),love.graphics.getWidth()-200,love.graphics.getHeight()-77)
 
   local restore_col = u.storeColour()
-  love.graphics.circle('fill', 10, love.graphics.getHeight()-100 + 10 - Debug.parameter_and_enemy_spawn_cursor * 30, 5)
+  love.graphics.circle('fill', 10, love.graphics.getHeight()-100 + 10 - Debug.cursor * 30, 5)
 
-  if Debug.parameter_and_enemy_spawn_cursor == 0 then u.changeColour{r = 1, g = 1, b = 1} else u.changeColour{r = 0.5, g = 0.5, b = 0.5} end
+  if Debug.cursor == 0 then u.changeColour{r = 1, g = 1, b = 1} else u.changeColour{r = 0.5, g = 0.5, b = 0.5} end
   love.graphics.print("Enemy: ", 20, love.graphics.getHeight()-100)
 ---@diagnostic disable-next-line: undefined-global
   if currentEnemyName then
     love.graphics.print(currentEnemyName, 150 + 20, love.graphics.getHeight()-100)
   end
-  if Debug.parameter_and_enemy_spawn_cursor == 1 then u.changeColour{r = 1, g = 1, b = 1} else u.changeColour{r = 0.5, g = 0.5, b = 0.5} end
-  love.graphics.print("Walk Anim Max Speed: " .. tostring(GPAR.walk_anim_max_speed), 20, love.graphics.getHeight()-100 - 30)
-  if Debug.parameter_and_enemy_spawn_cursor == 2 then u.changeColour{r = 1, g = 1, b = 1} else u.changeColour{r = 0.5, g = 0.5, b = 0.5} end
-  love.graphics.print("Walk Anim Speed Factor: " .. tostring(GPAR.walk_anim_speed_factor), 20, love.graphics.getHeight()-100 - 60)
+  -- if Debug.cursor == 1 then u.changeColour{r = 1, g = 1, b = 1} else u.changeColour{r = 0.5, g = 0.5, b = 0.5} end
+  -- love.graphics.print("Walk Anim Max Speed: " .. tostring(GPAR.walk_anim_max_speed), 20, love.graphics.getHeight()-100 - 30)
+  -- if Debug.cursor == 2 then u.changeColour{r = 1, g = 1, b = 1} else u.changeColour{r = 0.5, g = 0.5, b = 0.5} end
+  -- love.graphics.print("Walk Anim Speed Factor: " .. tostring(GPAR.walk_anim_speed_factor), 20, love.graphics.getHeight()-100 - 60)
   restore_col()
   if fuck then love.graphics.print(tostring(fuck), 0, 177+120) end
   local debiter = 0
@@ -1774,7 +1814,7 @@ function love.wheelmoved(_, y)
     move = -1
   end
 
-  if Debug.parameter_and_enemy_spawn_cursor == 0 then
+  if Debug.cursor == 0 then
     if cursor then
       cursor = cursor + move
     else
@@ -1786,9 +1826,9 @@ function love.wheelmoved(_, y)
       cursor = #enemyPaths
     end
     currentEnemyName = enemyPaths[cursor]
-  elseif Debug.parameter_and_enemy_spawn_cursor == 1 then
+  elseif Debug.cursor == 1 then
     GPAR.walk_anim_max_speed = GPAR.walk_anim_max_speed + move * 0.01
-  elseif Debug.parameter_and_enemy_spawn_cursor == 2 then
+  elseif Debug.cursor == 2 then
     GPAR.walk_anim_speed_factor = GPAR.walk_anim_speed_factor + move * 0.01
   end
 end
@@ -1800,7 +1840,7 @@ function love.mousepressed(x, y, button, isTouch)
   -- local brick = DynBrick:new{x = x, y = y, xstart = x, ystart = y}
   -- o.addToWorld(brick)
 
-  if Debug.parameter_and_enemy_spawn_cursor == 0 then
+  if Debug.cursor == 0 then
     if currentEnemyName then
       local enemClass = assert(love.filesystem.load(currentEnemyName))()
       local enem = enemClass:new()
@@ -1884,14 +1924,53 @@ function love.keypressed(key, scancode)
     local isFull = love.window.getFullscreen()
     love.window.setFullscreen(not isFull, "desktop")
   elseif key == ',' or key == '<' then
-    Debug.parameter_and_enemy_spawn_cursor = Debug.parameter_and_enemy_spawn_cursor + 1
+    Debug.cursor = Debug.cursor + 1
   elseif key == '.' or key == '>' then
-    Debug.parameter_and_enemy_spawn_cursor = Debug.parameter_and_enemy_spawn_cursor - 1
+    Debug.cursor = Debug.cursor - 1
   end
-  if Debug.parameter_and_enemy_spawn_cursor < 0 then
-    Debug.parameter_and_enemy_spawn_cursor = 2
-  elseif Debug.parameter_and_enemy_spawn_cursor > 2 then
-    Debug.parameter_and_enemy_spawn_cursor = 0
+  if Debug.cursor < 0 then
+    Debug.cursor = 2
+  elseif Debug.cursor > 2 then
+    Debug.cursor = 0
+  end
+
+  if key == 't' then
+    Debug.bodiesRenderMode = Debug.bodiesRenderMode + 1
+    if Debug.bodiesRenderMode > 2 then
+      Debug.bodiesRenderMode = 0
+    else
+      print('================')
+      print('Body stuff start')
+      print('================')
+    end
+
+    ---@param b love.Body
+    local shitfuckcrapass = function(b)
+      local x, y = b:getPosition()
+      local wmx, wmy = cam:toWorld(moup.x, moup.y)
+      if u.distanceSqared2d(wmx, wmy, x, y) < 256 then
+        print('--------------')
+        print('Body user Data')
+        print('--------------')
+        print('userdata ref: ', b:getUserData())
+        print('userdata exists: ', b:getUserData().exists)
+        u.printTable('userdata', b:getUserData(), 2)
+      end
+    end
+
+    if Debug.bodiesRenderMode == 1 then
+      local bs = ps.pw:getBodies()
+      for _, b in ipairs(bs) do
+        shitfuckcrapass(b)
+      end
+    elseif Debug.bodiesRenderMode == 2 then
+      local bs = ps.pw:getBodies()
+      for _, b in ipairs(bs) do
+        if b:getType() ~= 'static' then
+          shitfuckcrapass(b)
+        end
+      end
+    end
   end
 
   -- -- Enemarea code

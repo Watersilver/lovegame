@@ -20,7 +20,54 @@ local deathShader = shdrs.bossDeathShader
 
 local chainLink = require "GameObjects.bosses.boss4.chainLink"
 
-local lighting = require "ScreenEffects.lighting.lighting"
+local proj = require "GameObjects.enemies.projectile"
+
+
+
+local shockwaveShapeStraight = love.physics.newRectangleShape(5, 0, 1, 15)
+local shockwaveShapeDiagonal = love.physics.newRectangleShape(6, 0, 8, 1, math.pi * 0.5)
+local spawnShockwave = function(instance, direction, pos, speedMod)
+  if not pos then pos = instance end
+  local isDiagonal = ((direction + math.pi * 0.125) % (math.pi * 0.5)) > math.pi * 0.25
+  local shape
+  local si
+  local angle
+  if isDiagonal then
+    shape = shockwaveShapeDiagonal
+    si = im.spriteSettings.boss4ShockDiagonal
+    angle = direction - math.pi * 0.25
+  else
+    shape = shockwaveShapeStraight
+    si = im.spriteSettings.boss4ShockStraight
+    angle = direction - math.pi * 0.5
+  end
+  local shockwave = proj:new{
+    layer = instance.layer - 1,
+    xstart = pos.x,
+    ystart = pos.y,
+    notBreakableByMissile = true,
+    dpDeflectable = false,
+    attackDmg = 2,
+    sprite_info = si,
+    image_speed = 0.15,
+    creator = instance,
+    direction = direction,
+    maxspeed = 100 * (speedMod or 1),
+    swarmChance = 0,
+    angle = angle,
+    impact = 15,
+    explosive = true,
+    blowUpForce = 75,
+    ballbreaker = false,
+    drawIntPos = true
+  }
+  shockwave.physical_properties.shape = shape
+  shockwave.physical_properties.initAngle = direction
+  o.addToWorld(shockwave)
+
+  return shockwave
+end
+
 
 local states = {
   -- WARNING STARTING STATE IN INITIALIZE!!!
@@ -500,6 +547,30 @@ WreckingBall.functions = {
     end
 
     self:updateChain()
+
+    if self.hitwall then
+      local vx, vy = self.hitwall[1], self.hitwall[2]
+
+      local th = 0
+      if math.abs(vx) > math.abs(vy) then
+        if vx > 0 then
+          th = 0
+        else
+          th = math.pi
+        end
+      else
+        if vy > 0 then
+          th = math.pi * 0.5
+        else
+          th = math.pi * 1.5
+        end
+      end
+
+      spawnShockwave(self, th + math.pi * 0.25)
+      spawnShockwave(self, th)
+      spawnShockwave(self, th - math.pi * 0.25)
+      self.hitwall = nil
+    end
   end,
 
   late_update = function (self)
@@ -527,13 +598,15 @@ WreckingBall.functions = {
     self:emote("madlaugh")
   end,
 
-  hitSolidStatic = function (self, other, myF, otherF)
+  hitSolidStatic = function (self, other, myF, otherF, coll)
     if self.state.state == "spikedcharge" then
+      self.hitwall = {self.x - other.xstart, self.y - other.ystart}
       self.state:change_state(self, 1, "grabchance")
       snd.play(glsounds.smallBoom)
       gsh.newShake(mainCamera, "displacement")
       self:emote("mania")
     elseif self.state.state == "bounceAround" then
+      self.hitwall = {self.x - other.xstart, self.y - other.ystart}
       snd.play(glsounds.boing)
       gsh.newShake(mainCamera, "displacement", 0.2)
     end

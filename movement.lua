@@ -309,13 +309,14 @@ local mo = {}
       elseif object.sprite.frames > 5 then
         image_speed = image_speed * 1.25
       end
-      if floorFriction < 1 then
-        image_speed = image_speed * 1/floorFriction
-      end
       if image_speed > GPAR.walk_anim_max_speed then image_speed = GPAR.walk_anim_max_speed end
       -- if image_speed > 0.29 then image_speed = 0.29 end
       -- if image_speed > 0.3 then image_speed = 0.3 end
       -- if image_speed > 0.4 then image_speed = 0.4 end
+      if floorFriction < 1 then
+        -- image_speed = image_speed * 1/floorFriction
+        image_speed = image_speed * 2
+      end
       object.image_speed = image_speed * (speedMod or 1)
     end,
 

@@ -413,6 +413,7 @@ items.ringGlide = {
 }
 
 -- Skins
+-- Doesn't work
 items.ringMage = {
   name = "Mage Ring",
   description = "Transform into Mage!",

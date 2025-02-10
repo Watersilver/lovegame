@@ -331,6 +331,11 @@ HeldSword.functions = {
   end,
 
   draw = function(self, td)
+
+    if o.identified['itemGetPoseAndDlg'] then
+      return
+    end
+
     local cr = self.creator
     -- Check if I have to be destroyed
     if not cr then

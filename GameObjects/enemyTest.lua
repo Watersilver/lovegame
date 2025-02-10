@@ -86,6 +86,9 @@ function Enemy.initialize(instance)
   -- instance.drops = {{value = "fairy", chance = 1}}
   -- OR
   -- instance.drop = "cheap"
+
+  instance.x_draw_offset = 0
+  instance.y_draw_offset = 0
 end
 
 Enemy.functions = {
@@ -193,18 +196,26 @@ Enemy.functions = {
     self.speed = u.magnitude2d(self.vx, self.vy)
     if self.image_speed then
       self.image_index = (self.image_index + dt*60*self.image_speed)
+
+      if self.onAnimationEnd and self.sprite and self.sprite.frames and self.image_index >= self.sprite.frames then
+        self:onAnimationEnd()
+      end
     end
     -- Do specialised stuff
     self:enemyUpdate(dt)
 
     self.attacked = false
     self.attemtedToBeAttacked = false
+
+    if self.ifThisDiesIDie and not self.ifThisDiesIDie.exists then
+      self.die(self)
+    end
   end,
 
   draw = function (self)
     if self.invisible then return end
 
-    local zo = self.zo or 0
+    local zo = self.zoOverride or self.zo or 0
     local xtotal, ytotal = self.x, self.y + zo
 
     if self.spritebody then
@@ -227,7 +238,7 @@ Enemy.functions = {
     local worldShader = love.graphics.getShader()
     love.graphics.setShader(self.myShader)
     love.graphics.draw(
-    sprite.img, frame, xtotal, ytotal, self.angle,
+    sprite.img, frame, xtotal + self.x_draw_offset, ytotal + self.y_draw_offset, self.angle,
     self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
     sprite.cx, sprite.cy)
     love.graphics.setShader(worldShader)
@@ -248,7 +259,7 @@ Enemy.functions = {
     end
     local frame = sprite[floor(self.image_index)]
 
-    local zo = self.zo or 0
+    local zo = self.zoOverride or self.zo or 0
     local xtotal, ytotal = trans.moving_objects_coords(self)
     ytotal = ytotal + zo
 
@@ -258,7 +269,7 @@ Enemy.functions = {
 
     love.graphics.draw(
     sprite.img, frame,
-    xtotal, ytotal, self.angle,
+    xtotal + self.x_draw_offset, ytotal + self.y_draw_offset, self.angle,
     self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
     sprite.cx, sprite.cy)
     -- if self.body then

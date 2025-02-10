@@ -15,7 +15,8 @@ local hitShader = shdrs.enemyHitShader
 
 -- At this y the hand perfectly grips the ground
 local handMinHeight = 98.75
-local defaultHeadHeight = 65
+-- local defaultHeadHeight = 65
+local defaultHeadHeight = 52
 
 -- Does initial hands appearance
 local function initRaiseHand(instance, hand)
@@ -66,6 +67,14 @@ local states = {
       if (instance.prevStateTimer < 3 and instance.stateTimer > 3) then
         snd.play(instance.sounds.crumble)
         gsh.newShake(mainCamera, "displacement")
+
+        local ud = nil
+        for _, body in ipairs(ps.pw:getBodies()) do
+          ud = body:getUserData()
+          if ud and ud.exists and ud.draw and ud.ystart and ud.ystart < 88 then
+            o.change_layer(ud, instance.layer-1)
+          end
+        end
       end
     end,
     start_state = function(instance, dt)
@@ -102,7 +111,8 @@ local states = {
       else
         if instance.step == 0 then
           instance.step = 1
-          instance.body:setLinearVelocity(0, -10)
+          -- instance.body:setLinearVelocity(0, -10)
+          instance.body:setLinearVelocity(0, -20)
         elseif instance.step == 1 then
           if instance.y < defaultHeadHeight then
             instance.body:setLinearVelocity(0, 0)
@@ -119,13 +129,13 @@ local states = {
           else instance.y = instance.y - 1 end
         elseif instance.step == 2 then
           -- if instance.stateTimer > 0.5 then
-          if instance.stateTimer > 1.75 then
+          if instance.stateTimer > 1.4 then
             instance.step = 3
             instance.stateTimer = 0
           end
         elseif instance.step == 3 then
-          instance.leftEye.eyelidState = 1
-          instance.rightEye.eyelidState = 1
+          instance.leftEye.eyelidState = 2
+          instance.rightEye.eyelidState = 2
           -- if instance.stateTimer > 1.25 then
           if instance.stateTimer > 0.05 then
             instance.step = 4
@@ -145,19 +155,13 @@ local states = {
           local laugh = 15 * instance.stateTimer % 4
           laugh = math.floor(laugh)
 
-          instance.image_index = (laugh ~= 3) and laugh or 1
+          instance.mouth_gape_state = (laugh ~= 3) and laugh or 1
 
-          if instance.image_index == 0 then
-            instance.y = defaultHeadHeight
-          elseif instance.image_index == 1 then
-            instance.y = defaultHeadHeight + 4
-          elseif instance.image_index == 2 then
-            instance.y = defaultHeadHeight + 8
-          end
+          instance.y = defaultHeadHeight + 4 * instance.mouth_gape_state
 
           if instance.laughPrev ~= laugh then
-            instance.leftEye.eyelidState = love.math.random(0, 2)
-            instance.rightEye.eyelidState = love.math.random(0, 2)
+            instance.leftEye.image_index = love.math.random(0, 8)
+            instance.rightEye.image_index = love.math.random(0, 8)
           end
 
           instance.laughPrev = laugh
@@ -171,7 +175,7 @@ local states = {
             instance.laughed_this_frame = false
           end
 
-          if instance.stateTimer > 2.3 and instance.image_index == 0 then
+          if instance.stateTimer > 2.3 and instance.mouth_gape_state == 0 then
             instance.step = 6
             instance.leftEye.eyelidState = 0
             instance.rightEye.eyelidState = 0
@@ -350,6 +354,13 @@ local states = {
           parent = instance
         }
         o.addToWorld(instance.headBack)
+        instance.jawBack = HeadBack:new{
+          x = instance.x,
+          y = instance.y + instance.mouth_gape_state * 4,
+          isJaw = true
+        }
+        o.addToWorld(instance.jawBack)
+        instance.sprite = im.sprites["Bosses/boss2/skull"]
       end
     end,
     start_state = function(instance, dt)
@@ -364,7 +375,6 @@ local states = {
     end,
     end_state = function(instance, dt)
       o.change_layer(instance, 14)
-      instance.sprite = im.sprites["Bosses/boss2/HeadFront"]
       instance.iminOverride = 0
     end
   },
@@ -379,11 +389,10 @@ local states = {
       instance.body:setLinearVelocity(0, 0)
     end,
     start_state = function(instance, dt)
-      instance.maxHeight = defaultHeadHeight + 6
+      instance.maxHeight = 71
       instance.stateGravity = 5
       instance.stateVY = 0
       local x, y = instance.body:getPosition()
-      y = y - 13
       instance.body:setPosition(x, y)
       instance.y = y
     end,
@@ -422,6 +431,7 @@ local states = {
       instance.shakeTimer = 0
       instance.shakeFrequency = 0.04
       instance.shakeX, instance.shakeY = 0, 0
+      instance.sprite = im.sprites["Bosses/boss2/skullnaileddown"]
     end,
     check_state = function(instance, dt)
     end,
@@ -433,6 +443,8 @@ local states = {
 local Boss2 = {}
 
 function Boss2.initialize(instance)
+  instance.mouth_gape_state = 0
+
   instance.goThroughEnemies = true
   instance.grounded = true
   instance.grounded = false
@@ -519,6 +531,12 @@ Boss2.functions = {
     self.leftHand.otherHand = self.rightHand
     self.rightHand.otherHand = self.leftHand
 
+    -- Make decorations
+    local decor = (require "GameObjects.bosses.boss2.decorations"):new{
+      parent = self
+    }
+    o.addToWorld(decor)
+
     -- Everything set up. Now disable this and children untill
     -- player triggers starting cutscene and battle
     self:toggleEnabled(false)
@@ -547,7 +565,7 @@ Boss2.functions = {
       self.myShader = nil
     end
 
-    
+
     if self.enabled and self.handsLoss == 0 and self.leftHand.exists and self.rightHand.exists then
       local x = (self.rightHand.x + self.leftHand.x) * 0.5
       local y = defaultHeadHeight - 0.5 * (self.leftHand.y + self.rightHand.y - 2 * handMinHeight)
@@ -599,7 +617,7 @@ Boss2.functions = {
     end
 
     if self.enabled then
-      self.image_index = self.greatPain and 2 or (self.blind and 2 or (self:oneEyed() and 1 or 0))
+      self.mouth_gape_state = self.greatPain and 2 or (self.blind and 2 or (self:oneEyed() and 1 or 0))
 
       -- if self.blind and not self.dismembered then
       --   -- < 68 mouth visible
@@ -608,15 +626,15 @@ Boss2.functions = {
       -- Reaction to taking damage
       if self.invulnerable then
         if self.invulnerable > 0.2 then
-          self.image_index = 2
+          self.mouth_gape_state = 2
         else
-          self.image_index = self.greatPain and 2 or 1
+          self.mouth_gape_state = self.greatPain and 2 or 1
         end
       end
     end
 
     if self.iminOverride then
-      self.image_index = self.iminOverride
+      self.mouth_gape_state = self.iminOverride
     end
   end,
 
@@ -686,15 +704,56 @@ Boss2.functions = {
     snd.bgmV2.getMusicAndload()
   end,
 
-  -- draw = function (self)
-  --
-  --   -- Draw enemy the default way
-  --   et.functions.draw(self)
-  --
-  --   -- Draw extra stuff like eyes and hands.
-  --
-  --   -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
-  -- end,
+  draw = function (self)
+
+    if self.invisible then return end
+
+    local zo = self.zoOverride or self.zo or 0
+    local xtotal, ytotal = self.x, self.y + zo
+
+    if self.spritebody then
+      if self.spritejoint and (not self.spritejoint:isDestroyed()) then self.spritejoint:destroy() end
+      self.spritebody:setPosition(xtotal, ytotal)
+      self.spritejoint = love.physics.newWeldJoint(self.spritebody, self.body, 0,0)
+    end
+
+    local sprite = self.sprite
+    local frames = self.sprite.frames
+    while self.image_index >= frames do
+      self.image_index = self.image_index - frames
+    end
+    local frame = sprite[math.floor(self.image_index)]
+
+    if self.drawIntPos then
+      xtotal, ytotal = u.round(xtotal), u.round(ytotal)
+    end
+
+    local worldShader = love.graphics.getShader()
+    love.graphics.setShader(self.myShader)
+
+    -- Draw the Jaw
+    if not self.headBack then
+      local jaw = im.sprites["Bosses/boss2/jaw"]
+      local jaw_frame = jaw[0]
+      love.graphics.draw(
+      jaw.img, jaw_frame, xtotal, ytotal + self.mouth_gape_state * 4, self.angle,
+      self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
+      sprite.cx, sprite.cy)
+    end
+
+    love.graphics.draw(
+    sprite.img, frame, xtotal, ytotal, self.angle,
+    self.x_scale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
+    sprite.cx, sprite.cy)
+
+    love.graphics.setShader(worldShader)
+    -- if self.body then
+    --   love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
+    -- end
+
+    -- Draw enemy the default way
+    -- et.functions.draw(self)
+  end,
 
   destroy = function (self)
     -- What happens when I get destroyed.

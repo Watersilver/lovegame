@@ -64,14 +64,14 @@ ps.shapes = {
   bishopSprite = love.physics.newRectangleShape(13, 24),
 
   swordSprite = love.physics.newRectangleShape(16, 15),
-  -- swordIgniting = love.physics.newRectangleShape(0, 7, 2, 7+7),
-  swordIgniting = love.physics.newRectangleShape(0, -2, 2, 7),
+  swordIgniting = love.physics.newRectangleShape(0, 3, 2, 7+10),
   swordSwing = love.physics.newPolygonShape(-7,-7, 5,-5, -5,5, 6,6),
   -- swordSwingWide = love.physics.newPolygonShape(-14,-9, 5,-5, -10,10, 9,14),
-  swordSwingWide = love.physics.newPolygonShape(-12,-10, -12,1, 0,11, 8,11, 4,-4),
-  swordStill = love.physics.newRectangleShape(0, 1, 1, 16),
+  swordSwingWide = love.physics.newPolygonShape(-12,-10, -12,13, 0,13, 8,13, 4,-4),
+  swordStill = love.physics.newRectangleShape(0, 4, 1, 16 + 6),
   -- swordStill = love.physics.newRectangleShape(0, 6, 1, 15 + 10),
-  swordHeld = love.physics.newRectangleShape(0, -2, 1, 10),
+  -- swordHeld = love.physics.newRectangleShape(0, -2, 1, 10),
+  swordHeld = love.physics.newRectangleShape(0, 2, 1, 10 + 8),
   -- EdgeBrick16.u:setPreviousVertex(-24, -8)
   -- EdgeBrick16.u:setNextVertex(24, -8)
   edgeDown = love.physics.newEdgeShape(-7, 1, 7, 1),
@@ -82,14 +82,16 @@ ps.shapes = {
   portal = love.physics.newRectangleShape(8,8),
   bosses = {
     boss1 = {
-      sprite = love.physics.newRectangleShape(0, 0, 37*0.5, 61*0.5),
-      body = love.physics.newRectangleShape(0, 5, 10, 20),
+      sprite = love.physics.newRectangleShape(0, 0, 37, 61),
+      body = love.physics.newRectangleShape(0, 5, 16, 20),
       laser = love.physics.newRectangleShape(0, 80, 20, 160),
+      orb = love.physics.newCircleShape(7),
     },
     boss2 = {
       -- head = love.physics.newRectangleShape(0, 0, 37*0.5, 61*0.5),
-      head = love.physics.newRectangleShape(0, 3, 89, 48),
-      eye = love.physics.newRectangleShape(8,8),
+      -- head = love.physics.newRectangleShape(0, 3, 89, 48),
+      head = love.physics.newRectangleShape(0, 3, 70, 58),
+      eye = love.physics.newCircleShape(8),
       hand = love.physics.newRectangleShape(36,24),
     },
     boss3 = {

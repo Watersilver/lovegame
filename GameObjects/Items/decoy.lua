@@ -66,6 +66,7 @@ Decoy.functions = {
     self.timer = self.timer + dt
 
     -- TODO: Make it always have the same animation as player but opposite facing
+    -- TODO: Or make it jump around and swear and have a spotlight on it
     -- if pl1 then
     --   self.sprite = pl1.sprite
     -- end

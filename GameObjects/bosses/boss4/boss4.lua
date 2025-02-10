@@ -18,11 +18,71 @@ local cd = require "GameObjects.DialogueBubble.controlDefaults"
 
 local wreckingBall = require "GameObjects.bosses.boss4.wreckingBall"
 
+local proj = require "GameObjects.enemies.projectile"
+
 local shdrs = require "Shaders.shaders"
 local hitShader = shdrs.enemyHitShader
 local deathShader = shdrs.bossDeathShader
 
-local lighting = require "ScreenEffects.lighting.lighting"
+local shockwaveShapeStraight = love.physics.newRectangleShape(5, 0, 1, 15)
+local shockwaveShapeDiagonal = love.physics.newRectangleShape(6, 0, 8, 1, math.pi * 0.5)
+local spawnShockwave = function(instance, direction, pos, speedMod)
+  if not pos then pos = instance end
+  local isDiagonal = ((direction + math.pi * 0.125) % (math.pi * 0.5)) > math.pi * 0.25
+  local shape
+  local si
+  local angle
+  if isDiagonal then
+    shape = shockwaveShapeDiagonal
+    si = im.spriteSettings.boss4ShockDiagonal
+    angle = direction - math.pi * 0.25
+  else
+    shape = shockwaveShapeStraight
+    si = im.spriteSettings.boss4ShockStraight
+    angle = direction - math.pi * 0.5
+  end
+  local shockwave = proj:new{
+    layer = instance.layer - 1,
+    xstart = pos.x,
+    ystart = pos.y + (instance.shadowHeightMod or 0),
+    notBreakableByMissile = true,
+    dpDeflectable = false,
+    attackDmg = 2,
+    sprite_info = si,
+    image_speed = 0.15,
+    creator = instance,
+    direction = direction,
+    maxspeed = 100 * (speedMod or 1),
+    swarmChance = 0,
+    angle = angle,
+    impact = 15,
+    explosive = true,
+    blowUpForce = 75,
+    ballbreaker = false,
+    drawIntPos = true
+  }
+  shockwave.physical_properties.shape = shape
+  shockwave.physical_properties.initAngle = direction
+  o.addToWorld(shockwave)
+
+  return shockwave
+end
+
+local function spawnShockwaves(instance)
+  if instance.shockdiag then
+    instance.shockdiag = not instance.shockdiag
+    return spawnShockwave(instance, math.pi * 0.25),
+      spawnShockwave(instance, math.pi * 0.75),
+      spawnShockwave(instance, math.pi * 1.25),
+      spawnShockwave(instance, math.pi * 1.75)
+  else
+    instance.shockdiag = not instance.shockdiag
+    return spawnShockwave(instance, math.pi * 0),
+      spawnShockwave(instance, math.pi * 0.5),
+      spawnShockwave(instance, math.pi * 1),
+      spawnShockwave(instance, math.pi * 1.5)
+  end
+end
 
 local states = {
   -- WARNING STARTING STATE IN INITIALIZE!!!
@@ -237,6 +297,12 @@ local states = {
           pl1.triggers.damCounter = 2
           pl1.zo = -0.1
         end
+        local s1, s2, s3, s4 = spawnShockwaves(instance)
+        table.insert(instance.shockwaves, s1)
+        table.insert(instance.shockwaves, s2)
+        table.insert(instance.shockwaves, s3)
+        table.insert(instance.shockwaves, s4)
+
       elseif instance.step == 9 then
         if instance.timer <= 0 then
           instance.step = 10
@@ -585,6 +651,8 @@ function Boss4.initialize(instance)
   instance.content_index = 0
   instance.shieldJustBroke = false
   instance.allowAllStates = true
+
+  instance.shockwaves = {}
 end
 
 local dialogue = {
@@ -854,6 +922,22 @@ Boss4.functions = {
   enemyUpdate = function (self, dt)
     dlgCtrl.functions.update(self, dt)
 
+    -- Remove deleted shockwaves
+    for i = #self.shockwaves, 1, -1 do
+      if not self.shockwaves[i].exists then
+        table.remove(self.shockwaves, i)
+      end
+    end
+
+    -- Split shockwaves
+    for _, sw in ipairs(self.shockwaves) do
+      if sw.life_time > 1 then
+        spawnShockwave(self, sw.direction + math.pi * 0.25, sw)
+        spawnShockwave(self, sw.direction - math.pi * 0.25, sw)
+        o.removeFromWorld(sw)
+      end
+    end
+
     -- Get tricked by decoy
     self.target = session.decoy or pl1
 
@@ -899,6 +983,15 @@ Boss4.functions = {
 
     sh.handleShadow(self)
 
+  end,
+
+  late_update = function (self)
+    if self:isShieldBroken() then
+      self.sprite = im.sprites["Bosses/boss4/boss4-broken"]
+    else
+      self.sprite = im.sprites["Bosses/boss4/boss4-dmg" .. self.shieldDmg]
+    end
+    -- self.sprite = im.sprites["Bosses/boss4/boss4"]
   end,
 
   enemyBeginContact = function (self, other, myF, otherF, coll)
@@ -1000,51 +1093,51 @@ Boss4.functions = {
   --   end
   -- end,
 
-  draw = function (self)
+  -- draw = function (self)
     -- Draw enemy the default way
-    et.functions.draw(self)
+    -- et.functions.draw(self)
 
-    -- Draw shield
-    if not self:isShieldBroken() then
-      local zo = self.zo or 0
-      local xtotal, ytotal = self.x, self.y + zo + 2.5
-      local shield_index = 0
-      local shield_xscale = 1
+    -- -- Draw shield
+    -- if not self:isShieldBroken() then
+    --   local zo = self.zo or 0
+    --   local xtotal, ytotal = self.x, self.y + zo + 2.5
+    --   local shield_index = 0
+    --   local shield_xscale = 1
 
-      -- calculate offset and mirroring
-      if math.floor(self.image_index) % 2 == 0 then
-        xtotal = xtotal + 4
-        if self.shieldDmg == 1 then
-          shield_index = 1
-        elseif self.shieldDmg > 1 then
-          shield_index = 3
-        end
-      else
-        xtotal = xtotal + 6.8
-        if self.shieldDmg == 1 then
-          shield_index = 2
-        elseif self.shieldDmg > 1 then
-          shield_index = 4
-        else
-          shield_xscale = -1
-        end
-      end
+    --   -- calculate offset and mirroring
+    --   if math.floor(self.image_index) % 2 == 0 then
+    --     xtotal = xtotal + 4
+    --     if self.shieldDmg == 1 then
+    --       shield_index = 1
+    --     elseif self.shieldDmg > 1 then
+    --       shield_index = 3
+    --     end
+    --   else
+    --     xtotal = xtotal + 6.8
+    --     if self.shieldDmg == 1 then
+    --       shield_index = 2
+    --     elseif self.shieldDmg > 1 then
+    --       shield_index = 4
+    --     else
+    --       shield_xscale = -1
+    --     end
+    --   end
 
-      local sprite = im.sprites["Bosses/boss4/shield"]
-      local frame = sprite[math.floor(shield_index)]
+    --   local sprite = im.sprites["Bosses/boss4/shield"]
+    --   local frame = sprite[math.floor(shield_index)]
 
-      local worldShader = love.graphics.getShader()
-      love.graphics.setShader(self.myShader)
-      love.graphics.draw(
-      sprite.img, frame, xtotal, ytotal, self.angle,
-      shield_xscale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
-      sprite.cx, sprite.cy)
-      love.graphics.setShader(worldShader)
-    end
+    --   local worldShader = love.graphics.getShader()
+    --   love.graphics.setShader(self.myShader)
+    --   love.graphics.draw(
+    --   sprite.img, frame, xtotal, ytotal, self.angle,
+    --   shield_xscale * sprite.res_x_scale, self.y_scale * sprite.res_y_scale,
+    --   sprite.cx, sprite.cy)
+    --   love.graphics.setShader(worldShader)
+    -- end
 
     -- love.graphics.polygon("line", self.body:getWorldPoints(self.fixture:getShape():getPoints()))
     -- love.graphics.polygon("line", self.spritebody:getWorldPoints(self.spritefixture:getShape():getPoints()))
-  end,
+  -- end,
 }
 
 function Boss4:new(init)

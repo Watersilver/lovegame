@@ -51,6 +51,7 @@
 ---@class DlgChoice
 ---@field id DlgChoiceId
 ---@field available? fun(convo: ConversationObject): boolean
+---@field events? string[]
 ---@field text ChoiceGetter
 ---@field onChoose DlgNextNodeDataGetter
 

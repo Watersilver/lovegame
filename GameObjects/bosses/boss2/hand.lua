@@ -15,6 +15,9 @@ local b1fo = require "GameObjects.bosses.boss2.boss2fallorb"
 local leftmost = 34.24
 local rightmost = 365.76
 
+local knuckleheight = 24
+local shockwaveShape = love.physics.newRectangleShape(10, 40)
+
 local Boss2Hand = {}
 
 function Boss2Hand.initialize(instance)
@@ -39,11 +42,16 @@ function Boss2Hand.initialize(instance)
   })
   instance.sounds.handTouchGround = moreSounds.handTouchGround
   instance.sounds.handTouchGroundGently = moreSounds.handTouchGroundGently
+
+  instance.hpPrev = instance.hp
 end
 
 Boss2Hand.functions = {
   load = function (self)
-    self.sprite = im.sprites["Bosses/boss2/HandFront"]
+    self.x_draw_offset = 9 * self.x_scale
+    self.y_draw_offset = 18
+
+    self.sprite = im.sprites["Bosses/boss2/hand_front"]
 
     local HandBack = require "GameObjects.bosses.boss2.handBack"
     self.handBack = HandBack:new{
@@ -65,7 +73,7 @@ Boss2Hand.functions = {
       local xSlamFactor = self.slamming / (math.pi / self.slamTimeFactor)
       if xSlamFactor > 1 then xSlamFactor = 1 end
       self.xSlam = self.xSlamStart + xSlamFactor * (self.targetX - self.xSlamStart)
-      self.ySlam = self.minHeight - math.sin(self.slamming * self.slamTimeFactor) * self.sprite.height * 1.8
+      self.ySlam = self.minHeight - math.sin(self.slamming * self.slamTimeFactor) * knuckleheight * 1.8
       if self.ySlam > self.minHeight then
         self.slamming = nil
         self.ySlam = nil
@@ -100,8 +108,8 @@ Boss2Hand.functions = {
         self.invulnerable = 100
       end
 
-      if self.dyingY < self.minHeight - self.sprite.height * 1.8 then
-        self.dyingY = self.minHeight - self.sprite.height * 1.8
+      if self.dyingY < self.minHeight - knuckleheight * 1.8 then
+        self.dyingY = self.minHeight - knuckleheight * 1.8
         if not self.lastShakes then self.lastShakes = 0.3 end
         self.lastShakes = self.lastShakes - dt
         if self.lastShakes < 0 then
@@ -119,7 +127,7 @@ Boss2Hand.functions = {
       self.x, self.y = self.x + self.shakeX, self.y + self.shakeY
     end
 
-    if self.slammed then
+    if self.slammed and not self.dyingY then
       if pl1 and pl1.exists and pl1.zo == 0 then
         pl1.zvel = 66
       end
@@ -135,8 +143,36 @@ Boss2Hand.functions = {
         self:spawn2nd()
         gsh.newShake(mainCamera, "displacement")
       else
-      gsh.newShake(mainCamera, "displacement", 0.5)
+        gsh.newShake(mainCamera, "displacement", 0.5)
       end
+
+      -- create shockwave
+      local proj = require "GameObjects.enemies.projectile"
+      local direction = math.pi / 2
+      local shockwave = proj:new{
+        layer = self.layer - 1,
+        xstart = self.x,
+        ystart = self.y,
+        notBreakableByMissile = true,
+        dpDeflectable = false,
+        attackDmg = 2,
+        sprite_info = im.spriteSettings.dragonShockwave,
+        image_speed = 0.15,
+        creator = self,
+        direction = direction,
+        maxspeed = 160,
+        swarmChance = 0,
+        angle = direction,
+        impact = 15,
+        explosive = true,
+        blowUpForce = 75,
+        ballbreaker = false,
+        drawIntPos = true
+      }
+      shockwave.physical_properties.shape = shockwaveShape
+      shockwave.physical_properties.initAngle = direction
+
+      o.addToWorld(shockwave)
     end
     self.slammed = false
   end,
@@ -205,7 +241,7 @@ Boss2Hand.functions = {
 
   destroy = function (self)
     -- What happens when I get destroyed.
-    if self.otherHand.exists and self.otherHand.hp > 1 then
+    if self.otherHand.exists and self.otherHand.hp > self.hpPrev then
       self.otherHand.hp = 22 - math.floor(self.otherHand.hp / 2)
     end
     self.head:takeDamage()
@@ -217,8 +253,7 @@ Boss2Hand.functions = {
       self.head.handsLoss = self.head.handsLoss + 1
     end
 
-    if self.dyingY <= self.minHeight - self.sprite.height * 1.8 then
-      self.handBack.image_index = 1
+    if self.dyingY <= self.minHeight - knuckleheight * 1.8 then
       ebh.die(self)
     end
   end,

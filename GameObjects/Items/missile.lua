@@ -145,6 +145,8 @@ Missile.functions = {
         a= 1
       }
     end
+
+    self.layer_timer = 0.5
   end,
 
   early_update = function(self, dt)
@@ -199,10 +201,14 @@ Missile.functions = {
         end
       end
       o.change_layer(self, cr.layer+layeradjust)
-    -- else
-    --   self.weld = nil
     end
 
+    if self.layer_timer > 0 then
+      self.layer_timer = self.layer_timer - dt
+      if self.layer_timer < 0 then
+        o.change_layer(self, cr.layer)
+      end
+    end
   end,
 
   update = function(self, dt)

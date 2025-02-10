@@ -2,6 +2,7 @@ local ps = require "physics_settings"
 local snd = require "sound"
 local o = require "GameObjects.objects"
 local im = require "image"
+local collectables = require "collectables"
 
 local function createEffect (creator, onExplEnd)
   local appearEffect = (require "GameObjects.explode"):new{
@@ -16,18 +17,11 @@ local function createEffect (creator, onExplEnd)
 end
 
 local function spawnHeart (appearEffect)
-  local heart = (require "GameObjects.drops.heart"):new{
-    xstart = appearEffect.x, ystart = appearEffect.y,
-  }
-  o.addToWorld(heart)
+  (require "GameObjects.drops.nothing").fromData(collectables.data.heart, appearEffect.x, appearEffect.y, {zvel = 0})
 end
 
 local function spawnFairy (appearEffect)
-  local fairy = (require "GameObjects.drops.fairy"):new{
-    xstart = appearEffect.x, ystart = appearEffect.y,
-    inertiaDuration = 0.5
-  }
-  o.addToWorld(fairy)
+  (require "GameObjects.drops.nothing").fromData(collectables.data.fairy, appearEffect.x, appearEffect.y, {inertiaDuration = 0.5})
 end
 
 -- Common magic dust effects to avoid repeating code

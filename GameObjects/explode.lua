@@ -13,7 +13,7 @@ local noBody = require "GameObjects.noBody"
 
 local floor = math.floor
 
-enexploshaders = {shdrs.enemyExplodeShader1, shdrs.enemyExplodeShader2}
+local enexploshaders = {shdrs.enemyExplodeShader1, shdrs.enemyExplodeShader2}
 
 local Explode = {}
 

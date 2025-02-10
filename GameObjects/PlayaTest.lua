@@ -2522,11 +2522,26 @@ Playa.functions = {
 
   getFacing = function (self)
     local as = self.animation_state.state
-    if as:find("up") then return "up"
+    if as == "sprint" then return self.sprintSide
+    elseif as:find("up") then return "up"
     elseif as:find("left") then return "left"
     elseif as:find("right") then return "right"
     elseif as:find("down") then return "down"
     else return "down" end
+  end,
+
+  getXFacing = function(self)
+    local f = self:getFacing()
+    if f == "left" then return -1 end
+    if f == "right" then return 1 end
+    return 0
+  end,
+
+  getYFacing = function(self)
+    local f = self:getFacing()
+    if f == "up" then return -1 end
+    if f == "down" then return 1 end
+    return 0
   end,
 
   successfullyBullrushed = function (self, other)
@@ -3099,10 +3114,6 @@ Playa.functions = {
       love.graphics.setBlendMode("subtract")
     end
 
-    -- TODOOOOOO make this into an optional setting until I get more opinions
-    -- xtotal = u.round(xtotal)
-    -- ytotal = u.round(ytotal)
-
     local xfinal = xtotal + self.shakex
     local yfinal = ytotal + self.shakey
 
@@ -3323,7 +3334,8 @@ Playa.functions = {
             o.removeFromWorld(other)
             other.beginContact = nil
           end
-        elseif self.speed > 2 then
+        -- elseif self.speed > 2 then
+        else
           -- else see if you get thrown back
 
           -- Get vector perpendicular to collision
@@ -3339,9 +3351,22 @@ Playa.functions = {
           -- find angle between vectors (th)
           local dot = nx * self.vx + ny * self.vy
           -- costh = 	a*b / |a|*|b|
-          -- my magn is self.speed and normal's magn is 1 by definition:
-          local costh = dot / self.speed * 1
+          local prod = self.speed * 1
+          local costh = dot / prod
           local th = math.acos(costh)
+
+          -- Take care of very low speeds
+          local speedOverride = nil
+          local sprintDirOverride = nil
+          if self.speed < 2 then
+            -- dot = nx * self:getXFacing() + ny * self:getYFacing()
+            -- prod = 1
+            if (nx == 0 and ny == -self:getYFacing()) or (ny == 0 and nx == -self:getXFacing()) then
+              th = math.pi
+              speedOverride = 100
+              _, sprintDirOverride = u.cartesianToPolar(nx, ny)
+            end
+          end
 
           -- react to collision
           if th > 0.74 * math.pi then
@@ -3355,6 +3380,7 @@ Playa.functions = {
               if not self.triggers.rrBounce then
                 self.triggers.rrBounce = true
                 self._, self.sprintDir = u.cartesianToPolar(u.reflect(self.vx, self.vy, nx, ny))
+                self.sprintDir = sprintDirOverride or self.sprintDir
                 snd.play(glsounds.bombDrop)
               end
             else
@@ -3366,7 +3392,8 @@ Playa.functions = {
               self.triggers.altHurtSound = self.sounds.die
               gsh.newShake(mainCamera, "displacement")
               self.zvel = 100
-              self.body:setLinearVelocity(nx * self.speed * 0.8, ny * self.speed * 0.8)
+              local newSpeed = speedOverride or self.speed * 0.8
+              self.body:setLinearVelocity(nx * newSpeed, ny * newSpeed)
             end
           end
         end

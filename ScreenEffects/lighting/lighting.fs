@@ -9,6 +9,8 @@ extern Image lightMap; // holds info about light sources
 extern Image shadowMap; // holds info about shadows
 extern Image ditherPattern; // Dithering pattern for the lighting
 
+// TODO: Sun light effect like golden sun madra
+
 // WARNING: Do not use max for vectors, it behaves weirdly
 
 // Idea: backlight could be gradient
@@ -58,6 +60,16 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
     return color * unlit;
   }
 
+  // corresponding pixel of the lightMap texture
+  vec4 light = Texel(lightMap, texture_coords);
+
+  // Doing this so items will be shown with true color during fanfare.
+  // Before This was here gold rupee was changing colour during night
+  // because night was mapping reds to blues, making the final .b brighter than the unlit
+  if (light.r == 1 && light.g == 1 && light.b == 1 && light.a == 1) {
+    return color * unlit;
+  }
+
   // -----------------
   // Determine ambient
   // -----------------
@@ -89,11 +101,8 @@ vec4 effect( vec4 color, Image texture, vec2 texture_coords, vec2 screen_coords 
 
 
   // -----------------
-  // Get light sources
+  // Apply light sources
   // -----------------
-
-  // corresponding pixel of the lightMap texture
-  vec4 light = Texel(lightMap, texture_coords);
 
   // looks like day for night
   // Each pixel is the brightest of its max ambient

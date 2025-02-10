@@ -135,12 +135,6 @@ local function shallowcopy(orig)
   return copy
 end
 
-local function getLightsprite(spriteSettings)
-  local copy = shallowcopy(spriteSettings)
-  copy[1] = copy[1] .. "-light"
-  return copy
-end
-
 ---@alias SourceType "dynamic" | "sprite" | "owlStatue" | "canvas" | "cloudCurve" | "boss4" | "boss4shield" | "boss4ball" | "boss4spikes" | "boss4link" | "torch" | "sprinkle" | "owlStatue" | "playerGlow" | "massive" | "door" | 'missile' | 'pixel' | 'rupee' | 'rupee5' | 'rupee20' | 'rupee100' | 'rupee200'
 
 ---@type {[SourceType]: {type: "drawn", img: love.Image, centerOffset: number} | {type: "sprite", sprite: unknown} | {type: "canvas"}}
@@ -199,12 +193,6 @@ local sourceTypes = {
   door = squareGradient(16, {a = 1}),
 
   pixel = square(1),
-
-  boss4 = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[1]))},
-  boss4shield = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[2]))},
-  boss4ball = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[3]))},
-  boss4spikes = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[4]))},
-  boss4link = {type = "sprite", sprite = im.load_sprite(getLightsprite(im.spriteSettings.boss4[5]))},
 
   canvas = {type = 'canvas'}
 }

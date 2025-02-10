@@ -40,6 +40,7 @@ function Projectile.initialize(instance)
   instance.zvel = 0
   instance.targetIsGround = false
   instance.zoSafeZone = -10
+  instance.life_time = 0
 end
 
 local function fireUpdate(self, dt)
@@ -92,6 +93,10 @@ end
 Projectile.functions = {
   load = function (self)
     et.functions.load(self)
+
+    if self.startSpriteName then
+      self.sprite = im.sprites[self.startSpriteName]
+    end
 
     if self.enemFire then
       self.xtraUpdate = fireUpdate
@@ -151,6 +156,8 @@ Projectile.functions = {
   end,
 
   enemyUpdate = function (self, dt)
+    self.life_time = self.life_time + dt
+
     self.zo = self.zo + dt * self.zvel
     -- Remove if out of bounds
     if self.x + 5 < 0 or self.x - 5 > game.room.width then
@@ -174,6 +181,13 @@ Projectile.functions = {
     end
     if self.forceStill then
       self.body:setLinearVelocity(0, 0)
+    end
+    if self.angleIsDirection then
+      local vx, vy = self.body:getLinearVelocity()
+      if vx ~= 0 and vy ~= 0 then
+        local _, dir = u.cartesianToPolar(vx, vy)
+        self.angle = dir
+      end
     end
     sh.handleShadow(self)
   end,

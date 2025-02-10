@@ -764,9 +764,9 @@ room.gameObjects = {
 -- left door
 { x = 104, y = 296, n = {
   l = 10,
-  destination = "Rooms/sideScrollTest.lua",
-  desx = 24,
-  desy = 350
+  -- destination = "Rooms/sideScrollTest.lua",
+  -- desx = 24,
+  -- desy = 350
 }, t = 3, i = 8},
 
 { x = 136, y = 504, n = {l = 10}, t = 1, i = 179},
