@@ -71,7 +71,7 @@ local states = {
         local ud = nil
         for _, body in ipairs(ps.pw:getBodies()) do
           ud = body:getUserData()
-          if ud and ud.exists and ud.draw and ud.ystart and ud.ystart < 88 then
+          if body:getType() == 'static' and ud and ud.exists and ud.draw and ud.ystart and ud.ystart < 88 then
             o.change_layer(ud, instance.layer-1)
           end
         end

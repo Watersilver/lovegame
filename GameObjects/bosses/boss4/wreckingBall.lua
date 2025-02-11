@@ -600,13 +600,15 @@ WreckingBall.functions = {
 
   hitSolidStatic = function (self, other, myF, otherF, coll)
     if self.state.state == "spikedcharge" then
-      self.hitwall = {self.x - other.xstart, self.y - other.ystart}
+      -- self.hitwall = {self.x - other.xstart, self.y - other.ystart}
+      self.hitwall = {self.x - (other.x or other.xstart), self.y - (other.y or other.ystart)}
       self.state:change_state(self, 1, "grabchance")
       snd.play(glsounds.smallBoom)
       gsh.newShake(mainCamera, "displacement")
       self:emote("mania")
     elseif self.state.state == "bounceAround" then
-      self.hitwall = {self.x - other.xstart, self.y - other.ystart}
+      -- self.hitwall = {self.x - other.xstart, self.y - other.ystart}
+      self.hitwall = {self.x - (other.x or other.xstart), self.y - (other.y or other.ystart)}
       snd.play(glsounds.boing)
       gsh.newShake(mainCamera, "displacement", 0.2)
     end
