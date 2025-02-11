@@ -6,7 +6,7 @@ local snd = require "sound"
 local room = {}
 room.newType = true
 
-room.music_info = "StartingHouse"
+room.music_info = "house.local"
 room.ambientLightType = 'cozy'
 
 room.width = 144

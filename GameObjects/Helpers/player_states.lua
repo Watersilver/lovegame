@@ -240,7 +240,7 @@ player_states.run_still = function(instance, dt, side)
     -- if instance.is_landing then
     --   print(instance.image_index)
     -- end
-    if instance.state_start_frame < math.floor(instance.image_index) then
+    if instance.state_start_frame < math.floor(instance.image_index) - 1 then
       instance.short_landing = nil
     end
     if instance.triggers.animation_end then

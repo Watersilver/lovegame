@@ -6,7 +6,7 @@ local snd = require "sound"
 local room = {}
 room.newType = true
 
-room.music_info = "boss.local"--{"Music/MusicTest"}
+room.music_info = "boss.local"
 -- room.timeDoesntPass ToBeADDED
 room.ambientLightType = 'dark'
 

@@ -107,7 +107,8 @@ GPAR = {
 -- Debug
 Debug = {
   cursor = 2,
-  bodiesRenderMode = 0
+  bodiesRenderMode = 0,
+  freeze_screen = false
 }
 
 -- Load stuff from save directory
@@ -331,6 +332,7 @@ session = {
   end,
   getMagicCooldown = function()
     -- 0.3 was default
+    -- TODO: Spray and pray ring that makes this 0.1
     return 0.4 - session.save.magicLvl * 0.05
   end,
   getAthlectics = function(getLvl)
@@ -1185,74 +1187,76 @@ function love.update(dt)
     pam.close()
   end
 
-  if not game.paused then
-    -- Make sure missiles don't exceed mslLim game setting
-    if session.mslQueue.length > gs.mslLim then
-      local removedMsl = session.mslQueue:remove()
-      removedMsl.pastMslLim = true
-    end
-
-    -- Image indexes for background animations
-    im.updateGlobalImageIndexes(dt)
-
-    -- Update time
-    if not game.room.timeDoesntPass then
-      local m = session.sleeping_danger and 0.2 or 0.08333
-      -- dt * 0.08333 = ocarina of time
-      session.updateTime(dt * 0.08333 * session.timescale)
-      -- fuck = session.save.time
-    end
-    game.clockInactive = game.room.timeDoesntPass
-
-    -- Update drugs
-    if session.drug then
-      session.drug.duration = session.drug.duration - dt
-      if session.drug.duration < 0 then session.drug = nil end
-    end
-
-    -- Run early_update methods
-    local eUpnum = #o.earlyUpdaters
-    if eUpnum > 0 then
-      for i = 1, eUpnum do
-        o.earlyUpdaters[i]:early_update(dt)
+  if not Debug.freeze_screen then
+    if not game.paused then
+      -- Make sure missiles don't exceed mslLim game setting
+      if session.mslQueue.length > gs.mslLim then
+        local removedMsl = session.mslQueue:remove()
+        removedMsl.pastMslLim = true
       end
-    end
 
-    -- update physical world
-    local dtpart = dt
-    while dtpart > GCON.MAX_PHYSICS_DT do
-      ps.pw:update(GCON.MAX_PHYSICS_DT)
-      dtpart = dtpart - GCON.MAX_PHYSICS_DT
-    end
-    ps.pw:update(dtpart)
+      -- Image indexes for background animations
+      im.updateGlobalImageIndexes(dt)
 
-    -- Run update methods
-    local upnum = #o.updaters
-    if upnum > 0 then
-      for i = 1, upnum do
-        o.updaters[i]:update(dt)
+      -- Update time
+      if not game.room.timeDoesntPass then
+        local m = session.sleeping_danger and 0.2 or 0.08333
+        -- dt * 0.08333 = ocarina of time
+        session.updateTime(dt * 0.08333 * session.timescale)
+        -- fuck = session.save.time
       end
-    end
+      game.clockInactive = game.room.timeDoesntPass
 
-    -- Run late_update methods
-    local lUpnum = #o.lateUpdaters
-    if lUpnum > 0 then
-      for i = 1, lUpnum do
-        o.lateUpdaters[i]:late_update(dt)
+      -- Update drugs
+      if session.drug then
+        session.drug.duration = session.drug.duration - dt
+        if session.drug.duration < 0 then session.drug = nil end
       end
-    end
 
-  elseif not game.transitioning and not game.cutscene then -- not game.paused
-    inv.manage(game.paused)
-    pam.left.logic()
-    pam.top_menu_logic()
-    if game.paused ~= true and (inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0)
-      or (not pam.quitting and inp.cancelPressed and not pam.left.selectedHeader)
-      or session.forceCloseInv
-    then
-      game.pause(false)
-      inv.closeInv()
-      session.forceCloseInv = false
+      -- Run early_update methods
+      local eUpnum = #o.earlyUpdaters
+      if eUpnum > 0 then
+        for i = 1, eUpnum do
+          o.earlyUpdaters[i]:early_update(dt)
+        end
+      end
+
+      -- update physical world
+      local dtpart = dt
+      while dtpart > GCON.MAX_PHYSICS_DT do
+        ps.pw:update(GCON.MAX_PHYSICS_DT)
+        dtpart = dtpart - GCON.MAX_PHYSICS_DT
+      end
+      ps.pw:update(dtpart)
+
+      -- Run update methods
+      local upnum = #o.updaters
+      if upnum > 0 then
+        for i = 1, upnum do
+          o.updaters[i]:update(dt)
+        end
+      end
+
+      -- Run late_update methods
+      local lUpnum = #o.lateUpdaters
+      if lUpnum > 0 then
+        for i = 1, lUpnum do
+          o.lateUpdaters[i]:late_update(dt)
+        end
+      end
+
+    elseif not game.transitioning and not game.cutscene then -- not game.paused
+      inv.manage(game.paused)
+      pam.left.logic()
+      pam.top_menu_logic()
+      if game.paused ~= true and (inp.current[game.paused.player].start == 1 and inp.previous[game.paused.player].start == 0)
+        or (not pam.quitting and inp.cancelPressed and not pam.left.selectedHeader)
+        or session.forceCloseInv
+      then
+        game.pause(false)
+        inv.closeInv()
+        session.forceCloseInv = false
+      end
     end
   end
 
@@ -1927,6 +1931,8 @@ function love.keypressed(key, scancode)
     Debug.cursor = Debug.cursor + 1
   elseif key == '.' or key == '>' then
     Debug.cursor = Debug.cursor - 1
+  elseif key == 'p' then
+    Debug.freeze_screen = not Debug.freeze_screen
   end
   if Debug.cursor < 0 then
     Debug.cursor = 2

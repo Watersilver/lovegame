@@ -169,7 +169,8 @@ NPC.functions = {
             session.save.hasRecall = "recall"
             session.save.faroresCourage = true
           elseif self.boss == 3 then
-            session.save.hasSpeed = "speed"
+            session.save.hasMissile = "missile"
+            session.save.hasSword = "sword"
             session.save.nayrusWisdom = true
           elseif self.boss == 4 then
             session.save.hasMissile = "missile"
@@ -198,6 +199,7 @@ NPC.functions = {
             session.save.dinsPower = true
             session.save.hasBomb = "bomb"
           elseif self.boss == 3 then
+            session.save.hasJump = "mystery"
             session.save.hasJump = "jump"
             session.save.dinsPower = true
           elseif self.boss == 4 then

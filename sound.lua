@@ -3,7 +3,16 @@ local gs = require "game_settings"
 local snd = {}
 
 snd.silence = {"Silence"}
-snd.ovrwrld1 = {day = {name = "zelOverworld", introName = "zelOverworldIntro"}, night = {name = "PaperMarioCrystalPalace"}}
+snd.ovrwrld1 = {
+  day = {
+    name = "zelOverworld",
+    introName = "zelOverworldIntro"
+  },
+  night = {
+    name = "nightloop.local",
+    introName = "nightintro.local"
+  }
+}
 
 ---@type table<string, love.Source>
 snd.sounds = {}

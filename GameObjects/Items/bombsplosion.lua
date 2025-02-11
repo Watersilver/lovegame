@@ -145,11 +145,11 @@ Bombsplosion.functions = {
     self:draw(true)
   end,
 
-  beginContact = function(self, a, b, coll, aob, bob)
+  -- beginContact = function(self, a, b, coll, aob, bob)
     -- Find which fixture belongs to whom
     -- local other, myF, otherF = dc.determine_colliders(self, aob, bob, a, b)
 
-  end,
+  -- end,
 }
 
 function Bombsplosion:new(init)

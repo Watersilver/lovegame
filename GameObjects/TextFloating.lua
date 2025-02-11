@@ -14,7 +14,7 @@ function TextFloating.initialize(instance)
   instance.lifetime = 0
   instance.opacity = instance.opacity or 1
   instance.layer = 30
-  instance.draw_type = instance.draw_type or 'overlay'
+  instance.draw_type = instance.draw_type or 'normal'
 end
 
 TextFloating.functions = {
@@ -62,6 +62,7 @@ TextFloating.functions = {
     love.graphics.setColor(r,g,b,a)
   end,
 
+  --- There's currently an issue. If you draw overlay after scrolling the screen the coordinates get messed up.
   ---@param self TextFloatingObject
   ---@param td boolean
   draw_overlay = function(self, td)
@@ -80,11 +81,10 @@ TextFloating.functions = {
   end,
 
   trans_draw = function(self)
-    if self.draw_type == 'normal' then
-      self:draw(true)
-    else
-      self:draw_overlay(true)
-    end
+    local dt = self.draw_type
+    self.draw_type = 'normal'
+    self:draw(true)
+    self.draw_type = dt
   end,
 }
 
@@ -106,7 +106,7 @@ end
 ---@field x number
 ---@field y number
 ---@field content string
----@field draw_type? 'overlay' | 'normal' (default: overlay)
+---@field draw_type? 'overlay' | 'normal' (default: normal)
 ---@field angle? number radians
 ---@field x_scale? number
 ---@field y_scale? number

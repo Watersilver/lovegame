@@ -47,8 +47,9 @@ end
 
 -- Table to hold objects pending to be deleted from the world
 o.to_be_deleted = {}
--- Function to delete them
-function o.to_be_deleted:remove_all()
+--- Function to delete them
+---@param self any[]
+function o.to_be_deleted.remove_all(self)
   if not self[1] then return end
   for _, object in ipairs(self) do
     if object.sprite_info then object:unload_sprites(); object.sprite_info = nil end

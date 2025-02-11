@@ -80,7 +80,7 @@ Curse.functions = {
         }
       elseif roomName:find("cursedForest") then
         -- game.room.music_info = "ambient1"
-        game.room.music_info = {name = "mystical", introName = "mysticalIntro"}
+        game.room.music_info = {name = "mystical.local", introName = "mysticalIntro"}
         if roomName:find("Chess") then
           game.room.music_info = {"Silence", previousFadeOut = 0.5}
           session.startQuest("chessPuzzle1")
