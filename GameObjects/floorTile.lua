@@ -4,6 +4,46 @@ local trans = require "transitions"
 local game = require "game"
 local u = require "utilities"
 
+
+local typeTable = {
+  ["Tiles/Floor"] = {
+    [0] = "deepGrass","grass","deepGrass","grass","deepGrass","grass","grass","grass",
+    "grass","grass","grass","grass","flowers","flowers","flowers","flowers",
+    "grass","grass","grass","grass","flowers","flowers","flowers","flowers",
+    "grass","grass","grass","grass","flowers","flowers","flowers","flowers",
+    "grass","grass","grass","grass","flowers","flowers","flowers","flowers",
+    "grass","grass","grass","grass","flowers","flowers","flowers","flowers",
+    "grass","grass","grass","grass","flowers","flowers","flowers","flowers",
+    "grass","grass","grass","grass","flowers","flowers","flowers","flowers",
+    "grass","grass","grass","grass","flowers","flowers","flowers","flowers",
+    "grass","grass","grass","grass","flowers","flowers","flowers","flowers",
+    "snowGrass","snowGrass","snowGrass","snowGrass","deepSnowGrass","snow","deepSnowGrass","snowGrass",
+    "snowGrass","snowGrass","snowGrass","snowGrass","snowGrass","snow","snow","snowGrass",
+    "snowGrass","snowGrass","snowGrass","snowGrass","snowFlowers","snowFlowers","snowFlowers","snowFlowers",
+    "grass","grass","grass","grass","grass","grass","grass","grass",
+    "grass","gap","grass","grass","grass","gap","grass","grass",
+    "grass","grass","grass","grass","grass","grass","grass","grass",
+    "snow","snow","snow","snow","icyDirt","icyDirt","icyDirt","icyDirt",
+    "snow","gap","snow","snow","icyDirt","icyDirt","icyDirt","icyDirt",
+    "snow","snow","snow","snowGravel","icyDirt","icyDirt","icyDirt","icyGravel",
+    "dirt","dirt","dirt","dirt","gravel","gravel","gravel","gravel",
+    "dirt","dirt","dirt","dirt","gravel","gravel","gravel","gravel",
+    "dirt","dirt","dirt","dirt","gravel","gravel","gravel","gravel",
+    "sand","sand","sand","tile","tile","mud","mud","mud",
+    "sand","sand","sand","tile","tile","mud","mud","mud",
+    "sand","sand","sand","tile","tile","mud","mud","mud",
+    "water","water","water","water","sea","sea","sea","sea",
+    "water","water","water","water","sea","sea","sea","sea",
+    "wood","tile","grass","grass","wood","wood","wood","wood",
+    "wood","grass","grass","grass","wood","wood","wood","wood",
+    "wood","grass","grass","grass","wood","wood","wood","wood",
+    "dirtyRock","dirtyRock","gravelyRock","gap","gap","gap","gap","tile",
+    "wood","wood","wood","tile","tile","tile","tile","ice",
+    "tile","tile","tile","waterlily","waterlily","tile","grass","grass",
+  }
+}
+
+
 local Tile = {}
 
 function Tile.initialize(instance)
@@ -24,9 +64,16 @@ function Tile.initialize(instance)
   instance.floor = true
   instance.playerFloorTilesIndex = nil
   instance.seeThrough = true
+  instance.tileType = "dirt"
 end
 
 Tile.functions = {
+
+load = function(self)
+  local sheet_name = self.sprite_info[1][1] or self.sprite_info[1].img_name
+  self.tileType = typeTable[sheet_name][self.image_index] or self.tileType
+end,
+
 draw = function (self)
 
   -- Avoid drawing tiles I don't need to

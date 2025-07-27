@@ -1830,7 +1830,7 @@ local animation_states = {
     instance.image_speed = 0.3
 
     inp.disable_controller(instance.player)
-    snd.play(instance.sounds.water)
+    snd.play(u.listPickRandom(glsounds.footsteps.waterjumplight))
     instance:setGhost(true)
   end,
 
@@ -2757,8 +2757,17 @@ Playa.functions = {
 
     if self:grounded() then
       -- watersound
-      if self.inShallowWater and not self.inShallowWaterPrev then
-        snd.play(self.sounds.water)
+      if self.inShallowWater and not self.inShallowWaterPrev and self.groundedPrev then
+        local ct = self.closestTile
+        if ct then
+          if u.anyOf(ct.tileType, {"mud"}) then
+            snd.play(u.listPickRandom(glsounds.footsteps.mudrun))
+          else
+            snd.play(u.listPickRandom(glsounds.footsteps.waterwalk))
+          end
+        else
+          snd.play(u.listPickRandom(glsounds.footsteps.waterwalk))
+        end
       end
       -- dungeonJumpingLand
       if self.dungeonJumping and self.zvel == 0 then
@@ -2943,7 +2952,7 @@ Playa.functions = {
 
     -- Check if landing sound should be played
     if trig.land and self.landedTileSound ~= "none" then
-      snd.play(self.sounds[self.landedTileSound])
+      snd.playFootstepSound(self.closestTile, self.inShallowWater)
     end
 
     -- Trigger sudden disappearance if decoy disappeared

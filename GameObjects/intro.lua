@@ -42,8 +42,9 @@ function Intro.initialize(instance)
 end
 
 Intro.functions = {
-  load = function()
-    snd.bgmV2:load()
+  load = function(self)
+    o.removeFromWorld(self)
+    -- snd.bgmV2:load()
   end,
 
   delete = function()

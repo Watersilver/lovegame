@@ -265,6 +265,16 @@ function u.chooseKeyFromTable(tbl, ...)
   return returnKey
 end
 
+-- WARNING! Starts at index = 1! Don't forget!
+---@generic T
+---@param l T[]
+---@return T | nil
+function u.listPickRandom(l)
+  if #l == 0 then return nil end
+  local choice = random(#l)
+  return l[choice]
+end
+
 ---@alias ChanceTable {chance: number, value: any}[]
 
 ---Will work correctly only if sum of chances is <= 1
@@ -893,6 +903,17 @@ end
 ---@return number
 u.getDecimal = function(n)
   return abs(n)%1
+end
+
+---Returns if value is equal to any of the acceptable values
+---@param value any
+---@param acceptable any[]
+---@return boolean
+u.anyOf = function(value, acceptable)
+  for _, a in ipairs(acceptable) do
+    if value == a then return true end
+  end
+  return false
 end
 
 return u

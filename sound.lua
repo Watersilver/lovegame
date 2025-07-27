@@ -1,4 +1,5 @@
 local gs = require "game_settings"
+local u = require "utilities"
 
 local snd = {}
 
@@ -71,6 +72,40 @@ function snd.play(sound)
     if sound == soundFromTable then return end
   end
   table.insert(soundsToBePlayed, sound)
+end
+
+
+function snd.playFootstepSound(tile, inShallowWater)
+  if tile then
+    if u.anyOf(tile.tileType, {"tile"}) then
+      snd.play(u.listPickRandom(glsounds.footsteps.rockrun))
+    elseif u.anyOf(tile.tileType, {"grass", "flowers"}) then
+      snd.play(u.listPickRandom(glsounds.footsteps.grassrun))
+    elseif u.anyOf(tile.tileType, {"gravel", "gravelyRock", "snowGravel", "icyGravel", "icyDirt"}) then
+      snd.play(u.listPickRandom(glsounds.footsteps.gravelrun))
+    elseif u.anyOf(tile.tileType, {"deepGrass", "deepSnowGrass"}) then
+      snd.play(u.listPickRandom(glsounds.footsteps.grasswalk))
+    elseif u.anyOf(tile.tileType, {"mud", "waterlily"}) then
+      snd.play(u.listPickRandom(glsounds.footsteps.mudrun))
+    elseif u.anyOf(tile.tileType, {"water", "sea"}) then
+      snd.play(u.listPickRandom(glsounds.footsteps.waterwalk))
+    elseif u.anyOf(tile.tileType, {"snowGrass"}) then
+      snd.play(u.listPickRandom(glsounds.footsteps.snowsoftrun))
+    elseif u.anyOf(tile.tileType, {"snow"}) then
+      snd.play(u.listPickRandom(glsounds.footsteps.snowhardrun))
+    elseif u.anyOf(tile.tileType, {"sand"}) then
+      snd.play(u.listPickRandom(glsounds.footsteps.sandrun))
+    -- Commented out because it echoes like its in an interior
+    -- elseif u.anyOf(tile.tileType, {"tile"}) then
+    --   snd.play(u.listPickRandom(glsounds.footsteps.tilerun))
+    else
+      snd.play(u.listPickRandom(glsounds.footsteps.dirtrun))
+    end
+  elseif inShallowWater then
+    snd.play(u.listPickRandom(glsounds.footsteps.mudrun))
+  else
+    snd.play(u.listPickRandom(glsounds.footsteps.dirtrun))
+  end
 end
 
 -- Used in the main update every frame to play soundsToBePlayed

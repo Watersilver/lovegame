@@ -26,14 +26,6 @@ local emptyFunc = function() end
 
 local player_states = {}
 
-local play_footstep_sound = function (instance)
-  if instance.inShallowWater then
-    snd.play(instance.sounds.water)
-  else
-    snd.play(glsounds.hard_step)
-  end
-end
-
 local should_play_footstep_sound = function (instance)
   local frames = instance.sprite.frames
   if frames == 10 then
@@ -125,7 +117,7 @@ player_states.img_speed_and_footstep_sound = function(instance, dt)
   -- print(vy < 0, math.abs(vy) < 0.01)
 
   if should_play_footstep_sound(instance) then
-    play_footstep_sound(instance)
+    snd.playFootstepSound(instance.closestTile, instance.inShallowWater)
   end
 end
 
@@ -404,13 +396,14 @@ player_states.start_swing = function(instance, dt, side)
   instance.swingingSword = true
   -- random swing sound
   local randomizeSwing = random()
-  if randomizeSwing < 0.34 then
-    snd.play(instance.sounds.swordSlash1)
-  elseif randomizeSwing < 0.67 then
-    snd.play(instance.sounds.swordSlash2)
-  else
-    snd.play(instance.sounds.swordSlash3)
-  end
+  snd.play(glsounds.lasersword)
+  -- if randomizeSwing < 0.34 then
+  --   snd.play(instance.sounds.swordSlash1)
+  -- elseif randomizeSwing < 0.67 then
+  --   snd.play(instance.sounds.swordSlash2)
+  -- else
+  --   snd.play(instance.sounds.swordSlash3)
+  -- end
   instance.image_index = 0
   instance.triggers.animation_end = false
 
@@ -601,7 +594,7 @@ player_states.start_jump = function(instance, dt, side)
     instance.double_jumping = true
   else
     instance.zvel = 110
-    snd.play(instance.sounds.jump)
+    snd.playFootstepSound(instance.closestTile, instance.inShallowWater)
   end
   instance.animation_state:change_state(instance, dt, side .. "fall")
 end
@@ -1181,7 +1174,7 @@ player_states.run_sprintcharge = function(instance, dt, side)
 
   -- make footstep sounds
   if should_play_footstep_sound(instance) then
-    play_footstep_sound(instance)
+    snd.playFootstepSound(instance.closestTile, instance.inShallowWater)
   end
 
   if math.floor(instance.image_index + 1) % 5 ~= 0 then
@@ -1274,7 +1267,7 @@ player_states.run_sprint = function(instance, dt)
   -- make footstep sounds
 
   if should_play_footstep_sound(instance) then
-    play_footstep_sound(instance)
+    snd.playFootstepSound(instance.closestTile, instance.inShallowWater)
     local explOb = (require "GameObjects.explode"):new{
       x = instance.x, y = instance.y + 4,
       -- layer = self.layer+1,
