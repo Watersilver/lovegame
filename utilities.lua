@@ -50,7 +50,7 @@ function u.tablelength(t)
 end
 
 function u.capitalise(s)
-  return s:sub(1,1):upper()..s:sub(2)
+  return u.utf8_sub(s, 1,1):upper()..u.utf8_sub(s, 2)
 end
 
 -- A push operation that returns the new_index
@@ -365,19 +365,6 @@ function u.randomPointFromEllipse(width, height, perimeter)
   end
 end
 
--- Delete "chars" characters from the end of the string. UTF-8 friendly
-function u.utf8_backspace(t, chars)
-    -- get the byte offset to the last UTF-8 character in the string.
-    local byteoffset = utf8.offset(t, -chars)
-
-    if byteoffset then
-        -- remove the last UTF-8 character.
-        -- string.sub operates on bytes rather than UTF-8 characters, so we couldn't do string.sub(text, 1, -2).
-        return string.sub(t, 1, byteoffset - 1)
-    end
-    return ""
-end
-
 function u.findIndex(list, value, predicate)
   if predicate then
     for i, v in pairs(list) do
@@ -542,7 +529,7 @@ end
 function u.get_line_count(str)
   local lines = 1
   for i = 1, #str do
-      local c = str:sub(i, i)
+      local c = u.utf8_sub(str, i, i)
       if c == '\n' then lines = lines + 1 end
   end
 
@@ -785,7 +772,7 @@ end
 ---@param ending string
 ---@return boolean
 function u.ends_with(str, ending)
-  return ending == "" or str:sub(-#ending) == ending
+  return ending == "" or u.utf8_sub(str, -#ending) == ending
 end
 
 function u.shallow_copy(t)
@@ -828,13 +815,13 @@ function u.splitTokens(str, tokens, max)
   -- Now the actual loop to split the first string parameter
   local t, n, p = {}, 1, 1
   while n ~= max do
-    -- locate the nearest subpatterns that match a separator in str:sub(p);
+    -- locate the nearest subpatterns that match a separator in u.utf8_sub(str, p);
     -- if two subpatterns match at same nearest position, keep the longest one
     local first, last = nil, nil
     for _, token in ipairs(tokens) do
       local q, r, s = str:find(token, p)
       if q then
-        -- A possible token (not necessarily the neareast) was found in str:sub(s, r)
+        -- A possible token (not necessarily the neareast) was found in u.utf8_sub(str, s, r)
         -- Here: q~=nil, r~=nil, s~=nil, q==p <= s <= r)
         if not first or s < first then
           first, last = s, r -- this also overrides any longer pattern, but located later
@@ -844,11 +831,11 @@ function u.splitTokens(str, tokens, max)
       end
     end
     if not first then break end
-    -- The nearest token (with the longest length) was found in str:sub(first, last).
+    -- The nearest token (with the longest length) was found in u.utf8_sub(str, first, last).
     -- Store the non-token part (possibly empty) at odd position, and the token at the next even position
-    t[n], t[n + 1], n, p = str:sub(p, first - 1), str:sub(first, last), n + 2, last + 1
+    t[n], t[n + 1], n, p = u.utf8_sub(str, p, first - 1), u.utf8_sub(str, first, last), n + 2, last + 1
   end
-  t[n] = str:sub(p) -- Store the last non-token (possibly empty) at odd position
+  t[n] = u.utf8_sub(str, p) -- Store the last non-token (possibly empty) at odd position
   return t
 end
 
@@ -914,6 +901,45 @@ u.anyOf = function(value, acceptable)
     if value == a then return true end
   end
   return false
+end
+
+
+-- Delete "chars" characters from the end of the string. UTF-8 friendly
+function u.utf8_backspace(t, chars)
+    -- get the byte offset to the last UTF-8 character in the string.
+    local byteoffset = utf8.offset(t, -chars)
+
+    if byteoffset then
+        -- remove the last UTF-8 character.
+        -- string.sub operates on bytes rather than UTF-8 characters, so we couldn't do string.sub(text, 1, -2).
+        return string.sub(t, 1, byteoffset - 1)
+    end
+    return ""
+end
+
+--- Returns the substring of the string that starts at i (inclusive, 1 is first letter) and continues until j (inclusive)). UTF-8 friendly
+---@param s string|number
+---@param i integer
+---@param j? integer
+---@return string
+function u.utf8_sub(s,i,j)
+   i = i or 1
+   j = j or -1
+   if i<1 or j<1 then
+      local n = utf8.len(s)
+      if not n then return "" end
+      if i<0 then i = n+1+i end
+      if j<0 then j = n+1+j end
+      if i<0 then i = 1 elseif i>n then i = n end
+      if j<0 then j = 1 elseif j>n then j = n end
+   end
+   if j<i then return "" end
+   i = utf8.offset(s,i)
+   j = utf8.offset(s,j+1)
+   if i and j then return s:sub(i,j-1)
+      elseif i then return s:sub(i)
+      else return ""
+   end
 end
 
 return u

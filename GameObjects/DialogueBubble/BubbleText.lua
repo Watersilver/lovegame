@@ -10,7 +10,7 @@ local BubbleText = {}
 ---@class BubbleTextMethods
 ---@field new fun(content: string, options: any): BubbleTextMethods
 
----@class BubbleTextMethods
+---@class BubbleTextMethodsd
 local methods = {
 
   getLength = function (self)
@@ -55,7 +55,7 @@ local methods = {
       return
     end
     if length < 0 then length = 0 end
-    local c = self.string:sub(length, length)
+    local c = u.utf8_sub(self.string, length, length)
     if c == "" then
       if self.htLength == 0 then return end
       self.htLength = 0
@@ -63,11 +63,11 @@ local methods = {
       return
     elseif string.match(c, "%S") == nil then
       for i = length, 1, -1 do
-        local c = self.string:sub(i,i)
+        local c = u.utf8_sub(self.string, i,i)
         if string.match(c, "%S") ~= nil then
           if self.htLength == i then return end
           self.htLength = i
-          self.heightText:setf(string.sub(self.string, 0, i), self:getWraplimit(), self.alignmode)
+          self.heightText:setf(u.utf8_sub(self.string, 0, i), self:getWraplimit(), self.alignmode)
           return
         end
       end
@@ -76,11 +76,11 @@ local methods = {
       self.heightText:setf("", self:getWraplimit(), self.alignmode)
     end
     for i = length, #self.string do
-      local c = self.string:sub(i,i)
+      local c = u.utf8_sub(self.string, i,i)
       if string.match(c, "%S") == nil then
         if self.htLength == i then return end
         self.htLength = i
-        self.heightText:setf(string.sub(self.string, 0, i - 1), self:getWraplimit(), self.alignmode)
+        self.heightText:setf(u.utf8_sub(self.string, 0, i - 1), self:getWraplimit(), self.alignmode)
         return
       end
     end
@@ -99,14 +99,14 @@ local methods = {
 
   parseCol = function(self, col)
     if not col then return self.textRGBA end
-    if col.token:sub(5, 5) == '#' then
+    if u.utf8_sub(col.token, 5, 5) == '#' then
       return {
-        tonumber(col.token:sub(6, 6), 16) / 15,
-        tonumber(col.token:sub(7, 7), 16) / 15,
-        tonumber(col.token:sub(8, 8), 16) / 15,
+        tonumber(u.utf8_sub(col.token, 6, 6), 16) / 15,
+        tonumber(u.utf8_sub(col.token, 7, 7), 16) / 15,
+        tonumber(u.utf8_sub(col.token, 8, 8), 16) / 15,
         1
       }
-    elseif col.token:sub(5) == 'default' then
+    elseif u.utf8_sub(col.token, 5) == 'default' then
       return self.textRGBA
     end
   end,
@@ -141,7 +141,7 @@ local methods = {
   getDelays = function (self)
     local delays = {}
     for _, v in ipairs(self.options.markup or {}) do
-      if v.token:sub(1,5) == "delay" then
+      if u.utf8_sub(v.token, 1,5) == "delay" then
         local split = u.split(v.token, ":")
         table.insert(delays, {delay = tonumber(split[2]), pos = v.atLength - 1})
       end
@@ -161,7 +161,7 @@ local methods = {
     -- Sort color tokens by encounter order
     local colToks = {}
     for _, m in pairs(markup) do
-      if m.atLength <= self.length and m.token:sub(1,3) == 'col' then
+      if m.atLength <= self.length and u.utf8_sub(m.token, 1,3) == 'col' then
         table.insert(colToks, m)
       end
     end
@@ -190,13 +190,13 @@ local methods = {
 
     for _, col in ipairs(cols) do
       self.colouredString[i] = col.col
-      self.colouredString[i + 1] = self.string:sub(col.startPos, col.endPos)
+      self.colouredString[i + 1] = u.utf8_sub(self.string, col.startPos, col.endPos)
       i = i + 2
     end
 
     self.text:setf(self.colouredString, self:getWraplimit(), self.alignmode)
-    self.revealedString = string.sub(self.string, 1, self.length)
-    return self.revealedString:sub(#self.revealedString, #self.revealedString)
+    self.revealedString = u.utf8_sub(self.string, 1, self.length)
+    return u.utf8_sub(self.revealedString, #self.revealedString, #self.revealedString)
   end,
 
   draw = function (self, x, y, cam)

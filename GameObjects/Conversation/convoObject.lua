@@ -331,7 +331,7 @@ Conversation.functions = {
     local markup = {}
     local currentLength = 0
     for _, part in ipairs(partitioned) do
-      if part:sub(1,1) ~= '{' then
+      if u.utf8_sub(part,1,1) ~= '{' then
         if part ~= '' then
           currentLength = currentLength + #part
           table.insert(plainTxt, part)
@@ -612,13 +612,13 @@ Conversation.functions = {
                 if v.atLength > prevLength and v.atLength <= prevLength + numberOfLettersToAdd then
 
                   -- Quest tokens
-                  if v.token:sub(1,1) == 'q' then
-                    local questName = v.token:sub(3)
+                  if u.utf8_sub(v.token,1,1) == 'q' then
+                    local questName = u.utf8_sub(v.token,3)
                     session.startQuest(questName)
                   end
 
                   -- Event tokens
-                  if v.token:sub(1,2) == 'ev' then
+                  if u.utf8_sub(v.token,1,2) == 'ev' then
                     -- fire
                     local split = u.split(v.token, ':')
                     self:fire(split[2], split[3])

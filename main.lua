@@ -1998,7 +1998,7 @@ local enemiesPath = "/GameObjects/enemies/"
 local enemyNames = love.filesystem.getDirectoryItems(enemiesPath)
 for _, name in ipairs(enemyNames) do
   if not avoid[name] then
-    if string.sub(name, -4) == ".lua" then
+    if u.utf8_sub(name, -4) == ".lua" then
       table.insert(enemyPaths, enemiesPath .. name)
     else
       table.insert(enemiesSubfolders, enemiesPath .. name .. "/")

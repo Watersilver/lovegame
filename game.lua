@@ -47,10 +47,10 @@ function game.getRoomCoords(prev)
   if not roomName then return nil end
   local i, j = string.find(roomName, "w%d+x%d+%a?")
   if not i then return nil end
-  roomName = string.sub(roomName, i, j)
-  local x = string.sub(roomName, string.find(roomName, "%d+") or -1)
+  roomName = u.utf8_sub(roomName,i,j)
+  local x = u.utf8_sub(roomName, string.find(roomName, "%d+") or -1)
   roomName = string.gsub(roomName, x, "", 1)
-  local y = string.sub(roomName, string.find(roomName, "%d+") or -1)
+  local y = u.utf8_sub(roomName, string.find(roomName, "%d+") or -1)
 
   return tonumber(x), tonumber(y)
 end
