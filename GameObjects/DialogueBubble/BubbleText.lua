@@ -190,6 +190,8 @@ local methods = {
 
     for _, col in ipairs(cols) do
       self.colouredString[i] = col.col
+      -- At the moment we're done col.startPos will be bigger than string length
+      -- if the utf8_sub clamps its i value it will cause a bug here
       self.colouredString[i + 1] = u.utf8_sub(self.string, col.startPos, col.endPos)
       i = i + 2
     end
