@@ -7,7 +7,7 @@ local utilities = require "utilities"
 local room = {}
 room.newType = true
 
-room.music_info = snd.ovrwrld1
+room.music_info = snd.soundbalancetest
 -- room.timeDoesntPass ToBeADDED
 room.ambientLightType = 'daynight1'
 

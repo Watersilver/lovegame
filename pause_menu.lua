@@ -7,7 +7,6 @@ local items = require "items"
 local u = require "utilities"
 local snd = require "sound"
 local gamera = require "gamera.gamera"
-
 local pam = {}
 
 local moub, moup
@@ -17,13 +16,16 @@ function pam.init()
 end
 
 pam.draggingVolume = false
+pam.draggingMusicVolume = false
 
 function pam.open()
   pam.draggingVolume = false
+  pam.draggingMusicVolume = false
 end
 
 function pam.close()
   pam.draggingVolume = false
+  pam.draggingMusicVolume = false
 end
 
 -- Button Bounding Boxes (Top menu: For music, sounds and quit game)
@@ -113,17 +115,75 @@ function pam.top_menu_draw(l,t,w,h)
   love.graphics.print("Sound", bbb[2].x.l, bbb[2].y.u, 0, 0.2)
   alpha = 1
 
-  -- Volume control draw
-  local vcMaxWidth = 25
-  local vcGap = 3
-  local textWidth = love.graphics.getFont():getWidth("Volume") * scale
+  local vcMaxWidth = 0
+  local vcGap = 0
+  local vcTextWidth = 0
+  local vcStartW = 0
+  local vcL, vcT, vcW, vcH = 0, 0, 0, 0
+  local vcWidth = 0
+
+  -- Music volume control draw
+  vcMaxWidth = 25
+  vcGap = 3
+  vcTextWidth = love.graphics.getFont():getWidth("Music") * scale
+  vcStartW = 140
   love.graphics.setColor(1, 1, 1, 1)
-  love.graphics.print("Volume", 200 - (textWidth + vcMaxWidth + vcGap) * 0.5, bbb[3].y.u, 0, scale)
+  love.graphics.print("Music", vcStartW - (vcTextWidth + vcMaxWidth + vcGap) * 0.5, bbb[3].y.u, 0, scale)
   love.graphics.setColor(0, 0, 0, 0.5)
-  local vcL, vcT, vcW, vcH = 200 + (textWidth - vcMaxWidth + vcGap) * 0.5, bbb[2].y.u, vcMaxWidth, love.graphics.getFont():getHeight() * scale
+  vcL, vcT, vcW, vcH = vcStartW + (vcTextWidth - vcMaxWidth + vcGap) * 0.5, bbb[2].y.u, vcMaxWidth, love.graphics.getFont():getHeight() * scale
   love.graphics.rectangle('fill', vcL, vcT, vcW, vcH)
 
-  local vcWidth = snd.getMasterVolume() * vcMaxWidth
+  vcWidth = gs.music_volume * vcMaxWidth
+
+  love.graphics.setColor(1, 1, 1, 1)
+  for i = 1, vcMaxWidth, 2 do
+    if i > vcWidth then
+      love.graphics.rectangle("fill", vcL + i - 1, vcT + 2, 1, 1)
+    else
+      love.graphics.rectangle("fill", vcL + i - 1, vcT + 1, 1, 3)
+    end
+  end
+
+  -- Music volume control logic
+  if Pointer.left.getPressed() then
+    -- Check if we are draggin volume
+    local xnorm, ynorm = Pointer.left.getLastClickNormalViewportPos()
+    local x, y = xnorm * 400, ynorm * 225
+    if x >= vcL and x <= vcL + vcW and y >= vcT and y <= vcT + vcH then
+      pam.draggingMusicVolume = true
+    end
+  end
+
+  if pam.draggingMusicVolume then
+    local xnorm = Pointer.left.getNormalViewportPos()
+
+    local targetWidth = xnorm * 400 - vcL
+
+    if targetWidth <= 0 then
+      snd.setMusicVolume(0)
+    elseif targetWidth >= vcMaxWidth then
+      snd.setMusicVolume(1)
+    else
+      snd.setMusicVolume(targetWidth / vcMaxWidth)
+    end
+  end
+
+  if Pointer.left.getReleased() then
+    pam.draggingMusicVolume = false
+  end
+
+  -- Master volume control draw
+  vcMaxWidth = 25
+  vcGap = 3
+  vcTextWidth = love.graphics.getFont():getWidth("Master") * scale
+  vcStartW = 200
+  love.graphics.setColor(1, 1, 1, 1)
+  love.graphics.print("Master", vcStartW - (vcTextWidth + vcMaxWidth + vcGap) * 0.5, bbb[3].y.u, 0, scale)
+  love.graphics.setColor(0, 0, 0, 0.5)
+  vcL, vcT, vcW, vcH = vcStartW + (vcTextWidth - vcMaxWidth + vcGap) * 0.5, bbb[2].y.u, vcMaxWidth, love.graphics.getFont():getHeight() * scale
+  love.graphics.rectangle('fill', vcL, vcT, vcW, vcH)
+
+  vcWidth = snd.getMasterVolume() * vcMaxWidth
 
   love.graphics.setColor(1, 1, 1, 1)
   for i = 1, vcMaxWidth, 2 do

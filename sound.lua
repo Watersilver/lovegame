@@ -14,6 +14,7 @@ snd.ovrwrld1 = {
     introName = "nightintro.local"
   }
 }
+snd.soundbalancetest = {name = "soundbalancetest.local"}
 
 ---@type table<string, love.Source>
 snd.sounds = {}
@@ -49,8 +50,20 @@ function snd.setMasterVolume(newVol)
 
   prevMasterVolume = snd.getMasterVolume()
   gs.master_volume = newVol
-  if snd.bgm.current then snd.bgm.current:setVolume(snd.getMasterVolume()) end
-  if snd.bgm.next then snd.bgm.next:setVolume(snd.getMasterVolume()) end
+end
+
+function snd.getMusicVolume()
+  return gs.music_volume * snd.getMasterVolume()
+end
+
+local prevMusicVolume = snd.getMusicVolume()
+---@param newVol number
+function snd.setMusicVolume(newVol)
+  ---@diagnostic disable-next-line: undefined-field
+  if type(newVol) ~= 'number' then love.errorhandler("newVol wasn't number") end
+
+  prevMusicVolume = snd.getMusicVolume()
+  gs.music_volume = newVol
 end
 
 -- Function that returns a table with the sources to the object that calls it
@@ -119,76 +132,6 @@ function snd.play_soundsToBePlayed()
   end
 end
 
-function snd.bgm:load(music_info, force_replay, just_load)
-  if not music_info then self.next = nil; return end
-  self.last_loaded_music_info = music_info
-  local next_name = music_info.name or music_info[1]
-  local next_extension = music_info.extension or ".ogg"
-  local next_folder = music_info.folder or "Sounds/"
-  self.nextName = next_folder .. next_name .. next_extension
-  self.next = love.audio.newSource( self.nextName, "stream" )
-  self.next:setLooping(true)
-  snd.bgm:setFadeState(music_info.fadeType, self.next)
-  self.onTransitionEnd = music_info.onTransitionEnd or false
-  if self.current and not just_load then
-    if force_replay or (self.currentName ~= self.nextName) then
-      self.current:stop()
-      self.current = nil
-    end
-  end
-end
-
--- Used in main update
-function snd.bgm:update(dt)
-  -- If current song doesn't exist, play next
-  if not self.current then
-    -- If next doesn't exist either do nothing
-    if not self.next then return end
-    -- If music is off do nothing
-    if not gs.musicOn then return end
-    self.current = self.next
-    self.currentName = self.nextName
-    self.current:setVolume(snd.getMasterVolume())
-    self.current:play()
-  else
-    if not gs.musicOn then
-      self.current:stop()
-      -- delete current and reset next so I can resume music that's cut off.
-      self.next = self.current
-      self.current = nil
-    end
-  end
-  snd.bgm:handleFade(dt)
-end
-
-function snd.bgm:setFadeState(newFadeState, source)
-  source = source or self.current
-  self.fadeState = {}
-  if source then
-    if newFadeState == "fadeout" then
-      self.fadeState.fading = true
-      self.fadeState.targetVolume = 0
-      self.fadeState.timer = 0
-      self.fadeState.duration = 2
-      self.fadeState.startingVolume = source:getVolume()
-    end
-  end
-end
-
-function snd.bgm:handleFade(dt)
-  if self.fadeState.fading and self.current then
-    self.fadeState.timer = self.fadeState.timer + dt
-    if self.fadeState.timer > self.fadeState.duration then
-      self.fadeState.timer = self.fadeState.duration
-      self.fadeState.fading = nil
-      self.current:setVolume(self.fadeState.targetVolume)
-      return
-    end
-    local volMod = self.fadeState.timer / self.fadeState.duration
-    local newVol = self.fadeState.startingVolume + (self.fadeState.targetVolume - self.fadeState.startingVolume) * volMod
-    self.current:setVolume(newVol)
-  end
-end
 
 
 -- BGM ver2
@@ -350,9 +293,9 @@ function snd.bgmV2:update(dt)
     elseif self.current.targetVolume ~= self.next.targetVolume then
       -- If same piece with diff target vol, set new target
       self.current.targetVolume = self.next.targetVolume
-    elseif self.source:getVolume() ~= self.current.targetVolume or prevMasterVolume ~= snd.getMasterVolume() then
+    elseif self.source:getVolume() ~= self.current.targetVolume or prevMusicVolume ~= snd.getMusicVolume() then
       -- Fade to target volume
-      fadeToVolume(self.source, self.current.targetVolume * snd.getMasterVolume(), self.current.fadeSpeed, dt)
+      fadeToVolume(self.source, self.current.targetVolume * snd.getMusicVolume(), self.current.fadeSpeed, dt)
     elseif not self.source:isPlaying() and self.source.shouldBeLooping and self.source.shouldBePlaying then
       -- Hatchet job but fixes looping main stopping for no reason....
       -- self.source.main:rewind()

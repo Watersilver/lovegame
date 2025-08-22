@@ -1,6 +1,27 @@
 delta_time = 0
 
 local verh = require "version_handling"
+
+local function saveGameSettings()
+  local game_settings = require 'game_settings'
+  -- Overwrite game_settings file
+  local success = love.filesystem.write("game_settings.lua", "local gs = {}\n")
+  ---@diagnostic disable-next-line: undefined-field
+  if not success then love.errorhandler("Failed to write game_settings first line") end
+  local game_settings_body = ""
+  for setting, value in pairs(game_settings) do
+    -- Update already loaded table
+    game_settings[setting] = value
+    if type(value) == "string" then value = "\'" .. value .. "\'"
+    elseif type(value) == "boolean" then
+      if value then value = "true" else value = "false" end
+    end
+    game_settings_body = game_settings_body .. "gs." .. setting .. " = " .. value .. "\n"
+  end
+  success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
+  if not success then love.errorhandler("Failed to write game_settings body") end
+end
+
 -- Set up save directory
 if not verh.fileExists("game_settings.lua") then
   local gsdcontents = love.filesystem.read("game_settings_defaults.lua")
@@ -9,6 +30,16 @@ if not verh.fileExists("game_settings.lua") then
   local success = love.filesystem.write("game_settings.lua", gsdcontents)
 ---@diagnostic disable-next-line: undefined-field
   if not success then love.errorhandler("Failed to write game_settings") end
+else
+  -- Fill empty defaults
+  local game_settings = require 'game_settings'
+  local gsd = require 'game_settings_defaults'
+  for setting, value in pairs(gsd) do
+    if game_settings[setting] == nil then
+      game_settings[setting] = value
+    end
+  end
+  saveGameSettings()
 end
 local success = love.filesystem.createDirectory("Saves")
 ---@diagnostic disable-next-line: undefined-field
@@ -537,23 +568,24 @@ session = {
     end
   end,
   saveGame = function()
-    local game_settings = require 'game_settings'
-    -- Overwrite game_settings file
-    success = love.filesystem.write("game_settings.lua", "local gs = {}\n")
-    ---@diagnostic disable-next-line: undefined-field
-    if not success then love.errorhandler("Failed to write game_settings first line") end
-    local game_settings_body = ""
-    for setting, value in pairs(game_settings) do
-      -- Update already loaded table
-      gs[setting] = value
-      if type(value) == "string" then value = "\'" .. value .. "\'"
-      elseif type(value) == "boolean" then
-        if value then value = "true" else value = "false" end
-      end
-      game_settings_body = game_settings_body .. "gs." .. setting .. " = " .. value .. "\n"
-    end
-    success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
-    if not success then love.errorhandler("Failed to write game_settings body") end
+    saveGameSettings()
+    -- local game_settings = require 'game_settings'
+    -- -- Overwrite game_settings file
+    -- success = love.filesystem.write("game_settings.lua", "local gs = {}\n")
+    -- ---@diagnostic disable-next-line: undefined-field
+    -- if not success then love.errorhandler("Failed to write game_settings first line") end
+    -- local game_settings_body = ""
+    -- for setting, value in pairs(game_settings) do
+    --   -- Update already loaded table
+    --   gs[setting] = value
+    --   if type(value) == "string" then value = "\'" .. value .. "\'"
+    --   elseif type(value) == "boolean" then
+    --     if value then value = "true" else value = "false" end
+    --   end
+    --   game_settings_body = game_settings_body .. "gs." .. setting .. " = " .. value .. "\n"
+    -- end
+    -- success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
+    -- if not success then love.errorhandler("Failed to write game_settings body") end
 
     -- because Imma moron
     local saveKeysToBeIgnored = {

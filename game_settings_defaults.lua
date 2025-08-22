@@ -6,5 +6,7 @@ gs.musicOn = true
 gs.soundsOn = true
 gs.fullscreen = false
 gs.master_volume = 1
+gs.music_volume = 1
+gs.sound_volume = 1
 
 return gs
