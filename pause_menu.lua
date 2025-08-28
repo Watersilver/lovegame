@@ -17,15 +17,18 @@ end
 
 pam.draggingVolume = false
 pam.draggingMusicVolume = false
+pam.draggingSoundVolume = false
 
 function pam.open()
   pam.draggingVolume = false
   pam.draggingMusicVolume = false
+  pam.draggingSoundVolume = false
 end
 
 function pam.close()
   pam.draggingVolume = false
   pam.draggingMusicVolume = false
+  pam.draggingSoundVolume = false
 end
 
 -- Button Bounding Boxes (Top menu: For music, sounds and quit game)
@@ -172,11 +175,61 @@ function pam.top_menu_draw(l,t,w,h)
     pam.draggingMusicVolume = false
   end
 
+  -- Sound volume control draw
+  vcMaxWidth = 25
+  vcGap = 3
+  vcTextWidth = love.graphics.getFont():getWidth("Sound") * scale
+  vcStartW = 200
+  love.graphics.setColor(1, 1, 1, 1)
+  love.graphics.print("Sound", vcStartW - (vcTextWidth + vcMaxWidth + vcGap) * 0.5, bbb[3].y.u, 0, scale)
+  love.graphics.setColor(0, 0, 0, 0.5)
+  vcL, vcT, vcW, vcH = vcStartW + (vcTextWidth - vcMaxWidth + vcGap) * 0.5, bbb[2].y.u, vcMaxWidth, love.graphics.getFont():getHeight() * scale
+  love.graphics.rectangle('fill', vcL, vcT, vcW, vcH)
+
+  vcWidth = gs.sound_volume * vcMaxWidth
+
+  love.graphics.setColor(1, 1, 1, 1)
+  for i = 1, vcMaxWidth, 2 do
+    if i > vcWidth then
+      love.graphics.rectangle("fill", vcL + i - 1, vcT + 2, 1, 1)
+    else
+      love.graphics.rectangle("fill", vcL + i - 1, vcT + 1, 1, 3)
+    end
+  end
+
+  -- Sound volume control logic
+  if Pointer.left.getPressed() then
+    -- Check if we are draggin volume
+    local xnorm, ynorm = Pointer.left.getLastClickNormalViewportPos()
+    local x, y = xnorm * 400, ynorm * 225
+    if x >= vcL and x <= vcL + vcW and y >= vcT and y <= vcT + vcH then
+      pam.draggingSoundVolume = true
+    end
+  end
+
+  if pam.draggingSoundVolume then
+    local xnorm = Pointer.left.getNormalViewportPos()
+
+    local targetWidth = xnorm * 400 - vcL
+
+    if targetWidth <= 0 then
+      snd.setSoundVolume(0)
+    elseif targetWidth >= vcMaxWidth then
+      snd.setSoundVolume(1)
+    else
+      snd.setSoundVolume(targetWidth / vcMaxWidth)
+    end
+  end
+
+  if Pointer.left.getReleased() then
+    pam.draggingSoundVolume = false
+  end
+
   -- Master volume control draw
   vcMaxWidth = 25
   vcGap = 3
   vcTextWidth = love.graphics.getFont():getWidth("Master") * scale
-  vcStartW = 200
+  vcStartW = 262
   love.graphics.setColor(1, 1, 1, 1)
   love.graphics.print("Master", vcStartW - (vcTextWidth + vcMaxWidth + vcGap) * 0.5, bbb[3].y.u, 0, scale)
   love.graphics.setColor(0, 0, 0, 0.5)
@@ -194,7 +247,7 @@ function pam.top_menu_draw(l,t,w,h)
     end
   end
 
-  -- Volume control logic
+  -- Master volume control logic
   if Pointer.left.getPressed() then
     -- Check if we are draggin volume
     local xnorm, ynorm = Pointer.left.getLastClickNormalViewportPos()

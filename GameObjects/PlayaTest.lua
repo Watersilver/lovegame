@@ -2169,7 +2169,6 @@ local animation_states = {
 
   start_state = function(instance, dt)
     instance.deathStunCounter = 0
-    snd.bgm:setFadeState("fadeout")
 
     snd.play(instance.sounds.dying)
     instance.sprite = im.sprites["Witch/die"]

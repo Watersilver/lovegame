@@ -42,14 +42,28 @@ function snd.getMasterVolume()
   return gs.master_volume or 1
 end
 
-local prevMasterVolume = snd.getMasterVolume()
+-- local prevMasterVolume = snd.getMasterVolume()
 ---@param newVol number
 function snd.setMasterVolume(newVol)
   ---@diagnostic disable-next-line: undefined-field
   if type(newVol) ~= 'number' then love.errorhandler("newVol wasn't number") end
 
-  prevMasterVolume = snd.getMasterVolume()
+  -- prevMasterVolume = snd.getMasterVolume()
   gs.master_volume = newVol
+end
+
+function snd.getSoundVolume()
+  return snd.getMasterVolume() * gs.sound_volume
+end
+
+-- local prevSoundVolume = snd.getSoundVolume()
+---@param newVol number
+function snd.setSoundVolume(newVol)
+  ---@diagnostic disable-next-line: undefined-field
+  if type(newVol) ~= 'number' then love.errorhandler("newVol wasn't number") end
+
+  -- prevSoundVolume = snd.getSoundVolume()
+  gs.sound_volume = newVol
 end
 
 function snd.getMusicVolume()
@@ -125,7 +139,7 @@ end
 function snd.play_soundsToBePlayed()
   for i, sound in ipairs(soundsToBePlayed) do
     if gs.soundsOn then
-      sound:setVolume(snd.getMasterVolume())
+      sound:setVolume(snd.getSoundVolume())
       sound:play()
     end
     soundsToBePlayed[i] = nil
@@ -143,6 +157,10 @@ local silentSource = {
   play = function() end,
   stop = function() end,
   update = function(self, dt) end,
+  pause = function() end,
+  resume = function() end,
+  muffle = function() end,
+  unmuffle = function() end
 }
 
 -- bgm with intro
@@ -166,11 +184,34 @@ local bgmV2Source = {
     self.stopped = true
   end,
   setVolume = function(self, vol)
-    self[self.section]:setVolume(vol)
+    self.volume = vol
+    local mod = self.muffled and 0.2 or 1
+    self[self.section]:setVolume(self.volume * mod)
   end,
   getVolume = function(self)
-    return self[self.section]:getVolume()
-  end
+    -- return self[self.section]:getVolume()
+    return self.volume
+  end,
+  pause = function(self)
+    if self.paused then return end
+    self.paused = true
+    self.shouldBePlaying = false
+    self[self.section]:pause()
+  end,
+  resume = function(self)
+    if not self.paused then return end
+    self.paused = false
+    self.shouldBePlaying = true
+    self[self.section]:play()
+  end,
+  muffle = function(self)
+    self.muffled = true
+    self:setVolume(self:getVolume())
+  end,
+  unmuffle = function(self)
+    self.muffled = false
+    self:setVolume(self:getVolume())
+  end,
 }
 bgmV2Source.new = function(sourceInfo)
   if sourceInfo.introName then
@@ -183,6 +224,7 @@ bgmV2Source.new = function(sourceInfo)
   bgmV2Source.shouldBePlaying = false
   bgmV2Source.shouldBeLooping = false
   bgmV2Source.main = love.audio.newSource( sourceInfo.folder .. sourceInfo.name .. sourceInfo.extension, "stream" )
+  bgmV2Source.volume = bgmV2Source.main:getVolume()
   return bgmV2Source
 end
 bgmV2Source.update = function(self, dt)
@@ -267,6 +309,30 @@ end
 
 function snd.bgmV2.getMusicAndload()
   snd.bgmV2:load(session.getMusic())
+end
+
+function snd.bgmV2:pause()
+  if self.source and self.source:isPlaying() then
+    self.source:pause()
+  end
+end
+
+function snd.bgmV2:resume()
+  if self.source and not self.source:isPlaying() then
+    self.source:play()
+  end
+end
+
+function snd.bgmV2:muffle()
+  if self.source then
+    self.source:muffle()
+  end
+end
+
+function snd.bgmV2:unmuffle()
+  if self.source then
+    self.source:unmuffle()
+  end
 end
 
 function snd.bgmV2.overrideAndLoad(override_info)

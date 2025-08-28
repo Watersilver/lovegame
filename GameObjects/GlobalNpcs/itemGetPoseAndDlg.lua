@@ -49,7 +49,8 @@ activateFuncs[1] = function (self, dt, textIndex)
   snd.play(self.sounds.myFanfare or glsounds.fanfareItem)
   -- self.music_info = snd.bgm.last_loaded_music_info
   self.music_info = snd.bgmV2.current
-  snd.bgmV2.overrideAndLoad({previousFadeOut = math.huge, silenceDuration = 0})
+  -- snd.bgmV2.overrideAndLoad({previousFadeOut = math.huge, silenceDuration = 0}) -- stops and rewinds
+  snd.bgmV2:muffle()
 
   self.typical_activate(self, dt, textIndex)
   self.next = 2
@@ -83,7 +84,8 @@ local function onDialogueRealEnd(instance)
   end
   instance.image_index = 0
   game.cutscenePause(false)
-  snd.bgmV2.overrideAndLoad()
+  -- snd.bgmV2.overrideAndLoad() -- reloads from start
+  snd.bgmV2:unmuffle()
   o.removeFromWorld(instance)
 end
 

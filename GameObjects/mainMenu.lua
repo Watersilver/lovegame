@@ -616,17 +616,25 @@ load = function (self)
           end
         },
         {
-          -- Music
-          sprite = "Menu/SimpleMenuBox",
-          sprite2 = "Menu/SimpleSliderNTickbox",
-          cursorable = {xoff = - 20, yoff = 0},
+          -- Music Volume
           x = 250,
           y = 200,
           scale = 0.5,
-          repeats = 15,
-          checkmark = 0, -- 0 = unchecked, 1 = checked
+          sprite = "Menu/SimpleMenuBox",
+          sprite2 = "Menu/SimpleSliderNTickbox",
+          repeats = 17,
+          sliderRepeats = 4,
+          cursorable = {xoff = - 20, yoff = 0},
+          slider = 0.5,
+          mslLimMin = 0,
+          mslLimMax = 1,
+          checkmark = 0,
           load = function (self, menuHandler)
             self.checkmark = menuHandler.tempGs.musicOn and 1 or 0
+            self.slider = (menuHandler.tempGs.music_volume - self.mslLimMin)/(self.mslLimMax - self.mslLimMin)
+          end,
+          unload = function (self, menuHandler)
+            snd.setMusicVolume(menuHandler.tempGs.music_volume)
           end,
           action = function (self, menuHandler)
             if menuHandler.tempGs.musicOn then
@@ -635,11 +643,23 @@ load = function (self)
               menuHandler.tempGs.musicOn = true
             end
             self.checkmark = menuHandler.tempGs.musicOn and 1 or 0
+            gs.musicOn = menuHandler.tempGs.musicOn
           end,
-          drawMe = function (self, image_index, x, y)
+          slide = function (self, menuHandler, sliderImpulse)
+            self.slider = self.slider + sliderImpulse
+            if self.slider > 1 then self.slider = 1
+            elseif self.slider < 0 then self.slider = 0
+            end
+            snd.setMusicVolume(self.slider * (self.mslLimMax - self.mslLimMin) + self.mslLimMin)
+          end,
+          preciseSlide = function (self, menuHandler, sliderImpulse)
+            snd.setMusicVolume(0.01 * clamp(self.mslLimMin * 100, gs.music_volume * 100 + sliderImpulse, self.mslLimMax * 100))
+            self.slider = (gs.music_volume - self.mslLimMin)/(self.mslLimMax - self.mslLimMin)
+          end,
+          drawMe = function(self, image_index, x, y)
             typical_drawMe(self.sprite, image_index, x, y)
           end,
-          drawMe2 = function (self, image_index, x, y)
+          drawMe2 = function(self, image_index, x, y)
             typical_drawMe(self.sprite2, image_index, x, y)
           end,
           -- Custom Draw
@@ -651,25 +671,36 @@ load = function (self)
             -- MenuBox
             horizontal_menuBox(self, x, y, self.repeats)
 
-            -- Text
+            -- Slider
+            normal_slider(self, x, y, self.sliderRepeats, 230)
+
             setFont(font.prstartk)
-            love.graphics.print("Music: ", x, y, 0, self.scale, self.scale, 0, 8)
-            self:drawMe2(4+self.checkmark, x + 250, y)
+            love.graphics.print("Music: " .. floor(gs.music_volume * 100), x, y, 0, self.scale, self.scale, 0, 8)
             setFont(font.default)
+
+            self:drawMe2(4+self.checkmark, x + 150, y)
           end
         },
         {
-          -- Sounds
-          sprite = "Menu/SimpleMenuBox",
-          sprite2 = "Menu/SimpleSliderNTickbox",
-          cursorable = {xoff = - 20, yoff = 0},
+          -- Sound Volume
           x = 250,
           y = 250,
           scale = 0.5,
-          repeats = 15,
-          checkmark = 0, -- 0 = unchecked, 1 = checked
+          sprite = "Menu/SimpleMenuBox",
+          sprite2 = "Menu/SimpleSliderNTickbox",
+          repeats = 17,
+          sliderRepeats = 4,
+          cursorable = {xoff = - 20, yoff = 0},
+          slider = 0.5,
+          mslLimMin = 0,
+          mslLimMax = 1,
+          checkmark = 0,
           load = function (self, menuHandler)
             self.checkmark = menuHandler.tempGs.soundsOn and 1 or 0
+            self.slider = (menuHandler.tempGs.sound_volume - self.mslLimMin)/(self.mslLimMax - self.mslLimMin)
+          end,
+          unload = function (self, menuHandler)
+            snd.setSoundVolume(menuHandler.tempGs.sound_volume)
           end,
           action = function (self, menuHandler)
             if menuHandler.tempGs.soundsOn then
@@ -678,11 +709,23 @@ load = function (self)
               menuHandler.tempGs.soundsOn = true
             end
             self.checkmark = menuHandler.tempGs.soundsOn and 1 or 0
+            gs.soundsOn = menuHandler.tempGs.soundsOn
           end,
-          drawMe = function (self, image_index, x, y)
+          slide = function (self, menuHandler, sliderImpulse)
+            self.slider = self.slider + sliderImpulse
+            if self.slider > 1 then self.slider = 1
+            elseif self.slider < 0 then self.slider = 0
+            end
+            snd.setSoundVolume(self.slider * (self.mslLimMax - self.mslLimMin) + self.mslLimMin)
+          end,
+          preciseSlide = function (self, menuHandler, sliderImpulse)
+            snd.setSoundVolume(0.01 * clamp(self.mslLimMin * 100, gs.sound_volume * 100 + sliderImpulse, self.mslLimMax * 100))
+            self.slider = (gs.sound_volume - self.mslLimMin)/(self.mslLimMax - self.mslLimMin)
+          end,
+          drawMe = function(self, image_index, x, y)
             typical_drawMe(self.sprite, image_index, x, y)
           end,
-          drawMe2 = function (self, image_index, x, y)
+          drawMe2 = function(self, image_index, x, y)
             typical_drawMe(self.sprite2, image_index, x, y)
           end,
           -- Custom Draw
@@ -694,13 +737,102 @@ load = function (self)
             -- MenuBox
             horizontal_menuBox(self, x, y, self.repeats)
 
-            -- Text
+            -- Slider
+            normal_slider(self, x, y, self.sliderRepeats, 230)
+
             setFont(font.prstartk)
-            love.graphics.print("Sounds: ", x, y, 0, self.scale, self.scale, 0, 8)
-            self:drawMe2(4+self.checkmark, x + 250, y)
+            love.graphics.print("Sound: " .. floor(gs.sound_volume * 100), x, y, 0, self.scale, self.scale, 0, 8)
             setFont(font.default)
+
+            self:drawMe2(4+self.checkmark, x + 150, y)
           end
         },
+        -- {
+        --   -- Music
+        --   sprite = "Menu/SimpleMenuBox",
+        --   sprite2 = "Menu/SimpleSliderNTickbox",
+        --   cursorable = {xoff = - 20, yoff = 0},
+        --   x = 250,
+        --   y = 200,
+        --   scale = 0.5,
+        --   repeats = 15,
+        --   checkmark = 0, -- 0 = unchecked, 1 = checked
+        --   load = function (self, menuHandler)
+        --     self.checkmark = menuHandler.tempGs.musicOn and 1 or 0
+        --   end,
+        --   action = function (self, menuHandler)
+        --     if menuHandler.tempGs.musicOn then
+        --       menuHandler.tempGs.musicOn = false
+        --     else
+        --       menuHandler.tempGs.musicOn = true
+        --     end
+        --     self.checkmark = menuHandler.tempGs.musicOn and 1 or 0
+        --   end,
+        --   drawMe = function (self, image_index, x, y)
+        --     typical_drawMe(self.sprite, image_index, x, y)
+        --   end,
+        --   drawMe2 = function (self, image_index, x, y)
+        --     typical_drawMe(self.sprite2, image_index, x, y)
+        --   end,
+        --   -- Custom Draw
+        --   draw = function (self, menuHandler)
+        --     local gxo, gyo =
+        --     self.menu.globalXOffset or 0, self.menu.globalYOffset or 0
+        --     local x, y = self.x + gxo, self.y + gyo
+
+        --     -- MenuBox
+        --     horizontal_menuBox(self, x, y, self.repeats)
+
+        --     -- Text
+        --     setFont(font.prstartk)
+        --     love.graphics.print("Music: ", x, y, 0, self.scale, self.scale, 0, 8)
+        --     self:drawMe2(4+self.checkmark, x + 250, y)
+        --     setFont(font.default)
+        --   end
+        -- },
+        -- {
+        --   -- Sounds
+        --   sprite = "Menu/SimpleMenuBox",
+        --   sprite2 = "Menu/SimpleSliderNTickbox",
+        --   cursorable = {xoff = - 20, yoff = 0},
+        --   x = 250,
+        --   y = 250,
+        --   scale = 0.5,
+        --   repeats = 15,
+        --   checkmark = 0, -- 0 = unchecked, 1 = checked
+        --   load = function (self, menuHandler)
+        --     self.checkmark = menuHandler.tempGs.soundsOn and 1 or 0
+        --   end,
+        --   action = function (self, menuHandler)
+        --     if menuHandler.tempGs.soundsOn then
+        --       menuHandler.tempGs.soundsOn = false
+        --     else
+        --       menuHandler.tempGs.soundsOn = true
+        --     end
+        --     self.checkmark = menuHandler.tempGs.soundsOn and 1 or 0
+        --   end,
+        --   drawMe = function (self, image_index, x, y)
+        --     typical_drawMe(self.sprite, image_index, x, y)
+        --   end,
+        --   drawMe2 = function (self, image_index, x, y)
+        --     typical_drawMe(self.sprite2, image_index, x, y)
+        --   end,
+        --   -- Custom Draw
+        --   draw = function (self, menuHandler)
+        --     local gxo, gyo =
+        --     self.menu.globalXOffset or 0, self.menu.globalYOffset or 0
+        --     local x, y = self.x + gxo, self.y + gyo
+
+        --     -- MenuBox
+        --     horizontal_menuBox(self, x, y, self.repeats)
+
+        --     -- Text
+        --     setFont(font.prstartk)
+        --     love.graphics.print("Sounds: ", x, y, 0, self.scale, self.scale, 0, 8)
+        --     self:drawMe2(4+self.checkmark, x + 250, y)
+        --     setFont(font.default)
+        --   end
+        -- },
         {
           -- Fullscreen
           sprite = "Menu/SimpleMenuBox",
