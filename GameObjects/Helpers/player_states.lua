@@ -585,6 +585,7 @@ player_states.start_jump = function(instance, dt, side)
     instance.double_jumping = true
   else
     instance.zvel = 110
+    snd.play(glsounds.jump)
     snd.playJumpSound(instance.closestTile, instance.inShallowWater)
   end
   instance.animation_state:change_state(instance, dt, side .. "fall")

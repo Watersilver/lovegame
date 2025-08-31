@@ -908,7 +908,7 @@ Boss4.functions = {
       explosion_sprite = self.explosionSprite or im.spriteSettings.testsplosion,
       image_speed = self.explosionSpeed or 0.5,
       onlySoundOnce = true,
-      sounds = snd.load_sounds({explode = {"Effects/retro/bs_big_explosion"}})
+      sounds = {explode = glsounds.bossExplode}
     }
     o.addToWorld(explOb)
     o.removeFromWorld(self)
