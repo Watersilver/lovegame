@@ -435,7 +435,7 @@ Boss1.functions = {
       explosion_sprite = self.explosionSprite or im.spriteSettings.testsplosion,
       image_speed = self.explosionSpeed or 0.5,
       onlySoundOnce = true,
-      sounds = snd.load_sounds({explode = {"Effects/Oracle_Boss_Explode"}})
+      sounds = snd.load_sounds({explode = {"Effects/retro/bs_big_explosion"}})
     }
     o.addToWorld(explOb)
     o.removeFromWorld(self)

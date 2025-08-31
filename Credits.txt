@@ -1,3 +1,22 @@
 Press Start Font Family : codeman38 | cody@zone38.net | http://www.zone38.net/ ]
 
 kikito - require lib
+
+
+SFX:
+
+beatscribe - gba sound effects (in retro folder prepended with bs_)
+https://beatscribe.itch.io/beatscribes-free-uge-music-asset-pack
+"Please contact me first if you wish to credit me on your projects"
+
+
+cyrex - https://cyrex-studios.itch.io/universal-ui-soundpack
+in cyrex folder
+
+
+blackmid - https://blackmid.itch.io/realistic-bell-hits
+in blackmid folder
+
+
+https://tommusic.itch.io/free-fantasy-200-sfx-pack
+not mandatory but appreciated

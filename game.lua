@@ -67,6 +67,11 @@ function game.pause(pauser)
   if not game.unpausable or not pauser then
     game.paused = pauser
     snd.play(pauser and glsounds.pauseOpen or glsounds.pauseClose)
+    if pauser then
+      snd.bgmV2:muffle()
+    else
+      snd.bgmV2:unmuffle()
+    end
   end
 end
 

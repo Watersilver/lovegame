@@ -91,8 +91,12 @@ function snd.load_sounds(sounds_info)
   return snd_table
 end
 
--- Doesn't actually play the sound, just adds it to soundsToBePlayed table
+---Doesn't actually play the sound, just adds it to soundsToBePlayed table. If given a list it chooses random
+---@param sound love.Source | love.Source[] | nil
 function snd.play(sound)
+  if not sound then return end
+  if not sound.type then return snd.play(u.listPickRandom(sound)) end
+
   -- Make sure I don't add a sound twice
   sound:stop()
   for _, soundFromTable in ipairs(soundsToBePlayed) do
@@ -104,36 +108,116 @@ end
 
 function snd.playFootstepSound(tile, inShallowWater)
   if tile then
-    if u.anyOf(tile.tileType, {"tile"}) then
-      snd.play(u.listPickRandom(glsounds.footsteps.rockrun))
+    if u.anyOf(tile.tileType, {"tile", "ice"}) then
+      snd.play(glsounds.footsteps.rockrun)
     elseif u.anyOf(tile.tileType, {"grass", "flowers"}) then
-      snd.play(u.listPickRandom(glsounds.footsteps.grassrun))
+      snd.play(glsounds.footsteps.grassrun)
     elseif u.anyOf(tile.tileType, {"gravel", "gravelyRock", "snowGravel", "icyGravel", "icyDirt"}) then
-      snd.play(u.listPickRandom(glsounds.footsteps.gravelrun))
+      snd.play(glsounds.footsteps.gravelrun)
     elseif u.anyOf(tile.tileType, {"deepGrass", "deepSnowGrass"}) then
-      snd.play(u.listPickRandom(glsounds.footsteps.grasswalk))
+      snd.play(glsounds.footsteps.grasswalk)
     elseif u.anyOf(tile.tileType, {"mud", "waterlily"}) then
-      snd.play(u.listPickRandom(glsounds.footsteps.mudrun))
+      snd.play(glsounds.footsteps.mudrun)
     elseif u.anyOf(tile.tileType, {"water", "sea"}) then
-      snd.play(u.listPickRandom(glsounds.footsteps.waterwalk))
+      snd.play(glsounds.footsteps.waterwalk)
     elseif u.anyOf(tile.tileType, {"snowGrass"}) then
-      snd.play(u.listPickRandom(glsounds.footsteps.snowsoftrun))
+      snd.play(glsounds.footsteps.snowsoftrun)
     elseif u.anyOf(tile.tileType, {"snow"}) then
-      snd.play(u.listPickRandom(glsounds.footsteps.snowhardrun))
+      snd.play(glsounds.footsteps.snowhardrun)
     elseif u.anyOf(tile.tileType, {"sand"}) then
-      snd.play(u.listPickRandom(glsounds.footsteps.sandrun))
+      snd.play(glsounds.footsteps.sandrun)
+    elseif u.anyOf(tile.tileType, {"wood"}) then
+      snd.play(glsounds.footsteps.woodrun)
     -- Commented out because it echoes like its in an interior
     -- elseif u.anyOf(tile.tileType, {"tile"}) then
-    --   snd.play(u.listPickRandom(glsounds.footsteps.tilerun))
+    --   snd.play(glsounds.footsteps.tilerun)
     else
-      snd.play(u.listPickRandom(glsounds.footsteps.dirtrun))
+      snd.play(glsounds.footsteps.dirtrun)
     end
   elseif inShallowWater then
-    snd.play(u.listPickRandom(glsounds.footsteps.mudrun))
+    snd.play(glsounds.footsteps.mudrun)
   else
-    snd.play(u.listPickRandom(glsounds.footsteps.dirtrun))
+    snd.play(glsounds.footsteps.dirtrun)
   end
 end
+
+
+function snd.playJumpSound(tile, inShallowWater)
+  if tile then
+    if u.anyOf(tile.tileType, {"tile", "ice"}) then
+      snd.play(glsounds.tommusic.stone_jump)
+    elseif u.anyOf(tile.tileType, {"grass", "flowers"}) then
+      snd.play(glsounds.tommusic.dirt_jump)
+    elseif u.anyOf(tile.tileType, {"gravel", "gravelyRock", "snowGravel", "icyGravel", "icyDirt"}) then
+      snd.play(glsounds.footsteps.gravelrun)
+      snd.play(glsounds.tommusic.dirt_jump)
+    elseif u.anyOf(tile.tileType, {"deepGrass", "deepSnowGrass"}) then
+      snd.play(glsounds.footsteps.grasswalk)
+      snd.play(glsounds.tommusic.dirt_jump)
+    elseif u.anyOf(tile.tileType, {"mud", "waterlily"}) then
+      snd.play(glsounds.footsteps.mudrun)
+      snd.play(glsounds.tommusic.water_jump)
+    elseif u.anyOf(tile.tileType, {"water", "sea"}) then
+      snd.play(glsounds.tommusic.water_jump)
+    elseif u.anyOf(tile.tileType, {"snowGrass"}) then
+      snd.play(glsounds.footsteps.snowsoftrun)
+      snd.play(glsounds.tommusic.dirt_jump)
+    elseif u.anyOf(tile.tileType, {"snow"}) then
+      snd.play(glsounds.footsteps.snowhardrun)
+      snd.play(glsounds.tommusic.dirt_jump)
+    elseif u.anyOf(tile.tileType, {"sand"}) then
+      snd.play(glsounds.footsteps.sandrun)
+      snd.play(glsounds.tommusic.dirt_jump)
+    elseif u.anyOf(tile.tileType, {"wood"}) then
+      snd.play(glsounds.tommusic.wood_jump)
+    else
+      snd.play(glsounds.tommusic.dirt_jump)
+    end
+  elseif inShallowWater then
+    snd.play(glsounds.tommusic.water_jump)
+  else
+    snd.play(glsounds.tommusic.dirt_jump)
+  end
+end
+
+
+function snd.playLandSound(tile, inShallowWater)
+  if tile then
+    if u.anyOf(tile.tileType, {"tile", "ice"}) then
+      snd.play(glsounds.tommusic.stone_land)
+    elseif u.anyOf(tile.tileType, {"grass", "flowers"}) then
+      snd.play(glsounds.tommusic.dirt_land)
+    elseif u.anyOf(tile.tileType, {"gravel", "gravelyRock", "snowGravel", "icyGravel", "icyDirt"}) then
+      snd.play(glsounds.footsteps.gravelrun)
+      snd.play(glsounds.tommusic.dirt_land)
+    elseif u.anyOf(tile.tileType, {"deepGrass", "deepSnowGrass"}) then
+      snd.play(glsounds.footsteps.grasswalk)
+      snd.play(glsounds.tommusic.dirt_land)
+    elseif u.anyOf(tile.tileType, {"mud", "waterlily"}) then
+      snd.play(glsounds.footsteps.mudrun)
+      snd.play(glsounds.tommusic.water_land)
+    elseif u.anyOf(tile.tileType, {"water", "sea"}) then
+      snd.play(glsounds.tommusic.water_land)
+    elseif u.anyOf(tile.tileType, {"snowGrass"}) then
+      snd.play(glsounds.footsteps.snowsoftrun)
+      -- snd.play(glsounds.tommusic.dirt_land)
+    elseif u.anyOf(tile.tileType, {"snow"}) then
+      snd.play(glsounds.footsteps.snowhardrun)
+      snd.play(glsounds.tommusic.dirt_land)
+    elseif u.anyOf(tile.tileType, {"sand"}) then
+      snd.play(glsounds.footsteps.sandrun)
+    elseif u.anyOf(tile.tileType, {"wood"}) then
+      snd.play(glsounds.tommusic.wood_land)
+    else
+      snd.play(glsounds.tommusic.dirt_land)
+    end
+  elseif inShallowWater then
+    snd.play(glsounds.tommusic.water_land)
+  else
+    snd.play(glsounds.tommusic.dirt_land)
+  end
+end
+
 
 -- Used in the main update every frame to play soundsToBePlayed
 function snd.play_soundsToBePlayed()

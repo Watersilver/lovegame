@@ -394,16 +394,7 @@ end
 
 player_states.start_swing = function(instance, dt, side)
   instance.swingingSword = true
-  -- random swing sound
-  local randomizeSwing = random()
   snd.play(glsounds.lasersword)
-  -- if randomizeSwing < 0.34 then
-  --   snd.play(instance.sounds.swordSlash1)
-  -- elseif randomizeSwing < 0.67 then
-  --   snd.play(instance.sounds.swordSlash2)
-  -- else
-  --   snd.play(instance.sounds.swordSlash3)
-  -- end
   instance.image_index = 0
   instance.triggers.animation_end = false
 
@@ -594,7 +585,7 @@ player_states.start_jump = function(instance, dt, side)
     instance.double_jumping = true
   else
     instance.zvel = 110
-    snd.playFootstepSound(instance.closestTile, instance.inShallowWater)
+    snd.playJumpSound(instance.closestTile, instance.inShallowWater)
   end
   instance.animation_state:change_state(instance, dt, side .. "fall")
 end
