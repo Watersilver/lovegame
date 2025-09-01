@@ -14,9 +14,9 @@ function Boss2HandBack.initialize(instance)
   instance.deathTimer = 1
   instance.vy = 0
   instance.image_index = 0
-  instance.sounds = snd.load_sounds({
-    handTouchGround = {"Effects/Oracle_Boss_BigBoom"},
-  })
+  instance.sounds = {
+    handTouchGround = glsounds.bigBoom
+  }
 end
 
 Boss2HandBack.functions = {

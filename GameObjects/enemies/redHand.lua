@@ -33,7 +33,7 @@ function RedHand.initialize(instance)
   instance.gravity = 111
   instance.grabRadius = 16
   instance.fallSound = glsounds.blockFall
-  instance.grabSound = snd.load_sound{"Effects/Oracle_Boss_Die"}
+  instance.grabSound = glsounds.bossDie
 
   -- determine initial facing
   instance.x_scale = u.choose(1, -1)

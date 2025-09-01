@@ -307,12 +307,11 @@ function Boss1.initialize(instance)
   instance.spritefixture_properties.shape = ps.shapes.bosses.boss1.sprite
   instance.handFrame = 0
   instance.image_index = 0
-  instance.sounds = snd.load_sounds({
-    hit = {"Effects/Oracle_Boss_Hit"},
-    fatalHit = {"Effects/Oracle_Boss_Die"},
-    crumble = {"Effects/Oracle_FloorCrumble"},
-    spell = {"Effects/OOA_Veran_Shapeshift"}
-  })
+  instance.sounds = {
+    hit = glsounds.bossHit,
+    spell = glsounds.decoy,
+    fatalHit = glsounds.bossDie
+  }
 
   instance.state = sm.new_state_machine(states)
   instance.state.state = "start"

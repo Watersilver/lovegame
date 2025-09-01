@@ -38,7 +38,7 @@ function BlueHand.initialize(instance)
   instance.flying = true
   instance.zo = 0
   instance.harmless = true
-  instance.grabSound = snd.load_sound{"Effects/Oracle_Boss_Die"}
+  instance.grabSound = glsounds.bossDie
 
   -- Init dir direction
   instance.initDir = (love.math.random() * 2 - 1) * math.pi

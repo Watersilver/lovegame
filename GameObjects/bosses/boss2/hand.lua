@@ -36,12 +36,7 @@ function Boss2Hand.initialize(instance)
   instance.image_index = 0
   instance.drop = "noDrop"
   instance.goThroughPlayer = true
-  local moreSounds = snd.load_sounds({
-    handTouchGround = {"Effects/Oracle_Boss_BigBoom"},
-    handTouchGroundGently = {"Effects/smallBoom"}
-  })
-  instance.sounds.handTouchGround = moreSounds.handTouchGround
-  instance.sounds.handTouchGroundGently = moreSounds.handTouchGroundGently
+  instance.sounds.handTouchGround = glsounds.bigBoom
 
   instance.hpPrev = instance.hp
 end

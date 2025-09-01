@@ -461,13 +461,12 @@ function Boss2.initialize(instance)
   instance.physical_properties.shape = ps.shapes.bosses.boss2.head
   instance.spritefixture_properties = nil
   instance.image_index = 0
-  instance.sounds = snd.load_sounds({
-    hit = {"Effects/Oracle_Boss_Hit"},
-    fatalHit = {"Effects/Oracle_Boss_Die"},
-    crumble = {"Effects/Oracle_FloorCrumble"},
-    handTouchGround = {"Effects/Oracle_Boss_BigBoom"},
-    handTouchGroundGently = {"Effects/smallBoom"}
-  })
+  instance.sounds = {
+    crumble = glsounds.crumble,
+    hit = glsounds.bossHit,
+    fatalHit = glsounds.bossDie,
+    handTouchGround = glsounds.bigBoom
+  }
 
   instance.state = sm.new_state_machine(states)
   instance.state.state = "start"

@@ -629,10 +629,10 @@ function Boss4.initialize(instance)
   instance.hp = 60
   instance.deathInvulnerable = 2
   instance.initialHP = instance.hp
-  instance.sounds = snd.load_sounds({
-    hitSound = {"Effects/Oracle_Boss_Hit"},
-    fatalHit = {"Effects/Oracle_Boss_Die"},
-  })
+  instance.sounds = {
+    hitSound = glsounds.bossHit,
+    fatalHit = glsounds.bossDie
+  }
   instance.layer = (pl1 and pl1.layer) and pl1.layer - 1 or 20
   instance.groundLayer = instance.layer
   instance.airLayer = instance.layer + 1

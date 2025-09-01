@@ -1078,7 +1078,7 @@ load = function (self)
 end,
 
 update = function (self, dt)
-
+  snd.bgmV2:unmuffle()
 
   -- Determine menu we're working on
   local currMenu = self.menus[self.currentMenu]
@@ -1181,7 +1181,6 @@ update = function (self, dt)
 end,
 
 draw_overlay = function (self)
-
   if self.menus_to_be_drawn_previous then
     for i, prev in ipairs(self.menus_to_be_drawn_previous) do
 

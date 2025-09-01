@@ -46,9 +46,9 @@ function Orb.initialize(instance)
   instance.grounded = false
   instance.explosionSound = {"Effects/Oracle_Rock_Shatter"}
   instance.throw_collision = throw_collision
-  instance.sounds = snd.load_sounds({
-    land = {"Effects/Oracle_Boss_BigBoom"}
-  })
+  instance.sounds = {
+    land = glsounds.bigBoom
+  }
 
   instance.floorTiles = {role = "thrownFloorTilesIndex"}
   instance.zoOverride = 0

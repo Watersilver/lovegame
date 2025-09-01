@@ -1239,10 +1239,10 @@ function Boss3.initialize(instance)
   instance.hp = 20
   instance.initialHP = instance.hp
   instance.bombsplosionDamageMod = 1 / 4
-  instance.sounds = snd.load_sounds({
-    hitSound = {"Effects/Oracle_Boss_Hit"},
-    fatalHit = {"Effects/Oracle_Boss_Die"},
-  })
+  instance.sounds = {
+    hitSound = glsounds.bossHit,
+    fatalHit = glsounds.bossDie
+  }
   instance.layer = pl1 and pl1.layer or 20
   instance.physical_properties.shape = ps.shapes.bosses.boss3.body
   instance.spritefixture_properties.shape = ps.shapes.bosses.boss3.sprite
