@@ -45,7 +45,7 @@ function redRockBug.initialize(instance)
     enemRock = true,
     sprite_info = im.spriteSettings.bullet
   }
-  instance.shootSound = snd.load_sound{"Effects/Oracle_Link_Throw"}
+  instance.shootSound = snd.load_sound{"Effects/toss"}
 end
 
 redRockBug.functions = {}

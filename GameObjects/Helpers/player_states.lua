@@ -394,6 +394,7 @@ end
 
 player_states.start_swing = function(instance, dt, side)
   instance.swingingSword = true
+  snd.stop(glsounds.lasersword)
   snd.play(glsounds.lasersword)
   instance.image_index = 0
   instance.triggers.animation_end = false
@@ -580,9 +581,16 @@ end
 player_states.start_jump = function(instance, dt, side)
   if instance.triggers.hold_jump then
     instance.zvel = 33
-    snd.play(instance.sounds.throw)
+    snd.play(glsounds.doublejump)
     instance.gravity = 100
     instance.double_jumping = true
+    -- local wind = (require "GameObjects.whirlwind"):new{
+    --   x = instance.x, y = instance.y,
+    --   layer = instance.layer - 1,
+    --   eye = instance,
+    --   silent = true
+    -- }
+    -- o.addToWorld(wind)
   else
     instance.zvel = 110
     snd.play(glsounds.jump)

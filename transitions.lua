@@ -120,6 +120,9 @@ function trans.camera_modification()
     camytmod = game.room.height
   end
 
+  camxtmod = camxtmod + game.transitioning.xmod
+  camytmod = camytmod + game.transitioning.ymod
+
   return camxtmod, camytmod
 end
 

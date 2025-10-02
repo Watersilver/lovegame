@@ -856,7 +856,7 @@ local animation_states = {
 
   start_state = function(instance, dt)
     snd.play(instance.sounds.swordSpin)
-    instance.sounds.swordCharge:stop()
+    snd.stop(instance.sounds.swordCharge)
     instance.image_speed = 0
     instance.spinAttackCounter = 0
     instance.playerSpinFreq = 1 / 30
@@ -1744,7 +1744,7 @@ local animation_states = {
 
       if session.latestVisitedRooms:getLast() ~= instance.mark.roomName then
         if not game.transitioning and session.canRecallOtherRoom() then
-          instance.sounds.recallStart:stop()
+          snd.stop(instance.sounds.recallStart)
           snd.play(instance.sounds.recall)
           instance.stateTriggers.poof = true
           game.transition{
@@ -1759,7 +1759,7 @@ local animation_states = {
           instance:newMark(true, session.latestVisitedRooms:getLast(), true)
         end
       else
-        instance.sounds.recallStart:stop()
+        snd.stop(instance.sounds.recallStart)
         if instance.mark:canSlice() then
           local ws = windSlice:new{
             x0 = instance.x,
@@ -2246,7 +2246,8 @@ function Playa.initialize(instance)
     type = "whiteScreen",
     -- noFade = true,
     progress = 0,
-    roomTarget = session.save.room or "Rooms/LakeVillage/startingHouse.lua"
+    -- roomTarget = session.save.room or "Rooms/LakeVillage/startingHouse.lua"
+    roomTarget = "World_at_0x0x0"
   }
 
   -- Debug
@@ -2334,7 +2335,7 @@ function Playa.initialize(instance)
     magicMissile = {"Effects/Magic_Missile"},
     magicMissileCharge = {"Effects/MagicMissileCharge"},
     pickUp = {"Effects/Oracle_Link_PickUp"},
-    throw = {"Effects/Oracle_Link_Throw"},
+    throw = {"Effects/toss"},
     hurt = {"Effects/Oracle_Link_Hurt"},
     mark = {"Effects/Oracle_MysterySeed"},
     recall = {"Effects/OOA_SwitchHook_Switch"},
@@ -2553,7 +2554,7 @@ Playa.functions = {
       if reuse then used = used + self.mark.used + 1 end
       o.removeFromWorld(self.mark)
     end
-    self.sounds.markStart:stop()
+    snd.stop(self.sounds.markStart)
     if not silent then snd.play(self.sounds.mark) end
     self.mark = mark:new{xstart = self.x, ystart = self.y, creator = self, layer = self.layer - 1, used = used}
     if roomName then self.mark.roomName = roomName end

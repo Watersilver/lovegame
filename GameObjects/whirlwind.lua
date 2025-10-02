@@ -19,7 +19,9 @@ end
 
 Fire.functions = {
   load = function (self)
-    snd.play(glsounds.wind)
+    if not self.silent then
+      snd.play(glsounds.wind)
+    end
     self.timer = 0
     self.xstart = self.x
     self.ystart = self.y

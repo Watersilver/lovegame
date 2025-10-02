@@ -53,6 +53,19 @@ function u.capitalise(s)
   return u.utf8_sub(s, 1,1):upper()..u.utf8_sub(s, 2)
 end
 
+---@generic T
+---@param arrs T[][]
+---@return T[]
+function u.concatArrays(arrs)
+  local merged = {}
+  for _, a in ipairs(arrs) do
+    for _, e in ipairs(a) do
+      table.insert(merged, e)
+    end
+  end
+  return merged
+end
+
 -- A push operation that returns the new_index
 function u.push(array, thing)
   local new_index = #array + 1
@@ -239,7 +252,9 @@ end
 
 function u.choose(x, y, chanceToPickX)
   chanceToPickX = chanceToPickX or 0.5
-  return random()<chanceToPickX and x or y
+  local r = random()
+  print(r)
+  return r<chanceToPickX and x or y
 end
 
 -- Remember unpack() function when I want to pass table as second arg

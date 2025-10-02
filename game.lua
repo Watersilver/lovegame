@@ -98,8 +98,132 @@ function game.change_room(roomTarget)
   if session.latestVisitedRooms then
     session.latestVisitedRooms:add(roomTarget)
   end
-  local newRoom = assert(love.filesystem.load(roomTarget))()
-  return newRoom
+
+  -- local newRoom = assert(love.filesystem.load(roomTarget))()
+
+  local chunk, errmsg = love.filesystem.load(roomTarget)
+  if not errmsg then
+    return chunk()
+  else
+    local w = u.split(roomTarget, "_at_")
+    local dims = u.split(w[2], "x")
+    local worldName = w[1]
+    local x = tonumber(string.gsub(dims[1], "_", "-"), 10)
+    local y = tonumber(string.gsub(dims[2], "_", "-"), 10)
+    local z = tonumber(string.gsub(dims[3], "_", "-"), 10)
+
+    if x == nil or y == nil or z == nil then
+      assert(false, errmsg)
+      return
+    end
+
+    local level = GCON.ldtk:findRoom(worldName,x,y,z)
+
+    if not level then
+      assert(false, errmsg)
+      return
+    end
+
+    local room = {}
+    room.ldtk = {
+      worldName = worldName,
+      x = x,
+      y = y,
+      z = z
+    }
+
+    -- TODO: read room data from ldtk
+    room.music_info = snd.soundbalancetest
+    -- room.timeDoesntPass ToBeADDED
+    room.ambientLightType = 'daynight1'
+
+    room.width = level.pxWid
+    room.height = level.pxHei
+    room.downTrans = {
+      -- {
+      --   roomTarget = "Rooms/w100x101.lua",
+      --   xleftmost = 0, xrightmost = 520,
+      --   xmod = 0, ymod = 0
+      -- }
+    }
+    room.rightTrans = {
+      -- {
+      --   roomTarget = "Rooms/w101x100.lua",
+      --   yupper = 0, ylower = 520,
+      --   xmod = 0, ymod = 0
+      -- }
+    }
+    room.leftTrans = {
+      -- {
+      --   roomTarget = "Rooms/w099x100.lua",
+      --   yupper = 0, ylower = 520,
+      --   xmod = 0, ymod = 0
+      -- }
+    }
+    room.upTrans = {
+      -- {
+      --   roomTarget = "Rooms/w100x099.lua",
+      --   xleftmost = 0, xrightmost = 520,
+      --   xmod = 0, ymod = 0
+      -- }
+    }
+
+    for _, neighbor in ipairs(level.__neighbours) do
+      if neighbor.dir == "n" then
+        local lvl = GCON.ldtk:findLevelByIid(worldName, neighbor.levelIid)
+        if lvl then
+          local startDiff = lvl.worldX - level.worldX
+          local t = {
+            roomTarget = lvl.identifier,
+            xleftmost = startDiff, xrightmost = startDiff + lvl.pxWid,
+            xmod = -startDiff,
+            ymod = 0
+          }
+          table.insert(room.upTrans, t)
+        end
+      elseif neighbor.dir == "s" then
+        local lvl = GCON.ldtk:findLevelByIid(worldName, neighbor.levelIid)
+        if lvl then
+          local startDiff = lvl.worldX - level.worldX
+          local t = {
+            roomTarget = lvl.identifier,
+            xleftmost = startDiff, xrightmost = startDiff + lvl.pxWid,
+            xmod = -startDiff,
+            ymod = 0
+          }
+          table.insert(room.downTrans, t)
+        end
+      elseif neighbor.dir == "e" then
+        local lvl = GCON.ldtk:findLevelByIid(worldName, neighbor.levelIid)
+        if lvl then
+          local startDiff = lvl.worldY - level.worldY
+          local t = {
+            roomTarget = lvl.identifier,
+            yupper = startDiff, ylower = startDiff + lvl.pxHei,
+            xmod = 0,
+            ymod = -startDiff
+          }
+          table.insert(room.rightTrans, t)
+        end
+      elseif neighbor.dir == "w" then
+        local lvl = GCON.ldtk:findLevelByIid(worldName, neighbor.levelIid)
+        if lvl then
+          local startDiff = lvl.worldY - level.worldY
+          local t = {
+            roomTarget = lvl.identifier,
+            yupper = startDiff, ylower = startDiff + lvl.pxHei,
+            xmod = 0,
+            ymod = -startDiff
+          }
+          table.insert(room.leftTrans, t)
+        end
+      end
+    end
+
+    room.game_scale = 2
+
+    return room
+  end
 end
 
 --[[

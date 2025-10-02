@@ -68,7 +68,7 @@ function rm.build_room(room)
     end
   end
 
-  if not room.newType then
+  if not room.newType and not room.ldtk then
     -- Store room parts (e.g. a set of blocks, background stuff, player, etc.)
     local rparts = room.room_parts
 
@@ -180,10 +180,11 @@ function rm.build_room(room)
       end
 
     end
+  elseif room.ldtk then
+    GCON.ldtk:buildRoom(room.ldtk.worldName, room.ldtk.x, room.ldtk.y, room.ldtk.z)
   else
 
     for _, objInfo in ipairs(room.gameObjects) do
-      local element
       local tileset = tilesets[objInfo.t]
       local tilesetName = tileset[1]
       local symbol = tts[tilesetName][objInfo.i]
@@ -194,7 +195,7 @@ function rm.build_room(room)
       if not (symbol == 'n' or not symbol) then
         objInfo.n.layer = objInfo.n.l
         objInfo.n.l = nil
-        element = sto[symbol]:new(objInfo.n)
+        local element = sto[symbol]:new(objInfo.n)
         -- Determine sprite
         element.sprite_info = {tileset}
         element.image_index = objInfo.i
@@ -216,7 +217,7 @@ function rm.build_room(room)
       for _, objInfo in ipairs(room.manuallyPlacedObjects) do
         local blocation = objInfo.blueprint:gsub("%.", "/")
         local blueprint = assert(love.filesystem.load("GameObjects/" .. blocation .. ".lua"))()
-        element = blueprint:new(objInfo.n)
+        local element = blueprint:new(objInfo.n)
 
         -- Create tiles
         if element.physical_properties and element.physical_properties.tile then
