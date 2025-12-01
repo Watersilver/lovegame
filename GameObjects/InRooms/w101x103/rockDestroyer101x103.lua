@@ -8,7 +8,7 @@ local PC = {}
 function PC.initialize(instance)
   instance.saveNote = "rd101x103" -- Provide to only happen once
   instance.objDestLayer = 13 -- change in init if you want
-  instance.soundEffect = "Oracle_Rock_Shatter" -- change in init if you want
+  instance.soundEffect = "RockShatter" -- change in init if you want
   instance.graphicEffect = "rockDestruction" -- change in init if you want
   instance.fanfareWaitTime = 1
 end

@@ -142,8 +142,8 @@ function BladeTrap.initialize(instance)
   instance.directions = {up = 0, down = 1, left = 2, right = 3}
   instance.physical_properties.shape = ps.shapes.rectThreeFourths
   instance.canBeBullrushed = false
-  instance.moveSound = snd.load_sound({"Effects/Oracle_Sword_Slash2"})
-  instance.collideSound = snd.load_sound({"Effects/Oracle_Sword_Tap"})
+  instance.moveSound = snd.load_sound({"Effects/MagicSlash/MagicSlash2"})
+  instance.collideSound = snd.load_sound({"Effects/SwordTap"})
 end
 
 BladeTrap.functions = {

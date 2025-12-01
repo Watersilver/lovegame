@@ -117,13 +117,13 @@ local states = {
       if instance.image_speed == 0 and instance.divingPhase > pi / 2 then
         instance.image_speed = 0.15
         instance.image_index = 0
-        snd.play(glsounds.wingFlap)
+        snd.play(glsounds.wingFlap2)
       end
     end,
     start_state = function(instance, dt)
       instance.image_speed = 0
       instance.image_index = 1
-      snd.play(glsounds.wingFlap)
+      snd.play(glsounds.wingFlap2)
       -- in seconds
       -- local halftime = 0.7 -- fastish
       local halftime = 0.9
@@ -213,7 +213,7 @@ Raven.functions = {
         (self.x + 8 < l) or (self.x - 8 > l + w)
         or (self.y + 8 < t) or (self.y - (8 + abs(self.maxHeight)) > t + h)
       if not isOutsideGamera then
-        snd.play(glsounds.wingFlap)
+        snd.play(glsounds.wingFlap2)
       end
     end
     self.image_index_prev = self.image_index

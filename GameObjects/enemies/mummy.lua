@@ -29,8 +29,8 @@ function Mummy.initialize(instance)
   instance.hp = session.save.faroresCourage and 15 or 30
   instance.attackDmg = session.save.faroresCourage and 2 or 4
   instance.stepSounds = {
-    [0] = snd.load_sound({"Effects/step1"}),
-    [1] = snd.load_sound({"Effects/step2"})
+    [0] = snd.load_sound({"Effects/MummyStep1"}),
+    [1] = snd.load_sound({"Effects/MummyStep2"})
   }
   instance.behaviourTimer = love.math.random() * 1.3
 end

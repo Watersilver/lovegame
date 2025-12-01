@@ -54,7 +54,7 @@ function Chaser.initialize(instance)
   instance.shielded = true
   instance.pushback = true
   instance.attackDmg = 1.5
-  instance.moveSound = snd.load_sound({"Effects/Oracle_Block_Push"})
+  instance.moveSound = snd.load_sound({"Effects/ChaserMove"})
 end
 
 Chaser.functions = {

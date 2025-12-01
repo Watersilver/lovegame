@@ -6,6 +6,12 @@ local u = require "utilities"
 
 local cd = {}
 
+local function playLetterSound(instance, source)
+  if instance.letterSoundCooldown > 0 then return end
+  snd.play(source)
+  instance.letterSoundCooldown = 0.07
+end
+
 local closeEnoughToPlayer = function (self)
   if not (pl1 and pl1.exists) then return end
   local playa = pl1
@@ -98,7 +104,7 @@ private.singleSimpleBubbleTemplate = function(settings)
             instance.nextExists = nil
             instance.waitForKeyPress = nil
             instance.scrollingUp = true
-            if interactive then snd.play(glsounds.textDone) end
+            if interactive then snd.play(glsounds.textNext) end
           end
         elseif instance.scrollingUp then
           instance.content:setYOffset(instance.content.yOffset + GPAR.dlg_scroll_speed_factor * dt)
@@ -113,7 +119,7 @@ private.singleSimpleBubbleTemplate = function(settings)
             instance.content:updateHeightTextLength(instance.content:getLength() + 2)
             instance.timer = instance.timeBetweenLetters
             if (not noSound) and added ~= " " and prevLength < instance.content:getLength() then
-              snd.play(glsounds.letter)
+              playLetterSound(dlgControl, glsounds.letterTypeA)
             end
           end
           instance.timer = instance.timer - dt

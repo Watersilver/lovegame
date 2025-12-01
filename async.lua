@@ -290,3 +290,5 @@ end
 
 -- unless, onCancel and finally only apply to previous asyncTables
 -- for which they aren't already set
+
+return async

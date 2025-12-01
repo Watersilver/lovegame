@@ -21,7 +21,7 @@ function Tile.initialize(instance)
   instance.grass = 'Witch/defaultGrass'
   instance.physical_properties.masks = {1,2,3,4,5,6,7,8,9,10,11,12,14,16}
   instance.explosionSprite = {im.spriteSettings.grassDestruction}
-  instance.explosionSound = {"Effects/Oracle_Bush_Cut"}
+  instance.explosionSound = {"Effects/BushCut"}
   instance.explosionSpeed = 0.3
 end
 
@@ -83,6 +83,7 @@ Tile.functions = {
     self.floorViscosity = nil
     self.fixture:setMask(1,2,3,4,5,6,7,8,9,10,11,12,14,15,16)
     self.image_index = self.image_index + 1
+    self.tileType = "grass" -- Normally is deep grass
     if not self.noExplosion then
       local explOb = expl:new{
         x = self.x or self.xstart, y = self.y or self.ystart,

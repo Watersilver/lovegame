@@ -43,7 +43,7 @@ function Zora.initialize(instance)
   instance.attackDmgShock = 4
   instance.attackDmg = instance.attackDmgFloat
   instance.ballbreakerEvenIfHigh = true
-  instance.shockSound = snd.load_sound({"Effects/Oracle_Link_Shock"})
+  instance.shockSound = snd.load_sound({"Effects/ElectricShock"})
   instance.drops = {
     -- {value = "fairy", chance = 1}
   }

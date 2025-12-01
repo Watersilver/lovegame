@@ -18,7 +18,7 @@ local enexploshaders = {shdrs.enemyExplodeShader1, shdrs.enemyExplodeShader2}
 local Explode = {}
 
 local default_explosion_sprite = im.spriteSettings.rockDestruction
-local default_explosion_sound = {"Effects/Oracle_Rock_Shatter"}
+local default_explosion_sound = {"Effects/RockShatter"}
 function Explode.commonExplosion(instance, explosion_sprite, explosion_sound, xdest, ydest)
   local explOb = Explode:new{
     x = instance.x or instance.xstart, y = instance.y or instance.ystart,
@@ -63,7 +63,7 @@ function Explode.teleportEffect(instance, useBodyPosition, rgba)
 end
 
 local sink_sprite = im.spriteSettings.rockSink
-local sink_sound = {"Effects/Oracle_Link_Wade"}
+local sink_sound = {"Effects/Sink"}
 function Explode.sink(instance)
   instance.explosionSpeed = 0.4
   Explode.commonExplosion(instance, sink_sprite, sink_sound)
@@ -71,7 +71,7 @@ function Explode.sink(instance)
 end
 
 local plummet_sprite = im.spriteSettings.rockPlummet
-local plummet_sound = {"Effects/Oracle_Block_Fall"}
+local plummet_sound = {"Effects/BlockFall"}
 function Explode.plummet(instance)
   instance.explosionSpeed = 0.2
   Explode.commonExplosion(instance, plummet_sprite, plummet_sound, instance.xClosestTile, instance.yClosestTile)

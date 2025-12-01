@@ -27,8 +27,8 @@ function Knight.initialize(instance)
   instance.maxChargeTime = 5
   instance.chargeTime = 0
   instance.resetBehaviour = 0.5
-  instance.noticeSound = snd.load_sound({"Effects/Oracle_Sword_Tap"})
-  instance.hitWallSound = snd.load_sound({"Effects/Oracle_ScentSeed"})
+  instance.noticeSound = snd.load_sound({"Effects/SwordTap"})
+  instance.hitWallSound = snd.load_sound({"Effects/Bounce"})
   instance.chargeSound = snd.load_sound({"Effects/Oracle_Link_LandRun"})
   instance.drop = "rich"
   instance.attackDmg = 2

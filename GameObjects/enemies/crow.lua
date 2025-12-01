@@ -184,7 +184,7 @@ Crow.functions = {
         (self.x + 8 < l) or (self.x - 8 > l + w)
         or (self.y + 8 < t) or (self.y - (8 + abs(self.maxHeight)) > t + h)
       if not isOutsideGamera then
-        snd.play(glsounds.wingFlap)
+        snd.play(glsounds.wingFlap1)
       end
     end
     self.image_index_prev = self.image_index

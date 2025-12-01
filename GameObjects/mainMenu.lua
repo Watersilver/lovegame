@@ -43,49 +43,50 @@ local tipboxX, tipboxY, tipboxRepeats, tipboxRepeatsH, tipboxTip =
 
 
 local function start_game(saveName)
-  -- Disable menu music
-  snd.bgmV2:load({previousFadeOut = math.huge, silenceDuration = 0})
-  -- assert(love.filesystem.load instead of require to detect file changes
-  local readSave = assert(love.filesystem.load("Saves/" .. saveName .. ".lua"))()
-  -- Nilify session (Only values!!!)
-  for key, value in pairs(session) do
-    if type(value) ~= "table" and type(value) ~= "function" then session[key] = nil end
-  end
-  -- Nilify save
-  for key in pairs(session.save) do
-    session.save[key] = nil
-  end
-  -- Load imported save values to save
-  session.save.quests = {}
-  session.save.items = {}
-  for key, value in pairs(readSave) do
-    -- if saved thing is quest place on different table, minus prefix
-    if key:find("__quest__") then
-      -- value is quest id
-      local questIndex = string.gsub(key, "__quest__", "")
-      questIndex = tonumber(questIndex)
-      if questIndex then session.save.quests[questIndex] = value end
-    elseif key:find("__item__") then
-      -- value is item id
-      local itemIndex = string.gsub(key, "__item__", "")
-      itemIndex = tonumber(itemIndex)
-      if itemIndex then session.save.items[itemIndex] = value end
-    else
-      session.save[key] = value
-    end
-  end
-  -- Remember which save I am
-  session.save.saveName = saveName
-  -- initialize certain values
-  session.initialize()
+  session.loadGame(saveName)
+  -- -- Disable menu music
+  -- snd.bgmV2:load({previousFadeOut = math.huge, silenceDuration = 0})
+  -- -- assert(love.filesystem.load instead of require to detect file changes
+  -- local readSave = assert(love.filesystem.load("Saves/" .. saveName .. ".lua"))()
+  -- -- Nilify session (Only values!!!)
+  -- for key, value in pairs(session) do
+  --   if type(value) ~= "table" and type(value) ~= "function" then session[key] = nil end
+  -- end
+  -- -- Nilify save
+  -- for key in pairs(session.save) do
+  --   session.save[key] = nil
+  -- end
+  -- -- Load imported save values to save
+  -- session.save.quests = {}
+  -- session.save.items = {}
+  -- for key, value in pairs(readSave) do
+  --   -- if saved thing is quest place on different table, minus prefix
+  --   if key:find("__quest__") then
+  --     -- value is quest id
+  --     local questIndex = string.gsub(key, "__quest__", "")
+  --     questIndex = tonumber(questIndex)
+  --     if questIndex then session.save.quests[questIndex] = value end
+  --   elseif key:find("__item__") then
+  --     -- value is item id
+  --     local itemIndex = string.gsub(key, "__item__", "")
+  --     itemIndex = tonumber(itemIndex)
+  --     if itemIndex then session.save.items[itemIndex] = value end
+  --   else
+  --     session.save[key] = value
+  --   end
+  -- end
+  -- -- Remember which save I am
+  -- session.save.saveName = saveName
+  -- -- initialize certain values
+  -- session.initialize()
 
-  game.transition{
-    type = "whiteScreen",
-    noFade = true,
-    progress = 0,
-    roomTarget = "Rooms/room0.lua"
-  }
-  Hud.visible = true
+  -- game.transition{
+  --   type = "whiteScreen",
+  --   noFade = true,
+  --   progress = 0,
+  --   roomTarget = "Rooms/room0.lua"
+  -- }
+  -- Hud.visible = true
 end
 
 -- Make sure the cursor knows its menu and its items and each item knows its menu

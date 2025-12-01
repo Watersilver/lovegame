@@ -296,7 +296,7 @@ function WreckingBall.initialize(instance)
   instance.sprite_info = im.spriteSettings.boss4
   instance.physical_properties.shape = ps.shapes.circleThreeFourths
   instance.sounds = snd.load_sounds{
-    chainSizeChange = {"Effects/OOA_SwitchHook_Loop"}
+    chainSizeChange = {"Effects/BossChain"}
   }
   instance.chain = {}
   instance.state = sm.new_state_machine(states)

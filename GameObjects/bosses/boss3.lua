@@ -145,7 +145,7 @@ local states = {
               layer = instance.layer,
               explosionSpeed = 0.2
             }
-            expl.commonExplosion(explInst, im.spriteSettings.bushDestruction, {"Effects/Oracle_Bush_Cut"})
+            expl.commonExplosion(explInst, im.spriteSettings.bushDestruction, {"Effects/BushCut"})
           end
         end
       elseif instance.stateProg == 3 then

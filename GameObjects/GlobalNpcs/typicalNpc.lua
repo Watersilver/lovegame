@@ -84,7 +84,7 @@ NPC.functions = {
     if self.activated then
       if self.pauseWhenTalkedTo then game.cutscenePause(true) end
       -- Only play when there's no selection involved and at dialogue start
-      if not self.noLetterSound[self.counter] and not self.altLetterSound[self.counter] and ((type(self.next) ~= "table") or self.counter == 1) then snd.play(glsounds.letter) end
+      if not self.noLetterSound[self.counter] and not self.altLetterSound[self.counter] and ((type(self.next) ~= "table") or self.counter == 1) then snd.play(glsounds.letterTypeA) end
       if self.altLetterSound[self.counter] then
         if type(self.altLetterSound[self.counter] == "function") then
           snd.play(self.altLetterSound[self.counter]())

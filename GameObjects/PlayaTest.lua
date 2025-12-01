@@ -856,6 +856,7 @@ local animation_states = {
 
   start_state = function(instance, dt)
     snd.play(instance.sounds.swordSpin)
+    -- snd.play(instance.sounds.swordSpinLinger)
     snd.stop(instance.sounds.swordCharge)
     instance.image_speed = 0
     instance.spinAttackCounter = 0
@@ -2246,8 +2247,8 @@ function Playa.initialize(instance)
     type = "whiteScreen",
     -- noFade = true,
     progress = 0,
-    -- roomTarget = session.save.room or "Rooms/LakeVillage/startingHouse.lua"
-    roomTarget = "World_at_0x0x0"
+    roomTarget = session.save.room or "Rooms/LakeVillage/startingHouse.lua"
+    -- roomTarget = "World_at0x0x0"
   }
 
   -- Debug
@@ -2328,26 +2329,26 @@ function Playa.initialize(instance)
   instance.doesntForceDir = true
   instance.animationFramesPassed = 0
   instance.sounds = snd.load_sounds({
-    swordTap1 = {"Effects/Oracle_Sword_Tap"},
-    swordTap2 = {"Effects/Oracle_Shield_Deflect"},
-    swordShoot = {"Effects/Oracle_Sword_Shoot"},
+    swordTap1 = {"Effects/SwordTap"},
+    swordTap2 = {"Effects/ShieldDeflect"},
+    swordShoot = {"Effects/SwordDeflect"},
     land = {"Effects/Oracle_Link_LandRun"},
-    magicMissile = {"Effects/Magic_Missile"},
-    magicMissileCharge = {"Effects/MagicMissileCharge"},
-    pickUp = {"Effects/Oracle_Link_PickUp"},
-    throw = {"Effects/toss"},
-    hurt = {"Effects/Oracle_Link_Hurt"},
-    mark = {"Effects/Oracle_MysterySeed"},
-    recall = {"Effects/OOA_SwitchHook_Switch"},
-    markStart = {"Effects/OOA_SeedShooter"},
-    recallStart = {"Effects/Oracle_Link_GoronDance1"},
-    water = {"Effects/Oracle_Link_Wade"},
-    plummet = {"Effects/Oracle_Link_Fall"},
-    dying = {"Effects/Oracle_Link_Dying"},
-    die = {"Effects/Oracle_ScentSeed"},
-    swordCharge = {"Effects/Oracle_Sword_Charge"},
-    swordSpin = {"Effects/Oracle_Sword_Spin"},
-    roll = {"Effects/WL3_Rolling"}
+    magicMissile = {"Effects/MissileSpell"},
+    magicMissileCharge = {"Effects/MissileCharge"},
+    pickUp = {"Effects/LiftPower"},
+    throw = {"Effects/ThrowPower"},
+    hurt = {"Effects/PlayerHurt"},
+    mark = {"Effects/MarkAppears"},
+    recall = {"Effects/RecallTeleport"},
+    markStart = {"Effects/MarkPose"},
+    recallStart = {"Effects/RecallPose"},
+    water = {"Effects/Sink"},
+    plummet = {"Effects/PlayerFall"},
+    dying = {"Effects/Death"},
+    die = {"Effects/Bounce"},
+    swordCharge = {"Effects/SwordCharged"},
+    swordSpin = {"Effects/SwordSpin"},
+    -- swordSpinLinger = {"Effects/SwordSpinLinger"}
   })
   instance.floorTiles = {role = "playerFloorTilesIndex"} -- Tracks what kind of floortiles I'm on
   instance.player = "player1"

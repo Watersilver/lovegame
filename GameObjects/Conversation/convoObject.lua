@@ -10,6 +10,12 @@ local ChoiceList = require "GameObjects.DialogueBubble.ChoiceList"
 
 local Conversation = {}
 
+local function playLetterSound(instance, source)
+  if instance.letterSoundCooldown > 0 then return end
+  snd.play(source)
+  instance.letterSoundCooldown = 0.07
+end
+
 --- returns first object that contains given id
 local function getObjFromId(self, id)
   if self.idMaps[id] then
@@ -125,6 +131,7 @@ function Conversation.initialize(instance)
   instance.speechBubble = nil
   instance.choiceList = nil
   instance.currentChoices = nil
+  instance.letterSoundCooldown = 0.0
 
   instance.nodeIdHistory = {}
   instance.choiceHistory = {}
@@ -358,6 +365,8 @@ Conversation.functions = {
 
     local interactive = data.activators ~= 'none'
 
+    self.letterSoundCooldown = self.letterSoundCooldown - dt
+
     self.closestActivator = getClosest(self, 'activator')
 
     -----------------------------------------------
@@ -569,7 +578,7 @@ Conversation.functions = {
             dlgBubble.reachedVisibleEnd = nil
             dlgBubble.scrollingUp = true
             if not self.currentNode.autoProgress then
-              snd.play(glsounds.textDone)
+              snd.play(glsounds.textNext)
             end
           end
         elseif dlgBubble.scrollingUp then
@@ -637,7 +646,7 @@ Conversation.functions = {
               if type(src) == 'function' then
                 src = src(self)
               end
-              snd.play(src or glsounds.letter)
+              playLetterSound(self, src or glsounds.letterTypeA)
             end
           end
 

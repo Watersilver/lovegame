@@ -17,8 +17,8 @@ local floor = math.floor
 
 local hitShader = shdrs.enemyHitShader
 
-local hitSound = {"Effects/Oracle_Enemy_Hit"}
-local deathSound = {"Effects/Oracle_Enemy_Die"}
+local hitSound = {"Effects/EnemyHit"}
+local deathSound = {"Effects/EnemyDie"}
 
 local Enemy = {}
 

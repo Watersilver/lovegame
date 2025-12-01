@@ -17,17 +17,17 @@ local function createProjectile(eye, dir, pattern)
   local angleIsDirection = false
   local imgsp = 0.25
   if pattern == 'snipe' then
-    snd.play(glsounds.ice)
+    snd.play(glsounds.bossShotSnipe)
     startSpriteName = "Enemies/Missiles/directionalmissile"
     angleIsDirection = true
   elseif pattern == "shotgun" then
-    snd.play(glsounds.dragonWingFlap)
+    snd.play(glsounds.bossShotShotgun)
     startSpriteName = "Enemies/Missiles/multimissile"
   elseif pattern == "spray" then
-    snd.play(glsounds.supercharge)
+    snd.play(glsounds.bossShotSpray)
     startSpriteName = "Enemies/Missiles/spinmissile"
   elseif pattern == "random" then
-    snd.play(glsounds.wingFlap)
+    snd.play(glsounds.bossShotRandom)
     startSpriteName = "Enemies/Missiles/spinmissile2"
     imgsp = 0.5
   end

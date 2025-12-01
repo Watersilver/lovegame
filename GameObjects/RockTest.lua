@@ -45,9 +45,9 @@ rt.functions = {
   [GCON.md.choose] = function ()
     return u.chooseFromChanceTable{
       -- chance of plant
-      {value = GCON.md.reaction.plant, chance = 0.03},
+      {value = GCON.md.reaction.plant, chance = 0.3},
       -- chance of exploding
-      {value = GCON.md.reaction.bomb, chance = 0.02},
+      {value = GCON.md.reaction.bomb, chance = 0.1},
       -- If none of the above happens, nothing happens
       {value = GCON.md.reaction.nothing, chance = 1},
     }

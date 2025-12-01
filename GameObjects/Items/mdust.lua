@@ -116,14 +116,14 @@ MagicDust.functions = {
   --     local result = session.removeItem(focus)
   --     if result == 1 then
   --       async.realTime{
-  --         function() snd.play(glsounds.runningLow) end,
+  --         function() snd.play(glsounds.fuckthis) end,
   --         0.2,
   --         function() return session.save[focus] ~= 1 end
   --       }
   --     end
   --     if result == 0 then
   --       async.realTime{
-  --         function() snd.play(glsounds.runOut) end,
+  --         function() snd.play(glsounds.andthis) end,
   --         0.2,
   --         function() return session.save[focus] end
   --       }

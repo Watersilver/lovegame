@@ -30,7 +30,7 @@ function Laser.initialize(instance)
   instance.dpDeflectable = false
   instance.image_index = 1
   instance.sounds = snd.load_sounds({
-    laserSound = {"Effects/OOA_Boss_Shoot"}
+    laserSound = {"Effects/BossLaser"}
   })
 end
 
@@ -38,15 +38,15 @@ Laser.functions = {
   load = function (self)
     et.functions.load(self)
     self.sprite = im.sprites["boss1/arevcyeqLaser1"]
-    self.laserSoundInterval = 0.15
+    self.laserSoundInterval = 0.26
     self.laserTimer = 0
   end,
 
   early_update = function (self, dt)
-    self.laserTimer = self.laserTimer + dt
-    if self.laserTimer > self.laserSoundInterval then
+    self.laserTimer = self.laserTimer - dt
+    if self.laserTimer < 0 then
       snd.play(self.sounds.laserSound)
-      self.laserTimer = 0
+      self.laserTimer = self.laserSoundInterval
     end
   end,
 

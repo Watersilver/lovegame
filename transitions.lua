@@ -47,6 +47,7 @@ trans.ydisplacement = 0
 function trans.determine_coordinates_transformation()
   local side = game.transitioning.side
 
+  trans.caml, trans.camu, trans.camw, trans.camh = mainCamera:getVisible()
   if side == "left" then
     trans.xtransform = game.transitioning.progress * trans.camw
     trans.ytransform = 0
@@ -56,7 +57,7 @@ function trans.determine_coordinates_transformation()
     trans.ydisplacement = 0
   elseif side == "right" then
     local xtrans = game.room.width - game.room.prevWidth
-    trans.xtransform = xtrans-game.transitioning.progress * trans.camw
+    trans.xtransform = xtrans - game.transitioning.progress * trans.camw
     trans.ytransform = 0
     trans.xadjust = -ps.shapes.plshapeWidth
     trans.yadjust = 0
@@ -150,6 +151,7 @@ function trans.still_objects_coords(instance)
   local xtotal, ytotal
   local zo = instance.zo or 0
 
+    --  * game.transScale * 0.5
   if instance.onPreviousRoom then
     xtotal = instance.xstart
       + game.transitioning.xmod

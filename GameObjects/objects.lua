@@ -204,7 +204,7 @@ function o.to_be_added.add_all(self)
         if not o.draw_layers[i] then o.draw_layers[i] = {role = "drawable"} end
       end
       -- Add it to the appropriate layer in the draw_layers table
-      if not o.draw_layers[layer] then error(layer) end
+      if not o.draw_layers[layer] then error("Layer "..layer.." doesn't exist") end
       object[o.draw_layers[layer].role] = u.push(o.draw_layers[layer], object)
     end
     -- Run its load function if existent

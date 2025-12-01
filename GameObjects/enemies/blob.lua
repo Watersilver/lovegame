@@ -52,7 +52,7 @@ function Blob.initialize(instance)
   instance.attackDmgShock = 4
   instance.attackDmg = instance.attackDmgWalk
   instance.shockDuration = 5
-  instance.shockSound = snd.load_sound({"Effects/Oracle_Link_Shock"})
+  instance.shockSound = snd.load_sound({"Effects/ElectricShock"})
   instance.walkSprite = "walk"
   instance.unpushable = false
 end

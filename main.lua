@@ -1,25 +1,25 @@
 delta_time = 0
 
 local verh = require "version_handling"
+local serialize = require "Ser.ser"
 
 local function saveGameSettings()
   local game_settings = require 'game_settings'
-  -- Overwrite game_settings file
-  local success = love.filesystem.write("game_settings.lua", "local gs = {}\n")
-  ---@diagnostic disable-next-line: undefined-field
-  if not success then love.errorhandler("Failed to write game_settings first line") end
-  local game_settings_body = ""
+
   for setting, value in pairs(game_settings) do
     -- Update already loaded table
     game_settings[setting] = value
-    if type(value) == "string" then value = "\'" .. value .. "\'"
-    elseif type(value) == "boolean" then
-      if value then value = "true" else value = "false" end
-    end
-    game_settings_body = game_settings_body .. "gs." .. setting .. " = " .. value .. "\n"
+
+    -- Initialize any unfilled default values here
+    -- [NOTHING YET]
+
+    local result = serialize(game_settings)
+
+    local success = love.filesystem.write("game_settings.lua", result)
+
+    if not success then error("Failed to write game_settings body") end
   end
-  success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
-  if not success then love.errorhandler("Failed to write game_settings body") end
+
 end
 
 -- Set up save directory
@@ -47,7 +47,8 @@ if not success then love.errorhandler("Failed to create save directory") end
 
 -- game constants
 GCON = {
-  ldtk = require "RoomBuilding.ldtk",
+  ---@type LDtkBuilder
+  ldtk = nil,
   maxRandomPOHs = 4, -- Random drop pieces of heart
   maxPOHs = 84, -- Number of existing pieces of heart in world
   -- Day and night music time(in 24 hour clock) breaking points
@@ -172,8 +173,10 @@ local imports = {
   screenEffects = require "screenEffects",
   lighting = require "ScreenEffects.lighting.lighting",
   healthDisplay = require "HUD.health",
-  shdrs = require 'Shaders.shaders'
+  shdrs = require 'Shaders.shaders',
+  ldtk = require "RoomBuilding.ldtk"
 }
+GCON.ldtk = imports.ldtk
 
 -- Create table to save temporary stuff for current session
 session = {
@@ -276,10 +279,11 @@ session = {
   -- Transitions a value from 'from' to 'to' if object comes from
   -- the next room or the opposite if it was on the previous room
   transitionValue = function(obj, to, from)
+    if from == nil then from = 0 end
     if obj.onPreviousRoom then
-      return 0.5 * (1 - game.transitioning.progress)
+      return to * (1 - game.transitioning.progress) + from * game.transitioning.progress
     else
-      return 0.5 * game.transitioning.progress
+      return to * game.transitioning.progress + from * (1 - game.transitioning.progress)
     end
   end,
   updateTime = function(hoursPassed)
@@ -568,77 +572,88 @@ session = {
       session.save.dust = 0
     end
   end,
-  saveGame = function()
-    saveGameSettings()
-    -- local game_settings = require 'game_settings'
-    -- -- Overwrite game_settings file
-    -- success = love.filesystem.write("game_settings.lua", "local gs = {}\n")
-    -- ---@diagnostic disable-next-line: undefined-field
-    -- if not success then love.errorhandler("Failed to write game_settings first line") end
-    -- local game_settings_body = ""
-    -- for setting, value in pairs(game_settings) do
-    --   -- Update already loaded table
-    --   gs[setting] = value
-    --   if type(value) == "string" then value = "\'" .. value .. "\'"
-    --   elseif type(value) == "boolean" then
-    --     if value then value = "true" else value = "false" end
-    --   end
-    --   game_settings_body = game_settings_body .. "gs." .. setting .. " = " .. value .. "\n"
-    -- end
-    -- success = love.filesystem.append("game_settings.lua", game_settings_body .. "return gs\n")
-    -- if not success then love.errorhandler("Failed to write game_settings body") end
 
-    -- because Imma moron
-    local saveKeysToBeIgnored = {
-      hasSword = true, hasJump = true,
-      hasMissile = true, hasMark = true,
-      hasRecall = true, hasGrip = true,
-      swordKey = true, jumpKey = true,
-      missileKey = true, markKey = true,
-      recallKey = true, gripKey = true,
-      playerX = true, playerY = true,
-      playerHealth = true
-    }
-    local saveContent = "local save = {}"
-    local saveName = "Saves/" .. session.save.saveName .. ".lua"
-    -- write save (except spell slots and coordinates)
-    for key, value in pairs(session.save) do
-      if not saveKeysToBeIgnored[key] then
-        if type(value) == "string" then value = '"' .. value .. '"' end
-        if type(value) == "boolean" then value = value and "true" or "false" end
+  ---@param saveName string
+  loadGame = function(saveName)
+    -- Stop music
+    snd.bgmV2:load({previousFadeOut = math.huge, silenceDuration = 0})
+    -- `load` instead of `require` to detect file changes because `require` caches the returned table
+    local readSave = assert(love.filesystem.load("Saves/" .. saveName .. ".lua"))()
+    -- Nilify session (Only values!!!)
+    for key, value in pairs(session) do
+      if type(value) ~= "table" and type(value) ~= "function" then session[key] = nil end
+    end
+    -- Nilify save
+    for key in pairs(session.save) do
+      session.save[key] = nil
+    end
 
-        -- Quests are in a table in session.save. Get them out and save them with a prefix
-        if key == "quests" and type(value) == "table" then
-          for qindex, questid in ipairs(value) do
-            saveContent = saveContent .. "\nsave.__quest__" .. qindex .. ' = "' .. questid .. '"'
-          end
-        -- Items are in a table in session.save. Get them out and save them with a prefix
-        elseif key == "items" and type(value) == "table" then
-          for iindex, itemid in ipairs(value) do
-            saveContent = saveContent .. "\nsave.__item__" .. iindex .. ' = "' .. itemid .. '"'
-          end
+    if not readSave.ser then
+      session.save.ser = true
+      session.save.quests = {}
+      session.save.items = {}
+      for key, value in pairs(readSave) do
+        -- if saved thing is quest place on different table, minus prefix
+        if key:find("__quest__") then
+          -- value is quest id
+          local questIndex = string.gsub(key, "__quest__", "")
+          questIndex = tonumber(questIndex)
+          if questIndex then session.save.quests[questIndex] = value end
+        elseif key:find("__item__") then
+          -- value is item id
+          local itemIndex = string.gsub(key, "__item__", "")
+          itemIndex = tonumber(itemIndex)
+          if itemIndex then session.save.items[itemIndex] = value end
         else
-        -- Just write the value
-          saveContent = saveContent .. "\nsave." .. key .. " = " .. value
+          session.save[key] = value
         end
       end
+
+      -- Remember which save I am
+      session.save.saveName = saveName
+      local result = serialize(session.save)
+      success = love.filesystem.write(saveName, result)
+
+      if not success then error("Failed to migrate old save file to new") end
+
+      readSave = session.save
     end
-    -- write coordinates and roomName
-    saveContent = saveContent .. '\nsave.room = "' .. session.latestVisitedRooms:getLast() .. '"'
-    if pl1 then
-      saveContent = saveContent .. "\nsave.playerX = " .. pl1.x
-      saveContent = saveContent .. "\nsave.playerY = " .. pl1.y
-      -- write health
-      saveContent = saveContent .. "\nsave.playerHealth = " .. pl1.health
-    end
-    -- write spel slots
-    for i, slot in ipairs(inv.slots) do
+
+    session.save = readSave
+
+    -- Remember which save I am
+    session.save.saveName = saveName
+    -- initialize certain values
+    session.initialize()
+
+    game.transition{
+      type = "whiteScreen",
+      noFade = true,
+      progress = 0,
+      roomTarget = "Rooms/room0.lua"
+    }
+    Hud.visible = true
+  end,
+  saveGame = function()
+    saveGameSettings()
+
+    session.save.ser = true
+    session.save.playerX = pl1.x
+    session.save.playerY = pl1.y
+    session.save.playerHealth = pl1.health
+    session.save.room = session.latestVisitedRooms:getLast()
+
+    -- write spell slots
+    for _, slot in ipairs(inv.slots) do
       if slot.item then
-        saveContent = saveContent .. "\nsave." .. "has" .. u.capitalise(slot.item.name) .. " = " .. '"' .. slot.item.name .. '"'
-        saveContent = saveContent .. "\nsave." .. slot.item.name .. "Key = " .. '"' .. slot.key .. '"'
+        session.save["has" .. u.capitalise(slot.item.name)] = slot.item.name
+        session.save[slot.item.name .. "Key"] = slot.key
       end
     end
-    saveContent = saveContent .. "\nreturn save"
+
+    local saveContent = serialize(session.save)
+
+    local saveName = "Saves/" .. session.save.saveName .. ".lua"
     success = love.filesystem.write(saveName, saveContent)
   end,
   placeEnemies = function (room, enemiesList)
@@ -774,66 +789,71 @@ glsounds = {
     water = snd.load_sound{"Effects/tileland/water/WaterLand"},
     snow = snd.load_sound{"Effects/tileland/snow/SnowLand"},
   },
-  lasersword = snd.load_sound{"Effects/Oracle_Sword_Slash"},
-  doublejump = snd.load_sound{"Effects/double_jump"},
-  jagoburonLaugh = snd.load_sound{"Effects/jagoburonLaugh"},
-  wingFlap = snd.load_sound{"Effects/Wing_flap"},
-  dragonWingFlap = snd.load_sound{"Effects/OOS_OnoxDragon_Fly"},
-  bossDie = snd.load_sound{"Effects/Oracle_Boss_Die"},
-  dragonRoar = snd.load_sound{"Effects/OOS_Dodongo_Roar"},
-  dragonWalk = snd.load_sound{"Effects/OOS_Aquamentus_Walk"},
-  smallBoom = snd.load_sound{"Effects/Oracle_Barrier"},
-  bigBoom = snd.load_sound{"Effects/Oracle_Boss_BigBoom"},
-  bossExplode = snd.load_sound{"Effects/Oracle_Boss_Explode"},
-  bossHit = snd.load_sound{"Effects/Oracle_Boss_Hit"},
-  pauseOpen = snd.load_sound{"Effects/Oracle_PauseMenu_Open"},
-  pauseClose = snd.load_sound{"Effects/Oracle_PauseMenu_Close"},
-  secret = snd.load_sound{"Effects/Oracle_Secret"},
-  select = snd.load_sound{"Effects/Oracle_Menu_Select"},
-  deselect = snd.load_sound{"Effects/Oracle_Menu_Cursor_low_pitch"},
-  error = snd.load_sound{"Effects/Oracle_Error"},
-  crumble = snd.load_sound{"Effects/Oracle_FloorCrumble"},
-  letter = snd.load_sound{"Effects/Oracle_Text_Letter"},
-  textDone = snd.load_sound{"Effects/Oracle_Text_Done"},
-  cursor = snd.load_sound{"Effects/Oracle_Menu_Cursor"},
-  getHeart = snd.load_sound{"Effects/Oracle_Get_Heart"},
-  getRupee = snd.load_sound{"Effects/Oracle_Get_Rupee"},
-  getRupee5 = snd.load_sound{"Effects/Oracle_Get_Rupee5"},
-  getRupee20 = snd.load_sound{"Effects/Oracle_Get_Rupee20"},
-  fanfareItem = snd.load_sound{"Effects/Oracle_Fanfare_Item"},
-  open = snd.load_sound{"Effects/Oracle_Chest"},
+  lasersword = snd.load_sound{"Effects/MagicSlash"},
+  doublejump = snd.load_sound{"Effects/DoubleJump"},
+  jagoburonLaugh = snd.load_sound{"Effects/JagoburonLaugh"},
+  wingFlap1 = snd.load_sound{"Effects/WingFlap1"},
+  wingFlap2 = snd.load_sound{"Effects/WingFlap2"},
+  dragonWingFlap = snd.load_sound{"Effects/BossDragonWing"},
+  bossDie = snd.load_sound{"Effects/BossDie"},
+  dragonRoar = snd.load_sound{"Effects/BossRoar"},
+  dragonWalk = snd.load_sound{"Effects/BossWalk"},
+  smallBoom = snd.load_sound{"Effects/BossWrecking"},
+  bigBoom = snd.load_sound{"Effects/BossBoom"},
+  bossExplode = snd.load_sound{"Effects/BossExplodeSHORT"},
+  bossHit = snd.load_sound{"Effects/BossHit"},
+  bossShotRandom = snd.load_sound{"Effects/BossShotRandom"},
+  bossShotShotgun = snd.load_sound{"Effects/BossShotShotgun"},
+  bossShotSnipe = snd.load_sound{"Effects/BossShotSnipe"},
+  bossShotSpray = snd.load_sound{"Effects/BossShotSpray"},
+  pauseOpen = snd.load_sound{"Effects/PauseMenuOpen"},
+  pauseClose = snd.load_sound{"Effects/PauseMenuClose"},
+  secret = snd.load_sound{"Effects/PuzzleSolve"},
+  select = snd.load_sound{"Effects/MenuSelect"},
+  deselect = snd.load_sound{"Effects/MenuCancel"},
+  error = snd.load_sound{"Effects/Error"},
+  crumble = snd.load_sound{"Effects/FloorCrumble"},
+  letterTypeA = snd.load_sound{"Effects/TextLetter/TypeA"},
+  letterTypeB = snd.load_sound{"Effects/TextLetter/TypeB"},
+  letterTypeC = snd.load_sound{"Effects/TextLetter/TypeC"},
+  letterTypeD = snd.load_sound{"Effects/TextLetter/TypeD"},
+  textDone = snd.load_sound{"Effects/TextDone"},
+  textNext = snd.load_sound{"Effects/TextNext"},
+  cursor = snd.load_sound{"Effects/MenuCursor"},
+  getHeart = snd.load_sound{"Effects/GetHeart"},
+  getRupee = snd.load_sound{"Effects/GetLek"},
+  getRupee5 = snd.load_sound{"Effects/GetLeke5"},
+  getRupee20 = snd.load_sound{"Effects/GetLeke20"},
+  fanfareItem = snd.load_sound{"Effects/FanfareItem"},
+  open = snd.load_sound{"Effects/Open1"},
   heartContainer = snd.load_sound{"Effects/Oracle_HeartContainer"},
-  stairs = snd.load_sound{"Effects/Oracle_Stairs"},
-  useItem = snd.load_sound{"Effects/Oracle_Get_Item"},
+  stairs = snd.load_sound{"Effects/Stairs"},
+  useItem = snd.load_sound{"Effects/GetItem"},
   portal = snd.load_sound{"Effects/Oracle_Dungeon_Teleport"},
-  bomb = snd.load_sound{"Effects/Oracle_Bomb_Blow"},
-  bombDrop = snd.load_sound{"Effects/Oracle_Bomb_Drop"},
-  magicDust = snd.load_sound{"Effects/Oracle_MakuTree_Leaves"},
-  appearVanish = snd.load_sound{"Effects/Oracle_AppearVanish"},
-  decoy = snd.load_sound{"Effects/OOA_Veran_Shapeshift"},
-  fire = snd.load_sound{"Effects/Oracle_EmberSeed"},
-  ice = snd.load_sound{"Effects/Oracle_SwordShimmer"},
-  stone = snd.load_sound{"Effects/Oracle_Rumble2b"},
-  boing = snd.load_sound{"Effects/Oracle_ScentSeed"},
-  plant = snd.load_sound{"Effects/Oracle_ScentSeed_Shot"},
-  wind = snd.load_sound{"Effects/Oracle_GaleSeed"},
-  blockFall = snd.load_sound{"Effects/Oracle_Block_Fall"},
-  jump = snd.load_sound{"Effects/Oracle_Link_Jump"},
-  enemyJump = snd.load_sound{"Effects/Oracle_Enemy_Jump"},
-  shieldDeflect = snd.load_sound{"Effects/Oracle_Shield_Deflect"},
-  swordShimmer = snd.load_sound{"Effects/Oracle_SwordShimmer"},
-  supercharge = snd.load_sound{"Effects/Oracle_BiggoronsSword"},
-  journalEntry = snd.load_sound{"Effects/journalEntry"},
-  bell = snd.load_sound{"Effects/blackmid/Huge Bell Hit 03 Long"},
+  bomb = snd.load_sound{"Effects/BombExplosion"},
+  bombDrop = snd.load_sound{"Effects/BombBounce"},
+  magicDust = snd.load_sound{"Effects/SprinkleDust"},
+  appearVanish = snd.load_sound{"Effects/DustVisibility"},
+  decoy = snd.load_sound{"Effects/DustDecoy"},
+  fire = snd.load_sound{"Effects/DustFire"},
+  ice = snd.load_sound{"Effects/Shimmer"},
+  stone = snd.load_sound{"Effects/DustPetrify"},
+  boing = snd.load_sound{"Effects/Bounce"},
+  plant = snd.load_sound{"Effects/DustPlantify"},
+  wind = snd.load_sound{"Effects/DustWhirlwind"},
+  blockFall = snd.load_sound{"Effects/BlockFall"},
+  jump = snd.load_sound{"Effects/SingleJump"},
+  enemyJump = snd.load_sound{"Effects/NpcJump"},
+  shieldDeflect = snd.load_sound{"Effects/ShieldDeflect"},
+  swordShimmer = snd.load_sound{"Effects/Shimmer"},
+  supercharge = snd.load_sound{"Effects/BossCharge"},
+  journalEntry = snd.load_sound{"Effects/JournalEntry"},
+  bell = snd.load_sound{"Effects/Bell"},
 
   -- Mundane
-  bushCut = snd.load_sound{"Effects/Oracle_Bush_Cut"},
-  uproot = snd.load_sound{"Effects/Plant_Uproot"},
-  dungeonDoor = snd.load_sound{"Effects/Oracle_Dungeon_Door"},
-
-  -- Feedback
-  runOut = snd.load_sound{"Effects/run_out"},
-  runningLow = snd.load_sound{"Effects/running_low"},
+  bushCut = snd.load_sound{"Effects/BushCut"},
+  uproot = snd.load_sound{"Effects/PlantUproot"},
+  dungeonDoor = snd.load_sound{"Effects/DungeonDoor"},
 
   -- Harpsounds
   harpad = snd.load_sound{"Effects/harp/ad"},
@@ -1144,6 +1164,11 @@ function love.update(dt)
         game.transitioning.progress = game.transitioning.progress + (game.transitioning.speed or 1) * dt
       end
       if game.transitioning.progress > 1 then game.transitioning.progress = 1 end
+
+      local room = game.room
+      game.transScale = session.transitionValue({}, room.game_scale, game.prevRoom.game_scale)
+      sh.calculate_total_scale{game_scale=game.transScale}
+
       trans.determine_coordinates_transformation()
     else
       inp.transing = false

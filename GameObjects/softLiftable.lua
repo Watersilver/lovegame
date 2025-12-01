@@ -43,7 +43,7 @@ function Brick.initialize(instance)
   instance.explosionSprite = {im.spriteSettings.bushDestruction}
   instance.explosionNumber = 1
   instance.explosionSpeed = 0.3
-  instance.explosionSound = {"Effects/Oracle_Bush_Cut"}
+  instance.explosionSound = {"Effects/BushCut"}
   instance.allsides = true
   instance.ballbreaker = true
   instance.liftable = true

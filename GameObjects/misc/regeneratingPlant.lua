@@ -121,7 +121,7 @@ Plant.functions = {
         explosionNumber = 1,
         sprite_info = {im.spriteSettings.bushDestruction},
         image_speed = 0.3,
-        sounds = snd.load_sounds({explode = {"Effects/Oracle_Bush_Cut"}})
+        sounds = snd.load_sounds({explode = {"Effects/BushCut"}})
       }
       o.addToWorld(explOb)
     end

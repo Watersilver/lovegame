@@ -105,7 +105,7 @@ function game.change_room(roomTarget)
   if not errmsg then
     return chunk()
   else
-    local w = u.split(roomTarget, "_at_")
+    local w = u.split(roomTarget, "_at")
     local dims = u.split(w[2], "x")
     local worldName = w[1]
     local x = tonumber(string.gsub(dims[1], "_", "-"), 10)
@@ -132,10 +132,15 @@ function game.change_room(roomTarget)
       z = z
     }
 
-    -- TODO: read room data from ldtk
-    room.music_info = snd.soundbalancetest
-    -- room.timeDoesntPass ToBeADDED
-    room.ambientLightType = 'daynight1'
+    for _, field in ipairs(level.fieldInstances) do
+      if field.__identifier == "MusicInfo" then
+        room.music_info = snd[field.__value]
+      elseif field.__identifier == "AmbientLightType" then
+        room.ambientLightType = field.__value
+      elseif field.__identifier == "GameScale" then
+        room.game_scale = field.__value
+      end
+    end
 
     room.width = level.pxWid
     room.height = level.pxHei
@@ -219,8 +224,6 @@ function game.change_room(roomTarget)
         end
       end
     end
-
-    room.game_scale = 2
 
     return room
   end

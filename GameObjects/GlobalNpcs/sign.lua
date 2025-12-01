@@ -52,7 +52,7 @@ NPC.functions = {
             if self.activator.body then self.activator.body:setType("static") end
             if self.activator.player then inp.disable_controller(self.activator.player) end
           end
-          snd.play(glsounds.letter)
+          snd.play(glsounds.letterTypeA)
           dlg.simpleWallOfText.setUp(
             {{{1,1,1,1},
             "Hi, I'm a sign!"},
@@ -71,7 +71,7 @@ NPC.functions = {
           if self.activator.body then self.activator.body:setType("static") end
           if self.activator.player then inp.disable_controller(self.activator.player) end
         end
-        snd.play(glsounds.letter)
+        snd.play(glsounds.letterTypeA)
         dlg.simpleWallOfText.setUp(
           {{{1,1,1,1},
           "Can't read it from here..."},
